@@ -1,20 +1,23 @@
 import React, { forwardRef, Ref, useMemo } from "react";
-import { DynamicFormContainerConfig } from "../interfaces/models";
+import { DynamicFormElementConfig } from "../interfaces/models";
 import { DynamicFormContainer } from "./containers/DynamicFormContainer";
 import { useDynamicForm } from "../hooks/useDynamicForm";
-import { FieldValues, UseFormReturn } from "react-hook-form";
+import { FieldValues, UseFormReturn, FormProvider as FormProviderRHF } from "react-hook-form";
 import { useFieldConditions } from "../hooks/useFieldConditions";
 import { FormContextValue } from "../context/FormContext";
 import { FormProvider } from "../providers/FormProvider";
 
 interface DynamicFormProps<T extends FieldValues> {
-    config: DynamicFormContainerConfig;
+    config: DynamicFormElementConfig;
     onSubmit: (data: T) => void;
     data?: T | null;
     loading?: boolean;
     className?: string;
     onChange?: (data: T) => void;
     setFormInvalid?: (invalid: boolean) => void;
+    executeFieldConditionsOnInit?: boolean;
+    onElementSelect?: (config: DynamicFormElementConfig | any) => void;
+    sources?: Record<string, (params?: any) => Promise<any[]>>;
 }
 
 export interface DynamicFormRef {
@@ -34,6 +37,9 @@ export const DynamicForm = forwardRef(
             className = "",
             onChange,
             setFormInvalid,
+            executeFieldConditionsOnInit = false,
+            onElementSelect,
+            sources,
         } = props;
 
         const { form, emitSubmitData } = useDynamicForm<T>({
@@ -45,36 +51,37 @@ export const DynamicForm = forwardRef(
             ref,
         });
 
-        // Usar hook de condiciones
-        const { fieldStates } = useFieldConditions({ config, form });
+        const { fieldStates } = useFieldConditions({ config, form, executeOnInit: !data || executeFieldConditionsOnInit });
 
-        // Crear valor del contexto
         const formContextValue = useMemo(
             () =>
-                ({
-                    fieldStates,
-                    setFieldState: (fieldPath: string, state: Partial<any>) => {
-                        // Implementar si se necesita modificar estados manualmente
-                    },
-                    form: form as UseFormReturn<FieldValues>,
-                } as FormContextValue),
-            [fieldStates, form]
+            ({
+                fieldStates,
+                setFieldState: (fieldPath: string, state: Partial<any>) => {
+                },
+                form: form as UseFormReturn<FieldValues>,
+                onElementSelect,
+                sources
+            } as FormContextValue),
+            [fieldStates, form, onElementSelect, sources]
         );
 
         return (
-            <FormProvider value={formContextValue}>
-                <form className={className}>
-                    {config.containers?.map((container, index) => (
-                        <DynamicFormContainer
-                            key={container.name || `container-${index}`}
-                            config={container}
-                            loading={loading}
-                            onSubmit={emitSubmitData}
-                            form={form}
-                        />
-                    ))}
-                </form>
-            </FormProvider>
+            <FormProviderRHF {...form}>
+                <FormProvider value={formContextValue}>
+                    <form className={className}>
+                        {(config.children || config.containers)?.map((child, index) => (
+                            <DynamicFormContainer
+                                key={child.name || `element-${index}`}
+                                config={child}
+                                loading={loading}
+                                onSubmit={emitSubmitData}
+                                form={form}
+                            />
+                        ))}
+                    </form>
+                </FormProvider>
+            </FormProviderRHF>
         );
     }
 );

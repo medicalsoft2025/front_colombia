@@ -411,3 +411,7 @@ RewriteRule ^saveMenus$ Utils/saveMenus.php
 RewriteRule ^middlewareTest$ middleware.php
 RewriteRule ^configuracionesGenerales Config/generalConfiguracion.php
 RewriteRule ^dynamicFormTest$ r-test/dynamicFormTest.php
+RewriteRule ^inventoryMovementReport$ InventoryReports/InventoryMovementReport.php 
+RewriteRule ^testCachedData$ r-test/testCachedData.php
+RewriteRule ^formBuilderTest$ r-test/formBuilderTest.php
+RewriteRule ^patientEvolutions$ Evoluciones/evolucionesReact.php

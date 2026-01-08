@@ -1,291 +1,294 @@
-function _extends() { return _extends = Object.assign ? Object.assign.bind() : function (n) { for (var e = 1; e < arguments.length; e++) { var t = arguments[e]; for (var r in t) ({}).hasOwnProperty.call(t, r) && (n[r] = t[r]); } return n; }, _extends.apply(null, arguments); }
-import React, { useContext } from "react";
-import { Controller } from "react-hook-form";
-import { InputText } from "primereact/inputtext";
-import { Dropdown } from "primereact/dropdown";
-import { Calendar } from "primereact/calendar";
-import { Checkbox } from "primereact/checkbox";
-import { InputNumber } from "primereact/inputnumber";
-import { InputTextarea } from "primereact/inputtextarea";
-import { MultiSelect } from "primereact/multiselect";
-import { RadioButton } from "primereact/radiobutton";
-import { ColorPicker } from "primereact/colorpicker";
-import { Editor } from "primereact/editor";
+import React, { useContext, useMemo, useRef } from "react";
 import { getValueByPath } from "../../../../services/utilidades.js";
 import { FormContext } from "../../context/FormContext.js";
+import { useVisibility } from "../../context/VisibilityContext.js";
+import { DynamicInputText } from "./inputs/DynamicInputText.js";
+import { DynamicSelect } from "./inputs/DynamicSelect.js";
+import { DynamicMultiSelect } from "./inputs/DynamicMultiSelect.js";
+import { DynamicCalendar } from "./inputs/DynamicCalendar.js";
+import { DynamicCheckbox } from "./inputs/DynamicCheckbox.js";
+import { DynamicRadio } from "./inputs/DynamicRadio.js";
+import { DynamicInputNumber } from "./inputs/DynamicInputNumber.js";
+import { DynamicInputTextarea } from "./inputs/DynamicInputTextarea.js";
+import { DynamicColorPicker } from "./inputs/DynamicColorPicker.js";
+import { DynamicEditor } from "./inputs/DynamicEditor.js";
+import { DynamicTreeSelect } from "./inputs/DynamicTreeSelect.js";
+import { DynamicChips } from "./inputs/DynamicChips.js";
+import { DynamicRating } from "./inputs/DynamicRating.js";
+import { DynamicSlider } from "./inputs/DynamicSlider.js";
 export const DynamicField = ({
   field,
   form,
   parentPath = "",
   className = ""
 }) => {
-  const fieldName = parentPath ? `${parentPath}.${field.name}` : field.name;
+  const fieldName = parentPath ? `${parentPath}.${field.name}` : field.name || "";
   const {
-    control,
     formState: {
       errors
     }
   } = form;
-
-  // Usar contexto para obtener estado condicional
   const {
-    fieldStates
+    fieldStates,
+    onElementSelect
   } = useContext(FormContext);
+  const {
+    isVisible: parentVisibility
+  } = useVisibility();
   const fieldState = fieldStates[fieldName] || {
     visible: true,
     disabled: false
   };
-
-  // Si el campo no es visible, no renderizar
-  if (fieldState.visible === false) {
-    return null;
-  }
-
-  // Usar opciones dinámicas si existen
-  const fieldOptions = fieldState.options || field.options || [];
-
-  // Configurar validación
-  const validationRules = {
-    required: field.required ? "Este campo es requerido" : false,
-    ...field.validation
-  };
-
-  // Valor por defecto
-  const defaultValue = field.value !== undefined ? field.value : field.type === "checkbox" ? false : field.type === "number" ? 0 : field.type === "multiselect" ? [] : "";
+  const actualVisibility = fieldState.visible !== false && parentVisibility;
+  React.useEffect(() => {
+    form.trigger(fieldName);
+  }, [actualVisibility, fieldName, form, field.required]);
+  const validationCache = useRef(null);
+  const validationRules = useMemo(() => {
+    const rules = {
+      required: field.required ? "Este campo es requerido" : false,
+      ...field.validation
+    };
+    if (field.asyncValidation) {
+      rules.validate = async value => {
+        const config = field.asyncValidation;
+        const {
+          endpoint,
+          method = "POST",
+          message = "Valor inválido",
+          headers,
+          params
+        } = config;
+        const currentDataMap = {
+          value
+        };
+        let cacheKey = `${endpoint}|${value}`;
+        if (params) {
+          params.forEach(param => {
+            let val = null;
+            if (param.source === "static") val = param.value;else if (param.source === "url") {
+              const searchParams = new URLSearchParams(window.location.search);
+              val = searchParams.get(param.value);
+            } else if (param.source === "field") {
+              val = form.getValues(param.value);
+            }
+            if (val !== undefined && val !== null) {
+              currentDataMap[param.key] = val;
+              cacheKey += `|${param.key}:${val}`;
+            }
+          });
+        }
+        if (validationCache.current && validationCache.current.key === cacheKey) {
+          return validationCache.current.result;
+        }
+        try {
+          let url = endpoint;
+          let queryParams = new URLSearchParams();
+          let bodyParams = {
+            value
+          };
+          if (params) {
+            params.forEach(param => {
+              const val = currentDataMap[param.key];
+              if (val === null || val === undefined || val === "") return;
+              const location = param.location || (method === "POST" ? "body" : "query");
+              if (location === "path") {
+                const placeholder = `:${param.key}`;
+                if (url.includes(placeholder)) {
+                  url = url.replace(placeholder, String(val));
+                } else {
+                  url = url.replace(/\/+$/, "");
+                  url = `${url}/${val}`;
+                }
+              } else if (location === "body") {
+                bodyParams[param.key] = val;
+              } else {
+                queryParams.append(param.key, String(val));
+              }
+            });
+          }
+          const qs = queryParams.toString();
+          if (qs) {
+            url += (url.includes("?") ? "&" : "?") + qs;
+          }
+          const fetchOptions = {
+            method,
+            headers: {
+              "Content-Type": "application/json",
+              ...(headers || {})
+            },
+            body: method === "POST" || method === "PUT" ? JSON.stringify(bodyParams) : undefined
+          };
+          const response = await fetch(url, fetchOptions);
+          if (!response.ok) {
+            return message;
+          } else {
+            const data = await response.json();
+            if (data.valid === false) return data.message || message;
+          }
+          validationCache.current = {
+            key: cacheKey,
+            result: true
+          };
+          return true;
+        } catch (e) {
+          console.error(e);
+          return "Error de validación";
+        }
+      };
+    }
+    return rules;
+  }, [field, field.required, field.validation, field.asyncValidation, field.validation?.pattern, field.validation?.min, field.validation?.max, field.validation?.minLength, field.validation?.maxLength, form.getValues]);
   const commonProps = {
     id: fieldName,
-    disabled: field.disabled,
+    disabled: field.disabled || fieldState.disabled || !actualVisibility,
     placeholder: field.placeholder
   };
   const renderController = () => {
     switch (field.type) {
       case "select":
-        return /*#__PURE__*/React.createElement(Controller, {
-          name: fieldName,
-          control: control,
-          rules: validationRules,
-          defaultValue: defaultValue,
-          render: ({
-            field: controllerField
-          }) => /*#__PURE__*/React.createElement(Dropdown, _extends({}, commonProps, {
-            className: "w-100",
-            value: controllerField.value,
-            options: field.options || [],
-            optionLabel: "label",
-            optionValue: "value",
-            onChange: e => controllerField.onChange(e.value),
-            onBlur: controllerField.onBlur,
-            showClear: field.showClear
-          }))
+        return /*#__PURE__*/React.createElement(DynamicSelect, {
+          field: field,
+          form: form,
+          fieldName: fieldName,
+          validationRules: validationRules,
+          commonProps: commonProps,
+          options: fieldState.options
         });
-      case "multiselect":
-        return /*#__PURE__*/React.createElement(Controller, {
-          name: fieldName,
-          control: control,
-          rules: validationRules,
-          defaultValue: defaultValue,
-          render: ({
-            field: controllerField
-          }) => /*#__PURE__*/React.createElement(MultiSelect, _extends({}, commonProps, {
-            value: controllerField.value || [],
-            options: field.options || [],
-            className: "w-100",
-            optionLabel: "label",
-            optionValue: "value",
-            onChange: e => controllerField.onChange(e.value),
-            onBlur: controllerField.onBlur,
-            display: "chip"
-          }))
+      case "tree-select":
+        return /*#__PURE__*/React.createElement(DynamicTreeSelect, {
+          field: field,
+          form: form,
+          fieldName: fieldName,
+          validationRules: validationRules,
+          commonProps: commonProps,
+          options: fieldState.treeOptions
         });
-      case "date":
-      case "datetime":
-        return /*#__PURE__*/React.createElement(Controller, {
-          name: fieldName,
-          control: control,
-          rules: validationRules,
-          defaultValue: defaultValue,
-          render: ({
-            field: controllerField
-          }) => /*#__PURE__*/React.createElement(Calendar, _extends({}, commonProps, {
-            value: controllerField.value,
-            showIcon: true,
-            className: "w-100",
-            dateFormat: field.format || "dd/mm/yy",
-            showTime: field.type === "datetime",
-            hourFormat: "12",
-            onChange: e => controllerField.onChange(e.value),
-            onBlur: controllerField.onBlur
-          }))
-        });
-      case "checkbox":
-        return /*#__PURE__*/React.createElement(Controller, {
-          name: fieldName,
-          control: control,
-          rules: validationRules,
-          defaultValue: defaultValue,
-          render: ({
-            field: controllerField
-          }) => /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("div", {
-            className: "d-flex align-items-center"
-          }, /*#__PURE__*/React.createElement(Checkbox, _extends({}, commonProps, {
-            inputId: fieldName,
-            checked: controllerField.value || false,
-            onChange: e => controllerField.onChange(e.checked),
-            onBlur: controllerField.onBlur
-          })), /*#__PURE__*/React.createElement("label", {
-            htmlFor: fieldName,
-            className: "form-label"
-          }, field.label, field.required && /*#__PURE__*/React.createElement("span", {
-            className: "required"
-          }, "*"))))
-        });
-      case "radio":
-        return /*#__PURE__*/React.createElement(Controller, {
-          name: fieldName,
-          control: control,
-          rules: validationRules,
-          defaultValue: defaultValue,
-          render: ({
-            field: controllerField
-          }) => /*#__PURE__*/React.createElement("div", {
-            className: "d-flex flex-column gap-2"
-          }, field.options?.map((option, index) => /*#__PURE__*/React.createElement("div", {
-            key: index,
-            className: "d-flex align-items-center gap-2"
-          }, /*#__PURE__*/React.createElement(RadioButton, _extends({}, commonProps, {
-            inputId: `${fieldName}-${index}`,
-            name: fieldName,
-            value: option.value,
-            checked: controllerField.value === option.value,
-            onChange: e => {
-              controllerField.onChange(e.checked ? option.value : null);
-            },
-            onBlur: controllerField.onBlur
-          })), /*#__PURE__*/React.createElement("label", {
-            htmlFor: `${fieldName}-${index}`,
-            className: "ml-2"
-          }, option.label))))
-        });
-      case "number":
-        return /*#__PURE__*/React.createElement(Controller, {
-          name: fieldName,
-          control: control,
-          rules: validationRules,
-          defaultValue: defaultValue,
-          render: ({
-            field: controllerField
-          }) => /*#__PURE__*/React.createElement(InputNumber, _extends({}, commonProps, {
-            className: "w-100",
-            value: controllerField.value,
-            mode: "decimal",
-            showButtons: true,
-            minFractionDigits: 2,
-            onValueChange: e => controllerField.onChange(e.value),
-            onChange: e => controllerField.onChange(e.value),
-            onBlur: controllerField.onBlur
-          }))
-        });
-      case "textarea":
-        return /*#__PURE__*/React.createElement(Controller, {
-          name: fieldName,
-          control: control,
-          rules: validationRules,
-          defaultValue: defaultValue,
-          render: ({
-            field: controllerField
-          }) => /*#__PURE__*/React.createElement(InputTextarea, _extends({}, commonProps, {
-            className: "w-100",
-            value: controllerField.value,
-            rows: field.rows || 4,
-            onChange: e => controllerField.onChange(e.target.value),
-            onBlur: controllerField.onBlur
-          }))
-        });
-      case "colorpicker":
-        return /*#__PURE__*/React.createElement(Controller, {
-          name: fieldName,
-          control: control,
-          rules: validationRules,
-          defaultValue: defaultValue,
-          render: ({
-            field: controllerField
-          }) => /*#__PURE__*/React.createElement("div", {
-            className: "d-flex align-items-center gap-2"
-          }, /*#__PURE__*/React.createElement(ColorPicker, _extends({}, commonProps, {
-            value: controllerField.value,
-            onChange: e => controllerField.onChange(e.value),
-            onBlur: controllerField.onBlur
-          })), /*#__PURE__*/React.createElement(InputText, _extends({}, commonProps, {
-            className: "w-100",
-            value: controllerField.value,
-            onChange: e => controllerField.onChange(e.target.value),
-            onBlur: controllerField.onBlur
-          })))
-        });
-      case "editor":
-        return /*#__PURE__*/React.createElement(Controller, {
-          name: fieldName,
-          control: control,
-          rules: validationRules,
-          defaultValue: defaultValue,
-          render: ({
-            field: controllerField
-          }) => /*#__PURE__*/React.createElement(Editor, _extends({}, commonProps, {
-            value: controllerField.value,
-            onTextChange: e => controllerField.onChange(e.htmlValue),
-            style: {
-              height: "200px"
-            }
-          }))
-        });
-      case "password":
-        return /*#__PURE__*/React.createElement(Controller, {
-          name: fieldName,
-          control: control,
-          rules: validationRules,
-          defaultValue: defaultValue,
-          render: ({
-            field: controllerField
-          }) => /*#__PURE__*/React.createElement(InputText, _extends({}, commonProps, {
-            className: "w-100"
-          }, controllerField, {
-            type: "password"
-          }))
+      case "text":
+      case undefined:
+        return /*#__PURE__*/React.createElement(DynamicInputText, {
+          field: field,
+          form: form,
+          fieldName: fieldName,
+          validationRules: validationRules,
+          type: "text",
+          commonProps: commonProps
         });
       case "email":
-        return /*#__PURE__*/React.createElement(Controller, {
-          name: fieldName,
-          control: control,
-          rules: {
+        return /*#__PURE__*/React.createElement(DynamicInputText, {
+          field: field,
+          form: form,
+          fieldName: fieldName,
+          validationRules: {
             ...validationRules,
             pattern: {
               value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
               message: "Email inválido"
             }
           },
-          defaultValue: defaultValue,
-          render: ({
-            field: controllerField
-          }) => /*#__PURE__*/React.createElement(InputText, _extends({}, commonProps, {
-            className: "w-100"
-          }, controllerField, {
-            type: "email"
-          }))
+          type: "email",
+          commonProps: commonProps
+        });
+      case "password":
+        return /*#__PURE__*/React.createElement(DynamicInputText, {
+          field: field,
+          form: form,
+          fieldName: fieldName,
+          validationRules: validationRules,
+          type: "password",
+          commonProps: commonProps
+        });
+      case "multiselect":
+        return /*#__PURE__*/React.createElement(DynamicMultiSelect, {
+          field: field,
+          form: form,
+          fieldName: fieldName,
+          validationRules: validationRules,
+          commonProps: commonProps
+        });
+      case "date":
+      case "datetime":
+        return /*#__PURE__*/React.createElement(DynamicCalendar, {
+          field: field,
+          form: form,
+          fieldName: fieldName,
+          validationRules: validationRules,
+          commonProps: commonProps
+        });
+      case "checkbox":
+        return /*#__PURE__*/React.createElement(DynamicCheckbox, {
+          field: field,
+          form: form,
+          fieldName: fieldName,
+          validationRules: validationRules,
+          commonProps: commonProps
+        });
+      case "radio":
+        return /*#__PURE__*/React.createElement(DynamicRadio, {
+          field: field,
+          form: form,
+          fieldName: fieldName,
+          validationRules: validationRules,
+          commonProps: commonProps
+        });
+      case "number":
+        return /*#__PURE__*/React.createElement(DynamicInputNumber, {
+          field: field,
+          form: form,
+          fieldName: fieldName,
+          validationRules: validationRules,
+          commonProps: commonProps
+        });
+      case "textarea":
+        return /*#__PURE__*/React.createElement(DynamicInputTextarea, {
+          field: field,
+          form: form,
+          fieldName: fieldName,
+          validationRules: validationRules,
+          commonProps: commonProps
+        });
+      case "colorpicker":
+        return /*#__PURE__*/React.createElement(DynamicColorPicker, {
+          field: field,
+          form: form,
+          fieldName: fieldName,
+          validationRules: validationRules,
+          commonProps: commonProps
+        });
+      case "editor":
+        return /*#__PURE__*/React.createElement(DynamicEditor, {
+          field: field,
+          form: form,
+          fieldName: fieldName,
+          validationRules: validationRules,
+          commonProps: commonProps
+        });
+      case "chips":
+        return /*#__PURE__*/React.createElement(DynamicChips, {
+          field: field,
+          form: form,
+          fieldName: fieldName,
+          validationRules: validationRules,
+          commonProps: commonProps
+        });
+      case "rating":
+        return /*#__PURE__*/React.createElement(DynamicRating, {
+          field: field,
+          form: form,
+          fieldName: fieldName,
+          validationRules: validationRules,
+          commonProps: commonProps
+        });
+      case "slider":
+        return /*#__PURE__*/React.createElement(DynamicSlider, {
+          field: field,
+          form: form,
+          fieldName: fieldName,
+          validationRules: validationRules,
+          commonProps: commonProps
         });
       default:
-        return /*#__PURE__*/React.createElement(Controller, {
-          name: fieldName,
-          control: control,
-          rules: validationRules,
-          defaultValue: defaultValue,
-          render: ({
-            field: controllerField
-          }) => /*#__PURE__*/React.createElement(InputText, _extends({}, commonProps, {
-            className: "w-100"
-          }, controllerField, {
-            type: field.type || "text"
-          }))
-        });
+        return null;
     }
   };
   const getFormErrorMessage = name => {
@@ -294,8 +297,18 @@ export const DynamicField = ({
       className: "p-error"
     }, fieldErrors.message?.toString());
   };
+  const handleFieldClick = e => {
+    if (onElementSelect) {
+      e.stopPropagation();
+      onElementSelect(field);
+    }
+  };
   return /*#__PURE__*/React.createElement("div", {
-    className: `dynamic-field ${className}`
+    className: `dynamic-field ${className}`,
+    onClick: handleFieldClick,
+    style: {
+      display: actualVisibility ? 'block' : 'none'
+    }
   }, field.label && !["checkbox", "radio"].includes(field.type || "") && /*#__PURE__*/React.createElement("label", {
     htmlFor: fieldName,
     className: "form-label"

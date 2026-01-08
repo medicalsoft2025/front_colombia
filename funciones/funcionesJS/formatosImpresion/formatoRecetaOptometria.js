@@ -2,77 +2,70 @@ import { generatePDFFromHTMLV2 } from "../exportPDFV2.js";
 import { generarTablaPaciente } from "./tablaDatosPaciente.js";
 import { datosUsuario } from "./datosUsuario.js";
 
-let company = {};
-let patient = {};
 let patient_id = new URLSearchParams(window.location.search).get("patient_id");
 
-async function consultarData() {
-  const response = await consultarDatosEmpresa();
-  const responePatient = await consultarDatosPaciente(patient_id);
-
-  patient = responePatient;
-
-  company = {
-    legal_name: response.nombre_consultorio,
-    document_number: response.datos_consultorio[0].RNC,
-    address: response.datos_consultorio[1].Dirección,
-    phone: response.datos_consultorio[2].Teléfono,
-    email: response.datos_consultorio[3].Correo,
-    logo: response.logo_consultorio,
-    watermark: response.marca_agua,
-  };
-}
-document.addEventListener("DOMContentLoaded", () => {
-  consultarData();
-});
-
 export async function generarFormatoRecetaOptometria(
-  receta,
-  tipo,
-  inputId = ""
+    receta,
+    tipo,
+    inputId = ""
 ) {
-  let userName = [
-    receta.prescriber?.first_name,
-    receta.prescriber?.middle_name,
-    receta.prescriber?.last_name,
-    receta.prescriber?.second_last_name,
-  ]
-    .filter(Boolean)
-    .join(" ");
+    const response = await consultarDatosEmpresa();
 
-  let user = {
-    nombre: userName,
-    especialidad: receta.prescriber?.specialty.name || "",
-    registro_medico: receta.prescriber?.clinical_record || "",
-    sello: getUrlImage(receta.prescriber?.image_minio_url || ""),
-    firma: getUrlImage(receta.prescriber?.firma_minio_url || ""),
-  };
+    const company = {
+        legal_name: response.nombre_consultorio,
+        document_number: response.datos_consultorio[0].RNC,
+        address: response.datos_consultorio[1].Dirección,
+        phone: response.datos_consultorio[2].Teléfono,
+        email: response.datos_consultorio[3].Correo,
+        logo: response.logo_consultorio,
+        watermark: response.marca_agua,
+    };
 
-  const tablePatient = await generarTablaPaciente(patient, {
-    date: receta.created_at || "--",
-  });
+    let userName = [
+        receta.prescriber?.first_name,
+        receta.prescriber?.middle_name,
+        receta.prescriber?.last_name,
+        receta.prescriber?.second_last_name,
+    ]
+        .filter(Boolean)
+        .join(" ");
 
-  const dataJson = JSON.parse(receta.optometry_item.details);
+    let user = {
+        nombre: userName,
+        especialidad: receta.prescriber?.specialty.name || "",
+        registro_medico: receta.prescriber?.clinical_record || "",
+        sello: getUrlImage(receta.prescriber?.image_minio_url || ""),
+        firma: getUrlImage(receta.prescriber?.firma_minio_url || ""),
+    };
 
-  const camposQueratometria = {
-    queratometriaOjoDerecho: dataJson.queratometriaOjoDerecho,
-    esferaOjoDerecho: dataJson.esferaOjoDerecho,
-    cilindroOjoDerecho: dataJson.cilindroOjoDerecho,
-    ejeOjoDerecho: dataJson.ejeOjoDerecho,
-    adicionOjoDerecho: dataJson.adicionOjoDerecho,
-    alturaOjoDerecho: dataJson.alturaOjoDerecho,
-    dpOjoDerecho: dataJson.dpOjoDerecho,
+    const tablePatient = await generarTablaPaciente(
+        {},
+        {
+            date: receta.created_at || "--",
+        }
+    );
 
-    queratometriaOjoIzquierdo: dataJson.queratometriaOjoIzquierdo,
-    esferaOjoIzquierdo: dataJson.esferaOjoIzquierdo,
-    cilindroOjoIzquierdo: dataJson.cilindroOjoIzquierdo,
-    ejeOjoIzquierdo: dataJson.ejeOjoIzquierdo,
-    adicionOjoIzquierdo: dataJson.adicionOjoIzquierdo,
-    alturaOjoIzquierdo: dataJson.alturaOjoIzquierdo,
-    dpOjoIzquierdo: dataJson.dpOjoIzquierdo,
-  };
+    const dataJson = JSON.parse(receta.optometry_item.details);
 
-  let contenido = `
+    const camposQueratometria = {
+        queratometriaOjoDerecho: dataJson.queratometriaOjoDerecho,
+        esferaOjoDerecho: dataJson.esferaOjoDerecho,
+        cilindroOjoDerecho: dataJson.cilindroOjoDerecho,
+        ejeOjoDerecho: dataJson.ejeOjoDerecho,
+        adicionOjoDerecho: dataJson.adicionOjoDerecho,
+        alturaOjoDerecho: dataJson.alturaOjoDerecho,
+        dpOjoDerecho: dataJson.dpOjoDerecho,
+
+        queratometriaOjoIzquierdo: dataJson.queratometriaOjoIzquierdo,
+        esferaOjoIzquierdo: dataJson.esferaOjoIzquierdo,
+        cilindroOjoIzquierdo: dataJson.cilindroOjoIzquierdo,
+        ejeOjoIzquierdo: dataJson.ejeOjoIzquierdo,
+        adicionOjoIzquierdo: dataJson.adicionOjoIzquierdo,
+        alturaOjoIzquierdo: dataJson.alturaOjoIzquierdo,
+        dpOjoIzquierdo: dataJson.dpOjoIzquierdo,
+    };
+
+    let contenido = `
   <h3 class="text-primary text-center" style="margin: 0; padding: 0;">Receta Optométrica</h3>
       <hr style="margin: 0.25rem 0;">
          ${tablePatient}
@@ -95,49 +88,49 @@ export async function generarFormatoRecetaOptometria(
             <tr>
               <td style="padding: 4px; border: none; text-align: center;">OD</td>
               <td style="padding: 4px; border: 1px solid #000; text-align: center;">${
-                camposQueratometria.queratometriaOjoDerecho || ""
+                  camposQueratometria.queratometriaOjoDerecho || ""
               }</td>
               <td style="padding: 4px; border: 1px solid #000; text-align: center;">${
-                camposQueratometria.esferaOjoDerecho || ""
+                  camposQueratometria.esferaOjoDerecho || ""
               }</td>
               <td style="padding: 4px; border: 1px solid #000; text-align: center;">${
-                camposQueratometria.cilindroOjoDerecho || ""
+                  camposQueratometria.cilindroOjoDerecho || ""
               }</td>
               <td style="padding: 4px; border: 1px solid #000; text-align: center;">${
-                camposQueratometria.ejeOjoDerecho || ""
+                  camposQueratometria.ejeOjoDerecho || ""
               }</td>
               <td style="padding: 4px; border: 1px solid #000; text-align: center;">${
-                camposQueratometria.adicionOjoDerecho || ""
+                  camposQueratometria.adicionOjoDerecho || ""
               }</td>
               <td style="padding: 4px; border: 1px solid #000; text-align: center;">${
-                camposQueratometria.alturaOjoDerecho || ""
+                  camposQueratometria.alturaOjoDerecho || ""
               }</td>
               <td style="padding: 4px; border: 1px solid #000; text-align: center;">${
-                camposQueratometria.dpOjoDerecho || ""
+                  camposQueratometria.dpOjoDerecho || ""
               }</td>
             </tr>
             <tr>
               <td style="padding: 4px; border: none; text-align: center;">OS</td>
               <td style="padding: 4px; border: 1px solid #000; text-align: center;">${
-                camposQueratometria.queratometriaOjoIzquierdo || ""
+                  camposQueratometria.queratometriaOjoIzquierdo || ""
               }</td>
               <td style="padding: 4px; border: 1px solid #000; text-align: center;">${
-                camposQueratometria.esferaOjoIzquierdo || ""
+                  camposQueratometria.esferaOjoIzquierdo || ""
               }</td>
               <td style="padding: 4px; border: 1px solid #000; text-align: center;">${
-                camposQueratometria.cilindroOjoIzquierdo || ""
+                  camposQueratometria.cilindroOjoIzquierdo || ""
               }</td>
               <td style="padding: 4px; border: 1px solid #000; text-align: center;">${
-                camposQueratometria.ejeOjoIzquierdo || ""
+                  camposQueratometria.ejeOjoIzquierdo || ""
               }</td>
               <td style="padding: 4px; border: 1px solid #000; text-align: center;">${
-                camposQueratometria.adicionOjoIzquierdo || ""
+                  camposQueratometria.adicionOjoIzquierdo || ""
               }</td>
               <td style="padding: 4px; border: 1px solid #000; text-align: center;">${
-                camposQueratometria.alturaOjoIzquierdo || ""
+                  camposQueratometria.alturaOjoIzquierdo || ""
               }</td>
               <td style="padding: 4px; border: 1px solid #000; text-align: center;">${
-                camposQueratometria.dpOjoIzquierdo || ""
+                  camposQueratometria.dpOjoIzquierdo || ""
               }</td>
             </tr>
           </tbody>
@@ -207,7 +200,7 @@ export async function generarFormatoRecetaOptometria(
           <tr>
             <td style="padding: 4px 8px; border: none;" colspan="2">
               <strong>Tratamiento: </strong>${
-                dataJson.tratamiento || "Sin especificar"
+                  dataJson.tratamiento || "Sin especificar"
               }
             </td>
           </tr>
@@ -223,7 +216,7 @@ export async function generarFormatoRecetaOptometria(
     ${datosUsuario(user)}
 `;
 
-  await generatePDFFromHTMLV2(contenido, company, patient, inputId);
+    await generatePDFFromHTMLV2(contenido, company, {}, inputId);
 }
 
 export default generarFormatoRecetaOptometria;

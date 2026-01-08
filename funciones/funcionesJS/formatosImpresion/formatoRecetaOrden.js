@@ -2,46 +2,35 @@ import { generatePDFFromHTMLV2 } from "../exportPDFV2.js";
 import { generarTablaPaciente } from "./tablaDatosPaciente.js";
 import { datosUsuario } from "./datosUsuario.js";
 
-let company = {};
-let patient = {};
-let patient_id = new URLSearchParams(window.location.search).get("patient_id");
-let user = {};
-
-async function consultarData() {
-  const response = await consultarDatosEmpresa();
-  const responePatient = await consultarDatosPaciente(patient_id);
-
-  patient = responePatient;
-  company = {
-    legal_name: response.nombre_consultorio,
-    document_number: response.datos_consultorio[0].RNC,
-    address: response.datos_consultorio[1].Dirección,
-    phone: response.datos_consultorio[2].Teléfono,
-    email: response.datos_consultorio[3].Correo,
-    logo: response.logo_consultorio,
-    watermark: response.marca_agua,
-  };
-}
-document.addEventListener("DOMContentLoaded", () => {
-  consultarData();
-});
-
 export async function generarFormatoRecetaOrden(
-  datosExamen,
-  tipo,
-  inputId = ""
+    datosExamen,
+    tipo,
+    inputId = ""
 ) {
-  const tablePatient = await generarTablaPaciente(patient, {
-    date: datosExamen.created_at || "--",
-  });
-  user = {
-    nombre: datosExamen?.doctor,
-    especialidad: datosExamen.user?.user_specialty_name,
-    registro_medico: datosExamen.user?.clinical_record || "",
-    sello: getUrlImage(datosExamen.user?.image_minio_url || ""),
-    firma: getUrlImage(datosExamen.user?.firma_minio_url || ""),
-  };
-  let contenido = `
+    const response = await consultarDatosEmpresa();
+    const company = {
+        legal_name: response.nombre_consultorio,
+        document_number: response.datos_consultorio[0].RNC,
+        address: response.datos_consultorio[1].Dirección,
+        phone: response.datos_consultorio[2].Teléfono,
+        email: response.datos_consultorio[3].Correo,
+        logo: response.logo_consultorio,
+        watermark: response.marca_agua,
+    };
+    const tablePatient = await generarTablaPaciente(
+        {},
+        {
+            date: datosExamen.created_at || "--",
+        }
+    );
+    const user = {
+        nombre: datosExamen?.doctor,
+        especialidad: datosExamen.user?.user_specialty_name,
+        registro_medico: datosExamen.user?.clinical_record || "",
+        sello: getUrlImage(datosExamen.user?.image_minio_url || ""),
+        firma: getUrlImage(datosExamen.user?.firma_minio_url || ""),
+    };
+    let contenido = `
    <h3 class="text-primary text-center" style="margin: 0; padding: 0;">Orden de Exámenes</h3>
       <hr style="margin: 0.25rem 0;">
     <div class="container border rounded shadow-sm p-3">
@@ -59,23 +48,23 @@ export async function generarFormatoRecetaOrden(
           </thead>
           <tbody>
             ${
-              datosExamen.details.length > 0
-                ? datosExamen.details
-                    .map(
-                      (detalle) => `
+                datosExamen.details.length > 0
+                    ? datosExamen.details
+                          .map(
+                              (detalle) => `
                 <tr>
                   <td style="border: 1px black; padding: 8px;">${
-                    detalle.exam_type.name
+                      detalle.exam_type.name
                   }</td>
                   <td style="border: 1px black; padding: 8px;">1</td>
                   <td style="border: 1px black; padding: 8px;">${
-                    detalle.exam_type.description || "Sin descripción"
+                      detalle.exam_type.description || "Sin descripción"
                   }</td>
                 </tr>
               `
-                    )
-                    .join("")
-                : `<tr><td colspan="3" style="border: 1px solid #dee2e6; padding: 8px; text-align: center; color: #6c757d; font-style: italic;">No hay exámenes en esta solicitud</td></tr>`
+                          )
+                          .join("")
+                    : `<tr><td colspan="3" style="border: 1px solid #dee2e6; padding: 8px; text-align: center; color: #6c757d; font-style: italic;">No hay exámenes en esta solicitud</td></tr>`
             }
           </tbody>
         </table>
@@ -83,7 +72,7 @@ export async function generarFormatoRecetaOrden(
     </div>
     ${datosUsuario(user)}  
     `;
-  await generatePDFFromHTMLV2(contenido, company, patient, inputId);
+    await generatePDFFromHTMLV2(contenido, company, {}, inputId);
 }
 
 export default generarFormatoRecetaOrden;

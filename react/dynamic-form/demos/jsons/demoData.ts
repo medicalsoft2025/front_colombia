@@ -1,62 +1,114 @@
 export const demoData = {
-    name: "test xd",
-    formOne: {
-        additionalInfo: "jeje",
+    "asyncForm": {
+        "user": 1,
+        "posts": 1,
+        "customCheck": "aaa",
+        "simpleText": "a"
     },
-    persona: {
-        nombreCompleto: "juana",
-        email: "maste@g.com",
-        telefono: "+19587511007",
-        fechaNacimiento: "2007-12-31T05:00:00.000Z",
-        estadoCivil: "married",
-        hijos: 3,
+    "inventoryForm": {
+        "educationForm": {
+            "candidateName": "a",
+            "education": [
+                {
+                    "degree": "highschool",
+                    "institution": "a",
+                    "otherDegree": ""
+                },
+                {
+                    "degree": "other",
+                    "institution": "a",
+                    "otherDegree": "a"
+                },
+                {
+                    "degree": "university",
+                    "institution": "a",
+                    "otherDegree": ""
+                }
+            ]
+        },
+        "products": [
+            {
+                "code": "a",
+                "category": "electronics",
+                "quantity": 5,
+                "active": false
+            },
+            {
+                "code": "a",
+                "category": "electronics",
+                "quantity": 0,
+                "active": false
+            }
+        ]
     },
-    preferencias: {
-        tema: "dark",
-        idiomas: ["es", "en", "fr"],
-        colorFavorito: "9e3c3c",
-        notificaciones: true,
-        newsletter: false,
+    "persona": {
+        "nombreCompleto": "aaaaa",
+        "email": "zyjimotaw@mailinator.com",
+        "telefono": "+19587511007",
+        "fechaNacimiento": "1981-03-20T05:00:00.000Z",
+        "dni": "12345678a",
+        "estadoCivil": "partner"
     },
-    biografia: {
-        corta: "test",
-        completa: "<p>test</p><p><strong>test</strong></p><p><em>test</em></p>",
+    "direccion": {
+        "calle": "Quis consequat Iste",
+        "ciudad": "Mollit sed enim sed",
+        "pais": "ES"
     },
-    seguridad: {
-        password: "pinillacarlos892@gmail.com",
-        confirmPassword: "pinillacarlos892@gmail.com",
+    "empleo": {
+        "salarioActual": 4,
+        "salarioDeseado": 49.8
     },
-    configuracion: {
-        fechaInicio: "2026-01-03T23:34:00.000Z",
-        fechaFin: "2026-01-31T23:34:00.000Z",
-        prioridad: "high",
-        presupuesto: 3000,
+    "formacion": {
+        "titulacion": "none"
     },
-    resumen: {
-        confirmacion: true,
-        notasFinales: "<p>test</p>",
+    "experiencia": {
+        "anosExperiencia": 2,
+        "sector": "finance"
     },
-    direccion: {
-        calle: "Quis consequat Iste",
-        ciudad: "Mollit sed enim sed",
-        pais: "ES",
+    "preferencias": {
+        "tipoContrato": "temporary",
+        "salarioMinimo": 3,
+        "salarioDeseado": 3
     },
-    disponibilidad: {
-        dias: ["mon", "tue", "wed", "thu", "fri", "sat", "sun"],
+    "disponibilidad": {
+        "fechaDisponibilidad": "2026-01-28T05:00:00.000Z"
     },
-    avanzado: {
-        reintentos: 3,
-        timeout: 30,
-        modoDebug: true,
-        logLevel: "info",
+    "relocalizacion": {},
+    "documentos": {},
+    "biografia": {},
+    "cuenta": {
+        "username": "caliche123",
+        "password": "Caliche123*",
+        "confirmPassword": "Caliche123*",
+        "emailNotificaciones": "zyjimotaw@mailinator.com"
     },
-    terminos: {
-        acepto: true,
-        politicaPrivacidad: true,
-        comentarios: "test",
+    "seguridad": {
+        "respuestaSeguridad": "A97ce2af@1994"
     },
-    verificacion: {
-        dobleFactor: true,
-        recordatorio: "2025-12-31T05:00:00.000Z",
+    "privacidad": {},
+    "terminos": {
+        "condiciones": "TÉRMINOS Y CONDICIONES\n\n1. INFORMACIÓN GENERAL\nEste formulario recopila información para procesos de selección laboral. Los datos proporcionados serán tratados de acuerdo con la Ley Orgánica 3/2018 de Protección de Datos.\n\n2. CONSENTIMIENTO\nAl enviar este formulario, usted da su consentimiento para:\n- El tratamiento de sus datos personales\n- La evaluación de su candidatura\n- El almacenamiento de su información por un período de 2 años\n\n3. DERECHOS DEL USUARIO\nUsted tiene derecho a acceder, rectificar, suprimir sus datos y oponerse a su tratamiento, según lo establecido en el RGPD.\n\n4. CONFIDENCIALIDAD\nToda la información proporcionada será tratada con la máxima confidencialidad.",
+        "aceptoTerminos": true,
+        "aceptoPrivacidad": true,
+        "mayorEdad": true
     },
-};
+    "confirmacion": {
+        "veracidad": true,
+        "autorizacion": true
+    },
+    "educationForm": {
+        "candidateName": "a",
+        "education": [
+            {
+                "degree": "highschool",
+                "institution": "a",
+                "otherDegree": ""
+            },
+            {
+                "degree": "university",
+                "institution": "a",
+                "otherDegree": ""
+            }
+        ]
+    }
+}

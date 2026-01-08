@@ -1,85 +1,180 @@
-import React, { memo, useContext } from "react";
+import React, { useContext, useMemo, useRef } from "react";
 import {
     UseFormReturn,
     FieldValues,
-    FieldPath,
-    Controller,
     RegisterOptions,
 } from "react-hook-form";
-import { InputText } from "primereact/inputtext";
-import { Dropdown } from "primereact/dropdown";
-import { Calendar } from "primereact/calendar";
-import { Checkbox } from "primereact/checkbox";
-import { InputNumber } from "primereact/inputnumber";
-import { InputTextarea } from "primereact/inputtextarea";
-import { MultiSelect } from "primereact/multiselect";
-import { RadioButton } from "primereact/radiobutton";
-import { ColorPicker } from "primereact/colorpicker";
-import { Editor } from "primereact/editor";
 import { DynamicFieldConfig } from "../../interfaces/models";
 import { getValueByPath } from "../../../../services/utilidades";
 import { FormContext, FormContextValue } from "../../context/FormContext";
+import { useVisibility } from "../../context/VisibilityContext";
+import { DynamicInputText } from "./inputs/DynamicInputText";
+import { DynamicSelect } from "./inputs/DynamicSelect";
+import { DynamicMultiSelect } from "./inputs/DynamicMultiSelect";
+import { DynamicCalendar } from "./inputs/DynamicCalendar";
+import { DynamicCheckbox } from "./inputs/DynamicCheckbox";
+import { DynamicRadio } from "./inputs/DynamicRadio";
+import { DynamicInputNumber } from "./inputs/DynamicInputNumber";
+import { DynamicInputTextarea } from "./inputs/DynamicInputTextarea";
+import { DynamicColorPicker } from "./inputs/DynamicColorPicker";
+import { DynamicEditor } from "./inputs/DynamicEditor";
+import { DynamicTreeSelect } from "./inputs/DynamicTreeSelect";
+import { DynamicChips } from "./inputs/DynamicChips";
+import { DynamicRating } from "./inputs/DynamicRating";
+import { DynamicSlider } from "./inputs/DynamicSlider";
 
 interface DynamicFieldProps<T extends FieldValues> {
     field: DynamicFieldConfig;
     form: UseFormReturn<T>;
     parentPath?: string;
     className?: string;
+    onElementSelect?: (config: DynamicFieldConfig | any) => void;
 }
 
 export const DynamicField = <T extends FieldValues>({
     field,
     form,
     parentPath = "",
-    className = "",
+    className = ""
 }: DynamicFieldProps<T>) => {
-    const fieldName = parentPath ? `${parentPath}.${field.name}` : field.name;
+    const fieldName = parentPath ? `${parentPath}.${field.name}` : field.name || "";
+
     const {
-        control,
         formState: { errors },
     } = form;
 
-    // Usar contexto para obtener estado condicional
-    const { fieldStates } = useContext(FormContext) as FormContextValue;
+    const { fieldStates, onElementSelect } = useContext(FormContext) as FormContextValue;
+    const { isVisible: parentVisibility } = useVisibility();
+
     const fieldState = fieldStates[fieldName] || {
         visible: true,
         disabled: false,
     };
 
-    // Si el campo no es visible, no renderizar
-    if (fieldState.visible === false) {
-        return null;
-    }
+    const actualVisibility = fieldState.visible !== false && parentVisibility;
 
-    // Usar opciones dinámicas si existen
-    const fieldOptions = fieldState.options || field.options || [];
+    React.useEffect(() => {
+        form.trigger(fieldName as any);
+    }, [actualVisibility, fieldName, form, field.required]);
 
-    // Configurar validación
-    const validationRules:
-        | Omit<
-              RegisterOptions<any, any>,
-              "setValueAs" | "disabled" | "valueAsNumber" | "valueAsDate"
-          >
-        | undefined = {
-        required: field.required ? "Este campo es requerido" : false,
-        ...field.validation,
-    };
+    const validationCache = useRef<{ key: string; result: any } | null>(null);
 
-    // Valor por defecto
-    const defaultValue =
-        field.value !== undefined
-            ? field.value
-            : field.type === "checkbox"
-            ? false
-            : field.type === "number"
-            ? 0
-            : field.type === "multiselect"
-            ? []
-            : "";
+    const validationRules = useMemo(() => {
+        const rules: Omit<
+            RegisterOptions<any, any>,
+            "setValueAs" | "disabled" | "valueAsNumber" | "valueAsDate"
+        > = {
+            required: field.required ? "Este campo es requerido" : false,
+            ...field.validation,
+        };
+
+        if (field.asyncValidation) {
+            rules.validate = async (value: any) => {
+                const config = field.asyncValidation!;
+                const { endpoint, method = "POST", message = "Valor inválido", headers, params } = config;
+
+                const currentDataMap: Record<string, any> = { value };
+                let cacheKey = `${endpoint}|${value}`;
+
+                if (params) {
+                    params.forEach(param => {
+                        let val: any = null;
+                        if (param.source === "static") val = param.value;
+                        else if (param.source === "url") {
+                            const searchParams = new URLSearchParams(window.location.search);
+                            val = searchParams.get(param.value);
+                        } else if (param.source === "field") {
+                            val = form.getValues(param.value as any);
+                        }
+
+                        if (val !== undefined && val !== null) {
+                            currentDataMap[param.key] = val;
+                            cacheKey += `|${param.key}:${val}`;
+                        }
+                    });
+                }
+
+                if (validationCache.current && validationCache.current.key === cacheKey) {
+                    return validationCache.current.result;
+                }
+
+                try {
+                    let url = endpoint;
+                    let queryParams = new URLSearchParams();
+                    let bodyParams: Record<string, any> = { value };
+
+                    if (params) {
+                        params.forEach(param => {
+                            const val = currentDataMap[param.key];
+                            if (val === null || val === undefined || val === "") return;
+
+                            const location = param.location || (method === "POST" ? "body" : "query");
+
+                            if (location === "path") {
+                                const placeholder = `:${param.key}`;
+                                if (url.includes(placeholder)) {
+                                    url = url.replace(placeholder, String(val));
+                                } else {
+                                    url = url.replace(/\/+$/, "");
+                                    url = `${url}/${val}`;
+                                }
+                            } else if (location === "body") {
+                                bodyParams[param.key] = val;
+                            } else {
+                                queryParams.append(param.key, String(val));
+                            }
+                        });
+                    }
+
+                    const qs = queryParams.toString();
+                    if (qs) {
+                        url += (url.includes("?") ? "&" : "?") + qs;
+                    }
+
+                    const fetchOptions: RequestInit = {
+                        method,
+                        headers: {
+                            "Content-Type": "application/json",
+                            ...(headers || {})
+                        },
+                        body: (method === "POST" || method === "PUT") ? JSON.stringify(bodyParams) : undefined
+                    };
+
+                    const response = await fetch(url, fetchOptions);
+
+                    if (!response.ok) {
+                        return message;
+                    } else {
+                        const data = await response.json();
+                        if (data.valid === false) return data.message || message;
+                    }
+
+                    validationCache.current = { key: cacheKey, result: true };
+                    return true;
+
+                } catch (e) {
+                    console.error(e);
+                    return "Error de validación";
+                }
+            }
+        }
+        return rules;
+    }, [
+        field,
+        field.required,
+        field.validation,
+        field.asyncValidation,
+        field.validation?.pattern,
+        field.validation?.min,
+        field.validation?.max,
+        field.validation?.minLength,
+        field.validation?.maxLength,
+        form.getValues
+    ]);
 
     const commonProps = {
         id: fieldName,
-        disabled: field.disabled,
+        disabled: field.disabled || fieldState.disabled || !actualVisibility,
         placeholder: field.placeholder,
     };
 
@@ -87,320 +182,189 @@ export const DynamicField = <T extends FieldValues>({
         switch (field.type) {
             case "select":
                 return (
-                    <Controller
-                        name={fieldName as FieldPath<T>}
-                        control={control}
-                        rules={validationRules}
-                        defaultValue={defaultValue}
-                        render={({ field: controllerField }) => (
-                            <Dropdown
-                                {...commonProps}
-                                className="w-100"
-                                value={controllerField.value}
-                                options={field.options || []}
-                                optionLabel="label"
-                                optionValue="value"
-                                onChange={(e) =>
-                                    controllerField.onChange(e.value)
-                                }
-                                onBlur={controllerField.onBlur}
-                                showClear={field.showClear}
-                            />
-                        )}
+                    <DynamicSelect
+                        field={field}
+                        form={form}
+                        fieldName={fieldName}
+                        validationRules={validationRules}
+                        commonProps={commonProps}
+                        options={fieldState.options}
+                    />
+                )
+            case "tree-select":
+                return (
+                    <DynamicTreeSelect
+                        field={field}
+                        form={form}
+                        fieldName={fieldName}
+                        validationRules={validationRules}
+                        commonProps={commonProps}
+                        options={fieldState.treeOptions}
+                    />
+                )
+            case "text":
+            case undefined:
+                return (
+                    <DynamicInputText
+                        field={field}
+                        form={form}
+                        fieldName={fieldName}
+                        validationRules={validationRules}
+                        type="text"
+                        commonProps={commonProps}
                     />
                 );
-
+            case "email":
+                return (
+                    <DynamicInputText
+                        field={field}
+                        form={form}
+                        fieldName={fieldName}
+                        validationRules={{
+                            ...validationRules,
+                            pattern: {
+                                value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
+                                message: "Email inválido",
+                            },
+                        }}
+                        type="email"
+                        commonProps={commonProps}
+                    />
+                );
+            case "password":
+                return (
+                    <DynamicInputText
+                        field={field}
+                        form={form}
+                        fieldName={fieldName}
+                        validationRules={validationRules}
+                        type="password"
+                        commonProps={commonProps}
+                    />
+                );
             case "multiselect":
                 return (
-                    <Controller
-                        name={fieldName as FieldPath<T>}
-                        control={control}
-                        rules={validationRules}
-                        defaultValue={defaultValue}
-                        render={({ field: controllerField }) => (
-                            <MultiSelect
-                                {...commonProps}
-                                value={controllerField.value || []}
-                                options={field.options || []}
-                                className="w-100"
-                                optionLabel="label"
-                                optionValue="value"
-                                onChange={(e) =>
-                                    controllerField.onChange(e.value)
-                                }
-                                onBlur={controllerField.onBlur}
-                                display="chip"
-                            />
-                        )}
+                    <DynamicMultiSelect
+                        field={field}
+                        form={form}
+                        fieldName={fieldName}
+                        validationRules={validationRules}
+                        commonProps={commonProps}
                     />
                 );
 
             case "date":
             case "datetime":
                 return (
-                    <Controller
-                        name={fieldName as FieldPath<T>}
-                        control={control}
-                        rules={validationRules}
-                        defaultValue={defaultValue}
-                        render={({ field: controllerField }) => (
-                            <Calendar
-                                {...commonProps}
-                                value={controllerField.value}
-                                showIcon
-                                className="w-100"
-                                dateFormat={field.format || "dd/mm/yy"}
-                                showTime={field.type === "datetime"}
-                                hourFormat="12"
-                                onChange={(e) =>
-                                    controllerField.onChange(e.value)
-                                }
-                                onBlur={controllerField.onBlur}
-                            />
-                        )}
+                    <DynamicCalendar
+                        field={field}
+                        form={form}
+                        fieldName={fieldName}
+                        validationRules={validationRules}
+                        commonProps={commonProps}
                     />
                 );
 
             case "checkbox":
                 return (
-                    <Controller
-                        name={fieldName as FieldPath<T>}
-                        control={control}
-                        rules={validationRules}
-                        defaultValue={defaultValue}
-                        render={({ field: controllerField }) => (
-                            <>
-                                <div className="d-flex align-items-center">
-                                    <Checkbox
-                                        {...commonProps}
-                                        inputId={fieldName}
-                                        checked={controllerField.value || false}
-                                        onChange={(e) =>
-                                            controllerField.onChange(e.checked)
-                                        }
-                                        onBlur={controllerField.onBlur}
-                                    />
-                                    <label
-                                        htmlFor={fieldName}
-                                        className="form-label"
-                                    >
-                                        {field.label}
-                                        {field.required && (
-                                            <span className="required">*</span>
-                                        )}
-                                    </label>
-                                </div>
-                            </>
-                        )}
+                    <DynamicCheckbox
+                        field={field}
+                        form={form}
+                        fieldName={fieldName}
+                        validationRules={validationRules}
+                        commonProps={commonProps}
                     />
                 );
 
             case "radio":
                 return (
-                    <Controller
-                        name={fieldName as FieldPath<T>}
-                        control={control}
-                        rules={validationRules}
-                        defaultValue={defaultValue}
-                        render={({ field: controllerField }) => (
-                            <div className="d-flex flex-column gap-2">
-                                {field.options?.map((option, index) => (
-                                    <div
-                                        key={index}
-                                        className="d-flex align-items-center gap-2"
-                                    >
-                                        <RadioButton
-                                            {...commonProps}
-                                            inputId={`${fieldName}-${index}`}
-                                            name={fieldName}
-                                            value={option.value}
-                                            checked={
-                                                controllerField.value ===
-                                                option.value
-                                            }
-                                            onChange={(e) => {
-                                                controllerField.onChange(
-                                                    e.checked
-                                                        ? option.value
-                                                        : null
-                                                );
-                                            }}
-                                            onBlur={controllerField.onBlur}
-                                        />
-                                        <label
-                                            htmlFor={`${fieldName}-${index}`}
-                                            className="ml-2"
-                                        >
-                                            {option.label}
-                                        </label>
-                                    </div>
-                                ))}
-                            </div>
-                        )}
+                    <DynamicRadio
+                        field={field}
+                        form={form}
+                        fieldName={fieldName}
+                        validationRules={validationRules}
+                        commonProps={commonProps}
                     />
                 );
 
             case "number":
                 return (
-                    <Controller
-                        name={fieldName as FieldPath<T>}
-                        control={control}
-                        rules={validationRules}
-                        defaultValue={defaultValue}
-                        render={({ field: controllerField }) => (
-                            <InputNumber
-                                {...commonProps}
-                                className="w-100"
-                                value={controllerField.value}
-                                mode="decimal"
-                                showButtons
-                                minFractionDigits={2}
-                                onValueChange={(e) =>
-                                    controllerField.onChange(e.value)
-                                }
-                                onChange={(e) =>
-                                    controllerField.onChange(e.value)
-                                }
-                                onBlur={controllerField.onBlur}
-                            />
-                        )}
+                    <DynamicInputNumber
+                        field={field}
+                        form={form}
+                        fieldName={fieldName}
+                        validationRules={validationRules}
+                        commonProps={commonProps}
                     />
                 );
 
             case "textarea":
                 return (
-                    <Controller
-                        name={fieldName as FieldPath<T>}
-                        control={control}
-                        rules={validationRules}
-                        defaultValue={defaultValue}
-                        render={({ field: controllerField }) => (
-                            <InputTextarea
-                                {...commonProps}
-                                className="w-100"
-                                value={controllerField.value}
-                                rows={field.rows || 4}
-                                onChange={(e) =>
-                                    controllerField.onChange(e.target.value)
-                                }
-                                onBlur={controllerField.onBlur}
-                            />
-                        )}
+                    <DynamicInputTextarea
+                        field={field}
+                        form={form}
+                        fieldName={fieldName}
+                        validationRules={validationRules}
+                        commonProps={commonProps}
                     />
                 );
 
             case "colorpicker":
                 return (
-                    <Controller
-                        name={fieldName as FieldPath<T>}
-                        control={control}
-                        rules={validationRules}
-                        defaultValue={defaultValue}
-                        render={({ field: controllerField }) => (
-                            <div className="d-flex align-items-center gap-2">
-                                <ColorPicker
-                                    {...commonProps}
-                                    value={controllerField.value}
-                                    onChange={(e) =>
-                                        controllerField.onChange(e.value)
-                                    }
-                                    onBlur={controllerField.onBlur}
-                                />
-                                <InputText
-                                    {...commonProps}
-                                    className="w-100"
-                                    value={controllerField.value}
-                                    onChange={(e) =>
-                                        controllerField.onChange(e.target.value)
-                                    }
-                                    onBlur={controllerField.onBlur}
-                                />
-                            </div>
-                        )}
+                    <DynamicColorPicker
+                        field={field}
+                        form={form}
+                        fieldName={fieldName}
+                        validationRules={validationRules}
+                        commonProps={commonProps}
                     />
                 );
 
             case "editor":
                 return (
-                    <Controller
-                        name={fieldName as FieldPath<T>}
-                        control={control}
-                        rules={validationRules}
-                        defaultValue={defaultValue}
-                        render={({ field: controllerField }) => (
-                            <Editor
-                                {...commonProps}
-                                value={controllerField.value}
-                                onTextChange={(e) =>
-                                    controllerField.onChange(e.htmlValue)
-                                }
-                                style={{ height: "200px" }}
-                            />
-                        )}
+                    <DynamicEditor
+                        field={field}
+                        form={form}
+                        fieldName={fieldName}
+                        validationRules={validationRules}
+                        commonProps={commonProps}
                     />
                 );
 
-            case "password":
+            case "chips":
                 return (
-                    <Controller
-                        name={fieldName as FieldPath<T>}
-                        control={control}
-                        rules={validationRules}
-                        defaultValue={defaultValue}
-                        render={({ field: controllerField }) => (
-                            <InputText
-                                {...commonProps}
-                                className="w-100"
-                                {...controllerField}
-                                type="password"
-                            />
-                        )}
+                    <DynamicChips
+                        field={field}
+                        form={form}
+                        fieldName={fieldName}
+                        validationRules={validationRules}
+                        commonProps={commonProps}
                     />
                 );
 
-            case "email":
+            case "rating":
                 return (
-                    <Controller
-                        name={fieldName as FieldPath<T>}
-                        control={control}
-                        rules={
-                            {
-                                ...validationRules,
-                                pattern: {
-                                    value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
-                                    message: "Email inválido",
-                                },
-                            } as RegisterOptions<T, FieldPath<T>>
-                        }
-                        defaultValue={defaultValue}
-                        render={({ field: controllerField }) => (
-                            <InputText
-                                {...commonProps}
-                                className="w-100"
-                                {...controllerField}
-                                type="email"
-                            />
-                        )}
+                    <DynamicRating
+                        field={field}
+                        form={form}
+                        fieldName={fieldName}
+                        validationRules={validationRules}
+                        commonProps={commonProps}
                     />
                 );
 
+            case "slider":
+                return (
+                    <DynamicSlider
+                        field={field}
+                        form={form}
+                        fieldName={fieldName}
+                        validationRules={validationRules}
+                        commonProps={commonProps}
+                    />
+                );
             default:
-                return (
-                    <Controller
-                        name={fieldName as FieldPath<T>}
-                        control={control}
-                        rules={validationRules}
-                        defaultValue={defaultValue}
-                        render={({ field: controllerField }) => (
-                            <InputText
-                                {...commonProps}
-                                className="w-100"
-                                {...controllerField}
-                                type={field.type || "text"}
-                            />
-                        )}
-                    />
-                );
+                return null;
         }
     };
 
@@ -415,8 +379,19 @@ export const DynamicField = <T extends FieldValues>({
         );
     };
 
+    const handleFieldClick = (e: React.MouseEvent) => {
+        if (onElementSelect) {
+            e.stopPropagation();
+            onElementSelect(field);
+        }
+    };
+
     return (
-        <div className={`dynamic-field ${className}`}>
+        <div
+            className={`dynamic-field ${className}`}
+            onClick={handleFieldClick}
+            style={{ display: actualVisibility ? 'block' : 'none' }}
+        >
             {field.label &&
                 !["checkbox", "radio"].includes(field.type || "") && (
                     <label htmlFor={fieldName} className="form-label">

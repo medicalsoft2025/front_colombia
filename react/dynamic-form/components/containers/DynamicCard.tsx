@@ -4,63 +4,67 @@ import { DynamicFormContainerConfig } from "../../interfaces/models";
 import { DynamicFormContainer } from "./DynamicFormContainer";
 import { UseFormReturn } from "react-hook-form";
 import { FieldValues } from "react-hook-form";
+import { useContainerErrors } from "../../hooks/useContainerErrors";
+import { useDynamicFormContainer } from "../../hooks/useDynamicFormContainer";
+import { DynamicField } from "../fields/DynamicField";
 
 interface DynamicCardProps<T extends FieldValues> {
     config: DynamicFormContainerConfig;
     form: UseFormReturn<T>;
-    loading?: boolean;
-    onSubmit?: () => void;
-    actualFormGroup?: string;
+    actualFormGroup: string;
 }
 
-export const DynamicCard = <T extends FieldValues>(
-    props: DynamicCardProps<T>
-) => {
-    const { config, form, loading, onSubmit, actualFormGroup } = props;
+export const DynamicCard = <T extends FieldValues>({
+    config,
+    form,
+    actualFormGroup
+}: DynamicCardProps<T>) => {
+    const {
+        hasFields,
+        hasContainers,
+        shouldRenderFields,
+    } = useDynamicFormContainer({
+        config,
+        form: form,
+        parentPath: actualFormGroup,
+    });
 
-    if (!config.containers || config.containers.length === 0) return null;
+    const header = (
+        <div className="d-flex justify-content-between align-items-center mb-0 p-2">
+            <span className="font-bold text-xl">{config.label}</span>
+        </div>
+    );
+
+    if (!hasFields && !hasContainers) return null;
 
     return (
-        <>
-            <div className={config.styleClass}>
-                <Card
-                    header={
-                        <>
-                            <h5 className="px-3 pt-3">{config.name}</h5>
-                        </>
+        <Card title={config.label ? header : null} className={`shadow-1 ${config.styleClass}`}>
+            <div className={config.contentStyleClass}>
+                {(config.children || config.containers || config.fields)?.map((child, index) => {
+                    const isContainer = ["card", "form", "tabs", "tab", "accordion", "stepper", "container", "array"].includes(child.type);
+                    if (isContainer) {
+                        return (
+                            <DynamicFormContainer
+                                key={child.name || `container-${index}`}
+                                config={child}
+                                form={form}
+                                parentPath={actualFormGroup}
+                                className={child.styleClass}
+                            />
+                        );
+                    } else {
+                        return (
+                            <DynamicField
+                                key={child.name}
+                                field={child}
+                                form={form as UseFormReturn<FieldValues>}
+                                parentPath={actualFormGroup}
+                                className={child.styleClass}
+                            />
+                        );
                     }
-                    pt={{
-                        content: {
-                            style: {
-                                padding: "0",
-                            },
-                        },
-                        body: {
-                            style: {
-                                padding: "0",
-                            },
-                        },
-                    }}
-                >
-                    <div className={`p-3 ${config.contentStyleClass}`}>
-                        {config.containers!.map((childConfig, index) => {
-                            return (
-                                <DynamicFormContainer
-                                    key={
-                                        childConfig.name || `container-${index}`
-                                    }
-                                    config={childConfig}
-                                    form={form}
-                                    loading={loading}
-                                    onSubmit={onSubmit}
-                                    parentPath={actualFormGroup}
-                                    className={childConfig.styleClass}
-                                />
-                            );
-                        })}
-                    </div>
-                </Card>
+                })}
             </div>
-        </>
+        </Card>
     );
 };

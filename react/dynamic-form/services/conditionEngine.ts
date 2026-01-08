@@ -1,16 +1,23 @@
-// services/conditionEngine.ts
 import { DynamicCondition } from "../interfaces/models";
 
 export class ConditionEngine {
     private formValues: Record<string, any>;
+    private pathResolver: (key: string, operator?: string) => string;
 
-    constructor(formValues: Record<string, any>) {
+    constructor(
+        formValues: Record<string, any>,
+        fieldPathMapOrResolver: Map<string, string> | ((key: string, operator?: string) => string) = new Map()
+    ) {
         this.formValues = formValues;
+        if (typeof fieldPathMapOrResolver === "function") {
+            this.pathResolver = fieldPathMapOrResolver;
+        } else {
+            this.pathResolver = (key) => fieldPathMapOrResolver.get(key) || key;
+        }
     }
 
     evaluateCondition(condition: DynamicCondition): boolean {
         if (condition.conditions) {
-            // Evaluar condiciones anidadas
             const results = condition.conditions.map((c) =>
                 this.evaluateCondition(c)
             );
@@ -20,21 +27,30 @@ export class ConditionEngine {
                 : results.some(Boolean);
         }
 
-        const fieldValue = this.getFieldValue(condition.field);
+        const fieldValue = this.getFieldValue(condition.field, condition.operator);
+
+        let targetValue = condition.value;
+        if (condition.source === "field") {
+            // If comparing against another field, resolve its value
+            // We pass null operator because usually we want the raw value of the target field
+            // However, if the target is an array wildcard, should we aggregate?
+            // For now, assume simple value resolution or matching structure.
+            targetValue = this.getFieldValue(condition.value);
+        }
 
         switch (condition.operator) {
             case "equals":
-                return fieldValue === condition.value;
+                return fieldValue === targetValue;
             case "notEquals":
-                return fieldValue !== condition.value;
+                return fieldValue !== targetValue;
             case "greaterThan":
-                return fieldValue > condition.value;
+                return fieldValue > targetValue;
             case "lessThan":
-                return fieldValue < condition.value;
+                return fieldValue < targetValue;
             case "contains":
                 return Array.isArray(fieldValue)
-                    ? fieldValue.includes(condition.value)
-                    : String(fieldValue).includes(String(condition.value));
+                    ? fieldValue.includes(targetValue)
+                    : String(fieldValue).includes(String(targetValue));
             case "isEmpty":
                 return (
                     !fieldValue ||
@@ -47,13 +63,34 @@ export class ConditionEngine {
                     (!Array.isArray(fieldValue) || fieldValue.length > 0) &&
                     (typeof fieldValue !== "string" || fieldValue.trim() !== "")
                 );
+            case "sumGreaterThan":
+                {
+                    const vals = Array.isArray(fieldValue) ? fieldValue : [fieldValue];
+                    const sum = vals.reduce((a: any, b: any) => Number(a || 0) + Number(b || 0), 0);
+                    return sum > Number(targetValue);
+                }
+            case "sumLessThan":
+                {
+                    const vals = Array.isArray(fieldValue) ? fieldValue : [fieldValue];
+                    const sum = vals.reduce((a: any, b: any) => Number(a || 0) + Number(b || 0), 0);
+                    return sum < Number(targetValue);
+                }
+            case "sumEquals":
+                {
+                    const vals = Array.isArray(fieldValue) ? fieldValue : [fieldValue];
+                    const sum = vals.reduce((a: any, b: any) => Number(a || 0) + Number(b || 0), 0);
+                    return sum === Number(targetValue);
+                }
+            case "anyEquals":
+                return (Array.isArray(fieldValue) ? fieldValue : [fieldValue]).some((v: any) => v == targetValue);
+            case "allEquals":
+                return (Array.isArray(fieldValue) ? fieldValue : [fieldValue]).every((v: any) => v == targetValue);
             default:
                 return false;
         }
     }
 
     evaluateExpression(expression: string): any {
-        // Reemplazar variables como {{fieldName}}
         const interpolated = expression.replace(
             /\{\{([^}]+)\}\}/g,
             (match, fieldName) => {
@@ -62,14 +99,12 @@ export class ConditionEngine {
         );
 
         try {
-            // Evaluar expresión simple (con restricciones de seguridad)
             if (
                 interpolated.includes("+") ||
                 interpolated.includes("-") ||
                 interpolated.includes("*") ||
                 interpolated.includes("/")
             ) {
-                // Solo permitir operaciones matemáticas básicas
                 const safeExpression = interpolated.replace(
                     /[^0-9+\-*/(). ]/g,
                     ""
@@ -82,9 +117,32 @@ export class ConditionEngine {
         }
     }
 
-    private getFieldValue(fieldPath: string): any {
-        return fieldPath.split(".").reduce((obj, key) => {
-            return obj && obj[key] !== undefined ? obj[key] : undefined;
-        }, this.formValues);
+    private getFieldValue(fieldKey: string, operator?: string): any {
+        const fullPath = this.pathResolver(fieldKey, operator);
+
+        const getValueRecursive = (obj: any, pathParts: string[]): any => {
+            if (obj === undefined || obj === null) return undefined;
+            if (pathParts.length === 0) return obj;
+
+            const [head, ...tail] = pathParts;
+
+            if (head === "*") {
+                if (Array.isArray(obj)) {
+                    // Flatten if result is array of arrays? 
+                    // Typically mapping over array returns array of values.
+                    // If deeper parts also have *, we get array of arrays.
+                    // For simple sum/any, we want a flat list of values?
+                    // Let's assume one level of wildcard for now or flat map.
+                    const results = obj.map(item => getValueRecursive(item, tail));
+                    // Flatten one level to support nested arrays if needed, but risky.
+                    return results.flat();
+                }
+                return [];
+            }
+
+            return getValueRecursive(obj[head], tail);
+        };
+
+        return getValueRecursive(this.formValues, fullPath.split("."));
     }
 }

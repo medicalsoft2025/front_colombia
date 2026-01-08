@@ -10,11 +10,13 @@ interface UseDynamicFormContainerProps<T extends FieldValues> {
 
 interface UseDynamicFormContainerReturn {
     getActualFormGroupPath: () => string;
-    actualFormGroup: string; // Path del formulario actual
+    actualFormGroup: string;
     containerType: string;
     hasFields: boolean;
     hasContainers: boolean;
+    hasChildren: boolean;
     shouldRenderFields: boolean;
+    shouldRenderChildren: boolean;
     shouldRenderDivider: boolean;
 }
 
@@ -34,22 +36,27 @@ export function useDynamicFormContainer<T extends FieldValues>({
 
     const actualFormGroupPath = getActualFormGroupPath();
 
-    // Helper para verificar si tiene campos
     const hasFields = useMemo(
-        () => !!config.fields && config.fields.length > 0,
-        [config.fields]
+        () => (config.children !== undefined)
+            ? config.children.some(c => !["card", "form", "tabs", "tab", "accordion", "stepper", "container", "array"].includes(c.type))
+            : (!!config.fields && config.fields.length > 0),
+        [config.fields, config.children]
     );
 
-    // Helper para verificar si tiene contenedores
     const hasContainers = useMemo(
-        () => !!config.containers && config.containers.length > 0,
-        [config.containers]
+        () => (config.children !== undefined)
+            ? config.children.some(c => ["card", "form", "tabs", "tab", "accordion", "stepper", "container", "array"].includes(c.type))
+            : (!!config.containers && config.containers.length > 0),
+        [config.containers, config.children]
     );
 
-    // Determinar si debe renderizar campos (solo en el caso default)
-    const shouldRenderFields = containerType === "default" && hasFields;
+    const hasChildren = useMemo(
+        () => config.children !== undefined,
+        [config.children]
+    );
 
-    // Determinar si debe renderizar divider
+    const shouldRenderFields = hasFields;
+    const shouldRenderChildren = hasChildren;
     const shouldRenderDivider = !!config.divider;
 
     useEffect(() => {
@@ -62,7 +69,9 @@ export function useDynamicFormContainer<T extends FieldValues>({
         containerType,
         hasFields,
         hasContainers,
+        hasChildren,
         shouldRenderFields,
+        shouldRenderChildren,
         shouldRenderDivider,
     };
 }

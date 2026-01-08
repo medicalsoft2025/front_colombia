@@ -3,13 +3,14 @@ include "../menu.php";
 include "../header.php";
 ?>
 <style>
-.container-small {
-   max-width: 100% !important;
-   width: 100%;
+    .container-small {
+        max-width: 100% !important;
+        width: 100%;
         padding: 0 15px;
-   margin: 0;
-  }
- .breadcrumb {
+        margin: 0;
+    }
+
+    .breadcrumb {
         font-size: 0.9rem;
         padding: 1rem 1.5rem;
         margin: 1rem 0 2rem 0;
@@ -17,10 +18,10 @@ include "../header.php";
         border-radius: 12px;
         border: 1px solid rgba(0, 0, 0, 0.05);
     }
- 
- .content {
-        padding: calc(var(--phoenix-navbar-top-height) + 0.2rem) 1.5rem 6.375rem 1.5rem; 
-   }
+
+    .content {
+        padding: calc(var(--phoenix-navbar-top-height) + 0.2rem) 1.5rem 6.375rem 1.5rem;
+    }
 
     html[data-bs-theme="dark"] .breadcrumb {
         background: rgba(255, 255, 255, 0.05);
@@ -48,7 +49,7 @@ include "../header.php";
 
 <?php
 include "../footer.php";
-include "../Pacientes/modalPacientes.php";
+//include "../Pacientes/modalPacientes.php";
 ?>
 
 <script type="module">

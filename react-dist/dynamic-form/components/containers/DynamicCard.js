@@ -1,44 +1,51 @@
 import React from "react";
 import { Card } from "primereact/card";
 import { DynamicFormContainer } from "./DynamicFormContainer.js";
-export const DynamicCard = props => {
+import { useDynamicFormContainer } from "../../hooks/useDynamicFormContainer.js";
+import { DynamicField } from "../fields/DynamicField.js";
+export const DynamicCard = ({
+  config,
+  form,
+  actualFormGroup
+}) => {
   const {
+    hasFields,
+    hasContainers,
+    shouldRenderFields
+  } = useDynamicFormContainer({
     config,
-    form,
-    loading,
-    onSubmit,
-    actualFormGroup
-  } = props;
-  if (!config.containers || config.containers.length === 0) return null;
-  return /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("div", {
-    className: config.styleClass
-  }, /*#__PURE__*/React.createElement(Card, {
-    header: /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("h5", {
-      className: "px-3 pt-3"
-    }, config.name)),
-    pt: {
-      content: {
-        style: {
-          padding: "0"
-        }
-      },
-      body: {
-        style: {
-          padding: "0"
-        }
-      }
-    }
+    form: form,
+    parentPath: actualFormGroup
+  });
+  const header = /*#__PURE__*/React.createElement("div", {
+    className: "d-flex justify-content-between align-items-center mb-0 p-2"
+  }, /*#__PURE__*/React.createElement("span", {
+    className: "font-bold text-xl"
+  }, config.label));
+  if (!hasFields && !hasContainers) return null;
+  return /*#__PURE__*/React.createElement(Card, {
+    title: config.label ? header : null,
+    className: `shadow-1 ${config.styleClass}`
   }, /*#__PURE__*/React.createElement("div", {
-    className: `p-3 ${config.contentStyleClass}`
-  }, config.containers.map((childConfig, index) => {
-    return /*#__PURE__*/React.createElement(DynamicFormContainer, {
-      key: childConfig.name || `container-${index}`,
-      config: childConfig,
-      form: form,
-      loading: loading,
-      onSubmit: onSubmit,
-      parentPath: actualFormGroup,
-      className: childConfig.styleClass
-    });
-  })))));
+    className: config.contentStyleClass
+  }, (config.children || config.containers || config.fields)?.map((child, index) => {
+    const isContainer = ["card", "form", "tabs", "tab", "accordion", "stepper", "container", "array"].includes(child.type);
+    if (isContainer) {
+      return /*#__PURE__*/React.createElement(DynamicFormContainer, {
+        key: child.name || `container-${index}`,
+        config: child,
+        form: form,
+        parentPath: actualFormGroup,
+        className: child.styleClass
+      });
+    } else {
+      return /*#__PURE__*/React.createElement(DynamicField, {
+        key: child.name,
+        field: child,
+        form: form,
+        parentPath: actualFormGroup,
+        className: child.styleClass
+      });
+    }
+  })));
 };

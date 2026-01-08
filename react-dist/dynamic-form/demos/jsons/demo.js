@@ -1,4 +1,7 @@
+import { asyncDemo } from "./async-demo.js";
 import { employeeInfo } from "./employeeInfo.js";
+import { fieldArrayDemo } from "./field-array-demo.js";
+import { tableArrayDemo } from "./table-array-demo.js";
 export const ultraComplexForm = {
   containers: [{
     type: "stepper",
@@ -11,13 +14,17 @@ export const ultraComplexForm = {
     containers: [
     // === PRIMER STEP: INFORMACIÓN PERSONAL ===
     {
-      name: "Información Personal",
+      label: "Información Personal",
       containers: [{
         type: "card",
-        name: "Datos Personales Básicos",
+        label: "Datos Personales Básicos",
         styleClass: "mb-4 shadow-sm",
         contentStyleClass: "row g-3",
         containers: [{
+          ...asyncDemo
+        }, {
+          ...tableArrayDemo
+        }, {
           fields: [{
             name: "persona.nombreCompleto",
             type: "text",
@@ -97,11 +104,11 @@ export const ultraComplexForm = {
         }]
       }, {
         type: "accordion",
-        name: "Información Detallada",
-        defaultActiveChildren: "address",
+        defaultActiveChildren: "0",
         styleClass: "mb-4",
         containers: [{
-          name: "Dirección",
+          name: "address",
+          label: "Dirección",
           contentStyleClass: "row g-3",
           containers: [{
             fields: [{
@@ -180,7 +187,7 @@ export const ultraComplexForm = {
             }]
           }]
         }, {
-          name: "Información Familiar",
+          label: "Información Familiar",
           contentStyleClass: "row g-3",
           containers: [{
             fields: [{
@@ -202,7 +209,8 @@ export const ultraComplexForm = {
               }, {
                 label: "Pareja de hecho",
                 value: "partner"
-              }]
+              }],
+              required: true
             }]
           }, {
             contentStyleClass: "row g-3",
@@ -248,20 +256,20 @@ export const ultraComplexForm = {
     },
     // === SEGUNDO STEP: FORMACIÓN Y EXPERIENCIA ===
     {
-      name: "Formación y Experiencia",
+      label: "Formación y Experiencia",
       containers: [{
         type: "tabs",
         name: "formacionExperiencia",
         styleClass: "mb-4",
         containers: [{
-          name: "Formación Académica",
+          label: "Formación Académica",
           containers: [{
             type: "card",
-            name: "Información de Empleo",
+            label: "Información de Empleo",
             containers: [employeeInfo]
           }, {
             type: "card",
-            name: "Estudios",
+            label: "Estudios",
             styleClass: "mb-3",
             contentStyleClass: "row g-3",
             containers: [{
@@ -351,10 +359,10 @@ export const ultraComplexForm = {
             }]
           }]
         }, {
-          name: "Experiencia Laboral",
+          label: "Experiencia Laboral",
           containers: [{
             type: "card",
-            name: "Experiencia Profesional",
+            label: "Experiencia Profesional",
             styleClass: "mb-3",
             contentStyleClass: "row g-3",
             containers: [{
@@ -481,10 +489,10 @@ export const ultraComplexForm = {
     },
     // === TERCER STEP: PREFERENCIAS LABORALES ===
     {
-      name: "Preferencias Laborales",
+      label: "Preferencias Laborales",
       containers: [{
         type: "card",
-        name: "Condiciones Laborales Deseadas",
+        label: "Condiciones Laborales Deseadas",
         styleClass: "mb-4",
         contentStyleClass: "row g-3",
         containers: [{
@@ -608,9 +616,8 @@ export const ultraComplexForm = {
         }]
       }, {
         type: "accordion",
-        name: "Configuración Avanzada",
         containers: [{
-          name: "Disponibilidad",
+          label: "Disponibilidad",
           containers: [{
             fields: [{
               name: "disponibilidad.inicioInmediato",
@@ -680,7 +687,7 @@ export const ultraComplexForm = {
             }]
           }]
         }, {
-          name: "Movilidad y Relocalización",
+          label: "Movilidad y Relocalización",
           containers: [{
             fields: [{
               name: "relocalizacion.disponibilidad",
@@ -724,17 +731,17 @@ export const ultraComplexForm = {
     },
     // === CUARTO STEP: DOCUMENTACIÓN ===
     {
-      name: "Documentación",
+      label: "Documentación",
       containers: [{
         type: "tabs",
         styleClass: "mb-4",
         containers: [{
-          name: "Documentos Opcionales",
+          label: "Documentos Opcionales",
           contentStyleClass: "row g-3",
           containers: [{
             type: "accordion",
             containers: [{
-              name: "Portafolio",
+              label: "Portafolio",
               containers: [{
                 fields: [{
                   name: "documentos.enlacePortafolio",
@@ -745,7 +752,7 @@ export const ultraComplexForm = {
                 }]
               }]
             }, {
-              name: "Recomendaciones",
+              label: "Recomendaciones",
               containers: [{
                 fields: [{
                   name: "documentos.referencias",
@@ -761,7 +768,7 @@ export const ultraComplexForm = {
         }]
       }, {
         type: "card",
-        name: "Biografía y Presentación",
+        label: "Biografía y Presentación",
         styleClass: "mb-4",
         containers: [{
           fields: [{
@@ -790,10 +797,10 @@ export const ultraComplexForm = {
     },
     // === QUINTO STEP: CUENTA Y SEGURIDAD ===
     {
-      name: "Cuenta y Seguridad",
+      label: "Cuenta y Seguridad",
       containers: [{
         type: "card",
-        name: "Configuración de la Cuenta",
+        label: "Configuración de la Cuenta",
         styleClass: "mb-4",
         contentStyleClass: "row g-3",
         containers: [{
@@ -853,7 +860,7 @@ export const ultraComplexForm = {
         type: "accordion",
         name: "configuracionSeguridad",
         containers: [{
-          name: "Configuración de Seguridad",
+          label: "Configuración de Seguridad",
           containers: [{
             fields: [{
               name: "seguridad.dobleFactor",
@@ -893,7 +900,7 @@ export const ultraComplexForm = {
             }]
           }]
         }, {
-          name: "Privacidad y Comunicaciones",
+          label: "Privacidad y Comunicaciones",
           containers: [{
             fields: [{
               name: "privacidad.perfilPublico",
@@ -918,10 +925,10 @@ export const ultraComplexForm = {
     },
     // === SEXTO STEP: TÉRMINOS Y FINALIZACIÓN ===
     {
-      name: "Términos y Finalización",
+      label: "Términos y Finalización",
       containers: [{
         type: "card",
-        name: "Términos y Condiciones",
+        label: "Términos y Condiciones",
         styleClass: "mb-4",
         containers: [{
           fields: [{
@@ -975,7 +982,7 @@ Toda la información proporcionada será tratada con la máxima confidencialidad
         }]
       }, {
         type: "card",
-        name: "Confirmación Final",
+        label: "Confirmación Final",
         styleClass: "mb-4 bg-light",
         containers: [{
           fields: [{
@@ -1003,6 +1010,8 @@ Toda la información proporcionada será tratada con la máxima confidencialidad
             placeholder: "Cualquier observación adicional que quieras agregar..."
           }]
         }]
+      }, {
+        ...fieldArrayDemo
       }]
     }]
   }]

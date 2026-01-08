@@ -23,7 +23,7 @@ export const DynamicStepper = props => {
   });
   const stepperRef = useRef(null);
   const handleNext = () => {
-    if (validStep()) {
+    if (!config.linear || validStep()) {
       stepperRef.current?.nextCallback();
     }
   };
@@ -31,12 +31,10 @@ export const DynamicStepper = props => {
     stepperRef.current?.prevCallback();
   };
   const handleSubmit = () => {
-    if (validStep() && onSubmit) {
+    if ((!config.linear || validStep()) && onSubmit) {
       onSubmit();
     }
   };
-
-  // Actualizar el índice activo cuando cambia el paso en el stepper
   const handleStepChange = event => {
     setStepActiveIndex(event.index);
   };
@@ -50,9 +48,9 @@ export const DynamicStepper = props => {
     style: {
       flexBasis: "50rem"
     }
-  }, config.containers?.map((tab, index) => /*#__PURE__*/React.createElement(StepperPanel, {
+  }, (config.children || config.containers)?.map((tab, index) => /*#__PURE__*/React.createElement(StepperPanel, {
     key: index,
-    header: tab.name || `Paso ${index + 1}`
+    header: tab.label || tab.name || `Paso ${index + 1}`
   }, /*#__PURE__*/React.createElement("div", {
     className: "d-flex flex-column"
   }, /*#__PURE__*/React.createElement(DynamicFormContainer, {
@@ -72,7 +70,7 @@ export const DynamicStepper = props => {
     }),
     onClick: handlePrev,
     type: "button"
-  }), index < (config.containers?.length || 0) - 1 ? /*#__PURE__*/React.createElement(Button, {
+  }), index < ((config.children || config.containers)?.length || 0) - 1 ? /*#__PURE__*/React.createElement(Button, {
     label: "Siguiente",
     icon: /*#__PURE__*/React.createElement("i", {
       className: "fa fa-arrow-right me-2"

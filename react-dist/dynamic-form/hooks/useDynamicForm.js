@@ -25,18 +25,17 @@ export function useDynamicForm({
       }
       container.fields?.forEach(field => {
         const fieldPath = currentPath ? `${currentPath}.${field.name}` : field.name;
-
-        // Solo registrar si no existe
-        if (!form.getValues(fieldPath)) {
-          form.register(fieldPath);
-
-          // Establecer valor inicial si existe en la configuración
-          if (field.value !== undefined) {
-            form.setValue(fieldPath, field.value, {
-              shouldValidate: true,
-              shouldDirty: false
-            });
-          }
+        const rules = {
+          required: field.required ? "Este campo es requerido" : false,
+          ...field.validation
+        };
+        form.register(fieldPath, rules);
+        const currentValue = form.getValues(fieldPath);
+        if (currentValue === undefined && field.value !== undefined) {
+          form.setValue(fieldPath, field.value, {
+            shouldValidate: true,
+            shouldDirty: false
+          });
         }
       });
       container.containers?.forEach(childContainer => {

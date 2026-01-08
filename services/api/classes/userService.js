@@ -27,6 +27,18 @@ export class UserService extends BaseApiService {
         return await this.getByExternalId(getJWTPayload().sub);
     }
 
+    async getCachedLoggedUser() {
+        const cachedUser = localStorage.getItem("userData")
+        let user = JSON.parse(cachedUser)
+
+        if (!cachedUser) {
+            user = await this.getLoggedUser();
+            localStorage.setItem("userData", JSON.stringify(user))
+        }
+
+        return user;
+    }
+
     async getMenuByRole(userId) {
         return await this.httpClient.get(`${this.microservice}/menu-by-roles/${userId}`);
     }

@@ -2,67 +2,55 @@ import { generatePDFFromHTMLV2 } from "../exportPDFV2.js";
 import { generarTablaPaciente } from "./tablaDatosPaciente.js";
 import { datosUsuario } from "./datosUsuario.js";
 
-let companyData = {};
-let patientData = {};
-let usersMap = {};
-let user = {};
-let patient_id = new URLSearchParams(window.location.search).get("patient_id") || new URLSearchParams(window.location.search).get("patientId") || new URLSearchParams(window.location.search).get("id");
-
-async function consultarData() {
-  const response = await consultarDatosEmpresa();
-  const responePatient = await consultarDatosPaciente(patient_id);
-
-  patientData = responePatient;
-  companyData = {
-    legal_name: response.nombre_consultorio,
-    document_number: response.datos_consultorio[0].RNC,
-    address: response.datos_consultorio[1].Dirección,
-    phone: response.datos_consultorio[2].Teléfono,
-    email: response.datos_consultorio[3].Correo,
-    logo: response.logo_consultorio,
-    watermark: response.marca_agua,
-  };
-
-  console.log("companyData", companyData);
-  
-  // Promise.all(globalThis.usersData).then((resultados) => {
-  // });
-  // usersMap = await globalThis.usersData;
-}
-document.addEventListener("DOMContentLoaded", () => {
-  consultarData();
-});
+let patient_id =
+    new URLSearchParams(window.location.search).get("patient_id") ||
+    new URLSearchParams(window.location.search).get("patientId") ||
+    new URLSearchParams(window.location.search).get("id");
 
 export async function generarFormatoIncapacidad(
-  incapacidad,
-  tipo,
-  inputId = ""
+    incapacidad,
+    tipo,
+    inputId = ""
 ) {
+    const response = await consultarDatosEmpresa();
 
-  const tablePatient = await generarTablaPaciente(patientData, {
-    date: formatearFechaQuitarHora(incapacidad.created_at || "--"),
-  });
-  let userName = [
-    incapacidad.user?.first_name,
-    incapacidad.user?.middle_name,
-    incapacidad.user?.last_name,
-    incapacidad.user?.second_last_name,
-  ]
-    .filter(Boolean)
-    .join(" ");
+    const companyData = {
+        legal_name: response.nombre_consultorio,
+        document_number: response.datos_consultorio[0].RNC,
+        address: response.datos_consultorio[1].Dirección,
+        phone: response.datos_consultorio[2].Teléfono,
+        email: response.datos_consultorio[3].Correo,
+        logo: response.logo_consultorio,
+        watermark: response.marca_agua,
+    };
 
-  let user = {
-    nombre: userName,
-    especialidad: incapacidad.user?.user_specialty_name || "",
-    registro_medico: incapacidad.user?.clinical_record || "",
-    sello: getUrlImage(incapacidad.user?.image_minio_url || ""),
-    firma: getUrlImage(incapacidad.user?.firma_minio_url || ""),
-  };
+    const tablePatient = await generarTablaPaciente(
+        {},
+        {
+            date: formatearFechaQuitarHora(incapacidad.created_at || "--"),
+        }
+    );
 
-  console.log("user", user);
-  
+    let userName = [
+        incapacidad.user?.first_name,
+        incapacidad.user?.middle_name,
+        incapacidad.user?.last_name,
+        incapacidad.user?.second_last_name,
+    ]
+        .filter(Boolean)
+        .join(" ");
 
-  let contenido = `
+    let user = {
+        nombre: userName,
+        especialidad: incapacidad.user?.user_specialty_name || "",
+        registro_medico: incapacidad.user?.clinical_record || "",
+        sello: getUrlImage(incapacidad.user?.image_minio_url || ""),
+        firma: getUrlImage(incapacidad.user?.firma_minio_url || ""),
+    };
+
+    console.log("user", user);
+
+    let contenido = `
     <h3 class="text-primary" style="margin-top: 0; margin-bottom: 5px;">Certificado de Incapacidad</h3>
       <hr style="margin: 0.25rem 0;">
       ${tablePatient}
@@ -71,15 +59,15 @@ export async function generarFormatoIncapacidad(
       <hr style="margin: 0.25rem 0;">
       <div style="width: 100%; margin-bottom: 0; margin-top: 0">
           <p style="display: inline-block; width: 49%; margin-bottom: 5px"><strong>Desde:</strong> ${
-            incapacidad.start_date
+              incapacidad.start_date
           }</p>
           <p style="display: inline-block; width: 49%; margin-bottom: 5px"><strong>Hasta:</strong> ${
-            incapacidad.end_date
+              incapacidad.end_date
           }</p>
       </div>
       <div style="margin-top: 0;">
       <p style="margin: 0;"><strong>Motivo de Incapacidad: </strong> ${
-        incapacidad.reason
+          incapacidad.reason
       }</p>
       </div>
     </div>
@@ -87,20 +75,20 @@ export async function generarFormatoIncapacidad(
     ${datosUsuario(user)}
     </div>`;
 
-  let isDownload = false;
-  if (tipo == "Impresion") {
-    isDownload = false;
-  } else if (tipo == "Descarga") {
-    isDownload = true;
-  }
-  const pdfConfig = {
-    name: `Incapacidad_Médica_${incapacidad.patient.document_number}`,
-    isDownload: isDownload,
-    dimensions: [0, 0, 396, 612],
-    orientation: "landscape",
-  };
+    let isDownload = false;
+    if (tipo == "Impresion") {
+        isDownload = false;
+    } else if (tipo == "Descarga") {
+        isDownload = true;
+    }
+    const pdfConfig = {
+        name: `Incapacidad_Médica_${incapacidad.patient.document_number}`,
+        isDownload: isDownload,
+        dimensions: [0, 0, 396, 612],
+        orientation: "landscape",
+    };
 
-  await generatePDFFromHTMLV2(contenido, companyData, pdfConfig, inputId);
+    await generatePDFFromHTMLV2(contenido, companyData, pdfConfig, inputId);
 }
 
 export default generarFormatoIncapacidad;

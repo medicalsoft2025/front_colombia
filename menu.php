@@ -82,7 +82,7 @@ $_SESSION["ID"] = 1;
     <script src="<?= $BASE ?>vendors/simplebar/simplebar.min.js"></script>
     <script src="<?= $BASE ?>assets/js/config.js"></script>
 
-    <script src="<?= $BASE ?>editorNuevo.js"></script>
+    <!-- <script src="<?= $BASE ?>editorNuevo.js"></script> -->
 
     <!-- ===============================================-->
     <!--    Stylesheets-->
@@ -238,52 +238,6 @@ $_SESSION["ID"] = 1;
             /* Color del scroll al pasar el mouse */
         }
     </style>
-
-    <script type="module">
-        import UserManager from "./services/userManager.js";
-        import {
-            menuService,
-            permissionService
-        } from "./services/api/index.js";
-
-        UserManager.onAuthChange(async (isAuthenticated, user, userPermissions, userMenus) => {
-            // console.log(isAuthenticated, user, userPermissions, userMenus);
-            const menusFromService = await menuService.getAll()
-
-            if (user && userPermissions && userMenus) {
-                const loadingScreen = document.getElementById('loading-screen');
-                loadingScreen.classList.add('d-none');
-
-                const checkPermission = (key) => userPermissions.map(p => p.key).includes(key);
-                const checkMenu = (key) => userMenus.map(m => m.key).includes(key);
-
-                document.querySelectorAll('[data-permission-role]').forEach(element => {
-                    const permissionKey = element.dataset.permissionRole;
-
-                    if (permissionKey && !checkPermission(permissionKey)) {
-                        element.remove()
-                    }
-                })
-
-                document.querySelectorAll('[data-menu-role]').forEach(element => {
-                    const menuKey = element.dataset.menuRole;
-
-                    if (menuKey && !checkMenu(menuKey)) {
-                        //element.remove()
-                    };
-                })
-
-                const fullPath = window.location.pathname;
-                const parts = fullPath.split('/').filter(part => part !== '');
-                const firstPart = parts[0] || '';
-                const menuRouteFromService = menusFromService.find(menu => menu.route === firstPart)?.route;
-
-                if (!userMenus.find(menu => menu.route === firstPart || !menuRouteFromService)) {
-                    //window.location.href = 'noAutorizado';
-                }
-            }
-        });
-    </script>
 </head>
 
 <body>
@@ -383,7 +337,13 @@ $_SESSION["ID"] = 1;
       "primereact/inputicon": "https://esm.sh/primereact/inputicon?dev",
       "primereact/dataview": "https://esm.sh/primereact/dataview?dev",
       "primereact/buttongroup": "https://esm.sh/primereact/buttongroup?dev",
-      "primereact/scrolltop": "https://esm.sh/primereact/scrolltop?dev"
+      "primereact/scrolltop": "https://esm.sh/primereact/scrolltop?dev",
+      "primereact/cascadeselect": "https://esm.sh/primereact/cascadeselect?dev",
+      "primereact/treeselect": "https://esm.sh/primereact/treeselect?dev",
+      "primereact/chips": "https://esm.sh/primereact/chips?dev",
+      "primereact/rating": "https://esm.sh/primereact/rating?dev",
+      "primereact/slider": "https://esm.sh/primereact/slider?dev",
+      "primereact/contextmenu": "https://esm.sh/primereact/contextmenu?dev"
     }
   }
 </script>

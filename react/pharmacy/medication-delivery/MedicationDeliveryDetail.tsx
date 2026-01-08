@@ -98,7 +98,7 @@ export const MedicationDeliveryDetail = ({
     const { result: verifyMedicationsBulkResult, verifyMedicationsBulk } =
         useVerifyMedicationsBulk();
     const { productsWithAvailableStock, fetchProductsWithAvailableStock } =
-        useProductsWithAvailableStock();
+        useProductsWithAvailableStock({ stockType: "pharmacy_product_stock" });
     const { toast, showSuccessToast, showServerErrorsToast, showErrorToast } =
         usePRToast();
 
@@ -182,11 +182,9 @@ export const MedicationDeliveryDetail = ({
                 }
 
                 const replacements = {
-                    NOMBRE_PACIENTE: `${
-                        finalPrescription.patient.first_name ?? ""
-                    } ${finalPrescription.patient.middle_name ?? ""} ${
-                        finalPrescription.patient.last_name ?? ""
-                    } ${finalPrescription.patient.second_last_name ?? ""}`,
+                    NOMBRE_PACIENTE: `${finalPrescription.patient.first_name ?? ""
+                        } ${finalPrescription.patient.middle_name ?? ""} ${finalPrescription.patient.last_name ?? ""
+                        } ${finalPrescription.patient.second_last_name ?? ""}`,
                     NUMERO_FACTURA:
                         admissionData.invoice.invoice_code ||
                         admissionData.invoice.invoice_reminder,
@@ -594,11 +592,9 @@ export const MedicationDeliveryDetail = ({
 
             const thirdParty = await thirdPartyService.verifyAndStore({
                 type: "client",
-                name: `${finalPrescription.patient.first_name || ""} ${
-                    finalPrescription.patient.middle_name || ""
-                } ${finalPrescription.patient.last_name || ""} ${
-                    finalPrescription.patient.second_last_name || ""
-                }`,
+                name: `${finalPrescription.patient.first_name || ""} ${finalPrescription.patient.middle_name || ""
+                    } ${finalPrescription.patient.last_name || ""} ${finalPrescription.patient.second_last_name || ""
+                    }`,
                 external_id: finalPrescription.patient.id.toString(),
                 document_type: finalPrescription.patient.document_type,
                 document_number: finalPrescription.patient.document_number,
@@ -786,10 +782,9 @@ export const MedicationDeliveryDetail = ({
 
                                     <div className="mb-2">
                                         <strong>Nombre: </strong>
-                                        <span>{`${
-                                            medicationPrescriptionManager
-                                                ?.prescriber?.name || "--"
-                                        }`}</span>
+                                        <span>{`${medicationPrescriptionManager
+                                            ?.prescriber?.name || "--"
+                                            }`}</span>
                                     </div>
 
                                     <div className="mb-2">
@@ -838,231 +833,148 @@ export const MedicationDeliveryDetail = ({
                                 {
                                     field: "status",
                                     header: "Estado",
-                                    body: (deposit: MedicationDelivery) => (
-                                        <>
-                                            <div className="mb-2">
-                                                {getDeliveryStatusBadges(
-                                                    deposit
-                                                )}
-                                            </div>
-                                            <div className="mb-3">
-                                                {deposit.verification_description ||
-                                                    "--"}
-                                            </div>
-                                            {deposit.verification_status ===
-                                                "STOCK_NOT_ENOUGH" && (
-                                                <>
-                                                    <div className="d-flex flex-column gap-2">
-                                                        <label
-                                                            htmlFor="quantity"
-                                                            className="form-label"
-                                                        >
-                                                            Cantidad a entregar
-                                                        </label>
-                                                        <InputNumber
-                                                            value={
-                                                                deposit.quantity_to_deliver
-                                                            }
-                                                            max={
-                                                                deposit.available_stock
-                                                            }
-                                                            min={1}
-                                                            onValueChange={(
-                                                                e
-                                                            ) => {
-                                                                console.log(
-                                                                    e.value,
-                                                                    deposit.available_stock
-                                                                );
-                                                                if (
-                                                                    e.value &&
-                                                                    deposit.available_stock &&
-                                                                    e.value >
-                                                                        deposit.available_stock
-                                                                ) {
-                                                                    updateMedication(
-                                                                        medications.indexOf(
-                                                                            deposit
-                                                                        ) || 0,
-                                                                        {
-                                                                            ...deposit,
-                                                                            quantity_to_deliver:
-                                                                                deposit.available_stock,
-                                                                        }
-                                                                    );
-                                                                } else {
-                                                                    updateMedication(
-                                                                        medications.indexOf(
-                                                                            deposit
-                                                                        ) || 0,
-                                                                        {
-                                                                            ...deposit,
-                                                                            quantity_to_deliver:
-                                                                                e.value ||
-                                                                                0,
-                                                                        }
-                                                                    );
-                                                                }
-                                                            }}
-                                                        />
-                                                    </div>
-                                                </>
-                                            )}
-                                            {deposit.verification_status ===
-                                                "PRODUCT_NOT_FOUND" && (
-                                                <>
-                                                    <Dropdown
-                                                        options={
-                                                            productsWithAvailableStock
-                                                        }
-                                                        optionLabel="name"
-                                                        value={deposit.product}
-                                                        onChange={(e) => {
-                                                            if (e.value) {
-                                                                console.log(
-                                                                    e.value
-                                                                );
-                                                                updateMedication(
-                                                                    medications.indexOf(
-                                                                        deposit
-                                                                    ) || 0,
-                                                                    {
-                                                                        ...deposit,
-                                                                        product:
-                                                                            e.value,
-                                                                        product_id:
-                                                                            e
-                                                                                .value
-                                                                                .id,
-                                                                        sale_price:
-                                                                            e
-                                                                                .value
-                                                                                .sale_price,
-                                                                        quantity_to_deliver:
-                                                                            Math.min(
-                                                                                e
-                                                                                    .value
-                                                                                    .pharmacy_product_stock,
-                                                                                deposit.quantity
-                                                                            ),
-                                                                    }
-                                                                );
-                                                            } else {
-                                                                updateMedication(
-                                                                    medications.indexOf(
-                                                                        deposit
-                                                                    ) || 0,
-                                                                    {
-                                                                        ...deposit,
-                                                                        product:
-                                                                            null,
-                                                                        product_id:
-                                                                            null,
-                                                                        sale_price: 0,
-                                                                        quantity_to_deliver: 0,
-                                                                    }
-                                                                );
-                                                            }
-                                                        }}
-                                                        showClear
-                                                        filter
-                                                        placeholder="Seleccione del inventario"
-                                                        className="w-100"
-                                                    />
+                                    body: (deposit: MedicationDelivery) => {
+                                        const index = medications.findIndex(m => m.identifier === deposit.identifier);
+                                        const totalInventoryStock = deposit.available_stock || 0;
+                                        const usedInOtherRows = medications
+                                            .filter((m, i) => i !== index && m.product_id === deposit.product_id && deposit.product_id !== null)
+                                            .reduce((sum, m) => sum + (m.quantity_to_deliver || 0), 0);
+                                        const remainingStock = Math.max(0, totalInventoryStock - usedInOtherRows);
 
-                                                    {deposit.product &&
-                                                        deposit.product
-                                                            .pharmacy_product_stock <
-                                                            deposit.quantity && (
-                                                            <>
-                                                                <Divider />
-                                                                <p>
-                                                                    No hay stock
-                                                                    suficiente
-                                                                    para la
-                                                                    cantidad
-                                                                    solicitada.
-                                                                    Solo hay{" "}
-                                                                    {
-                                                                        deposit
-                                                                            .product
-                                                                            .pharmacy_product_stock
-                                                                    }{" "}
-                                                                    unidades
-                                                                    disponibles.
-                                                                    Si desea
-                                                                    hacer una
-                                                                    entrega
-                                                                    parcial, por
-                                                                    favor
-                                                                    ingrese la
-                                                                    cantidad a
-                                                                    entregar.
-                                                                </p>
-                                                                <div className="mb-2">
-                                                                    <label
-                                                                        htmlFor="quantity"
-                                                                        className="form-label"
-                                                                    >
-                                                                        Cantidad
-                                                                        a
-                                                                        entregar
-                                                                    </label>
-                                                                    <InputNumber
-                                                                        value={
-                                                                            deposit.quantity_to_deliver
-                                                                        }
-                                                                        max={
-                                                                            deposit.available_stock
-                                                                        }
-                                                                        min={1}
-                                                                        onValueChange={(
-                                                                            e
-                                                                        ) => {
-                                                                            console.log(
-                                                                                e.value,
-                                                                                deposit.available_stock
-                                                                            );
-                                                                            if (
-                                                                                e.value &&
-                                                                                deposit.available_stock &&
-                                                                                e.value >
-                                                                                    deposit.available_stock
-                                                                            ) {
-                                                                                updateMedication(
-                                                                                    medications.indexOf(
-                                                                                        deposit
-                                                                                    ) ||
-                                                                                        0,
-                                                                                    {
-                                                                                        ...deposit,
-                                                                                        quantity_to_deliver:
-                                                                                            deposit.available_stock,
-                                                                                    }
-                                                                                );
-                                                                            } else {
-                                                                                updateMedication(
-                                                                                    medications.indexOf(
-                                                                                        deposit
-                                                                                    ) ||
-                                                                                        0,
-                                                                                    {
-                                                                                        ...deposit,
-                                                                                        quantity_to_deliver:
-                                                                                            e.value ||
-                                                                                            0,
-                                                                                    }
-                                                                                );
+                                        const handleQuantityChange = (val: number | null) => {
+                                            const newQuantity = Math.min(val ?? 0, remainingStock);
+                                            updateMedication(index !== -1 ? index : 0, {
+                                                ...deposit,
+                                                quantity_to_deliver: newQuantity,
+                                            });
+                                        };
+
+                                        return (
+                                            <>
+                                                <div className="mb-2">
+                                                    {getDeliveryStatusBadges(
+                                                        deposit
+                                                    )}
+                                                </div>
+                                                <div className="mb-3">
+                                                    {deposit.verification_status === "STOCK_NOT_ENOUGH" || (deposit.product && deposit.product.pharmacy_product_stock < deposit.quantity) ? (
+                                                        <span>
+                                                            No hay stock suficiente para la cantidad solicitada. Solo hay {remainingStock} unidades disponibles después de considerar otros ítems.
+                                                        </span>
+                                                    ) : (
+                                                        deposit.verification_description || "--"
+                                                    )}
+                                                </div>
+                                                {deposit.verification_status ===
+                                                    "STOCK_NOT_ENOUGH" && (
+                                                        <>
+                                                            <div className="d-flex flex-column gap-2">
+                                                                <label
+                                                                    htmlFor="quantity"
+                                                                    className="form-label"
+                                                                >
+                                                                    Cantidad a entregar
+                                                                </label>
+                                                                <InputNumber
+                                                                    value={
+                                                                        deposit.quantity_to_deliver
+                                                                    }
+                                                                    max={
+                                                                        remainingStock
+                                                                    }
+                                                                    min={0}
+                                                                    onValueChange={(e) => handleQuantityChange(e.value)}
+                                                                />
+                                                            </div>
+                                                        </>
+                                                    )}
+                                                {deposit.verification_status ===
+                                                    "PRODUCT_NOT_FOUND" && (
+                                                        <>
+                                                            <Dropdown
+                                                                options={
+                                                                    productsWithAvailableStock
+                                                                }
+                                                                optionLabel="name"
+                                                                value={deposit.product}
+                                                                onChange={(e) => {
+                                                                    if (e.value) {
+                                                                        const newTotalStock = e.value.pharmacy_product_stock;
+                                                                        const newUsedInOtherRows = medications
+                                                                            .filter((m, i) => i !== index && m.product_id === e.value.id.toString())
+                                                                            .reduce((sum, m) => sum + (m.quantity_to_deliver || 0), 0);
+                                                                        const newRemainingStock = Math.max(0, newTotalStock - newUsedInOtherRows);
+
+                                                                        updateMedication(
+                                                                            index !== -1 ? index : 0,
+                                                                            {
+                                                                                ...deposit,
+                                                                                product: e.value,
+                                                                                product_id: e.value.id.toString(),
+                                                                                sale_price: e.value.sale_price,
+                                                                                available_stock: newTotalStock,
+                                                                                quantity_to_deliver: Math.min(
+                                                                                    newRemainingStock,
+                                                                                    deposit.quantity
+                                                                                ),
                                                                             }
-                                                                        }}
-                                                                    />
-                                                                </div>
-                                                            </>
-                                                        )}
-                                                </>
-                                            )}
-                                        </>
-                                    ),
+                                                                        );
+                                                                    } else {
+                                                                        updateMedication(
+                                                                            index !== -1 ? index : 0,
+                                                                            {
+                                                                                ...deposit,
+                                                                                product: null,
+                                                                                product_id: null,
+                                                                                sale_price: 0,
+                                                                                available_stock: 0,
+                                                                                quantity_to_deliver: 0,
+                                                                            }
+                                                                        );
+                                                                    }
+                                                                }}
+                                                                showClear
+                                                                filter
+                                                                placeholder="Seleccione del inventario"
+                                                                className="w-100"
+                                                            />
+
+                                                            {deposit.product &&
+                                                                deposit.product
+                                                                    .pharmacy_product_stock <
+                                                                deposit.quantity && (
+                                                                    <>
+                                                                        <Divider />
+                                                                        <p>
+                                                                            No hay stock suficiente para la cantidad solicitada. Solo hay {remainingStock} unidades disponibles después de considerar otros ítems.
+                                                                        </p>
+                                                                        <div className="mb-2">
+                                                                            <label
+                                                                                htmlFor="quantity"
+                                                                                className="form-label"
+                                                                            >
+                                                                                Cantidad
+                                                                                a
+                                                                                entregar
+                                                                            </label>
+                                                                            <InputNumber
+                                                                                value={
+                                                                                    deposit.quantity_to_deliver
+                                                                                }
+                                                                                max={
+                                                                                    remainingStock
+                                                                                }
+                                                                                min={0}
+                                                                                onValueChange={(e) => handleQuantityChange(e.value)}
+                                                                            />
+                                                                        </div>
+                                                                    </>
+                                                                )}
+                                                        </>
+                                                    )}
+                                            </>
+                                        );
+                                    },
                                 },
                             ]}
                             disablePaginator
@@ -1143,16 +1055,16 @@ export const MedicationDeliveryDetail = ({
                                             )}
                                             {verifiedProductsForDelivery.length ===
                                                 0 && (
-                                                <tr>
-                                                    <td
-                                                        colSpan={4}
-                                                        className="text-center text-muted"
-                                                    >
-                                                        No hay productos
-                                                        verificados para entrega
-                                                    </td>
-                                                </tr>
-                                            )}
+                                                    <tr>
+                                                        <td
+                                                            colSpan={4}
+                                                            className="text-center text-muted"
+                                                        >
+                                                            No hay productos
+                                                            verificados para entrega
+                                                        </td>
+                                                    </tr>
+                                                )}
                                         </tbody>
                                     </table>
                                 </div>

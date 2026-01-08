@@ -30,7 +30,7 @@ export const DynamicStepper = <T extends FieldValues>(
     const stepperRef = useRef<any>(null);
 
     const handleNext = () => {
-        if (validStep()) {
+        if (!config.linear || validStep()) {
             stepperRef.current?.nextCallback();
         }
     };
@@ -40,12 +40,11 @@ export const DynamicStepper = <T extends FieldValues>(
     };
 
     const handleSubmit = () => {
-        if (validStep() && onSubmit) {
+        if ((!config.linear || validStep()) && onSubmit) {
             onSubmit();
         }
     };
 
-    // Actualizar el índice activo cuando cambia el paso en el stepper
     const handleStepChange = (event: StepperChangeEvent) => {
         setStepActiveIndex(event.index);
     };
@@ -59,10 +58,10 @@ export const DynamicStepper = <T extends FieldValues>(
                 onChangeStep={handleStepChange}
                 style={{ flexBasis: "50rem" }}
             >
-                {config.containers?.map((tab, index) => (
+                {(config.children || config.containers)?.map((tab, index) => (
                     <StepperPanel
                         key={index}
-                        header={tab.name || `Paso ${index + 1}`}
+                        header={tab.label || tab.name || `Paso ${index + 1}`}
                     >
                         <div className="d-flex flex-column">
                             <DynamicFormContainer
@@ -88,7 +87,7 @@ export const DynamicStepper = <T extends FieldValues>(
                                 />
                             )}
 
-                            {index < (config.containers?.length || 0) - 1 ? (
+                            {index < ((config.children || config.containers)?.length || 0) - 1 ? (
                                 <Button
                                     label="Siguiente"
                                     icon={
@@ -107,10 +106,9 @@ export const DynamicStepper = <T extends FieldValues>(
                                         }
                                         icon={
                                             <i
-                                                className={`${
-                                                    config.submitButtonIcon ||
+                                                className={`${config.submitButtonIcon ||
                                                     "fa fa-save"
-                                                } me-2`}
+                                                    } me-2`}
                                             ></i>
                                         }
                                         loadingIcon={

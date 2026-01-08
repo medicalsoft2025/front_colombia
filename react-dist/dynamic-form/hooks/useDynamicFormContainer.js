@@ -12,17 +12,11 @@ export function useDynamicFormContainer({
     return parentPath;
   };
   const actualFormGroupPath = getActualFormGroupPath();
-
-  // Helper para verificar si tiene campos
-  const hasFields = useMemo(() => !!config.fields && config.fields.length > 0, [config.fields]);
-
-  // Helper para verificar si tiene contenedores
-  const hasContainers = useMemo(() => !!config.containers && config.containers.length > 0, [config.containers]);
-
-  // Determinar si debe renderizar campos (solo en el caso default)
-  const shouldRenderFields = containerType === "default" && hasFields;
-
-  // Determinar si debe renderizar divider
+  const hasFields = useMemo(() => config.children !== undefined ? config.children.some(c => !["card", "form", "tabs", "tab", "accordion", "stepper", "container", "array"].includes(c.type)) : !!config.fields && config.fields.length > 0, [config.fields, config.children]);
+  const hasContainers = useMemo(() => config.children !== undefined ? config.children.some(c => ["card", "form", "tabs", "tab", "accordion", "stepper", "container", "array"].includes(c.type)) : !!config.containers && config.containers.length > 0, [config.containers, config.children]);
+  const hasChildren = useMemo(() => config.children !== undefined, [config.children]);
+  const shouldRenderFields = hasFields;
+  const shouldRenderChildren = hasChildren;
   const shouldRenderDivider = !!config.divider;
   useEffect(() => {
     form.trigger();
@@ -33,7 +27,9 @@ export function useDynamicFormContainer({
     containerType,
     hasFields,
     hasContainers,
+    hasChildren,
     shouldRenderFields,
+    shouldRenderChildren,
     shouldRenderDivider
   };
 }

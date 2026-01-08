@@ -1,5 +1,5 @@
-import { Menubar } from 'primereact/menubar';
-import React from 'react';
+import { Menubar } from "primereact/menubar";
+import React from "react";
 import { navbarMenuStyle } from "./styles/navBarMegaMenu.js";
 import { useMenuItems } from "./hooks/useMenuItems.js";
 import NavbarSkeleton from "../skeleton/NavbarSkeleton.js";
@@ -30,6 +30,7 @@ const NavbarHeader = () => {
     });
   };
   const processedItems = processItems(menuItemsFromHook);
+  console.log("Processed Menus", processedItems);
   if (loading) {
     return /*#__PURE__*/React.createElement(NavbarSkeleton, null);
   }

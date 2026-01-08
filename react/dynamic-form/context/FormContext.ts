@@ -1,11 +1,13 @@
-// context/FormContext.tsx
 import React, { createContext, useContext } from "react";
 import { UseFormReturn, FieldValues } from "react-hook-form";
+import { FieldState } from "../interfaces/models";
 
 export interface FormContextValue {
-    fieldStates: Record<string, any>;
-    setFieldState: (fieldPath: string, state: Partial<any>) => void;
+    fieldStates: Record<string, FieldState>;
+    setFieldState: (fieldPath: string, state: Partial<FieldState>) => void;
     form: UseFormReturn<FieldValues>;
+    onElementSelect?: (config: any) => void;
+    sources?: Record<string, (params?: any) => Promise<any[]>>;
 }
 
 export const FormContext = createContext<FormContextValue | undefined>(

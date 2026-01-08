@@ -1,17 +1,17 @@
-import React, { useState, useEffect } from 'react';
-import { Toast } from 'primereact/toast';
-import { ConfirmDialog } from 'primereact/confirmdialog';
-import { Button } from 'primereact/button';
+import React, { useState, useEffect } from "react";
+import { Toast } from "primereact/toast";
+import { ConfirmDialog } from "primereact/confirmdialog";
+import { Button } from "primereact/button";
 import { useAuth } from "./hooks/useAuth.js";
 import { ForgotPasswordModal } from "./modal/ForgotPasswordModal.js";
 import { LoginForm } from "./form/LoginForm.js";
 import { OTPModal } from "./modal/OTPModal.js";
 export const LoginApp = () => {
-  const [currentView, setCurrentView] = useState('login');
+  const [currentView, setCurrentView] = useState("login");
   const [showForgotPassword, setShowForgotPassword] = useState(false);
-  const [username, setUsername] = useState('');
+  const [username, setUsername] = useState("");
   const [isLoading, setIsLoading] = useState(true);
-  const [otp, setOtp] = useState(['', '', '', '', '', '']);
+  const [otp, setOtp] = useState(["", "", "", "", "", ""]);
   const {
     login,
     verifyOtp,
@@ -26,33 +26,33 @@ export const LoginApp = () => {
   // Función para obtener email del userData - CORREGIDA
   const getUserEmail = () => {
     try {
-      const userData = localStorage.getItem('userData');
+      const userData = localStorage.getItem("loginUserData");
       if (userData) {
         const parsedData = JSON.parse(userData);
-        return parsedData.email || '';
+        return parsedData.email || "";
       }
-      return '';
+      return "";
     } catch (error) {
-      console.error('Error getting user email:', error);
-      return '';
+      console.error("Error getting user email:", error);
+      return "";
     }
   };
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);
-    const email = urlParams.get('email');
-    const firstTime = urlParams.get('first_time');
-    if (firstTime === 'true' && email) {
-      localStorage.setItem('complete_registration', 'true');
+    const email = urlParams.get("email");
+    const firstTime = urlParams.get("first_time");
+    if (firstTime === "true" && email) {
+      localStorage.setItem("complete_registration", "true");
       // Guardar en userData
       const userData = {
         email
       };
-      localStorage.setItem('userData', JSON.stringify(userData));
+      localStorage.setItem("loginUserData", JSON.stringify(userData));
     }
-    const savedUsername = localStorage.getItem('username');
-    if (savedUsername && window.location.pathname.includes('forgotPassword')) {
+    const savedUsername = localStorage.getItem("username");
+    if (savedUsername && window.location.pathname.includes("forgotPassword")) {
       setUsername(savedUsername);
-      setCurrentView('changePassword');
+      setCurrentView("changePassword");
     }
 
     // Simular tiempo de carga inicial
@@ -68,12 +68,12 @@ export const LoginApp = () => {
     }
   };
   const handleVerifyOtp = async () => {
-    const otpCode = otp.join('');
+    const otpCode = otp.join("");
     if (otpCode.length === 6) {
       const result = await verifyOtp(otpCode);
       if (result.success) {
         console.log("OTP verificado exitosamente");
-        setOtp(['', '', '', '', '', '']); // Reset OTP
+        setOtp(["", "", "", "", "", ""]); // Reset OTP
       }
     }
   };
@@ -82,18 +82,18 @@ export const LoginApp = () => {
   };
   const handleCancelOtp = () => {
     resetOtpFlow();
-    setOtp(['', '', '', '', '', '']);
+    setOtp(["", "", "", "", "", ""]);
   };
   const handleForgotPassword = () => {
     setShowForgotPassword(true);
   };
   const handlePasswordChangeSuccess = () => {
-    setCurrentView('login');
+    setCurrentView("login");
     setShowForgotPassword(false);
-    localStorage.removeItem('username');
+    localStorage.removeItem("username");
   };
   const handleCancelForgotPassword = () => {
-    setCurrentView('login');
+    setCurrentView("login");
     setShowForgotPassword(false);
   };
   const renderCurrentView = () => {
@@ -104,7 +104,7 @@ export const LoginApp = () => {
       }, /*#__PURE__*/React.createElement("div", {
         className: "text-center w-100",
         style: {
-          maxWidth: '400px'
+          maxWidth: "400px"
         }
       }, /*#__PURE__*/React.createElement("div", {
         className: "text-center mb-4"
@@ -113,7 +113,7 @@ export const LoginApp = () => {
         alt: "Logo Medicalsoft",
         className: "img-fluid mb-4",
         style: {
-          maxWidth: '45%'
+          maxWidth: "45%"
         }
       }), /*#__PURE__*/React.createElement("h4", {
         className: "fw-bold mb-2"
@@ -137,16 +137,16 @@ export const LoginApp = () => {
         onClick: handleCancelOtp,
         disabled: loading
       }), /*#__PURE__*/React.createElement(Button, {
-        label: loading ? 'Verificando...' : 'Verificar OTP',
-        icon: loading ? 'pi pi-spinner pi-spin' : 'pi pi-check',
+        label: loading ? "Verificando..." : "Verificar OTP",
+        icon: loading ? "pi pi-spinner pi-spin" : "pi pi-check",
         className: "w-50 p-3",
         onClick: handleVerifyOtp,
         loading: loading,
-        disabled: otp.join('').length !== 6
+        disabled: otp.join("").length !== 6
       }))));
     }
     switch (currentView) {
-      case 'changePassword':
+      case "changePassword":
         return /*#__PURE__*/React.createElement(ForgotPasswordModal, {
           visible: true,
           onHide: handleCancelForgotPassword,
@@ -166,8 +166,8 @@ export const LoginApp = () => {
   }), /*#__PURE__*/React.createElement(ConfirmDialog, null), /*#__PURE__*/React.createElement("div", {
     className: "bg-white rounded-3 shadow-lg border border-gray-200 w-100",
     style: {
-      maxWidth: '1200px',
-      minHeight: '600px'
+      maxWidth: "1200px",
+      minHeight: "600px"
     }
   }, /*#__PURE__*/React.createElement("div", {
     className: "w-100 h-100"

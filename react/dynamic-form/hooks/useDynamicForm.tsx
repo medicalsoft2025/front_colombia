@@ -1,7 +1,7 @@
 import { Ref, useEffect, useImperativeHandle } from "react";
 import { useForm, UseFormReturn, FieldValues } from "react-hook-form";
 import { DynamicFormContainerConfig } from "../interfaces/models";
-import { DynamicFormRef } from "../DynamicForm";
+import { DynamicFormRef } from "../components/DynamicForm";
 
 interface UseDynamicFormProps {
     config: DynamicFormContainerConfig;
@@ -53,17 +53,18 @@ export function useDynamicForm<T extends FieldValues>({
                     ? `${currentPath}.${field.name}`
                     : field.name;
 
-                // Solo registrar si no existe
-                if (!form.getValues(fieldPath)) {
-                    form.register(fieldPath);
+                const rules: any = {
+                    required: field.required ? "Este campo es requerido" : false,
+                    ...field.validation,
+                };
+                form.register(fieldPath, rules);
 
-                    // Establecer valor inicial si existe en la configuración
-                    if (field.value !== undefined) {
-                        form.setValue(fieldPath, field.value, {
-                            shouldValidate: true,
-                            shouldDirty: false,
-                        });
-                    }
+                const currentValue = form.getValues(fieldPath);
+                if (currentValue === undefined && field.value !== undefined) {
+                    form.setValue(fieldPath, field.value, {
+                        shouldValidate: true,
+                        shouldDirty: false,
+                    });
                 }
             });
 

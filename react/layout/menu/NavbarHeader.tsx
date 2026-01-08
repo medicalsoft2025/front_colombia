@@ -1,8 +1,8 @@
-import { Menubar } from 'primereact/menubar';
-import React from 'react';
-import { navbarMenuStyle } from './styles/navBarMegaMenu';
-import { useMenuItems } from './hooks/useMenuItems';
-import NavbarSkeleton from '../skeleton/NavbarSkeleton';
+import { Menubar } from "primereact/menubar";
+import React from "react";
+import { navbarMenuStyle } from "./styles/navBarMegaMenu";
+import { useMenuItems } from "./hooks/useMenuItems";
+import NavbarSkeleton from "../skeleton/NavbarSkeleton";
 
 const NavbarHeader = () => {
     const { menuItems: menuItemsFromHook, loading } = useMenuItems();
@@ -14,10 +14,10 @@ const NavbarHeader = () => {
     const processItems = (items) => {
         if (!items || !Array.isArray(items)) return [];
 
-        return items.map(item => {
+        return items.map((item) => {
             const processedItem = {
                 label: item.label,
-                url: item.url
+                url: item.url,
             };
 
             if (item.icon) {
@@ -33,6 +33,8 @@ const NavbarHeader = () => {
     };
 
     const processedItems = processItems(menuItemsFromHook);
+
+    console.log("Processed Menus", processedItems);
 
     if (loading) {
         return <NavbarSkeleton />;

@@ -109,7 +109,7 @@ export const PricesConfig = ({
         formSupplies: priceById.supplies.map(supply => {
           return {
             id: supply.id,
-            name: supply.product.name,
+            name: supply.supply.name,
             quantity: supply.quantity,
             accounting_account_debit_id: supply.accounting_account_debit_id,
             accounting_account_credit_id: supply.accounting_account_credit_id

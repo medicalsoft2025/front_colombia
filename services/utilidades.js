@@ -791,3 +791,277 @@ export function getValueByPath(obj, path, defaultValue = undefined) {
         return defaultValue;
     }
 }
+
+/**
+ * Copia un JSON/objeto/string al portapapeles con formato
+ * @param {string|Object} jsonInput - JSON string o objeto JavaScript
+ * @param {boolean} formatted - Si debe copiarse formateado (true) o minificado (false)
+ * @returns {Promise<boolean>} - True si se copió exitosamente, false si hubo error
+ */
+export async function copyJSONToClipboard(jsonInput, formatted = true) {
+  try {
+    // Parsear la entrada
+    let parsedJSON;
+    
+    if (typeof jsonInput === 'string') {
+      try {
+        parsedJSON = JSON.parse(jsonInput);
+      } catch (e) {
+        // Si no es un JSON válido, copiar el string tal cual
+        return await copyTextToClipboard(jsonInput);
+      }
+    } else if (typeof jsonInput === 'object' && jsonInput !== null) {
+      parsedJSON = jsonInput;
+    } else {
+      throw new Error('Entrada no válida. Debe ser un JSON string o un objeto.');
+    }
+
+    // Convertir a string formateado o minificado
+    let jsonString;
+    if (formatted) {
+      jsonString = JSON.stringify(parsedJSON, null, 2);
+    } else {
+      jsonString = JSON.stringify(parsedJSON);
+    }
+
+    // Usar la API del portapapeles moderna
+    return await copyTextToClipboard(jsonString);
+    
+  } catch (error) {
+    console.error('Error al copiar JSON:', error);
+    return false;
+  }
+}
+
+/**
+ * Función auxiliar para copiar texto al portapapeles
+ * @param {string} text - Texto a copiar
+ * @returns {Promise<boolean>} - True si se copió exitosamente
+ */
+export async function copyTextToClipboard(text) {
+  try {
+    // Método moderno (navegadores modernos)
+    if (navigator.clipboard && window.isSecureContext) {
+      await navigator.clipboard.writeText(text);
+      return true;
+    } else {
+      // Método de respaldo para navegadores más antiguos o contextos no seguros (HTTP)
+      return copyUsingExecCommand(text);
+    }
+  } catch (error) {
+    console.error('Error en copyTextToClipboard:', error);
+    // Intentar con método de respaldo
+    return copyUsingExecCommand(text);
+  }
+}
+
+/**
+ * Método de respaldo usando document.execCommand
+ * @param {string} text - Texto a copiar
+ * @returns {boolean} - True si se copió exitosamente
+ */
+export function copyUsingExecCommand(text) {
+  try {
+    // Crear un elemento textarea temporal
+    const textarea = document.createElement('textarea');
+    textarea.value = text;
+    
+    // Hacerlo invisible
+    textarea.style.position = 'fixed';
+    textarea.style.opacity = '0';
+    
+    // Añadirlo al DOM
+    document.body.appendChild(textarea);
+    
+    // Seleccionar y copiar
+    textarea.select();
+    textarea.setSelectionRange(0, textarea.value.length);
+    
+    const success = document.execCommand('copy');
+    
+    // Limpiar
+    document.body.removeChild(textarea);
+    
+    return success;
+  } catch (error) {
+    console.error('Error en copyUsingExecCommand:', error);
+    return false;
+  }
+}
+
+/**
+ * Función que simula el comportamiento de "Copy JSON" del inspector de Chrome
+ * Incluye colores y formato más avanzado (para mostrar en consola)
+ * @param {Object|string} jsonInput - JSON a copiar
+ * @returns {Promise<boolean>} - True si se copió exitosamente
+ */
+export async function copyJSONLikeChromeInspector(jsonInput) {
+  try {
+    let parsedJSON;
+    
+    // Parsear la entrada
+    if (typeof jsonInput === 'string') {
+      parsedJSON = JSON.parse(jsonInput);
+    } else {
+      parsedJSON = jsonInput;
+    }
+    
+    // Función para formatear con colores (solo para demostración)
+    const formatWithColors = (obj, indent = '') => {
+      const entries = Object.entries(obj);
+      let result = '{\n';
+      
+      entries.forEach(([key, value], index) => {
+        const isLast = index === entries.length - 1;
+        const lineEnd = isLast ? '' : ',';
+        
+        // Formato de clave (como lo hace Chrome)
+        const keyPart = `  ${indent}"${key}": `;
+        
+        // Formato de valor
+        let valuePart;
+        if (value === null) {
+          valuePart = 'null';
+        } else if (typeof value === 'string') {
+          valuePart = `"${value}"`;
+        } else if (typeof value === 'object') {
+          if (Array.isArray(value)) {
+            valuePart = `[${value.length} items]`; // Chrome muestra "[X items]" para arrays largos
+          } else {
+            valuePart = `{${Object.keys(value).length} properties}`; // Chrome muestra propiedades anidadas
+          }
+        } else {
+          valuePart = String(value);
+        }
+        
+        result += `${keyPart}${valuePart}${lineEnd}\n`;
+      });
+      
+      result += `${indent}}`;
+      return result;
+    };
+    
+    // Crear una versión formateada similar a Chrome
+    const chromeLikeFormat = formatWithColors(parsedJSON);
+    
+    // Copiar al portapapeles
+    return await copyTextToClipboard(JSON.stringify(parsedJSON, null, 2));
+    
+  } catch (error) {
+    console.error('Error en copyJSONLikeChromeInspector:', error);
+    return false;
+  }
+}
+
+// Ejemplos de uso:
+
+// Ejemplo 1: Uso básico
+export const exampleJSON = {
+  nombre: "Juan",
+  edad: 30,
+  ciudad: "Madrid",
+  intereses: ["programación", "música", "deportes"],
+  contacto: {
+    email: "juan@example.com",
+    telefono: "+123456789"
+  }
+};
+
+// Uso 1: Copiar como objeto JavaScript
+// copyJSONToClipboard(exampleJSON, true);
+
+// Uso 2: Copiar como string JSON
+// const jsonString = '{"nombre":"Juan","edad":30,"ciudad":"Madrid"}';
+// copyJSONToClipboard(jsonString, true);
+
+// Uso 3: Como el inspector de Chrome
+// copyJSONLikeChromeInspector(exampleJSON);
+
+// Función con feedback para el usuario
+export async function copyJSONWithFeedback({jsonInput, formatted = true, message = 'JSON copiado al portapapeles'}) {
+  const success = await copyJSONToClipboard(jsonInput, formatted);
+  
+  if (success) {
+    console.log('✓ ' + message);
+    // Podrías agregar aquí una notificación para el usuario
+    showNotification({message, type: 'success'});
+  } else {
+    console.error('✗ Error al copiar el JSON');
+    showNotification({message: 'Error al copiar el JSON', type: 'error'});
+  }
+  
+  return success;
+}
+
+// Función auxiliar para mostrar notificaciones (opcional)
+export function showNotification({message, type = 'info'}) {
+  // Crear elemento de notificación
+  const notification = document.createElement('div');
+  notification.textContent = message;
+  notification.style.cssText = `
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    padding: 12px 24px;
+    border-radius: 4px;
+    color: white;
+    font-family: Arial, sans-serif;
+    z-index: 10000;
+    animation: slideIn 0.3s ease;
+  `;
+  
+  // Estilos según tipo
+  if (type === 'success') {
+    notification.style.backgroundColor = '#4CAF50';
+  } else if (type === 'error') {
+    notification.style.backgroundColor = '#F44336';
+  } else {
+    notification.style.backgroundColor = '#2196F3';
+  }
+  
+  // Añadir al DOM
+  document.body.appendChild(notification);
+  
+  // Remover después de 3 segundos
+  setTimeout(() => {
+    notification.style.animation = 'slideOut 0.3s ease';
+    setTimeout(() => {
+      if (notification.parentNode) {
+        document.body.removeChild(notification);
+      }
+    }, 300);
+  }, 3000);
+}
+
+// Añadir estilos CSS para las animaciones
+if (!document.querySelector('#clipboard-styles')) {
+  const style = document.createElement('style');
+  style.id = 'clipboard-styles';
+  style.textContent = `
+    @keyframes slideIn {
+      from {
+        transform: translateX(100%);
+        opacity: 0;
+      }
+      to {
+        transform: translateX(0);
+        opacity: 1;
+      }
+    }
+    
+    @keyframes slideOut {
+      from {
+        transform: translateX(0);
+        opacity: 1;
+      }
+      to {
+        transform: translateX(100%);
+        opacity: 0;
+      }
+    }
+  `;
+  document.head.appendChild(style);
+}
+
+// Exportar las funciones (si estás usando módulos)
+// export { copyJSONToClipboard, copyJSONLikeChromeInspector, copyJSONWithFeedback };

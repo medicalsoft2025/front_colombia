@@ -126,7 +126,7 @@ export const PricesConfig = ({
                 formSupplies: priceById.supplies.map((supply) => {
                     return {
                         id: supply.id,
-                        name: supply.product.name,
+                        name: supply.supply.name,
                         quantity: supply.quantity,
                         accounting_account_debit_id:
                             supply.accounting_account_debit_id,
@@ -190,16 +190,14 @@ export const PricesConfig = ({
                     {showValidations && (
                         <div className="validation-section mb-3">
                             <div
-                                className={`alert ${
-                                    isComplete ? "alert-success" : "alert-info"
-                                } p-3`}
+                                className={`alert ${isComplete ? "alert-success" : "alert-info"
+                                    } p-3`}
                             >
                                 <i
-                                    className={`${
-                                        isComplete
+                                    className={`${isComplete
                                             ? "pi pi-check-circle"
                                             : "pi pi-info-circle"
-                                    } me-2`}
+                                        } me-2`}
                                 ></i>
                                 {isComplete
                                     ? "Precios configurados correctamente! Puede continuar al siguiente módulo."

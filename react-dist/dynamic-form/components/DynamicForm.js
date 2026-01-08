@@ -1,6 +1,7 @@
 import React, { forwardRef, useMemo } from "react";
 import { DynamicFormContainer } from "./containers/DynamicFormContainer.js";
 import { useDynamicForm } from "../hooks/useDynamicForm.js";
+import { FormProvider as FormProviderRHF } from "react-hook-form";
 import { useFieldConditions } from "../hooks/useFieldConditions.js";
 import { FormProvider } from "../providers/FormProvider.js";
 export const DynamicForm = /*#__PURE__*/forwardRef((props, ref) => {
@@ -11,7 +12,9 @@ export const DynamicForm = /*#__PURE__*/forwardRef((props, ref) => {
     loading,
     className = "",
     onChange,
-    setFormInvalid
+    setFormInvalid,
+    executeFieldConditionsOnInit = false,
+    onElementSelect
   } = props;
   const {
     form,
@@ -24,32 +27,28 @@ export const DynamicForm = /*#__PURE__*/forwardRef((props, ref) => {
     setFormInvalid,
     ref
   });
-
-  // Usar hook de condiciones
   const {
     fieldStates
   } = useFieldConditions({
     config,
-    form
+    form,
+    executeOnInit: !data || executeFieldConditionsOnInit
   });
-
-  // Crear valor del contexto
   const formContextValue = useMemo(() => ({
     fieldStates,
-    setFieldState: (fieldPath, state) => {
-      // Implementar si se necesita modificar estados manualmente
-    },
-    form: form
-  }), [fieldStates, form]);
-  return /*#__PURE__*/React.createElement(FormProvider, {
+    setFieldState: (fieldPath, state) => {},
+    form: form,
+    onElementSelect
+  }), [fieldStates, form, onElementSelect]);
+  return /*#__PURE__*/React.createElement(FormProviderRHF, form, /*#__PURE__*/React.createElement(FormProvider, {
     value: formContextValue
   }, /*#__PURE__*/React.createElement("form", {
     className: className
-  }, config.containers?.map((container, index) => /*#__PURE__*/React.createElement(DynamicFormContainer, {
-    key: container.name || `container-${index}`,
-    config: container,
+  }, (config.children || config.containers)?.map((child, index) => /*#__PURE__*/React.createElement(DynamicFormContainer, {
+    key: child.name || `element-${index}`,
+    config: child,
     loading: loading,
     onSubmit: emitSubmitData,
     form: form
-  }))));
+  })))));
 });

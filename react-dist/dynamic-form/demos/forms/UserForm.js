@@ -1,23 +1,19 @@
 import React, { useState } from "react";
 import { DynamicForm } from "../../components/DynamicForm.js";
 import { demoData } from "../jsons/demoData.js";
-import { historiaCardiologia } from "../../forms/clinical-records/historiaCardiologia.js";
+import { asyncDemo } from "../jsons/async-demo.js";
 export const UserForm = () => {
   const [loading, setLoading] = useState(false);
   const onSubmit = data => {
-    console.log(data);
     setLoading(true);
-    new Promise(resolve => {
-      setTimeout(() => {
-        resolve(data);
-      }, 2000);
-    }).then(() => {
+    console.log("Form Data:", data);
+    setTimeout(() => {
       setLoading(false);
-    });
+    }, 1000);
   };
   return /*#__PURE__*/React.createElement(DynamicForm, {
     onSubmit: onSubmit,
-    config: historiaCardiologia,
+    config: asyncDemo,
     loading: loading,
     data: demoData
   });

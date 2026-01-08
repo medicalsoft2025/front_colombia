@@ -1,4 +1,4 @@
-import React, { use, useEffect, useRef, useState } from "react";
+import React, { use, useCallback, useEffect, useRef, useState } from "react";
 import { PrimeReactProvider } from "primereact/api";
 import { Toast } from "primereact/toast";
 import { usePatientDocuments } from "./hooks/usePatientDocuments";
@@ -13,6 +13,10 @@ import { Button } from "primereact/button";
 import { MenuItem } from "primereact/menuitem";
 import { CustomPRTableMenu } from "../../components/CustomPRTableMenu";
 import { SwalManager } from "../../../services/alertManagerImported";
+import { consentimientoService } from "../../../services/api";
+import { getIndicativeByCountry } from "../../../services/utilidades";
+import { useMassMessaging } from "../../hooks/useMassMessaging";
+import { patientService } from "../../../services/api";
 
 const AsignarConsentimiento: React.FC = () => {
   const [patientId, setPatientId] = useState("");
@@ -39,7 +43,19 @@ const AsignarConsentimiento: React.FC = () => {
   const [showViewModal, setShowViewModal] = useState(false);
   const [documentToView, setDocumentToView] =
     useState<DocumentoConsentimiento | null>(null);
+  const [signatureData, setSignatureData] = useState<string | null>(null); // Para almacenar la firma en base64
+  const [isSignatureDirty, setIsSignatureDirty] = useState(false); // Para habilitar/deshabilitar botón
   const { data: templates } = useGetData();
+  const ENCRYPTION_KEY_STRING =
+    "MzE6MTI6MTc2Nzg4NDEzNTcxNTpTSUdOQVRVUkVfU0VDUkVUX0tFWQ";
+
+  const { sendMessage: sendMessageWpp } = useMassMessaging();
+
+  const sendMessageWppRef = useRef(sendMessageWpp);
+
+  useEffect(() => {
+    sendMessageWppRef.current = sendMessageWpp;
+  }, [sendMessageWpp]);
 
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);
@@ -57,66 +73,20 @@ const AsignarConsentimiento: React.FC = () => {
   };
 
   // Ver
-  const handleViewDocument = (id: string) => {
-    const documentToView = documents.find((doc) => doc.id === id);
+  const handleViewDocument = async (id: string) => {
+    const formData = {
+      model_type: "Consent",
+      model_id: id,
+    };
 
-    if (!documentToView) {
-      toast.current?.show({
-        severity: "warn",
-        summary: "No encontrado",
-        detail: "No se encontró el documento",
-        life: 3000,
-      });
-      return;
-    }
-
-    const printWindow = window.open(
-      "",
-      "_blank",
-      "width=800,height=1000,top=100,left=200,resizable=yes,scrollbars=yes"
-    );
-
-    if (printWindow) {
-      printWindow.document.write(`
-        <html>
-          <head>
-            <title>${documentToView.titulo ?? "Documento"}</title>
-            <style>
-              body {
-                font-family: Arial, sans-serif;
-                padding: 40px;
-                line-height: 1.6;
-                font-size: 14px;
-              }
-              h1, h2, h3 {
-                margin-top: 0;
-              }
-              @page {
-                size: A4;
-                margin: 15mm;
-              }
-            </style>
-          </head>
-          <body>
-            ${documentToView.contenido ?? "<p>Sin contenido</p>"}
-            <script>
-              window.onload = function() {
-                window.focus();
-                window.print();
-                window.onafterprint = function() {
-                  window.close();
-                };
-              }
-            </script>
-          </body>
-        </html>
-      `);
-      printWindow.document.close();
+    try {
+      await consentimientoService.previewPdf(formData);
+    } catch (error) {
+      console.error("Error al cargar el PDF:", error);
     }
   };
 
   const handleSignatureDocument = (id: string) => {
-    console.log("documents", documents);
     const doc = documents.find((d) => d.id === id);
     if (!doc) {
       toast.current?.show({
@@ -130,9 +100,18 @@ const AsignarConsentimiento: React.FC = () => {
     doc.patient_id = patientId;
     doc.title = doc.titulo;
     doc.description = doc.contenido || "No hay descripcion";
-    console.log("doc", doc);
+
+    // Resetear estado de firma cuando se abre un nuevo documento
+    setSignatureData(null);
+    setIsSignatureDirty(false);
     setDocumentToView(doc);
+    setCurrentDocumentId(doc.id);
     setShowViewModal(true);
+
+    // Inicializar el canvas de firma después de que el modal se haya mostrado
+    setTimeout(() => {
+      initializeSignatureCanvas();
+    }, 100);
   };
 
   // Editar
@@ -201,18 +180,17 @@ const AsignarConsentimiento: React.FC = () => {
     });
   };
 
-
   const handleDeleteDocument = async (id: string) => {
     const result = await SwalManager.confirmDelete({
-      title: '¿Estás seguro?',
+      title: "¿Estás seguro?",
       text: "¿Seguro que deseas eliminar este Documento?",
-      icon: 'warning',
+      icon: "warning",
       showCancelButton: true,
-      confirmButtonColor: '#d33',
-      cancelButtonColor: '#3085d6',
-      confirmButtonText: 'Sí, eliminar',
-      cancelButtonText: 'Cancelar',
-      reverseButtons: true
+      confirmButtonColor: "#d33",
+      cancelButtonColor: "#3085d6",
+      confirmButtonText: "Sí, eliminar",
+      cancelButtonText: "Cancelar",
+      reverseButtons: true,
     });
 
     if (result) {
@@ -294,6 +272,363 @@ const AsignarConsentimiento: React.FC = () => {
     setCurrentDocument(null);
   };
 
+  // Función para inicializar el canvas de firma
+  const initializeSignatureCanvas = () => {
+    const canvas = document.getElementById(
+      "signature-canvas"
+    ) as HTMLCanvasElement;
+    if (!canvas) return;
+
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
+
+    // Limpiar canvas
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.fillStyle = "#ffffff";
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    ctx.strokeStyle = "#000000";
+    ctx.lineWidth = 2;
+    ctx.lineCap = "round";
+    ctx.lineJoin = "round";
+
+    let isDrawing = false;
+    let lastX = 0;
+    let lastY = 0;
+
+    // Restaurar firma previa si existe
+    if (signatureData) {
+      const img = new Image();
+      img.onload = () => {
+        ctx.drawImage(img, 0, 0);
+      };
+      img.src = signatureData;
+    }
+
+    // Eventos para dibujar
+    const startDrawing = (e: MouseEvent) => {
+      isDrawing = true;
+      [lastX, lastY] = [e.offsetX, e.offsetY];
+    };
+
+    const draw = (e: MouseEvent) => {
+      if (!isDrawing) return;
+
+      ctx.beginPath();
+      ctx.moveTo(lastX, lastY);
+      ctx.lineTo(e.offsetX, e.offsetY);
+      ctx.stroke();
+      [lastX, lastY] = [e.offsetX, e.offsetY];
+
+      // Marcar que hay algo dibujado para habilitar el botón
+      if (!isSignatureDirty) {
+        setIsSignatureDirty(true);
+      }
+    };
+
+    const stopDrawing = () => {
+      isDrawing = false;
+    };
+
+    // Eventos táctiles para dispositivos móviles
+    const startDrawingTouch = (e: TouchEvent) => {
+      e.preventDefault();
+      const touch = e.touches[0];
+      const rect = canvas.getBoundingClientRect();
+      isDrawing = true;
+      [lastX, lastY] = [touch.clientX - rect.left, touch.clientY - rect.top];
+    };
+
+    const drawTouch = (e: TouchEvent) => {
+      e.preventDefault();
+      if (!isDrawing) return;
+
+      const touch = e.touches[0];
+      const rect = canvas.getBoundingClientRect();
+      const x = touch.clientX - rect.left;
+      const y = touch.clientY - rect.top;
+
+      ctx.beginPath();
+      ctx.moveTo(lastX, lastY);
+      ctx.lineTo(x, y);
+      ctx.stroke();
+      [lastX, lastY] = [x, y];
+
+      if (!isSignatureDirty) {
+        setIsSignatureDirty(true);
+      }
+    };
+
+    const stopDrawingTouch = () => {
+      isDrawing = false;
+    };
+
+    // Limpiar eventos anteriores y agregar nuevos
+    canvas.removeEventListener("mousedown", startDrawing);
+    canvas.removeEventListener("mousemove", draw);
+    canvas.removeEventListener("mouseup", stopDrawing);
+    canvas.removeEventListener("mouseout", stopDrawing);
+    canvas.removeEventListener("touchstart", startDrawingTouch);
+    canvas.removeEventListener("touchmove", drawTouch);
+    canvas.removeEventListener("touchend", stopDrawingTouch);
+
+    canvas.addEventListener("mousedown", startDrawing);
+    canvas.addEventListener("mousemove", draw);
+    canvas.addEventListener("mouseup", stopDrawing);
+    canvas.addEventListener("mouseout", stopDrawing);
+    canvas.addEventListener("touchstart", startDrawingTouch, {
+      passive: false,
+    });
+    canvas.addEventListener("touchmove", drawTouch, { passive: false });
+    canvas.addEventListener("touchend", stopDrawingTouch);
+  };
+
+  // Función para limpiar el canvas de firma
+  const clearSignatureCanvas = () => {
+    const canvas = document.getElementById(
+      "signature-canvas"
+    ) as HTMLCanvasElement;
+    if (canvas) {
+      const ctx = canvas.getContext("2d");
+      if (ctx) {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        ctx.fillStyle = "#ffffff";
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        setSignatureData(null);
+        setIsSignatureDirty(false);
+      }
+    }
+  };
+
+  // Función para guardar la firma
+  const handleSaveSignature = async () => {
+    if (!currentDocumentId || !isSignatureDirty) return;
+
+    try {
+      // Obtener la firma del canvas
+      const canvas = document.getElementById(
+        "signature-canvas"
+      ) as HTMLCanvasElement;
+      if (!canvas) return;
+
+      const dataUrl = canvas.toDataURL("image/png");
+      setSignatureData(dataUrl);
+
+      // Crear archivo desde el canvas
+      const blob = await new Promise<Blob>((resolve) => {
+        canvas.toBlob((blob) => {
+          if (blob) resolve(blob);
+          else resolve(new Blob());
+        }, "image/png");
+      });
+
+      const file = new File([blob], `signature_${currentDocumentId}.png`, {
+        type: "image/png",
+      });
+
+      // Subir la firma
+      const response = await handleDownloadAndUpload(file);
+
+      // Actualizar el documento con la firma
+      const doc = documents.find((d) => d.id === currentDocumentId);
+      if (!doc) return;
+
+      await updateTemplate(currentDocumentId, {
+        documentId: doc.id,
+        title: doc.titulo,
+        description: doc.motivo,
+        data: doc.contenido,
+        tenantId: window.location.hostname.split(".")[0],
+        patientId: doc.patient_id || patientId,
+        doctorId: JSON.parse(localStorage.getItem("userData")!).id,
+        statusSignature: 1,
+        imageSignature: response.file_url,
+      });
+
+      toast.current?.show({
+        severity: "success",
+        summary: "Firma guardada",
+        detail: "El consentimiento ha sido firmado correctamente",
+        life: 3000,
+      });
+
+      // Cerrar modal y actualizar
+      setShowViewModal(false);
+      setCurrentDocumentId(null);
+      setSignatureData(null);
+      setIsSignatureDirty(false);
+      reload(); // Recargar documentos para reflejar cambios
+    } catch (error) {
+      console.error("Error al guardar la firma:", error);
+      toast.current?.show({
+        severity: "error",
+        summary: "Error",
+        detail: "No se pudo guardar la firma",
+        life: 3000,
+      });
+    }
+  };
+
+  const getEncryptionKey = async (): Promise<CryptoKey> => {
+    const encoder = new TextEncoder();
+
+    // Importar la clave como material clave
+    const keyMaterial = await crypto.subtle.importKey(
+      "raw",
+      encoder.encode(ENCRYPTION_KEY_STRING),
+      { name: "PBKDF2" },
+      false,
+      ["deriveKey"]
+    );
+
+    // Derivar la clave usando PBKDF2
+    return crypto.subtle.deriveKey(
+      {
+        name: "PBKDF2",
+        salt: encoder.encode("firma-segura-salt"), // Salt fijo
+        iterations: 100000,
+        hash: "SHA-256",
+      },
+      keyMaterial,
+      { name: "AES-GCM", length: 256 },
+      false,
+      ["encrypt", "decrypt"]
+    );
+  };
+
+  // Encriptar datos
+  const encryptData = async (data: string): Promise<string> => {
+    try {
+      const key = await getEncryptionKey();
+
+      // Generar IV (Initialization Vector) aleatorio
+      const iv = crypto.getRandomValues(new Uint8Array(12));
+
+      // Convertir datos a ArrayBuffer
+      const encoder = new TextEncoder();
+      const dataBuffer = encoder.encode(data);
+
+      // Encriptar
+      const encryptedBuffer = await crypto.subtle.encrypt(
+        {
+          name: "AES-GCM",
+          iv: iv,
+        },
+        key,
+        dataBuffer
+      );
+
+      // Combinar IV + datos encriptados
+      const combined = new Uint8Array(iv.length + encryptedBuffer.byteLength);
+      combined.set(iv);
+      combined.set(new Uint8Array(encryptedBuffer), iv.length);
+
+      // Convertir a Base64 seguro para URL
+      return btoa(String.fromCharCode(...combined))
+        .replace(/\+/g, "-")
+        .replace(/\//g, "_")
+        .replace(/=/g, "");
+    } catch (error) {
+      console.error("Error encriptando:", error);
+      throw error;
+    }
+  };
+
+  // Desencriptar datos
+  const decryptData = async (encryptedBase64: string): Promise<string> => {
+    try {
+      const key = await getEncryptionKey();
+
+      // Revertir el Base64 URL-safe
+      const base64 = encryptedBase64.replace(/-/g, "+").replace(/_/g, "/");
+
+      // Convertir Base64 a ArrayBuffer
+      const binaryString = atob(base64);
+      const bytes = new Uint8Array(binaryString.length);
+      for (let i = 0; i < binaryString.length; i++) {
+        bytes[i] = binaryString.charCodeAt(i);
+      }
+
+      // Separar IV (12 bytes) y datos encriptados
+      const iv = bytes.slice(0, 12);
+      const encryptedData = bytes.slice(12);
+
+      // Desencriptar
+      const decryptedBuffer = await crypto.subtle.decrypt(
+        {
+          name: "AES-GCM",
+          iv: iv,
+        },
+        key,
+        encryptedData
+      );
+
+      // Convertir a string
+      const decoder = new TextDecoder();
+      return decoder.decode(decryptedBuffer);
+    } catch (error) {
+      console.error("Error desencriptando:", error);
+      throw error;
+    }
+  };
+
+  // Función para generar la URL pública
+  const generatePublicSignatureUrl = async (
+    documentId: string,
+    documentTitle: string
+  ): Promise<string> => {
+    try {
+      // Crear objeto con los datos
+      const signatureData = {
+        docId: documentId,
+        patId: patientId,
+        title: documentTitle,
+        timestamp: Date.now(),
+        expires: Date.now() + 24 * 60 * 60 * 1000, // 24 horas
+        tenant: window.location.hostname.split(".")[0],
+      };
+
+      // Convertir a JSON
+      const jsonString = JSON.stringify(signatureData);
+
+      // Encriptar los datos
+      const encryptedData = await encryptData(jsonString);
+
+      // Generar URL
+      const baseUrl = window.location.origin;
+      const publicUrl = `${baseUrl}/firmar-publico?d=${encryptedData}`;
+      const patientData = await patientService.get(patientId);
+      sendMessageWhatsapp(patientData, publicUrl);
+
+      toast.current?.show({
+        severity: "success",
+        summary: "URL Generada",
+        detail: "Se ha enviado la URL de firma al paciente vía WhatsApp.",
+        life: 5000,
+      });
+
+    } catch (error) {
+      console.error("Error generando URL:", error);
+      throw error;
+    }
+  };
+
+  const sendMessageWhatsapp = useCallback(
+    async (patient: any, message: any) => {
+      const dataMessage = {
+        channel: "whatsapp",
+        recipients: [
+          getIndicativeByCountry(patient.country_id) + patient.whatsapp,
+        ],
+        message_type: "text",
+        message: message,
+        webhook_url: "https://example.com/webhook",
+      };
+
+      await sendMessageWppRef.current(dataMessage);
+    },
+    [sendMessageWpp]
+  );
+
   // Función para obtener los items del menú de acciones
   const getMenuItems = (rowData: DocumentoConsentimiento): MenuItem[] => [
     {
@@ -305,23 +640,35 @@ const AsignarConsentimiento: React.FC = () => {
       label: "Editar",
       icon: <i className="fas fa-edit me-2"></i>,
       command: () => handleEditDocument(rowData.id),
+      visible: !rowData.firmado,
     },
     {
       label: "Firmar",
       icon: <i className="fas fa-signature me-2"></i>,
       command: () => handleSignatureDocument(rowData.id),
+      visible: !rowData.firmado,
+    },
+    {
+      label: "Enviar",
+      icon: <i className="fas fa-paper-plane me-2"></i>,
+      command: () =>
+        generatePublicSignatureUrl(rowData.id, rowData.titulo || "Documento"),
+      visible: !rowData.firmado,
     },
     {
       label: "Eliminar",
       icon: <i className="fas fa-trash me-2"></i>,
       command: () => handleDeleteDocument(rowData.id),
-    }
+    },
   ];
 
   // Template para las acciones - usando CustomPRTableMenu
   const accionesBodyTemplate = (rowData: DocumentoConsentimiento) => {
     return (
-      <div className="flex align-items-center justify-content-center" style={{ minWidth: "120px" }}>
+      <div
+        className="flex align-items-center justify-content-center"
+        style={{ minWidth: "120px" }}
+      >
         <CustomPRTableMenu
           rowData={rowData}
           menuItems={getMenuItems(rowData)}
@@ -333,40 +680,40 @@ const AsignarConsentimiento: React.FC = () => {
   // Columnas personalizadas con el menú de acciones
   const columns = [
     {
-      field: 'titulo',
-      header: 'Título',
-      sortable: true
-    },
-    {
-      field: 'motivo',
-      header: 'Motivo',
-      sortable: true
-    },
-    {
-      field: 'fecha',
-      header: 'Fecha',
-      sortable: true
-    },
-    {
-      field: 'firmado',
-      header: 'Firmado',
+      field: "titulo",
+      header: "Título",
       sortable: true,
-      body: (rowData: any) => rowData.firmado ? 'Sí' : 'No'
     },
     {
-      field: 'actions',
-      header: 'Acciones',
+      field: "motivo",
+      header: "Motivo",
+      sortable: true,
+    },
+    {
+      field: "fecha",
+      header: "Fecha",
+      sortable: true,
+    },
+    {
+      field: "firmado",
+      header: "Firmado",
+      sortable: true,
+      body: (rowData: any) => (rowData.firmado ? "Sí" : "No"),
+    },
+    {
+      field: "actions",
+      header: "Acciones",
       body: accionesBodyTemplate,
       exportable: false,
-      style: { minWidth: '80px', textAlign: 'center' },
-      width: '80px'
-    }
+      style: { minWidth: "80px", textAlign: "center" },
+      width: "80px",
+    },
   ];
 
   // Preparar datos para la tabla
-  const tableData = documents.map(doc => ({
+  const tableData = documents.map((doc) => ({
     ...doc,
-    actions: doc // Pasamos el documento completo para las acciones
+    actions: doc, // Pasamos el documento completo para las acciones
   }));
 
   if (error) {
@@ -423,7 +770,6 @@ const AsignarConsentimiento: React.FC = () => {
             onReload={reload}
             globalFilterFields={["titulo", "motivo", "fecha", "firmado"]}
           />
-
         </div>
 
         <DocumentFormModal
@@ -438,74 +784,7 @@ const AsignarConsentimiento: React.FC = () => {
           patient={patient!}
         />
 
-        <SignatureModal
-          visible={showSignatureModal}
-          onClose={() => setShowSignatureModal(false)}
-          onSave={async (file) => {
-            if (!currentDocumentId) return;
-
-            try {
-              const response = await handleDownloadAndUpload(file);
-              console.log("URL del archivo subido:", response.file_url);
-
-              const reader = new FileReader();
-              reader.onload = function (e) {
-                const base64 = e.target?.result as string;
-                const slot = document.getElementById("signature-slot");
-                if (slot) {
-                  slot.innerHTML = `<img src="${base64}" style="max-width:250px; height:auto;" />`;
-                }
-                setDocumentToView((prev) =>
-                  prev ? { ...prev, image_signature: base64 } : prev
-                );
-              };
-              reader.readAsDataURL(file);
-
-              const doc = documents.find((d) => d.id === currentDocumentId);
-              if (!doc) return;
-
-              await updateTemplate(currentDocumentId, {
-                documentId: doc.id,
-                title: doc.titulo,
-                description: doc.motivo,
-                data: doc.contenido,
-                tenantId: window.location.hostname.split(".")[0],
-                patientId: doc.patient_id || patientId,
-                doctorId: JSON.parse(localStorage.getItem("userData")!).id,
-                statusSignature: 1,
-                imageSignature: response.file_url,
-              });
-
-              setDocumentToView((prev) =>
-                prev
-                  ? {
-                    ...prev,
-                    status_signature: 1,
-                    image_signature: response.file_url,
-                  }
-                  : prev
-              );
-              setShowSignatureModal(false);
-              setShowViewModal(false);
-              setCurrentDocumentId(null);
-
-              toast.current?.show({
-                severity: "success",
-                summary: "Firma guardada",
-                detail: "El consentimiento ha sido firmado correctamente",
-                life: 3000,
-              });
-            } catch (error) {
-              console.error("Error al subir la firma:", error);
-              toast.current?.show({
-                severity: "error",
-                summary: "Error",
-                detail: "No se pudo guardar la firma",
-                life: 3000,
-              });
-            }
-          }}
-        />
+        {/* Removido el SignatureModal separado ya que ahora está integrado en el view modal */}
 
         {showViewModal && documentToView && (
           <div
@@ -520,7 +799,11 @@ const AsignarConsentimiento: React.FC = () => {
                   </h5>
                   <button
                     className="btn-close"
-                    onClick={() => setShowViewModal(false)}
+                    onClick={() => {
+                      setShowViewModal(false);
+                      setSignatureData(null);
+                      setIsSignatureDirty(false);
+                    }}
                   />
                 </div>
                 <div className="modal-body">
@@ -529,34 +812,102 @@ const AsignarConsentimiento: React.FC = () => {
                     id="doc-content"
                     dangerouslySetInnerHTML={{
                       __html:
-                        documentToView.contenido +
-                        `<br/><p><b>Firma del paciente:</b></p>
-                          <div id="signature-slot" style="border:1px dashed #aaa; height:80px; width:300px;">
-                            ${documentToView.firma
-                          ? `<img src="${documentToView.firma}" style="max-width:250px; height:auto;" />`
-                          : ""
-                        }
-                          </div>`,
+                        documentToView.contenido || "<p>Sin contenido</p>",
                     }}
                   />
-                </div>
-                <div className="modal-footer">
-                  <button
-                    className="btn btn-outline-primary"
-                    onClick={() => {
-                      setShowSignatureModal(true);
-                      setCurrentDocumentId(documentToView.id);
-                      setShowViewModal(false);
+
+                  {/* Área de firma */}
+                  <div
+                    style={{
+                      marginTop: "30px",
+                      padding: "20px",
+                      borderTop: "1px solid #ddd",
                     }}
                   >
-                    Firmar
+                    <h6>Firma del paciente:</h6>
+
+                    <div
+                      className="border rounded p-3 mb-3"
+                      style={{ background: "#f8f9fa" }}
+                    >
+                      <canvas
+                        id="signature-canvas"
+                        width="400"
+                        height="150"
+                        style={{
+                          border: "1px solid #ccc",
+                          background: "#fff",
+                          cursor: "crosshair",
+                          touchAction: "none",
+                        }}
+                      ></canvas>
+
+                      <div className="mt-2">
+                        <button
+                          className="btn btn-sm btn-outline-secondary me-2"
+                          onClick={clearSignatureCanvas}
+                        >
+                          <i className="fas fa-eraser me-1"></i> Limpiar
+                        </button>
+                        <small className="text-muted">
+                          {isSignatureDirty
+                            ? "Firma lista para guardar"
+                            : "Dibuje su firma arriba"}
+                        </small>
+                      </div>
+                    </div>
+
+                    {/* Mostrar firma existente si ya está firmado */}
+                    {documentToView.firma && !isSignatureDirty && (
+                      <div className="alert alert-info mt-3">
+                        <p>
+                          <strong>Documento ya firmado:</strong>
+                        </p>
+                        <img
+                          src={documentToView.firma}
+                          alt="Firma existente"
+                          style={{
+                            maxWidth: "250px",
+                            height: "auto",
+                            border: "1px solid #ddd",
+                          }}
+                        />
+                        <p className="mt-2 small">
+                          Este documento ya contiene una firma.
+                        </p>
+                      </div>
+                    )}
+                  </div>
+                </div>
+                <div className="modal-footer">
+                  {/* Botón para guardar la firma - solo habilitado si hay algo dibujado */}
+                  <button
+                    className="btn btn-primary"
+                    onClick={handleSaveSignature}
+                    disabled={!isSignatureDirty || !currentDocumentId}
+                  >
+                    <i className="fas fa-save me-1"></i> Guardar Firma
                   </button>
+
                   <button
                     className="btn btn-success"
                     onClick={async () => {
-                      // Tomar contenido del modal
-                      const doc =
+                      // Tomar contenido del modal incluyendo la firma
+                      const docContent =
                         document.getElementById("doc-content")?.innerHTML || "";
+                      const canvas = document.getElementById(
+                        "signature-canvas"
+                      ) as HTMLCanvasElement;
+                      let signatureImg = "";
+
+                      if (canvas) {
+                        const dataUrl = canvas.toDataURL("image/png");
+                        signatureImg = `<div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #000;">
+                          <p><strong>Firma del paciente:</strong></p>
+                          <img src="${dataUrl}" style="max-width: 300px; height: auto;" />
+                        </div>`;
+                      }
+
                       const iframe = document.createElement("iframe");
                       iframe.style.position = "absolute";
                       iframe.style.left = "-9999px";
@@ -567,13 +918,15 @@ const AsignarConsentimiento: React.FC = () => {
                         docIframe.write(`
                         <html>
                           <head>
-                            <title>${documentToView.titulo || "Documento"}</title>
+                            <title>${
+                              documentToView.titulo || "Documento"
+                            }</title>
                             <style>
                               body { font-family: Arial; padding: 40px; font-size: 14px; }
                               @page { size: A4; margin: 15mm; }
                             </style>
                           </head>
-                          <body>${doc}</body>
+                          <body>${docContent}${signatureImg}</body>
                         </html>
                       `);
                         docIframe.close();
@@ -582,7 +935,18 @@ const AsignarConsentimiento: React.FC = () => {
                       }
                     }}
                   >
-                    Descargar PDF
+                    <i className="fas fa-print me-1"></i> Imprimir/PDF
+                  </button>
+
+                  <button
+                    className="btn btn-outline-secondary"
+                    onClick={() => {
+                      setShowViewModal(false);
+                      setSignatureData(null);
+                      setIsSignatureDirty(false);
+                    }}
+                  >
+                    Cerrar
                   </button>
                 </div>
               </div>
@@ -590,7 +954,7 @@ const AsignarConsentimiento: React.FC = () => {
           </div>
         )}
       </div>
-    </PrimeReactProvider >
+    </PrimeReactProvider>
   );
 };
 

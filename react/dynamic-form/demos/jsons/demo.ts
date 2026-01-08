@@ -1,5 +1,8 @@
 import { DynamicFormContainerConfig } from "../../interfaces/models";
+import { asyncDemo } from "./async-demo";
 import { employeeInfo } from "./employeeInfo";
+import { fieldArrayDemo } from "./field-array-demo";
+import { tableArrayDemo } from "./table-array-demo";
 
 export const ultraComplexForm: DynamicFormContainerConfig = {
     containers: [
@@ -14,14 +17,16 @@ export const ultraComplexForm: DynamicFormContainerConfig = {
             containers: [
                 // === PRIMER STEP: INFORMACIÓN PERSONAL ===
                 {
-                    name: "Información Personal",
+                    label: "Información Personal",
                     containers: [
                         {
                             type: "card",
-                            name: "Datos Personales Básicos",
+                            label: "Datos Personales Básicos",
                             styleClass: "mb-4 shadow-sm",
                             contentStyleClass: "row g-3",
                             containers: [
+                                { ...asyncDemo },
+                                { ...tableArrayDemo },
                                 {
                                     fields: [
                                         {
@@ -126,12 +131,12 @@ export const ultraComplexForm: DynamicFormContainerConfig = {
                         },
                         {
                             type: "accordion",
-                            name: "Información Detallada",
-                            defaultActiveChildren: "address",
+                            defaultActiveChildren: "0",
                             styleClass: "mb-4",
                             containers: [
                                 {
-                                    name: "Dirección",
+                                    name: "address",
+                                    label: "Dirección",
                                     contentStyleClass: "row g-3",
                                     containers: [
                                         {
@@ -235,7 +240,7 @@ export const ultraComplexForm: DynamicFormContainerConfig = {
                                     ],
                                 },
                                 {
-                                    name: "Información Familiar",
+                                    label: "Información Familiar",
                                     contentStyleClass: "row g-3",
                                     containers: [
                                         {
@@ -266,6 +271,7 @@ export const ultraComplexForm: DynamicFormContainerConfig = {
                                                             value: "partner",
                                                         },
                                                     ],
+                                                    required: true
                                                 },
                                             ],
                                         },
@@ -329,7 +335,7 @@ export const ultraComplexForm: DynamicFormContainerConfig = {
 
                 // === SEGUNDO STEP: FORMACIÓN Y EXPERIENCIA ===
                 {
-                    name: "Formación y Experiencia",
+                    label: "Formación y Experiencia",
                     containers: [
                         {
                             type: "tabs",
@@ -337,16 +343,16 @@ export const ultraComplexForm: DynamicFormContainerConfig = {
                             styleClass: "mb-4",
                             containers: [
                                 {
-                                    name: "Formación Académica",
+                                    label: "Formación Académica",
                                     containers: [
                                         {
                                             type: "card",
-                                            name: "Información de Empleo",
+                                            label: "Información de Empleo",
                                             containers: [employeeInfo],
                                         },
                                         {
                                             type: "card",
-                                            name: "Estudios",
+                                            label: "Estudios",
                                             styleClass: "mb-3",
                                             contentStyleClass: "row g-3",
                                             containers: [
@@ -471,11 +477,11 @@ export const ultraComplexForm: DynamicFormContainerConfig = {
                                     ],
                                 },
                                 {
-                                    name: "Experiencia Laboral",
+                                    label: "Experiencia Laboral",
                                     containers: [
                                         {
                                             type: "card",
-                                            name: "Experiencia Profesional",
+                                            label: "Experiencia Profesional",
                                             styleClass: "mb-3",
                                             contentStyleClass: "row g-3",
                                             containers: [
@@ -649,11 +655,11 @@ export const ultraComplexForm: DynamicFormContainerConfig = {
 
                 // === TERCER STEP: PREFERENCIAS LABORALES ===
                 {
-                    name: "Preferencias Laborales",
+                    label: "Preferencias Laborales",
                     containers: [
                         {
                             type: "card",
-                            name: "Condiciones Laborales Deseadas",
+                            label: "Condiciones Laborales Deseadas",
                             styleClass: "mb-4",
                             contentStyleClass: "row g-3",
                             containers: [
@@ -824,10 +830,9 @@ export const ultraComplexForm: DynamicFormContainerConfig = {
                         },
                         {
                             type: "accordion",
-                            name: "Configuración Avanzada",
                             containers: [
                                 {
-                                    name: "Disponibilidad",
+                                    label: "Disponibilidad",
                                     containers: [
                                         {
                                             fields: [
@@ -864,7 +869,7 @@ export const ultraComplexForm: DynamicFormContainerConfig = {
                                                                 new Date();
                                                             return (
                                                                 selectedDate >=
-                                                                    today ||
+                                                                today ||
                                                                 "La fecha debe ser futura"
                                                             );
                                                         },
@@ -930,7 +935,7 @@ export const ultraComplexForm: DynamicFormContainerConfig = {
                                     ],
                                 },
                                 {
-                                    name: "Movilidad y Relocalización",
+                                    label: "Movilidad y Relocalización",
                                     containers: [
                                         {
                                             fields: [
@@ -991,21 +996,21 @@ export const ultraComplexForm: DynamicFormContainerConfig = {
 
                 // === CUARTO STEP: DOCUMENTACIÓN ===
                 {
-                    name: "Documentación",
+                    label: "Documentación",
                     containers: [
                         {
                             type: "tabs",
                             styleClass: "mb-4",
                             containers: [
                                 {
-                                    name: "Documentos Opcionales",
+                                    label: "Documentos Opcionales",
                                     contentStyleClass: "row g-3",
                                     containers: [
                                         {
                                             type: "accordion",
                                             containers: [
                                                 {
-                                                    name: "Portafolio",
+                                                    label: "Portafolio",
                                                     containers: [
                                                         {
                                                             fields: [
@@ -1023,7 +1028,7 @@ export const ultraComplexForm: DynamicFormContainerConfig = {
                                                     ],
                                                 },
                                                 {
-                                                    name: "Recomendaciones",
+                                                    label: "Recomendaciones",
                                                     containers: [
                                                         {
                                                             fields: [
@@ -1049,7 +1054,7 @@ export const ultraComplexForm: DynamicFormContainerConfig = {
                         },
                         {
                             type: "card",
-                            name: "Biografía y Presentación",
+                            label: "Biografía y Presentación",
                             styleClass: "mb-4",
                             containers: [
                                 {
@@ -1088,11 +1093,11 @@ export const ultraComplexForm: DynamicFormContainerConfig = {
 
                 // === QUINTO STEP: CUENTA Y SEGURIDAD ===
                 {
-                    name: "Cuenta y Seguridad",
+                    label: "Cuenta y Seguridad",
                     containers: [
                         {
                             type: "card",
-                            name: "Configuración de la Cuenta",
+                            label: "Configuración de la Cuenta",
                             styleClass: "mb-4",
                             contentStyleClass: "row g-3",
                             containers: [
@@ -1151,8 +1156,8 @@ export const ultraComplexForm: DynamicFormContainerConfig = {
                                                     "Confirma tu contraseña",
                                                 validate: (value, formValues) =>
                                                     value ===
-                                                        formValues.cuenta
-                                                            ?.password ||
+                                                    formValues.cuenta
+                                                        ?.password ||
                                                     "Las contraseñas no coinciden",
                                             },
                                         },
@@ -1173,7 +1178,7 @@ export const ultraComplexForm: DynamicFormContainerConfig = {
                             name: "configuracionSeguridad",
                             containers: [
                                 {
-                                    name: "Configuración de Seguridad",
+                                    label: "Configuración de Seguridad",
                                     containers: [
                                         {
                                             fields: [
@@ -1227,7 +1232,7 @@ export const ultraComplexForm: DynamicFormContainerConfig = {
                                     ],
                                 },
                                 {
-                                    name: "Privacidad y Comunicaciones",
+                                    label: "Privacidad y Comunicaciones",
                                     containers: [
                                         {
                                             fields: [
@@ -1262,11 +1267,11 @@ export const ultraComplexForm: DynamicFormContainerConfig = {
 
                 // === SEXTO STEP: TÉRMINOS Y FINALIZACIÓN ===
                 {
-                    name: "Términos y Finalización",
+                    label: "Términos y Finalización",
                     containers: [
                         {
                             type: "card",
-                            name: "Términos y Condiciones",
+                            label: "Términos y Condiciones",
                             styleClass: "mb-4",
                             containers: [
                                 {
@@ -1331,7 +1336,7 @@ Toda la información proporcionada será tratada con la máxima confidencialidad
                         },
                         {
                             type: "card",
-                            name: "Confirmación Final",
+                            label: "Confirmación Final",
                             styleClass: "mb-4 bg-light",
                             containers: [
                                 {
@@ -1369,6 +1374,7 @@ Toda la información proporcionada será tratada con la máxima confidencialidad
                                 },
                             ],
                         },
+                        { ...fieldArrayDemo },
                     ],
                 },
             ],

@@ -147,5 +147,9 @@ export class InventoryService extends BaseApiService {
   async usersSuppliesStockReport() {
     return await this.httpClient.get(`medical/users/supplies/stock/report`);
   }
+
+  async inventoryMovementReport() {
+    return await this.httpClient.get(`api/v1/admin/inventories/report`);
+  }
 }
 export default InventoryService;

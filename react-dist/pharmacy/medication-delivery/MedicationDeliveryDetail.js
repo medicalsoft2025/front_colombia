@@ -55,7 +55,9 @@ export const MedicationDeliveryDetail = ({
   const {
     productsWithAvailableStock,
     fetchProductsWithAvailableStock
-  } = useProductsWithAvailableStock();
+  } = useProductsWithAvailableStock({
+    stockType: "pharmacy_product_stock"
+  });
   const {
     toast,
     showSuccessToast,
@@ -568,85 +570,76 @@ export const MedicationDeliveryDetail = ({
     }, {
       field: "status",
       header: "Estado",
-      body: deposit => /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("div", {
-        className: "mb-2"
-      }, getDeliveryStatusBadges(deposit)), /*#__PURE__*/React.createElement("div", {
-        className: "mb-3"
-      }, deposit.verification_description || "--"), deposit.verification_status === "STOCK_NOT_ENOUGH" && /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("div", {
-        className: "d-flex flex-column gap-2"
-      }, /*#__PURE__*/React.createElement("label", {
-        htmlFor: "quantity",
-        className: "form-label"
-      }, "Cantidad a entregar"), /*#__PURE__*/React.createElement(InputNumber, {
-        value: deposit.quantity_to_deliver,
-        max: deposit.available_stock,
-        min: 1,
-        onValueChange: e => {
-          console.log(e.value, deposit.available_stock);
-          if (e.value && deposit.available_stock && e.value > deposit.available_stock) {
-            updateMedication(medications.indexOf(deposit) || 0, {
-              ...deposit,
-              quantity_to_deliver: deposit.available_stock
-            });
-          } else {
-            updateMedication(medications.indexOf(deposit) || 0, {
-              ...deposit,
-              quantity_to_deliver: e.value || 0
-            });
-          }
-        }
-      }))), deposit.verification_status === "PRODUCT_NOT_FOUND" && /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement(Dropdown, {
-        options: productsWithAvailableStock,
-        optionLabel: "name",
-        value: deposit.product,
-        onChange: e => {
-          if (e.value) {
-            console.log(e.value);
-            updateMedication(medications.indexOf(deposit) || 0, {
-              ...deposit,
-              product: e.value,
-              product_id: e.value.id,
-              sale_price: e.value.sale_price,
-              quantity_to_deliver: Math.min(e.value.pharmacy_product_stock, deposit.quantity)
-            });
-          } else {
-            updateMedication(medications.indexOf(deposit) || 0, {
-              ...deposit,
-              product: null,
-              product_id: null,
-              sale_price: 0,
-              quantity_to_deliver: 0
-            });
-          }
-        },
-        showClear: true,
-        filter: true,
-        placeholder: "Seleccione del inventario",
-        className: "w-100"
-      }), deposit.product && deposit.product.pharmacy_product_stock < deposit.quantity && /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement(Divider, null), /*#__PURE__*/React.createElement("p", null, "No hay stock suficiente para la cantidad solicitada. Solo hay", " ", deposit.product.pharmacy_product_stock, " ", "unidades disponibles. Si desea hacer una entrega parcial, por favor ingrese la cantidad a entregar."), /*#__PURE__*/React.createElement("div", {
-        className: "mb-2"
-      }, /*#__PURE__*/React.createElement("label", {
-        htmlFor: "quantity",
-        className: "form-label"
-      }, "Cantidad a entregar"), /*#__PURE__*/React.createElement(InputNumber, {
-        value: deposit.quantity_to_deliver,
-        max: deposit.available_stock,
-        min: 1,
-        onValueChange: e => {
-          console.log(e.value, deposit.available_stock);
-          if (e.value && deposit.available_stock && e.value > deposit.available_stock) {
-            updateMedication(medications.indexOf(deposit) || 0, {
-              ...deposit,
-              quantity_to_deliver: deposit.available_stock
-            });
-          } else {
-            updateMedication(medications.indexOf(deposit) || 0, {
-              ...deposit,
-              quantity_to_deliver: e.value || 0
-            });
-          }
-        }
-      })))))
+      body: deposit => {
+        const index = medications.findIndex(m => m.identifier === deposit.identifier);
+        const totalInventoryStock = deposit.available_stock || 0;
+        const usedInOtherRows = medications.filter((m, i) => i !== index && m.product_id === deposit.product_id && deposit.product_id !== null).reduce((sum, m) => sum + (m.quantity_to_deliver || 0), 0);
+        const remainingStock = Math.max(0, totalInventoryStock - usedInOtherRows);
+        const handleQuantityChange = val => {
+          const newQuantity = Math.min(val ?? 0, remainingStock);
+          updateMedication(index !== -1 ? index : 0, {
+            ...deposit,
+            quantity_to_deliver: newQuantity
+          });
+        };
+        return /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("div", {
+          className: "mb-2"
+        }, getDeliveryStatusBadges(deposit)), /*#__PURE__*/React.createElement("div", {
+          className: "mb-3"
+        }, deposit.verification_status === "STOCK_NOT_ENOUGH" || deposit.product && deposit.product.pharmacy_product_stock < deposit.quantity ? /*#__PURE__*/React.createElement("span", null, "No hay stock suficiente para la cantidad solicitada. Solo hay ", remainingStock, " unidades disponibles despu\xE9s de considerar otros \xEDtems.") : deposit.verification_description || "--"), deposit.verification_status === "STOCK_NOT_ENOUGH" && /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("div", {
+          className: "d-flex flex-column gap-2"
+        }, /*#__PURE__*/React.createElement("label", {
+          htmlFor: "quantity",
+          className: "form-label"
+        }, "Cantidad a entregar"), /*#__PURE__*/React.createElement(InputNumber, {
+          value: deposit.quantity_to_deliver,
+          max: remainingStock,
+          min: 0,
+          onValueChange: e => handleQuantityChange(e.value)
+        }))), deposit.verification_status === "PRODUCT_NOT_FOUND" && /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement(Dropdown, {
+          options: productsWithAvailableStock,
+          optionLabel: "name",
+          value: deposit.product,
+          onChange: e => {
+            if (e.value) {
+              const newTotalStock = e.value.pharmacy_product_stock;
+              const newUsedInOtherRows = medications.filter((m, i) => i !== index && m.product_id === e.value.id.toString()).reduce((sum, m) => sum + (m.quantity_to_deliver || 0), 0);
+              const newRemainingStock = Math.max(0, newTotalStock - newUsedInOtherRows);
+              updateMedication(index !== -1 ? index : 0, {
+                ...deposit,
+                product: e.value,
+                product_id: e.value.id.toString(),
+                sale_price: e.value.sale_price,
+                available_stock: newTotalStock,
+                quantity_to_deliver: Math.min(newRemainingStock, deposit.quantity)
+              });
+            } else {
+              updateMedication(index !== -1 ? index : 0, {
+                ...deposit,
+                product: null,
+                product_id: null,
+                sale_price: 0,
+                available_stock: 0,
+                quantity_to_deliver: 0
+              });
+            }
+          },
+          showClear: true,
+          filter: true,
+          placeholder: "Seleccione del inventario",
+          className: "w-100"
+        }), deposit.product && deposit.product.pharmacy_product_stock < deposit.quantity && /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement(Divider, null), /*#__PURE__*/React.createElement("p", null, "No hay stock suficiente para la cantidad solicitada. Solo hay ", remainingStock, " unidades disponibles despu\xE9s de considerar otros \xEDtems."), /*#__PURE__*/React.createElement("div", {
+          className: "mb-2"
+        }, /*#__PURE__*/React.createElement("label", {
+          htmlFor: "quantity",
+          className: "form-label"
+        }, "Cantidad a entregar"), /*#__PURE__*/React.createElement(InputNumber, {
+          value: deposit.quantity_to_deliver,
+          max: remainingStock,
+          min: 0,
+          onValueChange: e => handleQuantityChange(e.value)
+        })))));
+      }
     }],
     disablePaginator: true,
     disableSearch: true,

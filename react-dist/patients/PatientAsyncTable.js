@@ -41,9 +41,11 @@ export const PatientAsyncTable = () => {
     }
   });
   const [rowPatient, setRowPatient] = useState(null);
-  useEffect(() => {
-    fetchPatientsByFilters({});
-  }, []);
+
+  // useEffect(() => {
+  //   fetchPatientsByFilters({});
+  // }, []);
+
   const handlePageChange = page => {
     const calculatedPage = Math.floor(page.first / page.rows) + 1;
     setFirst(page.first);

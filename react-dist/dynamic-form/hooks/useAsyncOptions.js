@@ -1,0 +1,149 @@
+import { useState, useEffect, useRef, useMemo } from "react";
+import { useFormContext, useWatch } from "react-hook-form";
+import { getValueByPath } from "../../../services/utilidades.js";
+export const useAsyncOptions = ({
+  config,
+  fieldName
+}) => {
+  const {
+    control,
+    setValue,
+    getValues
+  } = useFormContext();
+  const [options, setOptions] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const resolveWildcardPath = (genericPath, specificFieldPath) => {
+    if (!genericPath.includes("*")) return genericPath;
+    const genericParts = genericPath.split(".");
+    const specificParts = specificFieldPath.split(".");
+
+    // If wildcard structure doesn't match roughly, try best effort or return generic
+    // Assuming genericPath and specificFieldPath align in hierarchy
+    // OR, simply replace '*' with corresponding index from specificFieldPath if available
+
+    return genericParts.map((part, index) => {
+      if (part === "*" && specificParts[index]) {
+        // If the specific part is a number (index), use it
+        if (/^\d+$/.test(specificParts[index])) {
+          return specificParts[index];
+        }
+      }
+      return part;
+    }).join(".");
+  };
+  const rawDependencies = useMemo(() => {
+    const deps = config?.params?.filter(p => p.source === "field").map(p => p.value) || [];
+    if (config?.dependsOn && !deps.includes(config.dependsOn)) {
+      deps.push(config.dependsOn);
+    }
+    return deps;
+  }, [config]);
+  const fieldDependencies = useMemo(() => {
+    return rawDependencies.map(dep => resolveWildcardPath(dep, fieldName));
+  }, [rawDependencies, fieldName]);
+  const watchedValues = useWatch({
+    control,
+    name: fieldDependencies
+  });
+  const currentDependencyValues = {};
+  if (fieldDependencies.length > 0) {
+    fieldDependencies.forEach((depName, index) => {
+      currentDependencyValues[depName] = Array.isArray(watchedValues) ? watchedValues[index] : watchedValues;
+    });
+  }
+  const hasFetched = useRef(false);
+  useEffect(() => {
+    if (!config) return;
+    if (config.dependsOn && !currentDependencyValues[resolveWildcardPath(config.dependsOn, fieldName)]) {
+      setOptions([]);
+      return;
+    }
+    if (config.dependsOn && !currentDependencyValues[resolveWildcardPath(config.dependsOn, fieldName)]) {
+      setOptions([]);
+      return;
+    }
+    const resolveParamValue = param => {
+      if (param.source === "static") return param.value;
+      if (param.source === "url") {
+        const searchParams = new URLSearchParams(window.location.search);
+        return searchParams.get(param.value);
+      }
+      if (param.source === "field") {
+        // Resolve the generic path (e.g. phones.*.country) to specific (phones.0.country)
+        const resolvedKey = resolveWildcardPath(param.value, fieldName);
+        return currentDependencyValues[resolvedKey];
+      }
+      return null;
+    };
+    const fetchOptions = async () => {
+      setLoading(true);
+      try {
+        let url = config.endpoint;
+        let queryParams = new URLSearchParams();
+        let bodyParams = {};
+        if (config.params) {
+          config.params.forEach(param => {
+            const val = resolveParamValue(param);
+            if (val === null || val === undefined || val === "") return;
+            const location = param.location || (config.method === "POST" ? "body" : "query");
+            if (location === "path") {
+              const placeholder = `:${param.key}`;
+              if (url.includes(placeholder)) {
+                url = url.replace(placeholder, String(val));
+              } else {
+                url = url.replace(/\/+$/, "");
+                url = `${url}/${val}`;
+              }
+            } else if (location === "body") {
+              bodyParams[param.key] = val;
+            } else {
+              queryParams.append(param.key, String(val));
+            }
+          });
+        }
+        if (config.dependsOn && config.paramKey) {
+          const val = currentDependencyValues[resolveWildcardPath(config.dependsOn, fieldName)];
+          if (val) queryParams.append(config.paramKey, String(val));
+        }
+        const qs = queryParams.toString();
+        if (qs) {
+          url += (url.includes("?") ? "&" : "?") + qs;
+        }
+        const fetchOptions = {
+          method: config.method || "GET",
+          headers: {
+            "Content-Type": "application/json",
+            ...(config.headers || {})
+          }
+        };
+        if (config.method === "POST" || config.method === "PUT") {
+          fetchOptions.body = JSON.stringify(bodyParams);
+        }
+        const response = await fetch(url, fetchOptions);
+        if (!response.ok) throw new Error("Error fetching options");
+        const data = await response.json();
+        const items = Array.isArray(data) ? data : [];
+        setOptions(items.map(item => ({
+          label: getValueByPath(item, config.labelKey) || item[config.labelKey],
+          value: getValueByPath(item, config.valueKey) || item[config.valueKey]
+        })));
+      } catch (error) {
+        console.error(error);
+        setOptions([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+    if (hasFetched.current) {
+      if (fieldDependencies.length > 0) {
+        setValue(fieldName, null);
+      }
+    }
+    fetchOptions();
+    hasFetched.current = true;
+  }, [config?.endpoint, JSON.stringify(currentDependencyValues), JSON.stringify(config?.params)]);
+  return {
+    options,
+    loading
+  };
+};

@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { farmaciaService } from "../../../services/api";
 import { ProductDto } from "../../models/models";
 
-export const useProductsWithAvailableStock = () => {
+export const useProductsWithAvailableStock = ({ stockType = "product_stock" }: { stockType?: string }) => {
     const [productsWithAvailableStock, setProductsWithAvailableStock] = useState<ProductDto[]>([]);
     const [loading, setLoading] = useState(false);
 
@@ -15,8 +15,8 @@ export const useProductsWithAvailableStock = () => {
                 return {
                     id: product.id,
                     name: concentration
-                        ? `${product.attributes.name} - ${concentration} | Stock: ${product.attributes.product_stock}`
-                        : `${product.attributes.name} | Stock: ${product.attributes.product_stock}`,
+                        ? `${product.attributes.name} - ${concentration} | Stock: ${product.attributes[stockType]}`
+                        : `${product.attributes.name} | Stock: ${product.attributes[stockType]}`,
                     product_stock: product.attributes.product_stock,
                     pharmacy_product_stock: product.attributes.pharmacy_product_stock,
                     sale_price: product.attributes.sale_price,
