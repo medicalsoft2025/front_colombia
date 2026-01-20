@@ -30,7 +30,8 @@ const DebouncedSelect = ({
     showClear: field.showClear,
     disabled: commonProps.disabled || loading,
     placeholder: loading ? "Cargando..." : commonProps.placeholder,
-    emptyMessage: emptyMessage
+    emptyMessage: emptyMessage,
+    filter: true
   }));
 };
 export const DynamicSelect = ({

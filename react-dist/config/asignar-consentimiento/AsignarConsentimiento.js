@@ -10,9 +10,9 @@ import { Button } from "primereact/button";
 import { CustomPRTableMenu } from "../../components/CustomPRTableMenu.js";
 import { SwalManager } from "../../../services/alertManagerImported.js";
 import { consentimientoService } from "../../../services/api/index.js";
-import { getIndicativeByCountry } from "../../../services/utilidades.js";
+import { getAge, getIndicativeByCountry } from "../../../services/utilidades.js";
 import { useMassMessaging } from "../../hooks/useMassMessaging.js";
-import { patientService } from "../../../services/api/index.js";
+import { useTemplateBuilded } from "../../hooks/useTemplateBuilded.js";
 const AsignarConsentimiento = () => {
   const [patientId, setPatientId] = useState("");
   const toast = useRef(null);
@@ -42,6 +42,10 @@ const AsignarConsentimiento = () => {
   const {
     sendMessage: sendMessageWpp
   } = useMassMessaging();
+  const {
+    fetchTemplate,
+    switchTemplate
+  } = useTemplateBuilded();
   const sendMessageWppRef = useRef(sendMessageWpp);
   useEffect(() => {
     sendMessageWppRef.current = sendMessageWpp;
@@ -498,12 +502,12 @@ const AsignarConsentimiento = () => {
   };
 
   // Función para generar la URL pública
-  const generatePublicSignatureUrl = async (documentId, documentTitle) => {
+  const generatePublicSignatureUrl = async (document, documentTitle) => {
     try {
       // Crear objeto con los datos
       const signatureData = {
-        docId: documentId,
-        patId: patientId,
+        docId: document.id,
+        patId: document.patient_id,
         title: documentTitle,
         timestamp: Date.now(),
         expires: Date.now() + 24 * 60 * 60 * 1000,
@@ -519,9 +523,28 @@ const AsignarConsentimiento = () => {
 
       // Generar URL
       const baseUrl = window.location.origin;
-      const publicUrl = `${baseUrl}/firmar-publico?d=${encryptedData}`;
-      const patientData = await patientService.get(patientId);
-      sendMessageWhatsapp(patientData, publicUrl);
+      const publicUrl = `${baseUrl}/publicSignature?d=${encryptedData}`;
+      const tenant = window.location.hostname.split(".")[0];
+      const data = {
+        tenantId: tenant,
+        belongsTo: "consentimientos-compartir",
+        type: "whatsapp"
+      };
+      const template = await fetchTemplate(data);
+      const dataToReplace = {
+        full_name_patient: `${document.patient.first_name ?? ""} ${document.patient.middle_name ?? ""} ${document.patient.last_name ?? ""} ${document.patient.second_last_name ?? ""}`,
+        full_name_doctor: `${document.doctor.first_name ?? ""} ${document.doctor.middle_name ?? ""} ${document.doctor.last_name ?? ""} ${document.doctor.second_last_name ?? ""}`,
+        age_patient: getAge(document.patient.date_of_birth),
+        birthdate_patient: document.patient.date_of_birth,
+        current_date: new Date().toLocaleDateString(),
+        phone_patient: document.patient.whatsapp,
+        email_patient: document.patient.email,
+        city_patient: document.patient.city_id,
+        document_patient: document.patient.document_number,
+        url_consent: publicUrl
+      };
+      const finishTemplate = await switchTemplate(template.template, "consents", dataToReplace);
+      sendMessageWhatsapp(document.patient, finishTemplate);
       toast.current?.show({
         severity: "success",
         summary: "URL Generada",
@@ -570,7 +593,7 @@ const AsignarConsentimiento = () => {
     icon: /*#__PURE__*/React.createElement("i", {
       className: "fas fa-paper-plane me-2"
     }),
-    command: () => generatePublicSignatureUrl(rowData.id, rowData.titulo || "Documento"),
+    command: () => generatePublicSignatureUrl(rowData, rowData.titulo || "Documento"),
     visible: !rowData.firmado
   }, {
     label: "Eliminar",

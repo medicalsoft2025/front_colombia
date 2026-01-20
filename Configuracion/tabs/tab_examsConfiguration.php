@@ -5,15 +5,10 @@
 </div>
 
 <script type="module">
-    import React from "react"
-    import ReactDOMClient from "react-dom/client"
     import {
         ExamConfigApp
     } from './react-dist/exams-config/ExamConfigApp.js';
-    import {
-        ExamCategoryApp
-    } from './react-dist/exam-categories/ExamCategoryApp.js';
+    import { renderApp } from './services/react/app-renderer.js';
 
-    ReactDOMClient.createRoot(document.getElementById('examsConfigReact')).render(React.createElement(ExamConfigApp));
-    // ReactDOMClient.createRoot(document.getElementById('examsCategoriesReact')).render(React.createElement(ExamCategoryApp));
+    renderApp(ExamConfigApp, 'examsConfigReact');
 </script>

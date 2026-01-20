@@ -5,7 +5,49 @@ import { Button } from "primereact/button";
 import { FormProvider } from "../../providers/FormProvider.js";
 import { DynamicFormContainer } from "./DynamicFormContainer.js";
 import { useFieldConditions } from "../../hooks/useFieldConditions.js";
-import { useFormContext } from "../../context/FormContext.js";
+import { useFormContext } from "../../context/FormContext.js"; // Componente celda extraido para permitir el uso correcto de hooks
+const DynamicTableArrayCell = ({
+  colNode,
+  rowData,
+  fields,
+  form,
+  parentPath
+}) => {
+  // Calcular index real basado en el ID del field array
+  const realIndex = fields.findIndex(f => f.id === rowData.id);
+
+  // Hooks ahora se ejecutan incondicionalmente dentro del componente
+  const {
+    fieldStates
+  } = useFieldConditions({
+    config: colNode,
+    form,
+    basePath: `${parentPath}.${realIndex}`
+    // Importante: pasar un key único o asegurar que basePath cambia
+  });
+  const parentContext = useFormContext();
+  const mergedFieldStates = {
+    ...parentContext.fieldStates,
+    ...fieldStates
+  };
+
+  // Si no encontramos el index (e.g. durante borrado), retornar null o fallback
+  if (realIndex === -1) return null;
+  return /*#__PURE__*/React.createElement(FormProvider, {
+    value: {
+      fieldStates: mergedFieldStates,
+      form: form,
+      setFieldState: parentContext.setFieldState,
+      onElementSelect: parentContext.onElementSelect,
+      sources: parentContext.sources
+    }
+  }, /*#__PURE__*/React.createElement(DynamicFormContainer, {
+    config: colNode,
+    form: form,
+    parentPath: `${parentPath}.${realIndex}`,
+    className: "w-full"
+  }));
+};
 export const DynamicTableArray = ({
   config,
   form,
@@ -44,33 +86,16 @@ export const DynamicTableArray = ({
     type: "button",
     size: "small"
   }));
+
+  // Wrapper para el body template que renderiza el componente Cell
   const cellBodyTemplate = colNode => rowData => {
-    const realIndex = getRealIndex(rowData);
-    const {
-      fieldStates
-    } = useFieldConditions({
-      config: config || colNode,
-      form,
-      basePath: `${parentPath}.${realIndex}`
-    });
-    const parentContext = useFormContext();
-    const mergedFieldStates = {
-      ...parentContext.fieldStates,
-      ...fieldStates
-    };
-    return /*#__PURE__*/React.createElement(FormProvider, {
-      value: {
-        fieldStates: mergedFieldStates,
-        form: form,
-        setFieldState: parentContext.setFieldState,
-        onElementSelect: parentContext.onElementSelect
-      }
-    }, /*#__PURE__*/React.createElement(DynamicFormContainer, {
-      config: colNode,
+    return /*#__PURE__*/React.createElement(DynamicTableArrayCell, {
+      colNode: colNode,
+      rowData: rowData,
+      fields: fields,
       form: form,
-      parentPath: `${parentPath}.${realIndex}`,
-      className: "w-full"
-    }));
+      parentPath: parentPath
+    });
   };
   return /*#__PURE__*/React.createElement("div", {
     className: `dynamic-table-array mb-4 ${config.styleClass || ""}`
@@ -88,6 +113,9 @@ export const DynamicTableArray = ({
       minWidth: '50rem'
     },
     emptyMessage: "No hay registros"
+    // Importante: usar dataKey para estabilidad
+    ,
+    dataKey: "id"
   }, (config?.children || config?.containers)?.map((col, i) => {
     const key = col.name || `col-${i}`;
     const header = col.label || col.name || `Col ${i + 1}`;

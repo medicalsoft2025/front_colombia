@@ -22,13 +22,12 @@ $jsonData = json_encode($remisionesData);
 ?>
 
 <script type="module">
-    import React from "react"
-    import ReactDOMClient from "react-dom/client"
     import {
         RemissionsContent
     } from './react-dist/remissions/RemissionsContent.js';
+    import { renderApp } from "./services/react/app-renderer.js";
 
-    ReactDOMClient.createRoot(document.getElementById('remission-data-content')).render(React.createElement(RemissionsContent));
+    renderApp(RemissionsContent, 'remission-data-content');
 </script>
 
 <style type="text/css">
@@ -108,7 +107,8 @@ $jsonData = json_encode($remisionesData);
                         </li>
                     </ul>
                     <div class="tab-content mt-3" id="myTabContent">
-                        <div class="tab-pane fade show active" id="tab-remisiones" role="tabpanel" aria-labelledby="remisiones-tab">
+                        <div class="tab-pane fade show active" id="tab-remisiones" role="tabpanel"
+                            aria-labelledby="remisiones-tab">
                             <div id="remission-data-content"></div>
                         </div>
                     </div>

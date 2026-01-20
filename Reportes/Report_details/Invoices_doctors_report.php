@@ -14,7 +14,7 @@ include "../../header.php";
         </nav>
         <div class="main-content">
             <div class="component-container">
-        <div id="report-invoices-doctors"></div>
+                <div id="report-invoices-doctors"></div>
             </div>
         </div>
     </div>
@@ -22,13 +22,12 @@ include "../../header.php";
 
 
 <script type="module">
-    import React from "react"
-    import ReactDOMClient from "react-dom/client"
     import {
         SpecialistsReport
     } from './react-dist/reports/InvoicesDoctors.js';
+    import { renderApp } from "./services/react/app-renderer.js";
 
-    ReactDOMClient.createRoot(document.getElementById('report-invoices-doctors')).render(React.createElement(SpecialistsReport));
+    renderApp(SpecialistsReport, 'report-invoices-doctors');
 </script>
 
 <?php

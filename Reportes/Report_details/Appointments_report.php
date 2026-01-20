@@ -16,20 +16,19 @@ include "../../header.php";
         </nav>
         <div class="main-content">
             <div class="component-container">
-        <div id="report-appointments"></div>
+                <div id="report-appointments"></div>
             </div>
         </div>
     </div>
 </div>
 
 <script type="module">
-    import React from "react"
-    import ReactDOMClient from "react-dom/client"
     import {
         Appointments
     } from './react-dist/reports/Appointments.js';
+    import { renderApp } from "./services/react/app-renderer.js";
 
-    ReactDOMClient.createRoot(document.getElementById('report-appointments')).render(React.createElement(Appointments));
+    renderApp(Appointments, 'report-appointments');
 </script>
 
 <?php

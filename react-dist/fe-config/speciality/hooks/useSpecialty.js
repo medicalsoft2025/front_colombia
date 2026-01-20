@@ -1,13 +1,12 @@
 import { useState, useEffect, useRef } from 'react';
 import { FilterMatchMode } from 'primereact/api';
 import { CentralSpecialtyService } from "../../../../services/api/classes/centralSpecialtyService.js";
+import { useUserSpecialties } from "../../../user-specialties/hooks/useUserSpecialties.js";
 export const useSpecialty = () => {
   // State management
   const [specialties, setSpecialties] = useState([]);
-  const [currentSpecialties, setCurrentSpecialties] = useState([]);
   const [clinicalRecordTypes, setClinicalRecordTypes] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [loadingCurrentSpecialties, setLoadingCurrentSpecialties] = useState(false);
   const [showConfigModal, setShowConfigModal] = useState(false);
   const [selectedSpecialty, setSelectedSpecialty] = useState(null);
   const [selectedAntecedent, setSelectedAntecedent] = useState(null);
@@ -26,6 +25,11 @@ export const useSpecialty = () => {
       matchMode: FilterMatchMode.CONTAINS
     }
   });
+  const {
+    userSpecialties: currentSpecialties,
+    fetchUserSpecialties: loadCurrentSpecialties,
+    loading: loadingCurrentSpecialties
+  } = useUserSpecialties();
   const toast = useRef(null);
 
   // Utility functions
@@ -67,20 +71,6 @@ export const useSpecialty = () => {
     } catch (error) {
       console.error('Error loading specialties:', error);
       throw error;
-    }
-  };
-  const loadCurrentSpecialties = async () => {
-    try {
-      setLoadingCurrentSpecialties(true);
-      const response = await fetch(`${getApiUrl()}/medical/user-specialties`);
-      if (!response.ok) throw new Error('Error loading current specialties');
-      const data = await response.json();
-      setCurrentSpecialties(data);
-    } catch (error) {
-      console.error('Error loading current specialties:', error);
-      throw error;
-    } finally {
-      setLoadingCurrentSpecialties(false);
     }
   };
   const loadClinicalRecordTypes = async () => {
@@ -233,7 +223,7 @@ export const useSpecialty = () => {
   const loadData = async () => {
     try {
       setLoading(true);
-      await Promise.all([loadSpecialties(), loadCurrentSpecialties(), loadClinicalRecordTypes()]);
+      await Promise.all([loadSpecialties(), loadClinicalRecordTypes()]);
     } catch (error) {
       console.error('Error loading data:', error);
       showError('Error al cargar los datos');

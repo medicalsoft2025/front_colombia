@@ -30,15 +30,12 @@ include "../header.php";
     </div>
 </div>
 <script type="module">
-    import React from "react"
-    import ReactDOMClient from "react-dom/client"
     import {
         NewReceiptBoxTable
     } from './react-dist/accounting/paymentReceipt/NewReceiptBoxTable.js';
+    import { renderApp } from "./services/react/app-renderer.js";
 
-    ReactDOMClient.createRoot(document.getElementById('NewReceiptBoxTable')).render(
-        React.createElement(NewReceiptBoxTable)
-    );
+    renderApp(NewReceiptBoxTable, "NewReceiptBoxTable");
 </script>
 <?php
 include "../footer.php";

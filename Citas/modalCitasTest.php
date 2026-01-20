@@ -10,19 +10,15 @@ include "../header.php";
 </div>
 
 <script type="module">
-    import React from "react";
-    import ReactDOMClient from "react-dom/client";
     import {
         AppointmentFormModal
     } from './react-dist/appointments/AppointmentFormModal.js';
+    import { renderApp } from "./services/react/app-renderer.js";
 
-    const appointmentFormModalRef = React.createRef();
-
-    const rootElement = document.getElementById('appointmentModalRoot');
-    ReactDOMClient.createRoot(rootElement).render(React.createElement(AppointmentFormModal, {
+    renderApp(AppointmentFormModal, "appointmentModalRoot", {
         isOpen: true,
-        onClose: () => {}
-    }));
+        onClose: () => { }
+    });
 </script>
 
 <?php include "../footer.php"; ?>

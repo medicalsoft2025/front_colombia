@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef, useMemo } from "react";
-import { useFormContext, useWatch } from "react-hook-form";
+import { useFormContext as useRHFFormContext, useWatch } from "react-hook-form";
 import { getValueByPath } from "../../../services/utilidades.js";
+import { useFormContext as useCustomFormContext } from "../context/FormContext.js";
 export const useAsyncOptions = ({
   config,
   fieldName
@@ -9,7 +10,10 @@ export const useAsyncOptions = ({
     control,
     setValue,
     getValues
-  } = useFormContext();
+  } = useRHFFormContext();
+  const {
+    sources
+  } = useCustomFormContext();
   const [options, setOptions] = useState([]);
   const [loading, setLoading] = useState(false);
   const resolveWildcardPath = (genericPath, specificFieldPath) => {
@@ -78,55 +82,84 @@ export const useAsyncOptions = ({
     const fetchOptions = async () => {
       setLoading(true);
       try {
-        let url = config.endpoint;
-        let queryParams = new URLSearchParams();
-        let bodyParams = {};
-        if (config.params) {
-          config.params.forEach(param => {
-            const val = resolveParamValue(param);
-            if (val === null || val === undefined || val === "") return;
-            const location = param.location || (config.method === "POST" ? "body" : "query");
-            if (location === "path") {
-              const placeholder = `:${param.key}`;
-              if (url.includes(placeholder)) {
-                url = url.replace(placeholder, String(val));
-              } else {
-                url = url.replace(/\/+$/, "");
-                url = `${url}/${val}`;
+        // NEW: Check if sourceKey is defined and a corresponding source exists
+        if (config.sourceKey && sources && sources[config.sourceKey]) {
+          const fetcher = sources[config.sourceKey];
+
+          // Build params object for the custom fetcher
+          const fetcherParams = {};
+          if (config.params) {
+            config.params.forEach(param => {
+              const val = resolveParamValue(param);
+              if (val !== null && val !== undefined && val !== "") {
+                fetcherParams[param.key] = val;
               }
-            } else if (location === "body") {
-              bodyParams[param.key] = val;
-            } else {
-              queryParams.append(param.key, String(val));
-            }
-          });
-        }
-        if (config.dependsOn && config.paramKey) {
-          const val = currentDependencyValues[resolveWildcardPath(config.dependsOn, fieldName)];
-          if (val) queryParams.append(config.paramKey, String(val));
-        }
-        const qs = queryParams.toString();
-        if (qs) {
-          url += (url.includes("?") ? "&" : "?") + qs;
-        }
-        const fetchOptions = {
-          method: config.method || "GET",
-          headers: {
-            "Content-Type": "application/json",
-            ...(config.headers || {})
+            });
           }
-        };
-        if (config.method === "POST" || config.method === "PUT") {
-          fetchOptions.body = JSON.stringify(bodyParams);
+          if (config.dependsOn && config.paramKey) {
+            const val = currentDependencyValues[resolveWildcardPath(config.dependsOn, fieldName)];
+            if (val) fetcherParams[config.paramKey] = val;
+          }
+
+          // Call the custom fetcher
+          const data = await fetcher(fetcherParams);
+          const items = Array.isArray(data) ? data : [];
+          setOptions(items.map(item => ({
+            label: getValueByPath(item, config.labelKey) || item[config.labelKey],
+            value: getValueByPath(item, config.valueKey) || item[config.valueKey]
+          })));
+        } else if (config.endpoint) {
+          // EXISTING: Fetch from endpoint
+          let url = config.endpoint;
+          let queryParams = new URLSearchParams();
+          let bodyParams = {};
+          if (config.params) {
+            config.params.forEach(param => {
+              const val = resolveParamValue(param);
+              if (val === null || val === undefined || val === "") return;
+              const location = param.location || (config.method === "POST" ? "body" : "query");
+              if (location === "path") {
+                const placeholder = `:${param.key}`;
+                if (url.includes(placeholder)) {
+                  url = url.replace(placeholder, String(val));
+                } else {
+                  url = url.replace(/\/+$/, "");
+                  url = `${url}/${val}`;
+                }
+              } else if (location === "body") {
+                bodyParams[param.key] = val;
+              } else {
+                queryParams.append(param.key, String(val));
+              }
+            });
+          }
+          if (config.dependsOn && config.paramKey) {
+            const val = currentDependencyValues[resolveWildcardPath(config.dependsOn, fieldName)];
+            if (val) queryParams.append(config.paramKey, String(val));
+          }
+          const qs = queryParams.toString();
+          if (qs) {
+            url += (url.includes("?") ? "&" : "?") + qs;
+          }
+          const fetchOptions = {
+            method: config.method || "GET",
+            headers: {
+              "Content-Type": "application/json",
+              ...(config.headers || {})
+            }
+          };
+          if (config.method === "POST" || config.method === "PUT") {
+            fetchOptions.body = JSON.stringify(bodyParams);
+          }
+          const response = await fetch(url, fetchOptions);
+          if (!response.ok) throw new Error("Error fetching options");
+          const data = await response.json();
+          const items = Array.isArray(data) ? data : [];
+          setOptions(items.map(item => ({
+            label: getValueByPath(item, config.labelKey) || item[config.labelKey],
+            value: getValueByPath(item, config.valueKey) || item[config.valueKey]
+          })));
         }
-        const response = await fetch(url, fetchOptions);
-        if (!response.ok) throw new Error("Error fetching options");
-        const data = await response.json();
-        const items = Array.isArray(data) ? data : [];
-        setOptions(items.map(item => ({
-          label: getValueByPath(item, config.labelKey) || item[config.labelKey],
-          value: getValueByPath(item, config.valueKey) || item[config.valueKey]
-        })));
       } catch (error) {
         console.error(error);
         setOptions([]);
@@ -141,7 +174,7 @@ export const useAsyncOptions = ({
     }
     fetchOptions();
     hasFetched.current = true;
-  }, [config?.endpoint, JSON.stringify(currentDependencyValues), JSON.stringify(config?.params)]);
+  }, [config?.endpoint, config?.sourceKey, JSON.stringify(currentDependencyValues), JSON.stringify(config?.params)]);
   return {
     options,
     loading

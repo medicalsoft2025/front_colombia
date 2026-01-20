@@ -10,6 +10,7 @@ import { Dialog } from "primereact/dialog";
 import { classNames } from "primereact/utils";
 import { TreeSelect } from "primereact/treeselect";
 import { JsonHelpers } from "../../helpers/JsonHelpers.js";
+import { InputTextarea } from "primereact/inputtextarea";
 /**
  * Helper to get field properties considering rules
  */
@@ -127,6 +128,15 @@ const ConfigFieldRenderer = ({
             "p-invalid": !!error
           }, "w-100")
         });
+      case "textarea":
+        return /*#__PURE__*/React.createElement(InputTextarea, {
+          value: value || "",
+          onChange: e => handleFieldChange(e.target.value),
+          placeholder: currentField.placeholder,
+          className: classNames({
+            "p-invalid": !!error
+          }, "w-100")
+        });
       case "number":
         return /*#__PURE__*/React.createElement(InputNumber, {
           value: value,
@@ -147,7 +157,8 @@ const ConfigFieldRenderer = ({
           placeholder: currentField.placeholder || "Seleccionar",
           className: classNames({
             "p-invalid": !!error
-          }, "w-100")
+          }, "w-100"),
+          filter: true
         });
       case "checkbox":
         return /*#__PURE__*/React.createElement("div", {
@@ -201,11 +212,11 @@ const ConfigFieldRenderer = ({
     className: "field mb-3"
   }, computed.inputType !== "checkbox" && /*#__PURE__*/React.createElement("label", {
     htmlFor: computed.key,
-    className: "block mb-1 font-bold"
+    className: "d-block mb-1 font-bold"
   }, computed.label, " ", computed.required && /*#__PURE__*/React.createElement("span", {
     className: "text-red-500"
   }, "*")), computed.description && /*#__PURE__*/React.createElement("small", {
-    className: "block text-gray-500 mb-2"
+    className: "d-block text-gray-500 mb-2"
   }, computed.description), renderInput(), error && /*#__PURE__*/React.createElement("small", {
     className: "text-red-500 block mt-1"
   }, error));

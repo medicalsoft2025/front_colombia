@@ -8,14 +8,12 @@ include "../header.php";
 </div>
 
 <script type="module">
-    import React from "react";
-    import ReactDOMClient from "react-dom/client";
     import {
         WebCreatorApp
     } from './react-dist/web-creator/WebCreatorApp.js';
+    import { renderApp } from "./services/react/app-renderer.js";
 
-    const rootElement = document.getElementById('creadorPaginasRoot');
-    ReactDOMClient.createRoot(rootElement).render(React.createElement(WebCreatorApp));
+    renderApp(WebCreatorApp, "creadorPaginasRoot");
 </script>
 
 <?php include "../footer.php"; ?>

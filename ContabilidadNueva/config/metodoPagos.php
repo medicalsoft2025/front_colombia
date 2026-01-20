@@ -21,13 +21,12 @@ include "../../header.php";
     </div>
 </div>
 <script type="module">
-    import React from "react"
-    import ReactDOMClient from "react-dom/client"
-    import { PaymentMethodsConfig } from './react-dist/config-accounting/paymentmethods/PaymentMethodsConfig.js';
+    import {
+        PaymentMethodsConfig
+    } from './react-dist/config-accounting/paymentmethods/PaymentMethodsConfig.js';
+    import { renderApp } from "./services/react/app-renderer.js";
 
-    ReactDOMClient.createRoot(document.getElementById('PaymentMethodsConfig')).render(
-        React.createElement(PaymentMethodsConfig)
-    );
+    renderApp(PaymentMethodsConfig, "PaymentMethodsConfig");
 </script>
 <?php
 include "../../footer.php";

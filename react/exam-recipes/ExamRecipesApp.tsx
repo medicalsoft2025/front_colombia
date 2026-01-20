@@ -85,9 +85,11 @@ export const ExamRecipesApp: React.FC = () => {
       .sort((a, b) => parseInt(b.id, 10) - parseInt(a.id, 10))
       .map((prescription: any) => ({
         id: prescription.id,
-        doctor: `${prescription.user.first_name || ""} ${prescription.user.middle_name || ""
-          } ${prescription.user.last_name || ""} ${prescription.user.second_last_name || ""
-          }`,
+        doctor: `${prescription.user.first_name || ""} ${
+          prescription.user.middle_name || ""
+        } ${prescription.user.last_name || ""} ${
+          prescription.user.second_last_name || ""
+        }`,
         exams: prescription.details
           .map((detail) => detail.exam_type.name)
           .join(", "),
@@ -181,15 +183,13 @@ export const ExamRecipesApp: React.FC = () => {
     }
   }
 
-
   const handleAppointmentCreated = () => {
     showSuccessToast({
       title: "Cita creada",
-      message: "La cita se ha creado exitosamente y se ha actualizado la tabla"
+      message: "La cita se ha creado exitosamente y se ha actualizado la tabla",
     });
     setShowAppointmentForm(false);
   };
-
 
   const sendMessageWhatsapp = useCallback(
     async (exam) => {
@@ -197,9 +197,11 @@ export const ExamRecipesApp: React.FC = () => {
 
       const dataToFile: any = await generatePdfFile(exam);
       const replacements = {
-        NOMBRE_PACIENTE: `${exam.patient.first_name ?? ""} ${exam.patient.middle_name ?? ""
-          } ${exam.patient.last_name ?? ""} ${exam.patient.second_last_name ?? ""
-          }`,
+        NOMBRE_PACIENTE: `${exam.patient.first_name ?? ""} ${
+          exam.patient.middle_name ?? ""
+        } ${exam.patient.last_name ?? ""} ${
+          exam.patient.second_last_name ?? ""
+        }`,
         NOMBRE_EXAMEN: exam.details
           .map((detail) => detail.exam_type.name)
           .join(", "),
@@ -216,7 +218,7 @@ export const ExamRecipesApp: React.FC = () => {
         channel: "whatsapp",
         recipients: [
           getIndicativeByCountry(exam.patient.country_id) +
-          exam.patient.whatsapp,
+            exam.patient.whatsapp,
         ],
         message_type: "media",
         message: templateFormatted,
@@ -314,7 +316,9 @@ export const ExamRecipesApp: React.FC = () => {
           onDownload={() => {
             generarFormato("RecetaExamen", rowData, "Descarga");
           }}
-          onViewResults={() => { seeExamRecipeResults(rowData.resultMinioUrl) }}
+          onViewResults={() => {
+            seeExamRecipeResults(rowData.resultMinioUrl);
+          }}
           onCancel={() => cancelPrescription(rowData.id)}
           onShare={async () => {
             sendMessageWhatsapp(rowData.original);
@@ -343,12 +347,22 @@ export const ExamRecipesApp: React.FC = () => {
         style={{ minHeight: "400px" }}
       >
         <div className="card-body h-100 w-100 d-flex flex-column">
-          <div className="d-flex justify-content-end gap-3 mb-2 botones-responsive" style={{ marginTop: "-5px" }}>
+          <div
+            className="d-flex justify-content-end gap-3 mb-2 botones-responsive"
+            style={{ marginTop: "-5px" }}
+          >
             <Button
               label="Crear Cita"
               className="p-button-primary"
               onClick={() => setShowAppointmentForm(true)}
-            ><i className="fa-solid fa-comment-medical me-2" style={{ marginLeft: "5px" }}>‌</i></Button>
+            >
+              <i
+                className="fa-solid fa-comment-medical me-2"
+                style={{ marginLeft: "5px" }}
+              >
+                ‌
+              </i>
+            </Button>
           </div>
 
           <CustomPRTable
@@ -397,55 +411,69 @@ const TableActionsMenu: React.FC<{
   const items = [
     ...(rowData.status === "pending"
       ? [
-        {
-          label: "Anular receta",
-          icon: "pi pi-times",
-          command: () => {
-            onCancel();
+          {
+            label: "Anular receta",
+            icon: "pi pi-times",
+            command: () => {
+              onCancel();
+            },
           },
-        },
-      ]
+          {
+            label: "Imprimir",
+            icon: "pi pi-print",
+            command: () => {
+              onPrint();
+            },
+          },
+          {
+            label: "Descargar",
+            icon: "pi pi-download",
+            command: () => {
+              onDownload();
+            },
+          },
+        ]
       : []),
     ...(rowData.status === "uploaded"
       ? [
-        {
-          label: "Visualizar resultados",
-          icon: "pi pi-eye",
-          command: () => {
-            onViewResults();
-          },
-        },
-        {
-          label: "Imprimir",
-          icon: "pi pi-print",
-          command: () => {
-            onPrint();
-          },
-        },
-        {
-          label: "Descargar",
-          icon: "pi pi-download",
-          command: () => {
-            onDownload();
-          },
-        },
-        {
-          separator: true,
-        },
-        {
-          label: "Compartir",
-          icon: "pi pi-share-alt",
-          items: [
-            {
-              label: "WhatsApp",
-              icon: "pi pi-whatsapp",
-              command: () => {
-                onShare();
-              },
+          {
+            label: "Visualizar resultados",
+            icon: "pi pi-eye",
+            command: () => {
+              onViewResults();
             },
-          ],
-        },
-      ]
+          },
+          {
+            label: "Imprimir",
+            icon: "pi pi-print",
+            command: () => {
+              onPrint();
+            },
+          },
+          {
+            label: "Descargar",
+            icon: "pi pi-download",
+            command: () => {
+              onDownload();
+            },
+          },
+          {
+            separator: true,
+          },
+          {
+            label: "Compartir",
+            icon: "pi pi-share-alt",
+            items: [
+              {
+                label: "WhatsApp",
+                icon: "pi pi-whatsapp",
+                command: () => {
+                  onShare();
+                },
+              },
+            ],
+          },
+        ]
       : []),
   ];
 

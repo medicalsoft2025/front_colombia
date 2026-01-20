@@ -7,8 +7,9 @@ $generoPaciente = 'femenino';
     import {
         PastMedicalHistoryForm
     } from './react-dist/past-medical-history/PastMedicalHistoryForm.js';
+    import { renderApp } from './services/react/app-renderer.js';
 
-    ReactDOMClient.createRoot(document.getElementById('form-content')).render(React.createElement(PastMedicalHistoryForm));
+    renderApp(PastMedicalHistoryForm, "form-content");
 </script>
 
 <div id="form-content"></div>

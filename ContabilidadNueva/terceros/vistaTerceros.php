@@ -30,13 +30,12 @@ include "../../header.php";
     </div>
 </div>
 <script type="module">
-    import React from "react"
-    import ReactDOMClient from "react-dom/client"
-    import { ThridPartiesTable } from './react-dist/billing/third-parties/table/ThridPartiesTable.js';
+    import {
+        ThridPartiesTable
+    } from './react-dist/billing/third-parties/table/ThridPartiesTable.js';
+    import { renderApp } from "./services/react/app-renderer.js";
 
-    ReactDOMClient.createRoot(document.getElementById('tablaTerceros')).render(
-        React.createElement(ThridPartiesTable)
-    );
+    renderApp(ThridPartiesTable, "tablaTerceros");
 </script>
 <?php
 include "../../footer.php";

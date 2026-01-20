@@ -46,13 +46,14 @@
   import {
     PatientInfoContainer
   } from './react-dist/patients/PatientInfoContainer.js';
+  import { renderApp } from "./services/react/app-renderer.js";
 
-  ReactDOMClient.createRoot(document.getElementById('modalBodyInfoPacientesReact')).render(React.createElement(PatientInfoContainer, {
+  renderApp(PatientInfoContainer, "modalBodyInfoPacientesReact", {
     patientId: (
       new URLSearchParams(window.location.search).get('id') ||
       new URLSearchParams(window.location.search).get('patient_id')
     )
-  }));
+  });
 </script>
 
 <style>

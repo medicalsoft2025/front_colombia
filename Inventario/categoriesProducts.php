@@ -22,13 +22,12 @@ include "../header.php";
 </div>
 
 <script type="module">
-    import React from "react";
-    import ReactDOMClient from "react-dom/client";
     import {
         CategoriesApp
     } from './react-dist/inventory/categories/CategoriesApp.js';
+    import { renderApp } from "./services/react/app-renderer.js";
 
-    ReactDOMClient.createRoot(document.getElementById('categoriesProductsAppReact')).render(React.createElement(CategoriesApp));
+    renderApp(CategoriesApp, "categoriesProductsAppReact");
 </script>
 
 <?php include "../footer.php";

@@ -16,7 +16,8 @@ include "../header.php";
         <nav class="mb-3" aria-label="breadcrumb">
             <ol class="breadcrumb mb-0">
                 <li class="breadcrumb-item"><a href="Dashboard">Inicio</a></li>
-                <li class="breadcrumb-item active" onclick="location.reload()">Facturas - Solicitudes de anulación pendientes</li>
+                <li class="breadcrumb-item active" onclick="location.reload()">Facturas - Solicitudes de anulación
+                    pendientes</li>
             </ol>
         </nav>
 
@@ -86,14 +87,12 @@ include "../header.php";
     </script>
 
     <script type="module">
-        import React from "react";
-        import ReactDOMClient from "react-dom/client";
         import {
             AdmissionsPendingCancellation
         } from './react-dist/admission/AdmissionsPendingCancellation.js';
+        import { renderApp } from './services/react/app-renderer.js';
 
-        const rootElement = document.getElementById('admisionesAnulacionesPendientesReact');
-        ReactDOMClient.createRoot(rootElement).render(React.createElement(AdmissionsPendingCancellation));
+        renderApp(AdmissionsPendingCancellation, "admisionesAnulacionesPendientesReact");
     </script>
 
     <?php include "../footer.php"; ?>

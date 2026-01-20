@@ -26,8 +26,7 @@ include "../header.php";
       <div class="row">
         <div class="col-12">
           <div class="col-10">
-            <div class="d-flex justify-content-between col-12 row col-md-auto"
-              id="scrollspyFacturacionVentas">
+            <div class="d-flex justify-content-between col-12 row col-md-auto" id="scrollspyFacturacionVentas">
               <div class="col-6">
                 <h2 class="mb-4">Configuración</h2>
               </div>
@@ -38,9 +37,8 @@ include "../header.php";
       <div class="row g-0 g-md-4 g-xl-6">
         <ul class="nav nav-underline fs-9" id="myTab" role="tablist">
           <li class="nav-item" role="presentation">
-            <a class="nav-link active" id="info-facturacion-tab" data-bs-toggle="tab"
-              href="#tab-config-empresa" role="tab" aria-controls="tab-info-facturacion"
-              aria-selected="false">
+            <a class="nav-link active" id="info-facturacion-tab" data-bs-toggle="tab" href="#tab-config-empresa"
+              role="tab" aria-controls="tab-info-facturacion" aria-selected="false">
               <i class="fas fa-building"></i> Configuración Empresa
             </a>
           </li>
@@ -51,27 +49,26 @@ include "../header.php";
             </a>
           </li>
           <li class="nav-item" role="presentation">
-            <a class="nav-link" id="metodos-pago-tab" data-bs-toggle="tab" href="#tab-metodos-pago"
-              role="tab" aria-controls="tab-metodos-pago" aria-selected="false">
+            <a class="nav-link" id="metodos-pago-tab" data-bs-toggle="tab" href="#tab-metodos-pago" role="tab"
+              aria-controls="tab-metodos-pago" aria-selected="false">
               <i class="fas fa-credit-card"></i> Métodos de Pago
             </a>
           </li>
           <li class="nav-item" role="presentation">
-            <a class="nav-link" id="impuesto-cargo-tab" data-bs-toggle="tab" href="#tab-impuesto-cargo"
-              role="tab" aria-controls="tab-impuesto-cargo" aria-selected="false">
+            <a class="nav-link" id="impuesto-cargo-tab" data-bs-toggle="tab" href="#tab-impuesto-cargo" role="tab"
+              aria-controls="tab-impuesto-cargo" aria-selected="false">
               <i class="fas fa-percentage"></i> Impuesto Cargo
             </a>
           </li>
           <li class="nav-item" role="presentation">
-            <a class="nav-link" id="impuesto-retencion-tab" data-bs-toggle="tab"
-              href="#tab-impuesto-retencion" role="tab" aria-controls="tab-impuesto-retencion"
-              aria-selected="false">
+            <a class="nav-link" id="impuesto-retencion-tab" data-bs-toggle="tab" href="#tab-impuesto-retencion"
+              role="tab" aria-controls="tab-impuesto-retencion" aria-selected="false">
               <i class="fas fa-hand-holding-usd"></i> Impuesto Retención
             </a>
           </li>
           <li class="nav-item" role="presentation">
-            <a class="nav-link" id="centro-costos-tab" data-bs-toggle="tab" href="#tab-centro-costos"
-              role="tab" aria-controls="tab-centro-costos" aria-selected="false">
+            <a class="nav-link" id="centro-costos-tab" data-bs-toggle="tab" href="#tab-centro-costos" role="tab"
+              aria-controls="tab-centro-costos" aria-selected="false">
               <i class="fas fa-chart-pie"></i> Centro de Costos
             </a>
           </li>
@@ -82,8 +79,8 @@ include "../header.php";
             </a>
           </li>
           <li class="nav-item" role="presentation">
-            <a class="nav-link" id="especialidades-tab" data-bs-toggle="tab" href="#tab-especialidades"
-              role="tab" aria-controls="tab-especialidades" aria-selected="false">
+            <a class="nav-link" id="especialidades-tab" data-bs-toggle="tab" href="#tab-especialidades" role="tab"
+              aria-controls="tab-especialidades" aria-selected="false">
               <i class="fas fa-stethoscope"></i> Especialidades Médicas
             </a>
           </li>
@@ -106,8 +103,8 @@ include "../header.php";
             </a>
           </li>
           <li class="nav-item" role="presentation">
-            <a class="nav-link" id="user-absences-tab" data-bs-toggle="tab" href="#tab-user-absences"
-              role="tab" aria-controls="tab-user-absences" aria-selected="false">
+            <a class="nav-link" id="user-absences-tab" data-bs-toggle="tab" href="#tab-user-absences" role="tab"
+              aria-controls="tab-user-absences" aria-selected="false">
               <i class="fas fa-calendar-alt"></i> Ausencias Programadas
             </a>
           </li>
@@ -118,14 +115,14 @@ include "../header.php";
             </a>
           </li>
           <li class="nav-item" role="presentation">
-            <a class="nav-link" id="consentimientos-tab" data-bs-toggle="tab" href="#tab-consentimientos"
-              role="tab" aria-controls="tab-consentimientos" aria-selected="false">
+            <a class="nav-link" id="consentimientos-tab" data-bs-toggle="tab" href="#tab-consentimientos" role="tab"
+              aria-controls="tab-consentimientos" aria-selected="false">
               <i class="fas fa-file-contract"></i> Consentimientos
             </a>
           </li>
           <li class="nav-item" role="presentation">
-            <a class="nav-link" id="importar-datos-tab" data-bs-toggle="tab" href="#tab-importar-datos"
-              role="tab" aria-controls="tab-importar-datos" aria-selected="false">
+            <a class="nav-link" id="importar-datos-tab" data-bs-toggle="tab" href="#tab-importar-datos" role="tab"
+              aria-controls="tab-importar-datos" aria-selected="false">
               <i class="fas fa-file-import"></i> Importar Datos
             </a>
           </li>
@@ -148,8 +145,8 @@ include "../header.php";
             </a>
           </li>
           <li class="nav-item" role="presentation">
-            <a class="nav-link" id="dgii-tab" data-bs-toggle="tab" href="#tab-dgii" role="tab"
-              aria-controls="tab-dgii" aria-selected="false">
+            <a class="nav-link" id="dgii-tab" data-bs-toggle="tab" href="#tab-dgii" role="tab" aria-controls="tab-dgii"
+              aria-selected="false">
               <i class="fas fa-coins"></i> DGII
             </a>
           </li>
@@ -166,25 +163,20 @@ include "../header.php";
           <div class="tab-pane fade" id="tab-entidades" role="tabpanel" aria-labelledby="entidades-tab"></div>
           <div class="tab-pane fade" id="tab-metodos-pago" role="tabpanel" aria-labelledby="metodos-pago-tab">
           </div>
-          <div class="tab-pane fade" id="tab-impuesto-cargo" role="tabpanel"
-            aria-labelledby="impuesto-cargo-tab"></div>
+          <div class="tab-pane fade" id="tab-impuesto-cargo" role="tabpanel" aria-labelledby="impuesto-cargo-tab"></div>
           <div class="tab-pane fade" id="tab-impuesto-retencion" role="tabpanel"
             aria-labelledby="impuesto-retencion-tab"></div>
-          <div class="tab-pane fade" id="tab-centro-costos" role="tabpanel"
-            aria-labelledby="centro-costos-tab"></div>
+          <div class="tab-pane fade" id="tab-centro-costos" role="tabpanel" aria-labelledby="centro-costos-tab"></div>
           <div class="tab-pane fade" id="tab-usuarios" role="tabpanel" aria-labelledby="usuarios-tab"></div>
-          <div class="tab-pane fade" id="tab-especialidades" role="tabpanel"
-            aria-labelledby="especialidades-tab"></div>
+          <div class="tab-pane fade" id="tab-especialidades" role="tabpanel" aria-labelledby="especialidades-tab"></div>
           <div class="tab-pane fade" id="tab-roles" role="tabpanel" aria-labelledby="roles-tab"></div>
           <div class="tab-pane fade" id="tab-horarios" role="tabpanel" aria-labelledby="horarios-tab"></div>
           <div class="tab-pane fade" id="tab-modulos" role="tabpanel" aria-labelledby="modulos-tab"></div>
-          <div class="tab-pane fade" id="tab-user-absences" role="tabpanel"
-            aria-labelledby="user-absences-tab"></div>
+          <div class="tab-pane fade" id="tab-user-absences" role="tabpanel" aria-labelledby="user-absences-tab"></div>
           <div class="tab-pane fade" id="tab-precios" role="tabpanel" aria-labelledby="precios-tab"></div>
-          <div class="tab-pane fade" id="tab-consentimientos" role="tabpanel"
-            aria-labelledby="consentimientos-tab"></div>
-          <div class="tab-pane fade" id="tab-importar-datos" role="tabpanel"
-            aria-labelledby="importar-datos-tab"></div>
+          <div class="tab-pane fade" id="tab-consentimientos" role="tabpanel" aria-labelledby="consentimientos-tab">
+          </div>
+          <div class="tab-pane fade" id="tab-importar-datos" role="tabpanel" aria-labelledby="importar-datos-tab"></div>
           <div class="tab-pane fade" id="tab-examenes" role="tabpanel" aria-labelledby="examenes-tab"></div>
           <div class="tab-pane fade" id="tab-comissions" role="tabpanel" aria-labelledby="comissions-tab">
           </div>
@@ -243,7 +235,8 @@ include "../header.php";
   import {
     ComissionApp
   } from './react-dist/users/ComissionsApp.js';
-  import  SpecialityApp from './react-dist/fe-config/speciality/SpecialityApp.js';
+  import SpecialityApp from './react-dist/fe-config/speciality/SpecialityApp.js';
+  import { renderApp } from './services/react/app-renderer.js';
   // Importa aquí otros componentes React que necesites
 
   // Mapa de contenido de los tabs
@@ -317,10 +310,7 @@ include "../header.php";
       if (container) {
         // Limpia cualquier contenido previo
         container.innerHTML = '';
-        // Crea una nueva raíz React
-        const root = ReactDOMClient.createRoot(container);
-        // Renderiza el componente
-        root.render(React.createElement(component));
+        renderApp(component, containerId);
       }
     }
   }
@@ -434,14 +424,14 @@ include "../header.php";
 
   // Event listeners para los tabs
   document.querySelectorAll('#myTab a').forEach(tab => {
-    tab.addEventListener('shown.bs.tab', function(event) {
+    tab.addEventListener('shown.bs.tab', function (event) {
       const target = event.target.getAttribute('href').substring(1);
       loadTabContent(target);
     });
   });
 
   // Cargar el primer tab al iniciar
-  document.addEventListener('DOMContentLoaded', function() {
+  document.addEventListener('DOMContentLoaded', function () {
     loadTabContent('tab-config-empresa');
   });
 </script>

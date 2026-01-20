@@ -8,14 +8,13 @@ import {
   Cie11Code
 } from '../interfaces'
 import { CentralSpecialtyService } from '../../../../services/api/classes/centralSpecialtyService'
+import { useUserSpecialties } from '../../../user-specialties/hooks/useUserSpecialties'
 
 export const useSpecialty = () => {
   // State management
   const [specialties, setSpecialties] = useState<Specialty[]>([])
-  const [currentSpecialties, setCurrentSpecialties] = useState<Specialty[]>([])
   const [clinicalRecordTypes, setClinicalRecordTypes] = useState<ClinicalRecordType[]>([])
   const [loading, setLoading] = useState(true)
-  const [loadingCurrentSpecialties, setLoadingCurrentSpecialties] = useState(false)
   const [showConfigModal, setShowConfigModal] = useState(false)
   const [selectedSpecialty, setSelectedSpecialty] = useState<Specialty | null>(null)
   const [selectedAntecedent, setSelectedAntecedent] = useState<ClinicalRecordType | null>(null)
@@ -31,6 +30,8 @@ export const useSpecialty = () => {
   const [filters, setFilters] = useState({
     global: { value: null as string | null, matchMode: FilterMatchMode.CONTAINS }
   })
+
+  const { userSpecialties: currentSpecialties, fetchUserSpecialties: loadCurrentSpecialties, loading: loadingCurrentSpecialties } = useUserSpecialties()
 
   const toast = useRef<Toast>(null)
 
@@ -64,21 +65,6 @@ export const useSpecialty = () => {
     } catch (error) {
       console.error('Error loading specialties:', error)
       throw error
-    }
-  }
-
-  const loadCurrentSpecialties = async () => {
-    try {
-      setLoadingCurrentSpecialties(true)
-      const response = await fetch(`${getApiUrl()}/medical/user-specialties`)
-      if (!response.ok) throw new Error('Error loading current specialties')
-      const data = await response.json()
-      setCurrentSpecialties(data)
-    } catch (error) {
-      console.error('Error loading current specialties:', error)
-      throw error
-    } finally {
-      setLoadingCurrentSpecialties(false)
     }
   }
 
@@ -255,7 +241,6 @@ export const useSpecialty = () => {
       setLoading(true)
       await Promise.all([
         loadSpecialties(),
-        loadCurrentSpecialties(),
         loadClinicalRecordTypes()
       ])
     } catch (error) {

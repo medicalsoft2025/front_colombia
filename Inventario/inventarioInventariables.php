@@ -23,7 +23,7 @@ include "../header.php";
         <div class="container">
             <nav class="mb-3" aria-label="breadcrumb">
                 <ol class="breadcrumb mt-5">
-                <li class="breadcrumb-item"><a href="Dashboard">Inicio</a></li>
+                    <li class="breadcrumb-item"><a href="Dashboard">Inicio</a></li>
                     <li class="breadcrumb-item"><a href="homeInventario">Inventario</a></li>
                     <li class="breadcrumb-item active" onclick="location.reload()">Productos Inventariables</li>
                 </ol>
@@ -49,16 +49,14 @@ include "../header.php";
 <script type="module" src="Inventario/js/inventarioMedicamentos.js"></script>
 
 <script type="module">
-    import React from "react";
-    import ReactDOMClient from "react-dom/client";
     import {
         ProductInventoryApp
     } from './react-dist/inventory/ProductInventoryApp.js';
+    import { renderApp } from "./services/react/app-renderer.js";
 
-    ReactDOMClient.createRoot(document.getElementById('productInventoryAppReact')).render(React
-                .createElement(ProductInventoryApp, {
-                    type: 'inventariables'
-                }));
+    renderApp(ProductInventoryApp, "productInventoryAppReact", {
+        type: 'inventariables'
+    });
 </script>
 
 <?php include "../footer.php";

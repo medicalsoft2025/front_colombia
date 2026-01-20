@@ -1,11 +1,10 @@
 <script type="module">
-  import React from "react"
-  import ReactDOMClient from "react-dom/client"
   import {
     UserApp
   } from './react-dist/users/UserApp.js';
+  import { renderApp } from './services/react/app-renderer.js';
 
-  ReactDOMClient.createRoot(document.getElementById('userAppReact')).render(React.createElement(UserApp));
+  renderApp(UserApp, 'userAppReact');
 </script>
 
 <div id="userAppReact"></div>

@@ -40,9 +40,8 @@
       <!-- Tabs -->
       <ul class="nav nav-underline fs-9 flex-column me-3" id="tabs-typeMessages" role="tablist">
         <li class="nav-item" role="presentation">
-          <button class="nav-link active" id="general-tab" data-bs-toggle="tab"
-            data-bs-target="#general-tab-pane" type="button" role="tab" aria-controls="general-tab-pane"
-            aria-selected="true">
+          <button class="nav-link active" id="general-tab" data-bs-toggle="tab" data-bs-target="#general-tab-pane"
+            type="button" role="tab" aria-controls="general-tab-pane" aria-selected="true">
             <i class="fa-solid fa-circle-info"></i> Información General
           </button>
         </li>
@@ -54,16 +53,14 @@
           </button>
         </li> -->
         <li class="nav-item" role="presentation">
-          <button class="nav-link" id="representante-tab" data-bs-toggle="tab"
-            data-bs-target="#representante-tab-pane" type="button" role="tab"
-            aria-controls="representante-tab-pane" aria-selected="false">
+          <button class="nav-link" id="representante-tab" data-bs-toggle="tab" data-bs-target="#representante-tab-pane"
+            type="button" role="tab" aria-controls="representante-tab-pane" aria-selected="false">
             <i class="fa-solid fa-address-book"></i> Representante
           </button>
         </li>
         <li class="nav-item" role="presentation">
-          <button class="nav-link" id="comunicacion-tab" data-bs-toggle="tab"
-            data-bs-target="#comunicacion-tab-pane" type="button" role="tab"
-            aria-controls="comunicacion-tab-pane" aria-selected="false">
+          <button class="nav-link" id="comunicacion-tab" data-bs-toggle="tab" data-bs-target="#comunicacion-tab-pane"
+            type="button" role="tab" aria-controls="comunicacion-tab-pane" aria-selected="false">
             <i class="fa-solid fa-envelopes-bulk"></i> Comunicaciones
           </button>
         </li>
@@ -86,8 +83,7 @@
       <div class="tab-content overflow-hidden w-100 p-2" id="typeMessages-tabContent">
 
         <input type="hidden" id="id_Empresa" value="">
-        <div class="tab-pane fade show active" id="general-tab-pane" role="tabpanel"
-          aria-labelledby="general-tab">
+        <div class="tab-pane fade show active" id="general-tab-pane" role="tabpanel" aria-labelledby="general-tab">
 
           <form class="row g-3 needs-validation" novalidate id="form-general">
             <h5>Datos Consultorio</h5>
@@ -99,8 +95,7 @@
             </div>
             <div class="col-md-6">
               <label class="form-label" for="tipoDocumento-consultorio">Tipo Documento</label>
-              <select class="form-control" id="tipoDocumento-consultorio" name="tipoDocumento-consultorio"
-                required>
+              <select class="form-control" id="tipoDocumento-consultorio" name="tipoDocumento-consultorio" required>
                 <option value="">Seleccione un tipo de documento</option>
                 <option value="RNC">RNC</option>
                 <option value="CC">CEDULA DE IDENTIDAD</option>
@@ -110,8 +105,8 @@
             </div>
             <div class="col-6">
               <label class="form-label" for="documento-consultorio">Documento</label>
-              <input class="form-control" id="documento-consultorio" name="documento-consultorio"
-                type="text" placeholder="123456789" required>
+              <input class="form-control" id="documento-consultorio" name="documento-consultorio" type="text"
+                placeholder="123456789" required>
               <div class="invalid-feedback">El Documento del consultorio no puede estar Vacio.</div>
             </div>
             <h5>Configuración General</h5>
@@ -129,8 +124,8 @@
             </div>
             <div class="col-12">
               <label class="form-label" for="direccion-consultorio">Dirección</label>
-              <input class="form-control" id="direccion-consultorio" name="direccion-consultorio"
-                type="text" placeholder="Ej: Calle 123 #45-67, Bogotá" required>
+              <input class="form-control" id="direccion-consultorio" name="direccion-consultorio" type="text"
+                placeholder="Ej: Calle 123 #45-67, Bogotá" required>
               <div class="invalid-feedback">Ingrese una dirección válida.</div>
             </div>
             <div class="col-md-6">
@@ -156,8 +151,7 @@
               <label class="form-label">Logo</label>
               <input type="file" class="form-control" id="logo" name="logo" accept="image/*"
                 onchange="previewImage(event, 'logoPreview')">
-              <img id="logoPreview" src="#" class="img-fluid mt-2 d-none border"
-                alt="Vista previa del logo">
+              <img id="logoPreview" src="#" class="img-fluid mt-2 d-none border" alt="Vista previa del logo">
             </div>
             <div class="col-12">
               <label class="form-label">Marca de Agua</label>
@@ -176,19 +170,18 @@
         <div class="tab-pane fade" id="facturacion-tab-pane" role="tabpanel" aria-labelledby="facturacion-tab">
 
           <ul class="nav nav-underline fs-9" id="tabFacturasConfig" role="tablist">
-            <li class="nav-item" role="presentation"><a class="nav-link active" id="fiscal-tab"
-                data-bs-toggle="tab" href="#tab-fiscal" role="tab" aria-controls="tab-fiscal"
-                aria-selected="true">Fiscal</a></li>
-            <li class="nav-item" role="presentation"><a class="nav-link" id="consumidor-tab"
-                data-bs-toggle="tab" href="#tab-consumidor" role="tab" aria-controls="tab-consumidor"
-                aria-selected="false" tabindex="-1">Consumidor</a></li>
-            <li class="nav-item" role="presentation"><a class="nav-link" id="gubernamental-tab"
-                data-bs-toggle="tab" href="#tab-gubernamental" role="tab"
-                aria-controls="tab-gubernamental" aria-selected="false" tabindex="-1">Gubernamental</a>
+            <li class="nav-item" role="presentation"><a class="nav-link active" id="fiscal-tab" data-bs-toggle="tab"
+                href="#tab-fiscal" role="tab" aria-controls="tab-fiscal" aria-selected="true">Fiscal</a></li>
+            <li class="nav-item" role="presentation"><a class="nav-link" id="consumidor-tab" data-bs-toggle="tab"
+                href="#tab-consumidor" role="tab" aria-controls="tab-consumidor" aria-selected="false"
+                tabindex="-1">Consumidor</a></li>
+            <li class="nav-item" role="presentation"><a class="nav-link" id="gubernamental-tab" data-bs-toggle="tab"
+                href="#tab-gubernamental" role="tab" aria-controls="tab-gubernamental" aria-selected="false"
+                tabindex="-1">Gubernamental</a>
             </li>
-            <li class="nav-item" role="presentation"><a class="nav-link" id="notaCredito-tab"
-                data-bs-toggle="tab" href="#tab-notaCredito" role="tab" aria-controls="tab-notaCredito"
-                aria-selected="false" tabindex="-1">Notas Credito</a></li>
+            <li class="nav-item" role="presentation"><a class="nav-link" id="notaCredito-tab" data-bs-toggle="tab"
+                href="#tab-notaCredito" role="tab" aria-controls="tab-notaCredito" aria-selected="false"
+                tabindex="-1">Notas Credito</a></li>
           </ul>
           <div class="tab-content mt-3" id="tabFacturasConfigContent">
 
@@ -199,47 +192,44 @@
                 <input type="hidden" name="" id="idFacturaConsumidor" value="">
                 <div class="col-6">
                   <label class="form-label" for="prefijoConsumidor">Prefijo DGII</label>
-                  <input class="form-control" id="prefijoConsumidor" name="prefijoConsumidor"
-                    type="text" placeholder="Ej: ABC" required>
+                  <input class="form-control" id="prefijoConsumidor" name="prefijoConsumidor" type="text"
+                    placeholder="Ej: ABC" required>
                   <div class="invalid-feedback">Favor ingrese el prefijo DGII.</div>
                 </div>
                 <div class="col-6">
                   <label class="form-label" for="cuentaConsumidor">Cuenta Contable</label>
-                  <input class="form-control" id="cuentaConsumidor" name="cuentaConsumidor"
-                    type="text" placeholder="Ej: 1-0001-0001" required>
+                  <input class="form-control" id="cuentaConsumidor" name="cuentaConsumidor" type="text"
+                    placeholder="Ej: 1-0001-0001" required>
                   <div class="invalid-feedback">Favor ingrese la cuenta contable.</div>
                 </div>
                 <div class="col-12">
                   <label class="form-label" for="numeroResolucionConsumidor">Número Resolución</label>
-                  <input class="form-control" id="numeroResolucionConsumidor"
-                    name="numeroResolucionConsumidor" type="text" placeholder="Ej: 1234567890"
-                    required>
+                  <input class="form-control" id="numeroResolucionConsumidor" name="numeroResolucionConsumidor"
+                    type="text" placeholder="Ej: 1234567890" required>
                   <div class="invalid-feedback">Favor ingrese el número de resolución.</div>
                 </div>
                 <div class="col-md-6">
                   <label class="form-label" for="facturaDesdeConsumidor">Facturas Desde</label>
-                  <input class="form-control" id="facturaDesdeConsumidor"
-                    name="facturaDesdeConsumidor" type="number" min="1" placeholder="Ej: 1001"
-                    required>
+                  <input class="form-control" id="facturaDesdeConsumidor" name="facturaDesdeConsumidor" type="number"
+                    min="1" placeholder="Ej: 1001" required>
                   <div class="invalid-feedback">Ingrese el número inicial de facturas.</div>
                 </div>
                 <div class="col-md-6">
                   <label class="form-label" for="facturaHastaConsumidor">Facturas Hasta</label>
-                  <input class="form-control" id="facturaHastaConsumidor"
-                    name="facturaHastaConsumidor" type="number" min="1" placeholder="Ej: 2000"
-                    required>
+                  <input class="form-control" id="facturaHastaConsumidor" name="facturaHastaConsumidor" type="number"
+                    min="1" placeholder="Ej: 2000" required>
                   <div class="invalid-feedback">Ingrese el número final de facturas.</div>
                 </div>
                 <div class="col-md-6">
                   <label class="form-label" for="fechaResolucionConsumidor">Fecha Resolución</label>
-                  <input class="form-control" id="fechaResolucionConsumidor"
-                    name="fechaResolucionConsumidor" type="date" required>
+                  <input class="form-control" id="fechaResolucionConsumidor" name="fechaResolucionConsumidor"
+                    type="date" required>
                   <div class="invalid-feedback">Seleccione la fecha de resolución.</div>
                 </div>
                 <div class="col-md-6">
                   <label class="form-label" for="fechaVencimientoConsumidor">Fecha Vencimiento</label>
-                  <input class="form-control" id="fechaVencimientoConsumidor"
-                    name="fechaVencimientoConsumidor" type="date" required>
+                  <input class="form-control" id="fechaVencimientoConsumidor" name="fechaVencimientoConsumidor"
+                    type="date" required>
                   <div class="invalid-feedback">Seleccione la fecha de vencimiento.</div>
                 </div>
                 <div class="col-12">
@@ -248,14 +238,13 @@
               </form>
             </div>
 
-            <div class="tab-pane fade show active" id="tab-fiscal" role="tabpanel"
-              aria-labelledby="fiscal-tab">
+            <div class="tab-pane fade show active" id="tab-fiscal" role="tabpanel" aria-labelledby="fiscal-tab">
               <form class="row g-3 needs-validation" novalidate id="form-fiscal">
                 <input type="hidden" id="idFacturaFiscal" value="">
                 <div class="col-6">
                   <label class="form-label" for="prefijoFiscal">Prefijo DGII</label>
-                  <input class="form-control" id="prefijoFiscal" name="prefijoFiscal" type="text"
-                    placeholder="Ej: ABC" required>
+                  <input class="form-control" id="prefijoFiscal" name="prefijoFiscal" type="text" placeholder="Ej: ABC"
+                    required>
                   <div class="invalid-feedback">Favor ingrese el prefijo DGII.</div>
                 </div>
                 <div class="col-6">
@@ -266,32 +255,32 @@
                 </div>
                 <div class="col-12">
                   <label class="form-label" for="numeroResolucionFiscal">Número Resolución</label>
-                  <input class="form-control" id="numeroResolucionFiscal"
-                    name="numeroResolucionFiscal" type="text" placeholder="Ej: 1234567890" required>
+                  <input class="form-control" id="numeroResolucionFiscal" name="numeroResolucionFiscal" type="text"
+                    placeholder="Ej: 1234567890" required>
                   <div class="invalid-feedback">Favor ingrese el número de resolución.</div>
                 </div>
                 <div class="col-md-6">
                   <label class="form-label" for="facturaDesdeFiscal">Facturas Desde</label>
-                  <input class="form-control" id="facturaDesdeFiscal" name="facturaDesdeFiscal"
-                    type="number" min="1" placeholder="Ej: 1001" required>
+                  <input class="form-control" id="facturaDesdeFiscal" name="facturaDesdeFiscal" type="number" min="1"
+                    placeholder="Ej: 1001" required>
                   <div class="invalid-feedback">Ingrese el número inicial de facturas.</div>
                 </div>
                 <div class="col-md-6">
                   <label class="form-label" for="facturaHastaFiscal">Facturas Hasta</label>
-                  <input class="form-control" id="facturaHastaFiscal" name="facturaHastaFiscal"
-                    type="number" min="1" placeholder="Ej: 2000" required>
+                  <input class="form-control" id="facturaHastaFiscal" name="facturaHastaFiscal" type="number" min="1"
+                    placeholder="Ej: 2000" required>
                   <div class="invalid-feedback">Ingrese el número final de facturas.</div>
                 </div>
                 <div class="col-md-6">
                   <label class="form-label" for="fechaResolucionFiscal">Fecha Resolución</label>
-                  <input class="form-control" id="fechaResolucionFiscal" name="fechaResolucionFiscal"
-                    type="date" required>
+                  <input class="form-control" id="fechaResolucionFiscal" name="fechaResolucionFiscal" type="date"
+                    required>
                   <div class="invalid-feedback">Seleccione la fecha de resolución.</div>
                 </div>
                 <div class="col-md-6">
                   <label class="form-label" for="fechaVencimientoFiscal">Fecha Vencimiento</label>
-                  <input class="form-control" id="fechaVencimientoFiscal"
-                    name="fechaVencimientoFiscal" type="date" required>
+                  <input class="form-control" id="fechaVencimientoFiscal" name="fechaVencimientoFiscal" type="date"
+                    required>
                   <div class="invalid-feedback">Seleccione la fecha de vencimiento.</div>
                 </div>
                 <div class="col-12">
@@ -299,57 +288,53 @@
                 </div>
               </form>
             </div>
-            <div class="tab-pane fade" id="tab-gubernamental" role="tabpanel"
-              aria-labelledby="gubernamental-tab">
+            <div class="tab-pane fade" id="tab-gubernamental" role="tabpanel" aria-labelledby="gubernamental-tab">
 
               <form class="row g-3 needs-validation" novalidate id="form-gubernamental">
                 <input type="hidden" name="" id="idFacturaGubernamental" value="">
                 <div class="col-6">
                   <label class="form-label" for="prefijoGubernamental">Prefijo DGII</label>
-                  <input class="form-control" id="prefijoGubernamental" name="prefijoGubernamental"
-                    type="text" placeholder="Ej: ABC" required>
+                  <input class="form-control" id="prefijoGubernamental" name="prefijoGubernamental" type="text"
+                    placeholder="Ej: ABC" required>
                   <div class="invalid-feedback">Favor ingrese el prefijo DGII.</div>
                 </div>
                 <div class="col-6">
                   <label class="form-label" for="cuentaGubernamental">Cuenta Contable</label>
-                  <input class="form-control" id="cuentaGubernamental" name="cuentaGubernamental"
-                    type="text" placeholder="Ej: 1-0001-0001" required>
+                  <input class="form-control" id="cuentaGubernamental" name="cuentaGubernamental" type="text"
+                    placeholder="Ej: 1-0001-0001" required>
                   <div class="invalid-feedback">Favor ingrese el prefijo DGII.</div>
                 </div>
                 <div class="col-12">
                   <label class="form-label" for="numeroResolucionGubernamental">Número
                     Resolución</label>
-                  <input class="form-control" id="numeroResolucionGubernamental"
-                    name="numeroResolucionGubernamental" type="text" placeholder="Ej: 1234567890"
-                    required>
+                  <input class="form-control" id="numeroResolucionGubernamental" name="numeroResolucionGubernamental"
+                    type="text" placeholder="Ej: 1234567890" required>
                   <div class="invalid-feedback">Favor ingrese el número de resolución.</div>
                 </div>
                 <div class="col-md-6">
                   <label class="form-label" for="facturaDesdeGubernamental">Facturas Desde</label>
-                  <input class="form-control" id="facturaDesdeGubernamental"
-                    name="facturaDesdeGubernamental" type="number" min="1" placeholder="Ej: 1001"
-                    required>
+                  <input class="form-control" id="facturaDesdeGubernamental" name="facturaDesdeGubernamental"
+                    type="number" min="1" placeholder="Ej: 1001" required>
                   <div class="invalid-feedback">Ingrese el número inicial de facturas.</div>
                 </div>
                 <div class="col-md-6">
                   <label class="form-label" for="facturaHastaGubernamental">Facturas Hasta</label>
-                  <input class="form-control" id="facturaHastaGubernamental"
-                    name="facturaHastaGubernamental" type="number" min="1" placeholder="Ej: 2000"
-                    required>
+                  <input class="form-control" id="facturaHastaGubernamental" name="facturaHastaGubernamental"
+                    type="number" min="1" placeholder="Ej: 2000" required>
                   <div class="invalid-feedback">Ingrese el número final de facturas.</div>
                 </div>
                 <div class="col-md-6">
                   <label class="form-label" for="fechaResolucionGubernamental">Fecha
                     Resolución</label>
-                  <input class="form-control" id="fechaResolucionGubernamental"
-                    name="fechaResolucionGubernamental" type="date" required>
+                  <input class="form-control" id="fechaResolucionGubernamental" name="fechaResolucionGubernamental"
+                    type="date" required>
                   <div class="invalid-feedback">Seleccione la fecha de resolución.</div>
                 </div>
                 <div class="col-md-6">
                   <label class="form-label" for="fechaVencimientoGubernamental">Fecha
                     Vencimiento</label>
-                  <input class="form-control" id="fechaVencimientoGubernamental"
-                    name="fechaVencimientoGubernamental" type="date" required>
+                  <input class="form-control" id="fechaVencimientoGubernamental" name="fechaVencimientoGubernamental"
+                    type="date" required>
                   <div class="invalid-feedback">Seleccione la fecha de vencimiento.</div>
                 </div>
                 <div class="col-12">
@@ -357,56 +342,52 @@
                 </div>
               </form>
             </div>
-            <div class="tab-pane fade" id="tab-notaCredito" role="tabpanel"
-              aria-labelledby="notaCredito-tab">
+            <div class="tab-pane fade" id="tab-notaCredito" role="tabpanel" aria-labelledby="notaCredito-tab">
 
               <form class="row g-3 needs-validation" novalidate id="form-notaCredito">
                 <input type="hidden" name="" id="idNotaCredito" value="">
                 <div class="col-6">
                   <label class="form-label" for="prefijoNotaCredito">Prefijo DGII</label>
-                  <input class="form-control" id="prefijoNotaCredito" name="prefijoNotaCredito"
-                    type="text" placeholder="Ej: ABC" required>
+                  <input class="form-control" id="prefijoNotaCredito" name="prefijoNotaCredito" type="text"
+                    placeholder="Ej: ABC" required>
                   <div class="invalid-feedback">Favor ingrese el prefijo DGII.</div>
                 </div>
                 <div class="col-6">
                   <label class="form-label" for="cuentaNotaCredito">Cuenta Contable</label>
-                  <input class="form-control" id="cuentaNotaCredito" name="cuentaNotaCredito"
-                    type="text" placeholder="Ej: 1-0001-0001" required>
+                  <input class="form-control" id="cuentaNotaCredito" name="cuentaNotaCredito" type="text"
+                    placeholder="Ej: 1-0001-0001" required>
                   <div class="invalid-feedback">Favor ingresar la cuenta contable.</div>
                 </div>
                 <div class="col-12">
                   <label class="form-label" for="numeroResolucionNotaCredito">Número
                     Resolución</label>
-                  <input class="form-control" id="numeroResolucionNotaCredito"
-                    name="numeroResolucionNotaCredito" type="text" placeholder="Ej: 1234567890"
-                    required>
+                  <input class="form-control" id="numeroResolucionNotaCredito" name="numeroResolucionNotaCredito"
+                    type="text" placeholder="Ej: 1234567890" required>
                   <div class="invalid-feedback">Favor ingrese el número de resolución.</div>
                 </div>
                 <div class="col-md-6">
                   <label class="form-label" for="facturaDesdeNotaCredito">Facturas Desde</label>
-                  <input class="form-control" id="facturaDesdeNotaCredito"
-                    name="facturaDesdeNotaCredito" type="number" min="1" placeholder="Ej: 1001"
-                    required>
+                  <input class="form-control" id="facturaDesdeNotaCredito" name="facturaDesdeNotaCredito" type="number"
+                    min="1" placeholder="Ej: 1001" required>
                   <div class="invalid-feedback">Ingrese el número inicial de facturas.</div>
                 </div>
                 <div class="col-md-6">
                   <label class="form-label" for="facturaHastaNotaCredito">Facturas Hasta</label>
-                  <input class="form-control" id="facturaHastaNotaCredito"
-                    name="facturaHastaNotaCredito" type="number" min="1" placeholder="Ej: 2000"
-                    required>
+                  <input class="form-control" id="facturaHastaNotaCredito" name="facturaHastaNotaCredito" type="number"
+                    min="1" placeholder="Ej: 2000" required>
                   <div class="invalid-feedback">Ingrese el número final de facturas.</div>
                 </div>
                 <div class="col-md-6">
                   <label class="form-label" for="fechaResolucionNotaCredito">Fecha Resolución</label>
-                  <input class="form-control" id="fechaResolucionNotaCredito"
-                    name="fechaResolucionNotaCredito" type="date" required>
+                  <input class="form-control" id="fechaResolucionNotaCredito" name="fechaResolucionNotaCredito"
+                    type="date" required>
                   <div class="invalid-feedback">Seleccione la fecha de resolución.</div>
                 </div>
                 <div class="col-md-6">
                   <label class="form-label" for="fechaVencimientoNotaCredito">Fecha
                     Vencimiento</label>
-                  <input class="form-control" id="fechaVencimientoNotaCredito"
-                    name="fechaVencimientoNotaCredito" type="date" required>
+                  <input class="form-control" id="fechaVencimientoNotaCredito" name="fechaVencimientoNotaCredito"
+                    type="date" required>
                   <div class="invalid-feedback">Seleccione la fecha de vencimiento.</div>
                 </div>
                 <div class="col-12">
@@ -419,31 +400,29 @@
 
         </div>
 
-        <div class="tab-pane fade" id="representante-tab-pane" role="tabpanel"
-          aria-labelledby="representante-tab">
+        <div class="tab-pane fade" id="representante-tab-pane" role="tabpanel" aria-labelledby="representante-tab">
 
           <form class="row g-3 needs-validation" novalidate id="form-representante">
             <input type="hidden" name="" id="representanteId" value="">
             <div class="col-12">
               <label class="form-label" for="nombre-representante">Nombre</label>
-              <input class="form-control" id="nombre-representante" name="nombre-representante"
-                type="text" placeholder="Jhon Doe" required>
+              <input class="form-control" id="nombre-representante" name="nombre-representante" type="text"
+                placeholder="Jhon Doe" required>
               <div class="invalid-feedback">El Nombre del Representante no puede estar Vacio.</div>
             </div>
             <div class="col-6">
               <label class="form-label" for="telefono-representante">Telefono</label>
-              <input class="form-control" id="telefono-representante" name="telefono-representante"
-                type="tel" placeholder="+57 300 123 4567">
+              <input class="form-control" id="telefono-representante" name="telefono-representante" type="tel"
+                placeholder="+57 300 123 4567">
             </div>
             <div class="col-6">
               <label class="form-label" for="correo-representante">Correo</label>
-              <input class="form-control" id="correo-representante" name="correo-representante"
-                type="email" placeholder="ejemplo@correo.com">
+              <input class="form-control" id="correo-representante" name="correo-representante" type="email"
+                placeholder="ejemplo@correo.com">
             </div>
             <div class="col-md-6">
               <label class="form-label" for="tipoDocumento-representante">Tipo Documento</label>
-              <select class="form-control" id="tipoDocumento-representante"
-                name="tipoDocumento-representante" required>
+              <select class="form-control" id="tipoDocumento-representante" name="tipoDocumento-representante" required>
                 <option value="">Seleccione un tipo de documento</option>
                 <option value="RNC">RNC</option>
                 <option value="PASSPORT">PASAPORTE</option>
@@ -454,8 +433,8 @@
             </div>
             <div class="col-6 mb-3">
               <label class="form-label" for="documento-representante">Documento</label>
-              <input class="form-control" id="documento-representante" name="documento-representante"
-                type="text" placeholder="123456789" required>
+              <input class="form-control" id="documento-representante" name="documento-representante" type="text"
+                placeholder="123456789" required>
               <div class="invalid-feedback">El Documento del Representante no puede estar Vacio.</div>
             </div>
             <div class="col-12">
@@ -465,8 +444,7 @@
 
         </div>
 
-        <div class="tab-pane fade" id="comunicacion-tab-pane" role="tabpanel"
-          aria-labelledby="comunicacion-tab">
+        <div class="tab-pane fade" id="comunicacion-tab-pane" role="tabpanel" aria-labelledby="comunicacion-tab">
           <div class="row">
             <!-- Sección de Vincular WhatsApp -->
             <div class="col-md-6 qr-container">
@@ -480,8 +458,7 @@
                     style="font-size: 100px; width: 100px; height: 100px;"></i>
                 </span>
                 <span id="badIcon" class="d-none">
-                  <i class="fas fa-circle-xmark text-danger"
-                    style="font-size: 100px; width: 100px; height: 100px;"></i>
+                  <i class="fas fa-circle-xmark text-danger" style="font-size: 100px; width: 100px; height: 100px;"></i>
                 </span>
 
                 <div class="mt-3" aria-label="Botones-Conexion">
@@ -514,8 +491,8 @@
                 </div>
                 <div class="col-md-6">
                   <label class="form-label" for="smtpPuerto">Puerto</label>
-                  <input class="form-control" id="smtpPuerto" name="smtpPuerto" type="number"
-                    placeholder="587" required>
+                  <input class="form-control" id="smtpPuerto" name="smtpPuerto" type="number" placeholder="587"
+                    required>
                   <div class="invalid-feedback">Ingrese el puerto SMTP.</div>
                 </div>
                 <div class="col-md-6">
@@ -536,8 +513,8 @@
                 </div>
                 <div class="col-12">
                   <label class="form-label" for="smtpClave">Contraseña</label>
-                  <input class="form-control" id="smtpClave" name="smtpClave" type="password"
-                    placeholder="********" required>
+                  <input class="form-control" id="smtpClave" name="smtpClave" type="password" placeholder="********"
+                    required>
                   <div class="invalid-feedback">Ingrese la contraseña SMTP.</div>
                 </div>
                 <div class="col-12">
@@ -561,18 +538,16 @@
 </div>
 
 <script type="module">
-  import React from "react";
-  import ReactDOMClient from "react-dom/client";
   import {
     BtnCreateWhatsAppInstance
   } from './react-dist/communications/BtnCreateWhatsAppInstance.js';
+  import { renderApp } from './services/react/app-renderer.js';
 
-  const rootElement = document.getElementById('createInstanceButtonReact');
-  ReactDOMClient.createRoot(rootElement).render(React.createElement(BtnCreateWhatsAppInstance));
+  renderApp(BtnCreateWhatsAppInstance, 'createInstanceButtonReact');
 </script>
 
 <script>
-  document.addEventListener("DOMContentLoaded", function() {
+  document.addEventListener("DOMContentLoaded", function () {
     // Asignar eventos a los botones
     document.getElementById("guardarInfoGeneral").addEventListener("click", guardarInformacionGeneral);
     document.getElementById("guardarFiscal")?.addEventListener("click", guardarFacturaFiscal);
@@ -594,7 +569,7 @@
 
     if (input.files && input.files[0]) {
       const reader = new FileReader();
-      reader.onload = function(e) {
+      reader.onload = function (e) {
         preview.src = e.target.result;
         preview.classList.remove("d-none");
       };
@@ -881,17 +856,16 @@
 </script>
 
 <script type="module">
-  import React from "react"
-  import ReactDOMClient from "react-dom/client"
   import {
     BranchApp
   } from './react-dist/fe-config/company/branch/BranchApp.js';
   import {
     SystemConfigApp
   } from './react-dist/config/system-config/SystemConfigApp.js';
+  import { renderApp } from './services/react/app-renderer.js';
 
-  ReactDOMClient.createRoot(document.getElementById('branchComponent')).render(React.createElement(BranchApp));
-  ReactDOMClient.createRoot(document.getElementById('systemComponent')).render(React.createElement(SystemConfigApp));
+  renderApp(BranchApp, 'branchComponent');
+  renderApp(SystemConfigApp, 'systemComponent');
 </script>
 
 <?php include "../../Configuracion/modales/ModalVincularWS.php"; ?>

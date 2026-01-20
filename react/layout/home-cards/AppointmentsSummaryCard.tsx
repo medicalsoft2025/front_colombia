@@ -1,11 +1,11 @@
 import React from 'react';
 import { AppointmentFormModal } from '../../appointments/AppointmentFormModal';
+import { useAppointmentsActiveCount } from './hooks/useAppointmentsActiveCount';
 
 export const AppointmentsSummaryCard = () => {
     const [showAppointmentFormModal, setShowAppointmentFormModal] = React.useState(false);
-    const handleViewAppointments = () => {
-        window.location.href = 'citasControl';
-    };
+
+    const { count, isFetching } = useAppointmentsActiveCount();
 
     return (
         <div className="card dashboard-card">
@@ -14,8 +14,14 @@ export const AppointmentsSummaryCard = () => {
                     <i className='far fa-calendar-check ml-2'></i> Citas Generadas
                 </h5>
                 <div className="card-content">
-                    <h3 id="appointmentsActiveCount">Cargando...</h3>
-                    <span className="text-span-descripcion">Citas este mes</span>
+                    {isFetching ? (
+                        <span className="text-span-descripcion">Cargando...</span>
+                    ) : (
+                        <>
+                            <h3 id="appointmentsActiveCount">{count}</h3>
+                            <span className="text-span-descripcion">Citas este mes</span>
+                        </>
+                    )}
                 </div>
                 <div className="card-button">
                     <button

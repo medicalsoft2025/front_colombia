@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react"
 import { admissionService } from "../../../../services/api";
 import { usePRToast } from "../../../hooks/usePRToast";
+import { useQuery } from "@tanstack/react-query";
 
 interface AdmisionCountData {
     year: number;
@@ -14,21 +15,23 @@ interface AdmisionCountData {
 
 
 export const useAdmisionsCurrentMonth = () => {
-    const [admisionCount, setAdmisionCount] = useState<AdmisionCountData | null>(null);
-    const { toast, showSuccessToast, showServerErrorsToast } = usePRToast();
+    const { toast, showServerErrorsToast } = usePRToast();
+
+    const {
+        data
+    } = useQuery({
+        queryKey: ['admisions-current-month'],
+        queryFn: () => fetchAdmisionCurrentMonth()
+    });
 
     const fetchAdmisionCurrentMonth = async () => {
         try {
             const response = await admissionService.getAdmisionsCurrentMonth();
-            const data = response.data
-            setAdmisionCount(data)
+            return response.data
         } catch (error) {
             showServerErrorsToast(error)
         }
     }
 
-    useEffect(() => {
-        fetchAdmisionCurrentMonth()
-    }, [])
-    return { admisionCount, fetchAdmisionCurrentMonth, toast }
+    return { admisionCount: data, fetchAdmisionCurrentMonth, toast }
 }

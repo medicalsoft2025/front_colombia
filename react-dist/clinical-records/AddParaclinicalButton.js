@@ -6,6 +6,7 @@ import { userService } from "../../services/api/index.js";
 import { useExamRecipeResultCreate } from "../exam-recipe-results/hooks/useExamRecipeResultCreate.js";
 import { useExamRecipeResultUpdate } from "../exam-recipe-results/hooks/useExamRecipeResultUpdate.js";
 import { validFile } from "../../services/utilidades.js";
+import { Button } from 'primereact/button';
 export const AddParaclinicalButton = () => {
   const [showAddParaclinicalFormModal, setShowAddParaclinicalFormModal] = useState(false);
   const {
@@ -38,12 +39,13 @@ export const AddParaclinicalButton = () => {
       console.error(error);
     }
   };
-  return /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("button", {
-    className: "btn btn-primary",
+  return /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement(Button, {
+    icon: /*#__PURE__*/React.createElement("i", {
+      className: "fas fa-plus me-1"
+    }),
+    label: "Agregar resultados",
     onClick: () => setShowAddParaclinicalFormModal(true)
-  }, /*#__PURE__*/React.createElement("i", {
-    className: "fas fa-plus"
-  }), " Agregar resultados"), /*#__PURE__*/React.createElement(CustomFormModal, {
+  }), /*#__PURE__*/React.createElement(CustomFormModal, {
     formId: "createParaclinical",
     show: showAddParaclinicalFormModal,
     title: "Agregar paracl\xEDnico",

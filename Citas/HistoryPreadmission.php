@@ -4,13 +4,12 @@ include "../header.php";
 ?>
 
 <script type="module">
-    import React from "react"
-    import ReactDOMClient from "react-dom/client"
     import {
         PreadmissionTable
     } from './react-dist/appointments/PreadmissionTable.js';
+    import { renderApp } from './services/react/app-renderer.js';
 
-    ReactDOMClient.createRoot(document.getElementById('history-preadmission-data-content')).render(React.createElement(PreadmissionTable));
+    renderApp(PreadmissionTable, "history-preadmission-data-content")
 </script>
 
 <div class="componente">
@@ -35,14 +34,16 @@ include "../header.php";
                     <h3>Historial de preadmisiones</h3>
                     <ul class="nav nav-underline fs-9" id="myTab" role="tablist">
                         <li class="nav-item">
-                            <a class="nav-link active" id="history-preadmission-tab" data-bs-toggle="tab" href="#tab-history-preadmission"
-                                role="tab" aria-controls="tab-history-preadmission" aria-selected="true">
+                            <a class="nav-link active" id="history-preadmission-tab" data-bs-toggle="tab"
+                                href="#tab-history-preadmission" role="tab" aria-controls="tab-history-preadmission"
+                                aria-selected="true">
                                 <i class="fas fa-chart-line"></i> Historial de preadmisiones
                             </a>
                         </li>
                     </ul>
                     <div class="tab-content mt-3" id="myTabContent">
-                        <div class="tab-pane fade show active" id="tab-history-preadmission" role="tabpanel" aria-labelledby="history-preadmission-tab">
+                        <div class="tab-pane fade show active" id="tab-history-preadmission" role="tabpanel"
+                            aria-labelledby="history-preadmission-tab">
                             <div id="history-preadmission-data-content"></div>
                         </div>
                     </div>

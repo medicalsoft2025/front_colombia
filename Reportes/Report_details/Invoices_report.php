@@ -20,13 +20,10 @@ include "../../header.php";
 </div>
 
 <script type="module">
-    import React from "react"
-    import ReactDOMClient from "react-dom/client"
     import { InvoicesReport } from './react-dist/reports/Invoices.js';
+    import { renderApp } from "./services/react/app-renderer.js";
 
-    ReactDOMClient.createRoot(document.getElementById('report-invoices')).render(
-        React.createElement(InvoicesReport)
-    );
+    renderApp(InvoicesReport, 'report-invoices');
 </script>
 
 <?php

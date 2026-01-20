@@ -10,14 +10,12 @@ include "../../header.php";
 </div>
 
 <script type="module">
-    import React from "react";
-    import ReactDOMClient from "react-dom/client";
     import {
         CashRegisterApp
     } from './react-dist/cash-register/CashRegisterApp.js';
+    import { renderApp } from './services/react/app-renderer.js';
 
-    const rootElement = document.getElementById('cajaModalRoot');
-    ReactDOMClient.createRoot(rootElement).render(React.createElement(CashRegisterApp));
+    renderApp(CashRegisterApp, "cajaModalRoot");
 </script>
 
 <?php include "../../footer.php"; ?>

@@ -13,6 +13,7 @@ interface UseFieldConditionsProps<T extends FieldValues> {
     form: UseFormReturn<T>;
     executeOnInit?: boolean;
     basePath?: string;
+    initialFieldStates?: Record<string, FieldState>;
 }
 
 export function useFieldConditions<T extends FieldValues>({
@@ -20,10 +21,11 @@ export function useFieldConditions<T extends FieldValues>({
     form, // This is full form context
     executeOnInit = true,
     basePath = "",
+    initialFieldStates = {},
 }: UseFieldConditionsProps<T>) {
     const { watch, setValue, getValues, setError, clearErrors } = form;
     const [fieldStates, setFieldStates] = useState<Record<string, FieldState>>(
-        {}
+        initialFieldStates
     );
     const timeoutRef = useRef<number | null>(null);
     const fieldConfigs = useRef<Map<string, DynamicFieldConfig>>(new Map());

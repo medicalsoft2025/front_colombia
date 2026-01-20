@@ -28,14 +28,12 @@ include "../../header.php";
 </div>
 
 <script type="module">
-    import React from "react";
-    import ReactDOMClient from "react-dom/client";
     import {
         SuppliesDeliveries
     } from './react-dist/pharmacy/supplies/SuppliesDeliveries.js';
+    import { renderApp } from "./services/react/app-renderer.js";
 
-    const rootElement = document.getElementById('suppliesDeliveriesReact');
-    ReactDOMClient.createRoot(rootElement).render(React.createElement(SuppliesDeliveries));
+    renderApp(SuppliesDeliveries, "suppliesDeliveriesReact");
 </script>
 
 <?php include "../../footer.php";

@@ -24,13 +24,12 @@ include "../header.php";
     </div>
 </div>
 <script type="module">
-    import React from "react"
-    import ReactDOMClient from "react-dom/client"
-    import { NewPaymentMethod } from './react-dist/accounting/paymentReceipt/NewPaymentMethod.js';
+    import {
+        NewPaymentMethod
+    } from './react-dist/accounting/paymentReceipt/NewPaymentMethod.js';
+    import { renderApp } from "./services/react/app-renderer.js";
 
-    ReactDOMClient.createRoot(document.getElementById('newpaymentMethod')).render(
-        React.createElement(NewPaymentMethod)
-    );
+    renderApp(NewPaymentMethod, "newpaymentMethod");
 </script>
 
 <?php

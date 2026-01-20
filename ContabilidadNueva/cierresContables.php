@@ -29,15 +29,12 @@ include "../header.php";
     </div>
 </div>
 <script type="module">
-    import React from "react"
-    import ReactDOMClient from "react-dom/client"
     import {
         accountingClosings
     } from './react-dist/accounting/accountingClosings/accountingClosings.js';
+    import { renderApp } from "./services/react/app-renderer.js";
 
-    ReactDOMClient.createRoot(document.getElementById('accountingClosings')).render(
-        React.createElement(accountingClosings)
-    );
+    renderApp(accountingClosings, "accountingClosings");
 </script>
 <?php
 include "../footer.php";

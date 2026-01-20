@@ -14,20 +14,19 @@ include "../header.php";
         </nav>
         <div class="main-content">
             <div class="component-container">
-              <div id="tabs-invoices"></div>
+                <div id="tabs-invoices"></div>
             </div>
         </div>
     </div>
 </div>
 
 <script type="module">
-    import React from "react"
-    import ReactDOMClient from "react-dom/client"
     import {
         TabsBilling
     } from './react-dist/billing/TabsBilling.js';
+    import { renderApp } from "./services/react/app-renderer.js";
 
-    ReactDOMClient.createRoot(document.getElementById('tabs-invoices')).render(React.createElement(TabsBilling));
+    renderApp(TabsBilling, "tabs-invoices");
 </script>
 
 <?php

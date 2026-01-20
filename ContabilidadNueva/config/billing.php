@@ -54,13 +54,12 @@ include "../../header.php";
     </div>
 </div>
 <script type="module">
-    import React from "react"
-    import ReactDOMClient from "react-dom/client"
-    import BilingConfigTab from './react-dist/config-accounting/billing/BilingConfigTab.js';
+    import {
+        BilingConfigTab
+    } from './react-dist/config-accounting/billing/BilingConfigTab.js';
+    import { renderApp } from "./services/react/app-renderer.js";
 
-    ReactDOMClient.createRoot(document.getElementById('BilingConfigTab')).render(
-        React.createElement(BilingConfigTab)
-    );
+    renderApp(BilingConfigTab, "BilingConfigTab");
 </script>
 <?php
 include "../../footer.php";

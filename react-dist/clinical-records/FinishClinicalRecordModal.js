@@ -28,7 +28,8 @@ export const FinishClinicalRecordModal = /*#__PURE__*/forwardRef((props, ref) =>
   const finishClinicalRecordFormRef = useRef(null);
   const {
     initialExternalDynamicData,
-    clinicalRecordId = new URLSearchParams(window.location.search).get("clinical_record_id") || ""
+    clinicalRecordId = new URLSearchParams(window.location.search).get("clinical_record_id") || "",
+    clinicalRecordTypeId = new URLSearchParams(window.location.search).get("clinical_record_type_id") || ""
   } = props;
   const [visible, setVisible] = useState(false);
   const [externalDynamicData, setExternalDynamicData] = useState(null);
@@ -247,7 +248,8 @@ export const FinishClinicalRecordModal = /*#__PURE__*/forwardRef((props, ref) =>
     ref: toast
   }), /*#__PURE__*/React.createElement(FinishClinicalRecordForm, {
     ref: finishClinicalRecordFormRef,
-    clinicalRecordId: clinicalRecordId
+    clinicalRecordId: clinicalRecordId,
+    clinicalRecordTypeId: clinicalRecordTypeId
   }), /*#__PURE__*/React.createElement("div", {
     className: "d-flex justify-content-end gap-2 mt-3"
   }, /*#__PURE__*/React.createElement(Button, {

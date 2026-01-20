@@ -54,15 +54,12 @@ include "../../header.php";
     </div>
 </div>
 <script type="module">
-    import React from "react"
-    import ReactDOMClient from "react-dom/client"
     import {
         CostCenterConfig
     } from './react-dist/config-accounting/costcenters/CostCenterConfig.js';
+    import { renderApp } from "./services/react/app-renderer.js";
 
-    ReactDOMClient.createRoot(document.getElementById('CostCenterConfig')).render(
-        React.createElement(CostCenterConfig)
-    );
+    renderApp(CostCenterConfig, "CostCenterConfig");
 </script>
 <?php
 include "../../footer.php";

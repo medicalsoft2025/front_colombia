@@ -44,11 +44,10 @@ include "../header.php";
 </script> -->
 
 <script type="module">
-  import React from "react"
-  import ReactDOMClient from "react-dom/client"
   import {
     ManualUsuario
   } from './react-dist/manual-usuario/ManualUsuario.js';
+  import { renderApp } from "./services/react/app-renderer.js";
 
-  ReactDOMClient.createRoot(document.getElementById('ManualUsuario')).render(React.createElement(ManualUsuario));
+  renderApp(ManualUsuario, "ManualUsuario");
 </script>

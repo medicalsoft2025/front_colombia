@@ -1,14 +1,14 @@
 <script type="module">
-    import React from "react"
-    import ReactDOMClient from "react-dom/client"
     import {
         EvolutionsForm
     } from './react-dist/evolutions/EvolutionsForm.js';
+    import { renderApp } from "./services/react/app-renderer.js";
 
-    ReactDOMClient.createRoot(document.getElementById('evolution-form-content')).render(React.createElement(EvolutionsForm));
+    renderApp(EvolutionsForm, "evolution-form-content");
 </script>
 
-<div class="modal fade" id="nuevaEvolucionModal" tabindex="-1" aria-labelledby="nuevaEvolucionModalLabel" aria-hidden="true">
+<div class="modal fade" id="nuevaEvolucionModal" tabindex="-1" aria-labelledby="nuevaEvolucionModalLabel"
+    aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">

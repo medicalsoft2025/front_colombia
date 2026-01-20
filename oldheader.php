@@ -180,11 +180,9 @@
 </nav>
 
 <script type="module">
-    import React from "react"
-    import ReactDOMClient from "react-dom/client"
-    import NavbarHeader from './react-dist/layout/menu/NavbarHeader.js';
+    import { renderApp } from './services/react/app-renderer.js';
 
-    ReactDOMClient.createRoot(document.getElementById('NavbarHeader')).render(React.createElement(NavbarHeader));
+    renderApp(NavbarHeader, 'NavbarHeader');
 
     import {
         userService
@@ -198,7 +196,7 @@
     } from "./Middleware/authMiddleware.js";
 
 
-    document.addEventListener('DOMContentLoaded', async function() {
+    document.addEventListener('DOMContentLoaded', async function () {
         // Aplicar middleware de autenticación
         // authMiddleware();        
         const user = await userService.getByExternalId(getJWTPayload().sub);
@@ -305,97 +303,97 @@
     // Objeto que contiene las notificaciones
     const notificationsData = {
         notifications: [{
-                id: 1,
-                user: {
-                    name: "Jessie Samson",
-                    avatar: "https://i.pinimg.com/736x/6c/6e/d7/6c6ed7f4011b7f926b3f1505475aba16.jpg",
-                    status: "online"
-                },
-                type: "comment",
-                message: "Ha comentado tu post",
-                time: "10:41",
-                date: "2021-08-07",
-                read: false
+            id: 1,
+            user: {
+                name: "Jessie Samson",
+                avatar: "https://i.pinimg.com/736x/6c/6e/d7/6c6ed7f4011b7f926b3f1505475aba16.jpg",
+                status: "online"
             },
-            {
-                id: 2,
-                user: {
-                    name: "MedicalSoft",
-                    avatar: null,
-                    initials: "M",
-                    status: "online"
-                },
-                type: "event",
-                message: "Ha creado un evento",
-                time: "10:20",
-                date: "2021-08-07",
-                read: false
+            type: "comment",
+            message: "Ha comentado tu post",
+            time: "10:41",
+            date: "2021-08-07",
+            read: false
+        },
+        {
+            id: 2,
+            user: {
+                name: "MedicalSoft",
+                avatar: null,
+                initials: "M",
+                status: "online"
             },
-            {
-                id: 3,
-                user: {
-                    name: "Kiera Anderson",
-                    avatar: "https://i.pinimg.com/736x/6c/6e/d7/6c6ed7f4011b7f926b3f1505475aba16.jpg",
-                    status: "offline"
-                },
-                type: "like",
-                message: "Le ha gustado tu post",
-                time: "09:30",
-                date: "2021-08-07",
-                read: true
+            type: "event",
+            message: "Ha creado un evento",
+            time: "10:20",
+            date: "2021-08-07",
+            read: false
+        },
+        {
+            id: 3,
+            user: {
+                name: "Kiera Anderson",
+                avatar: "https://i.pinimg.com/736x/6c/6e/d7/6c6ed7f4011b7f926b3f1505475aba16.jpg",
+                status: "offline"
             },
-            {
-                id: 4,
-                user: {
-                    name: "Herman Carter",
-                    avatar: "https://i.pinimg.com/736x/6c/6e/d7/6c6ed7f4011b7f926b3f1505475aba16.jpg",
-                    status: "online"
-                },
-                type: "appointment",
-                message: "Ha solicitado una cita",
-                time: "09:11",
-                date: "2021-08-07",
-                read: false
+            type: "like",
+            message: "Le ha gustado tu post",
+            time: "09:30",
+            date: "2021-08-07",
+            read: true
+        },
+        {
+            id: 4,
+            user: {
+                name: "Herman Carter",
+                avatar: "https://i.pinimg.com/736x/6c/6e/d7/6c6ed7f4011b7f926b3f1505475aba16.jpg",
+                status: "online"
             },
-            {
-                id: 4,
-                user: {
-                    name: "Herman Carter",
-                    avatar: "https://i.pinimg.com/736x/6c/6e/d7/6c6ed7f4011b7f926b3f1505475aba16.jpg",
-                    status: "online"
-                },
-                type: "appointment",
-                message: "Ha solicitado una cita",
-                time: "09:11",
-                date: "2021-08-07",
-                read: false
+            type: "appointment",
+            message: "Ha solicitado una cita",
+            time: "09:11",
+            date: "2021-08-07",
+            read: false
+        },
+        {
+            id: 4,
+            user: {
+                name: "Herman Carter",
+                avatar: "https://i.pinimg.com/736x/6c/6e/d7/6c6ed7f4011b7f926b3f1505475aba16.jpg",
+                status: "online"
             },
-            {
-                id: 4,
-                user: {
-                    name: "Herman Carter",
-                    avatar: "https://i.pinimg.com/736x/6c/6e/d7/6c6ed7f4011b7f926b3f1505475aba16.jpg",
-                    status: "online"
-                },
-                type: "appointment",
-                message: "Ha solicitado una cita",
-                time: "09:11",
-                date: "2021-08-07",
-                read: false
+            type: "appointment",
+            message: "Ha solicitado una cita",
+            time: "09:11",
+            date: "2021-08-07",
+            read: false
+        },
+        {
+            id: 4,
+            user: {
+                name: "Herman Carter",
+                avatar: "https://i.pinimg.com/736x/6c/6e/d7/6c6ed7f4011b7f926b3f1505475aba16.jpg",
+                status: "online"
             },
-            {
-                id: 4,
-                user: {
-                    name: "Herman Carter",
-                    avatar: "https://i.pinimg.com/736x/6c/6e/d7/6c6ed7f4011b7f926b3f1505475aba16.jpg",
-                    status: "online"
-                },
-                type: "appointment",
-                message: "Ha solicitado una cita",
-                time: "09:11",
-                date: "2021-08-07",
-                read: false
-            }
+            type: "appointment",
+            message: "Ha solicitado una cita",
+            time: "09:11",
+            date: "2021-08-07",
+            read: false
+        },
+        {
+            id: 4,
+            user: {
+                name: "Herman Carter",
+                avatar: "https://i.pinimg.com/736x/6c/6e/d7/6c6ed7f4011b7f926b3f1505475aba16.jpg",
+                status: "online"
+            },
+            type: "appointment",
+            message: "Ha solicitado una cita",
+            time: "09:11",
+            date: "2021-08-07",
+            read: false
+        }
         ],
         unreadCount: 3
     };
@@ -512,7 +510,7 @@
     }
 
     // Inicializar cuando el DOM esté cargado
-    document.addEventListener('DOMContentLoaded', function() {
+    document.addEventListener('DOMContentLoaded', function () {
         // Renderizar notificaciones iniciales
         renderNotifications();
 

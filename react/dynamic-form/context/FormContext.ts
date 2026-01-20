@@ -8,6 +8,8 @@ export interface FormContextValue {
     form: UseFormReturn<FieldValues>;
     onElementSelect?: (config: any) => void;
     sources?: Record<string, (params?: any) => Promise<any[]>>;
+    fieldSuggestions?: Record<string, any[]>;
+    setFieldSuggestions?: (suggestions: Record<string, any[]>) => void;
 }
 
 export const FormContext = createContext<FormContextValue | undefined>(

@@ -14,20 +14,19 @@ include "../../header.php";
         </nav>
         <div class="main-content">
             <div class="component-container">
-    <div id="report-invoices-entity"></div>
+                <div id="report-invoices-entity"></div>
             </div>
         </div>
     </div>
 </div>
 
 <script type="module">
-    import React from "react"
-    import ReactDOMClient from "react-dom/client"
     import {
         InvoicesByEntity
     } from './react-dist/reports/InvoicesByEntity.js';
+    import { renderApp } from "./services/react/app-renderer.js";
 
-    ReactDOMClient.createRoot(document.getElementById('report-invoices-entity')).render(React.createElement(InvoicesByEntity));
+    renderApp(InvoicesByEntity, 'report-invoices-entity');
 </script>
 
 <?php

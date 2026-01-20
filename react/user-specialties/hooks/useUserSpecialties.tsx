@@ -1,11 +1,14 @@
-import { useState, useEffect } from 'react';
 import { UserSpecialtyDto } from '../../models/models';
 import { userSpecialtyService } from '../../../services/api';
 import { ErrorHandler } from '../../../services/errorHandler';
+import { useQuery } from '@tanstack/react-query';
 
 export const useUserSpecialties = () => {
-    const [userSpecialties, setUserSpecialties] = useState<UserSpecialtyDto[]>([]);
-    const [loading, setLoading] = useState(true);
+    const { data, isLoading, isFetching, refetch } = useQuery({
+        queryKey: ['userSpecialties'],
+        queryFn: () => fetchUserSpecialties(),
+        placeholderData: []
+    });
 
     const fetchUserSpecialties = async () => {
         try {
@@ -16,21 +19,15 @@ export const useUserSpecialties = () => {
                     label: item.name,
                 };
             })
-            setUserSpecialties(mappedData);
+            return mappedData;
         } catch (err) {
             ErrorHandler.generic(err);
-        } finally {
-            setLoading(false);
         }
     };
 
-    useEffect(() => {
-        fetchUserSpecialties();
-    }, []);
-
     return {
-        userSpecialties,
-        fetchUserSpecialties,
-        loading
+        userSpecialties: data,
+        fetchUserSpecialties: refetch,
+        loading: isLoading || isFetching
     };
 };

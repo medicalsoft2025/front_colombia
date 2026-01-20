@@ -12,13 +12,12 @@ include "../../../header.php";
 </div>
 
 <script type="module">
-    import React from "react"
-    import ReactDOMClient from "react-dom/client"
     import {
         BillingByEntity
     } from './react-dist/billing/by-entity/modal.js';
+    import { renderApp } from "./services/react/app-renderer.js";
 
-    ReactDOMClient.createRoot(document.getElementById('billing-by-entity-modal')).render(React.createElement(BillingByEntity));
+    renderApp(BillingByEntity, "billing-by-entity-modal");
 </script>
 
 <?php

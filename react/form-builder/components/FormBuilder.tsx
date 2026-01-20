@@ -5,26 +5,50 @@ import { Divider } from "primereact/divider";
 import { Tree, TreeCheckboxSelectionKeys, TreeEventNodeEvent, TreeMultipleSelectionKeys, TreeSelectionEvent } from "primereact/tree";
 import { JsonHelpers } from "../helpers/JsonHelpers";
 import { JsonConfigurator } from "./configurator/JsonConfigurator";
-import { fieldConfigMetadata, finalNestedContainerConfigMetadata } from "../config/metadata";
+import { finalNestedContainerConfigMetadata } from "../config/metadata";
 import { copyJSONWithFeedback, showNotification } from "../../../services/utilidades";
 import { InputText } from "primereact/inputtext";
 import { TreeNode } from "primereact/treenode";
-import { SplitButton } from "primereact/splitbutton";
 import { ContextMenu } from "primereact/contextmenu";
 import { Button } from "primereact/button";
-import { MenuItem } from "primereact/menuitem";
 import { Dialog } from "primereact/dialog";
 import { InputTextarea } from "primereact/inputtextarea";
+import { FormBuilderData } from "../interfaces/types";
+import { Controller, useForm, useWatch } from "react-hook-form";
+import { SplitButton } from "primereact/splitbutton";
 
-export const FormBuilder = () => {
+interface FormBuilderProps {
+    onSubmit: (data: FormBuilderData) => void;
+    initialData?: FormBuilderData | null;
+    loading?: boolean;
+}
+
+export const FormBuilder = (props: FormBuilderProps) => {
+
+    const { onSubmit, initialData, loading = false } = props;
+
+    const { getValues, control, trigger, reset, formState: { errors, isValid } } = useForm<{ configName: string }>({
+        defaultValues: initialData ?? {
+            configName: ""
+        }
+    });
+
+    const configName = useWatch({
+        control,
+        name: "configName"
+    });
 
     const [baseConfig, setBaseConfig] = useState<DynamicFormElementConfig>({
-        name: "form",
-        type: "form",
-        label: "Formulario",
-        children: []
+        type: "container",
+        children: [
+            {
+                name: "form",
+                type: "form",
+                label: "Formulario",
+                children: []
+            }
+        ]
     });
-    const [configName, setConfigName] = useState("Formulario");
 
     const [config, setConfigState] = useState<DynamicFormElementConfig>(baseConfig);
     const [past, setPast] = useState<DynamicFormElementConfig[]>([]);
@@ -141,8 +165,11 @@ export const FormBuilder = () => {
         }
     };
 
-    const handleSubmit = (data: any) => {
-        copyJSONWithFeedback({ jsonInput: data, message: "Datos del formulario copiados al portapapeles" });
+    const handleSubmit = async () => {
+        const isValid = await trigger();
+        if (!isValid) return;
+        const data = getValues();
+        onSubmit({ config, configName: data.configName });
     };
 
     const copyConfig = () => {
@@ -252,15 +279,34 @@ export const FormBuilder = () => {
         }
     }
 
+    const getFormErrorMessage = (name: keyof { configName: string }) => {
+        return (
+            errors[name] && (
+                <small className="p-error">{errors[name].message}</small>
+            )
+        );
+    };
+
     useEffect(() => {
-        const localConfig = localStorage.getItem(configName);
-        if (localConfig && localConfig !== "{}") {
-            setConfigState(JSON.parse(localConfig));
+        if (!initialData) {
+            const localConfig = localStorage.getItem(configName);
+            if (localConfig && localConfig !== "{}") {
+                setConfigState(JSON.parse(localConfig));
+            }
         }
-    }, [configName]);
+    }, [configName, initialData]);
+
+    useEffect(() => {
+        if (initialData) {
+            reset({
+                configName: initialData.configName
+            });
+            setConfigState(initialData.config);
+        }
+    }, [initialData]);
 
     return (<>
-        <div className="d-flex justify-content-between align-items-center mb-3 mt-3">
+        <div className="d-flex justify-content-between align-items-center mb-3">
             <div className="d-flex gap-2 align-items-center">
                 <Button
                     icon={<i className="fa fa-undo"></i>}
@@ -276,27 +322,39 @@ export const FormBuilder = () => {
                     disabled={future.length === 0}
                     tooltip="Rehacer"
                 />
-                <InputText
-                    value={configName}
-                    className="w-100"
-                    onChange={(e) => setConfigName(e.target.value)}
+                <Controller
+                    name="configName"
+                    control={control}
+                    rules={{
+                        required: "El nombre del formulario es requerido"
+                    }}
+                    render={({ field }) => (
+                        <InputText
+                            {...field}
+                            className="w-100"
+                        />
+                    )}
                 />
+                {getFormErrorMessage("configName")}
             </div>
             <SplitButton
                 label="Guardar"
                 icon={<i className="fa fa-save me-1"></i>}
                 size="small"
-                onClick={() => saveConfig({ message: "Configuración guardada", clearRedoHistory: true })}
+                onClick={handleSubmit}
+                disabled={!isValid || loading}
                 model={[
                     {
                         label: 'Copiar',
                         icon: <i className="fa fa-copy me-1"></i>,
                         command: copyConfig
+
                     },
                     {
                         label: 'Guardar',
                         icon: <i className="fa fa-save me-1"></i>,
-                        command: () => saveConfig({ message: "Configuración guardada", clearRedoHistory: true })
+                        command: handleSubmit,
+                        disabled: !isValid
                     }
                 ]}
             />
@@ -432,7 +490,7 @@ export const FormBuilder = () => {
             <div className="flex-grow-1 overflow-auto" style={{ maxHeight: '100vh' }}>
                 <h5>Formulario</h5>
                 <Divider />
-                <DynamicForm config={config} onSubmit={handleSubmit} onElementSelect={handleElementSelect} />
+                <DynamicForm config={config} onSubmit={() => { }} onElementSelect={handleElementSelect} />
             </div>
             <div className="d-flex flex-column" style={{ minWidth: '400px', maxWidth: '400px', borderLeft: '1px solid #ddd' }}>
                 <h5 className="p-3 pb-0">Configuración</h5>

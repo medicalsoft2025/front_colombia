@@ -1,8 +1,13 @@
+import { cleanJsonObject } from "../../utilidades.js";
 import BaseApiService from "./baseApiService.js";
 
 export class consentimientoService extends BaseApiService {
   async getAll() {
     return await this.httpClient.get(`api/v1/firma/template_documents`);
+  }
+
+  async getConsent(id) {
+    return await this.httpClient.get(`api/v1/firma/templates/show/${id}`);
   }
 
   async create(data) {
@@ -64,6 +69,10 @@ export class consentimientoService extends BaseApiService {
     a.click();
     a.remove();
     window.URL.revokeObjectURL(url);
+  }
+
+  async getTemplateByStatus(params) {
+    return await this.httpClient.post(`api/v1/firma/templates/by-status-signature`, params);
   }
 }
 export default consentimientoService;

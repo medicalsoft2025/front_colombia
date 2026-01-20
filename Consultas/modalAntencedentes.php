@@ -1,11 +1,11 @@
 <script type="module">
-  import React from "react"
-  import ReactDOMClient from "react-dom/client"
   import {
     PastMedicalHistoryDetail
   } from './react-dist/past-medical-history/PastMedicalHistoryDetail.js';
 
-  ReactDOMClient.createRoot(document.getElementById('modal-details-content')).render(React.createElement(PastMedicalHistoryDetail));
+  import { renderApp } from "./services/react/app-renderer.js";
+
+  renderApp(PastMedicalHistoryDetail, "modal-details-content");
 </script>
 
 <div class="modal fade modal-xl" id="modalVerAntecedentesClinicos" tabindex="-1" aria-hidden="true">
@@ -29,7 +29,8 @@
           <a href="#<?php echo $consulta['historiaId']; ?>" title="Imprimir antecedentes" class="btn text-primary p-0">
             <i class="fa-solid fa-print"></i>
           </a>
-          <a href="#<?php echo $consulta['historiaId']; ?>" title="Descargar antecedentes" class="btn text-primary p-0 ms-3">
+          <a href="#<?php echo $consulta['historiaId']; ?>" title="Descargar antecedentes"
+            class="btn text-primary p-0 ms-3">
             <i class="fa-solid fa-download"></i>
           </a>
           <div class="dropdown ms-3">
@@ -38,7 +39,8 @@
               <i class="fa-solid fa-share-nodes"></i>
             </a>
             <ul class="dropdown-menu">
-              <li><a class="dropdown-item" href="#"><i class="fa-brands fa-whatsapp"></i> Compartir por Whatsapp</a></li>
+              <li><a class="dropdown-item" href="#"><i class="fa-brands fa-whatsapp"></i> Compartir por Whatsapp</a>
+              </li>
               <li><a class="dropdown-item" href="#"><i class="fa-solid fa-envelope"></i> Compartir por Correo</a></li>
             </ul>
           </div>

@@ -12,12 +12,13 @@ include "../header.php";
     justify-content: center;
     margin-bottom: 5px;
   }
-     .container-small {
-        max-width: 100% !important;
-        width: 100%;
-        padding: 0;
-        margin: 0;
-    }
+
+  .container-small {
+    max-width: 100% !important;
+    width: 100%;
+    padding: 0;
+    margin: 0;
+  }
 
   .custom-btn i {
     margin-right: 5px;
@@ -25,13 +26,12 @@ include "../header.php";
 </style>
 
 <script type="module">
-  import React from "react"
-  import ReactDOMClient from "react-dom/client"
   import {
     PrescriptionApp
   } from './react-dist/prescriptions/PrescriptionApp.js';
+  import { renderApp } from "./services/react/app-renderer.js";
 
-  ReactDOMClient.createRoot(document.getElementById('prescriptionAppReact')).render(React.createElement(PrescriptionApp));
+  renderApp(PrescriptionApp, 'prescriptionAppReact');
 </script>
 
 <div class="content">

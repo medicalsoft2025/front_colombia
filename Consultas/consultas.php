@@ -44,6 +44,8 @@ include "../header.php";
 
                 <div class="container mt-4 w-100 mw-100">
 
+                    <div id="reactForm"></div>
+
                     <!-- Contenedor de tabs -->
                     <ul class="nav nav-tabs" id="formContainer">
                     </ul>
@@ -204,7 +206,8 @@ include "../header.php";
                                         class="btn btn-danger" id="cancelBtn">Cancelar consulta</a>
                                 </div>
                                 <div class="col-3">
-                                    <button disabled class="btn btn-primary" id="finishBtn" type="button">Terminar consulta</button>
+                                    <button disabled class="btn btn-primary" id="finishBtn" type="button">Terminar
+                                        consulta</button>
                                 </div>
                             </div>
                         </div>
@@ -584,22 +587,21 @@ include "../Remisiones/modalRemisiones.php";
     import {
         TimerApp
     } from './react-dist/components/timer/TimerApp.js';
+    import { renderApp } from "./services/react/app-renderer.js";
 
-    ReactDOMClient.createRoot(document.getElementById('timerReact')).render(React.createElement(TimerApp));
+    renderApp(TimerApp, 'timerReact');
 
-    ReactDOMClient.createRoot(document.getElementById('SeePatientInfoButtonReact')).render(React.createElement(
-        SeePatientInfoButton, {
-            patientId: patientId
-        }
-    ));
+    renderApp(SeePatientInfoButton, 'SeePatientInfoButtonReact', {
+        patientId: patientId
+    });
 
-    ReactDOMClient.createRoot(document.getElementById('form-content')).render(React.createElement(PastMedicalHistoryForm, {
+    renderApp(PastMedicalHistoryForm, 'form-content', {
         onFinishSave: () => {
             validatePastMedicalHistory();
         }
-    }));
-    ReactDOMClient.createRoot(document.getElementById('addParaclinicalBtnReact')).render(React.createElement(
-        AddParaclinicalButton));
+    });
+
+    renderApp(AddParaclinicalButton, 'addParaclinicalBtnReact');
 
     async function validatePastMedicalHistory() {
         const antecedentes = await clinicalRecordService.ofParentByType(
@@ -681,6 +683,7 @@ include "../Remisiones/modalRemisiones.php";
     import {
         FinishClinicalRecordModal
     } from './react-dist/clinical-records/FinishClinicalRecordModal.js';
+    import { renderApp } from "./services/react/app-renderer.js";
 
     const params = new URLSearchParams(window.location.search);
     const jsonPath = `../../ConsultasJson/${params.get("tipo_historia")}.json`;
@@ -692,14 +695,13 @@ include "../Remisiones/modalRemisiones.php";
 
     const clinicalRecordModalRef = React.createRef();
 
-    ReactDOMClient.createRoot(document.getElementById('clinicalRecordModalRoot')).render(React.createElement(
-        FinishClinicalRecordModal, {
-            ref: clinicalRecordModalRef,
-            externalDynamicData: basicCaptureFormValues(formData.form1),
-            onClose: () => {
-                ReactDOMClient.createRoot(document.getElementById('clinicalRecordModalRoot')).unmount();
-            }
-        }));
+    renderApp(FinishClinicalRecordModal, 'clinicalRecordModalRoot', {
+        ref: clinicalRecordModalRef,
+        externalDynamicData: basicCaptureFormValues(formData.form1),
+        onClose: () => {
+            ReactDOMClient.createRoot(document.getElementById('clinicalRecordModalRoot')).unmount();
+        }
+    });
 
     function basicCaptureFormValues(formData) {
         const formValues = {
@@ -858,7 +860,7 @@ include "../Remisiones/modalRemisiones.php";
         return formValues;
     }
 
-    document.getElementById("finishBtn").addEventListener("click", function() {
+    document.getElementById("finishBtn").addEventListener("click", function () {
         clinicalRecordModalRef.current.updateExternalDynamicData(basicCaptureFormValues(formData.form1));
         clinicalRecordModalRef.current.showModal();
     });

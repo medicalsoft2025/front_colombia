@@ -1065,3 +1065,77 @@ if (!document.querySelector('#clipboard-styles')) {
 
 // Exportar las funciones (si estás usando módulos)
 // export { copyJSONToClipboard, copyJSONLikeChromeInspector, copyJSONWithFeedback };
+
+export function flattenToStringArray(...args) {
+    const result = [];
+    
+    // Si se pasa un array como segundo parámetro, lo aplanamos
+    const items = args.length === 1 && Array.isArray(args[0]) ? args[0] : args;
+    
+    // Función recursiva para aplanar cualquier valor
+    const flatten = (value) => {
+        // Casos base: null, undefined, o valores primitivos
+        if (value === null) return ['null'];
+        if (value === undefined) return ['undefined'];
+        
+        // Manejar Date
+        if (value instanceof Date) return [value.toISOString()];
+        
+        // Manejar booleanos
+        if (typeof value === 'boolean') return [value.toString()];
+        
+        // Manejar números
+        if (typeof value === 'number') return [value.toString()];
+        
+        // Manejar strings
+        if (typeof value === 'string') return [value];
+        
+        // Manejar BigInt
+        if (typeof value === 'bigint') return [value.toString()];
+        
+        // Manejar Symbol
+        if (typeof value === 'symbol') return [value.toString()];
+        
+        // Manejar funciones
+        if (typeof value === 'function') return [`function:${value.name || 'anonymous'}`];
+        
+        // Manejar arrays (recursivamente)
+        if (Array.isArray(value)) {
+            return value.flatMap(item => flatten(item));
+        }
+        
+        // Manejar objetos (incluyendo Map, Set, etc.)
+        if (typeof value === 'object') {
+            // Casos especiales para objetos built-in
+            if (value instanceof Map) {
+                return flatten(Array.from(value.entries()));
+            }
+            
+            if (value instanceof Set) {
+                return flatten(Array.from(value));
+            }
+            
+            if (value instanceof RegExp) {
+                return [value.toString()];
+            }
+            
+            if (value instanceof Error) {
+                return [`Error:${value.message}`];
+            }
+            
+            // Objeto plano - aplanar recursivamente sus valores
+            return Object.values(value).flatMap(val => flatten(val));
+        }
+        
+        // Por si acaso queda algún tipo extraño
+        return [String(value)];
+    };
+    
+    // Procesar todos los argumentos
+    for (const arg of items) {
+        const flattened = flatten(arg);
+        result.push(...flattened);
+    }
+    
+    return result;
+}

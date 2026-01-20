@@ -30,13 +30,12 @@ include "../header.php";
 </div>
 
 <script type="module">
-    import React from "react"
-    import ReactDOMClient from "react-dom/client"
     import {
         PurchaseBilling
     } from './react-dist/billing/purchase_billing/PurchaseBilling.js';
+    import { renderApp } from "./services/react/app-renderer.js";
 
-    ReactDOMClient.createRoot(document.getElementById('FacturacionCompras')).render(React.createElement(PurchaseBilling));
+    renderApp(PurchaseBilling, "FacturacionCompras");
 </script>
 
 

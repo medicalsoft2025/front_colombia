@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { clinicalRecordTypeService } from '../../../services/api';
 import { ErrorHandler } from '../../../services/errorHandler';
-import { ClinicalRecordTypeDto } from '../../models/models';
+import { ClinicalRecordTypeDto } from '../interfaces/models';
 
 export const useClinicalRecordTypes = () => {
     const [clinicalRecordTypes, setClinicalRecordTypes] = useState<ClinicalRecordTypeDto[]>([]);
@@ -9,6 +9,7 @@ export const useClinicalRecordTypes = () => {
 
     const fetchClinicalRecordTypes = async () => {
         try {
+            setLoading(true);
             const data: ClinicalRecordTypeDto[] = await clinicalRecordTypeService.getAll();
             setClinicalRecordTypes(data);
         } catch (err) {

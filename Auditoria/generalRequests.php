@@ -85,14 +85,12 @@ include "../header.php";
     </script>
 
     <script type="module">
-        import React from "react";
-        import ReactDOMClient from "react-dom/client";
         import {
             SolvedRequestsTable
         } from './react-dist/general-request/components/SolvedRequestsTable.js';
+        import { renderApp } from './services/react/app-renderer.js';
 
-        const rootElement = document.getElementById('solvedRequestsReact');
-        ReactDOMClient.createRoot(rootElement).render(React.createElement(SolvedRequestsTable));
+        renderApp(SolvedRequestsTable, "solvedRequestsReact");
     </script>
 
     <?php include "../footer.php"; ?>

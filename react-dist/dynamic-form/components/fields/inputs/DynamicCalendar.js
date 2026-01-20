@@ -23,7 +23,8 @@ const DebouncedCalendar = ({
     showTime: field.type === "datetime",
     hourFormat: "12",
     onChange: e => onChange(e.value),
-    onBlur: controllerField.onBlur
+    onBlur: controllerField.onBlur,
+    selectionMode: field.calendarMode || "single"
   }));
 };
 export const DynamicCalendar = ({

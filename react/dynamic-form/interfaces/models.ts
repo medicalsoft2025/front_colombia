@@ -132,6 +132,7 @@ export interface DynamicFormElementConfig {
     asyncValidation?: AsyncValidationConfig;
     asyncOptions?: AsyncOptionsConfig;
     debounceTime?: number;
+    aiSuggestion?: string; // Hint/Context for AI to generate suggestions for this field
 
     // Container Specific
     children?: DynamicFormElementConfig[];
@@ -163,6 +164,7 @@ export interface DynamicFormElementConfig {
     // Legacy (to be removed)
     fields?: DynamicFormElementConfig[];
     containers?: DynamicFormElementConfig[];
+    calendarMode?: "single" | "range" | "multiple";
 }
 
 // Keep these for backward compatibility during transition

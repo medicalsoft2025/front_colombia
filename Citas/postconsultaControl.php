@@ -13,9 +13,9 @@ include "../header.php";
         </nav>
         <div class="main-content">
             <div class="component-container">
-                <div class="d-flex align-items-center justify-content-between mb-3"> 
+                <div class="d-flex align-items-center justify-content-between mb-3">
                     <h2>Post Consulta</h2>
-                </div>        
+                </div>
                 <div id="citasFinalizadasReact"></div>
             </div>
         </div>
@@ -23,13 +23,12 @@ include "../header.php";
 </div>
 
 <script type="module">
-    import React from "react"
-    import ReactDOMClient from "react-dom/client"
     import {
         AppointmentsFinishedTable
     } from './react-dist/appointments/AppointmentsFinishedTable.js';
+    import { renderApp } from './services/react/app-renderer.js';
 
-    ReactDOMClient.createRoot(document.getElementById('citasFinalizadasReact')).render(React.createElement(AppointmentsFinishedTable));
+    renderApp(AppointmentsFinishedTable, "citasFinalizadasReact")
 </script>
 
 <?php

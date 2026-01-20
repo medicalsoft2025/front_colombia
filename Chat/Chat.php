@@ -299,18 +299,14 @@ include "../header.php";
 
 <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
 <script type="module">
-    import React from "react"
-    import ReactDOMClient from "react-dom/client"
     import {
         ChatApp
     } from './react-dist/chat/ChatApp.js';
+    import { renderApp } from './services/react/app-renderer.js';
 
     const token = sessionStorage.getItem("auth_token") || "";
 
-    ReactDOMClient.createRoot(document.getElementById('ChatApp'))
-        .render(React.createElement(ChatApp, {
-            token
-        }));
+    renderApp(ChatApp, "ChatApp", { token });
 </script>
 
 <?php

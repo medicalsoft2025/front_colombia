@@ -18,7 +18,6 @@ export const useDataPagination = ({
     try {
       setLoading(true);
       const customFilters = typeof filters === "function" ? filters() : filters;
-      console.log(customFilters);
       const response = await fetchFunction({
         per_page: _perPage,
         page: page,

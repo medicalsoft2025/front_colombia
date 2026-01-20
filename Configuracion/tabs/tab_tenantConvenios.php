@@ -8,18 +8,17 @@
 </nav>        
 <div class="main-content">            
 <div class="component-container">                 -->
-<div id="TenantConvenios"></div>            
+<div id="TenantConvenios"></div>
 <!-- </div>        
 </div>    
 </div>
 </div> -->
 
 <script type="module">
-    import React from "react"
-    import ReactDOMClient from "react-dom/client"
     import {
         TenantConvenios
     } from './react-dist/tenant-convenios/TenantConvenios.js';
+    import { renderApp } from './services/react/app-renderer.js';
 
-    ReactDOMClient.createRoot(document.getElementById('TenantConvenios')).render(React.createElement(TenantConvenios));
+    renderApp(TenantConvenios, 'TenantConvenios');
 </script>

@@ -42,13 +42,12 @@ include "../header.php";
 </div>
 
 <script type="module">
-  import React from "react"
-  import ReactDOMClient from "react-dom/client"
   import {
     CierreCaja
   } from './react-dist/cash-control/CashControlReport.js';
+  import { renderApp } from "./services/react/app-renderer.js";
 
-  ReactDOMClient.createRoot(document.getElementById('cashControlReportReact')).render(React.createElement(CierreCaja));
+  renderApp(CierreCaja, 'cashControlReportReact');
 </script>
 
 <?php include "../footer.php"; ?>

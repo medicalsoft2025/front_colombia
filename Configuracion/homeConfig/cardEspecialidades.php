@@ -18,14 +18,10 @@ include "../../header.php";
     </div>
 
     <script type="module">
-        import React from "react";
-        import ReactDOMClient from "react-dom/client";
         import SpecialityApp from '../../react-dist/fe-config/speciality/SpecialityApp.js';
+        import { renderApp } from './services/react/app-renderer.js';
 
-        const rootElement = document.getElementById('specialities');
-        if (rootElement) {
-            ReactDOMClient.createRoot(rootElement).render(React.createElement(SpecialityApp));
-        }
+        renderApp(SpecialityApp, 'specialities');
     </script>
 </div>
 

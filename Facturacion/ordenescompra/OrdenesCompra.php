@@ -57,6 +57,7 @@ include "../../header.php";
     import {
         thirdPartyService
     } from "./services/api/index.js";
+    import { renderApp } from "./services/react/app-renderer.js";
 
     const patientId = new URLSearchParams(window.location.search).get('patient_id')
 
@@ -85,9 +86,7 @@ include "../../header.php";
         formPurchaseOrderProps.title = "Crear Cotización | " + patientThirdParty.name
     }
 
-    ReactDOMClient.createRoot(document.getElementById('FormPuchaseOrders')).render(
-        React.createElement(FormPurchaseOrders, formPurchaseOrderProps)
-    );
+    renderApp(FormPurchaseOrders, "FormPuchaseOrders", formPurchaseOrderProps);
 </script>
 <?php
 include "../../footer.php";

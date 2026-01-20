@@ -1,14 +1,14 @@
 <script type="module">
-    import React from "react"
-    import ReactDOMClient from "react-dom/client"
     import {
         remissionsForm
     } from './react-dist/remissions/RemissionsForm.js';
+    import { renderApp } from "./services/react/app-renderer.js";
 
-    ReactDOMClient.createRoot(document.getElementById('remission-form-content')).render(React.createElement(remissionsForm));
+    renderApp(remissionsForm, 'remission-form-content');
 </script>
 
-<div class="modal fade" id="nuevaRemisionModal" tabindex="-1" aria-labelledby="nuevaRemisionModalLabel" aria-hidden="true">
+<div class="modal fade" id="nuevaRemisionModal" tabindex="-1" aria-labelledby="nuevaRemisionModalLabel"
+    aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">

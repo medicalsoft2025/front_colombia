@@ -301,15 +301,12 @@
       </div>
     </div>
     <script type="module">
-      import React from "react"
-      import ReactDOMClient from "react-dom/client"
       import {
         SystemConfiguration
       } from './react-dist/config/general-configuration/SystemConfiguration.js';
+      import { renderApp } from "./services/react/app-renderer.js";
 
-      ReactDOMClient.createRoot(document.getElementById('SystemConfiguration')).render(
-        React.createElement(SystemConfiguration)
-      );
+      renderApp(SystemConfiguration, 'SystemConfiguration');
     </script>
   </main>
 </body>

@@ -1,13 +1,6 @@
 import React from "react";
-import { DynamicForm } from "../../dynamic-form/components/DynamicForm.js";
-import { tableFilters } from "../config/table-filters.js";
+import { PersistentQueryProvider } from "../../wrappers/PersistentQueryProvider.js";
+import { PatientEvolutionsTable } from "./PatientEvolutionsTable.js";
 export const PatientEvolutions = () => {
-  const handleFiltersChange = data => {
-    console.log(data);
-  };
-  return /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement(DynamicForm, {
-    config: tableFilters,
-    onSubmit: () => {},
-    onChange: handleFiltersChange
-  }));
+  return /*#__PURE__*/React.createElement(PersistentQueryProvider, null, /*#__PURE__*/React.createElement(PatientEvolutionsTable, null));
 };

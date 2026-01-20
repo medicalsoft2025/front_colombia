@@ -12,13 +12,12 @@ include "../../header.php";
 </div>
 
 <script type="module">
-    import React from "react"
-    import ReactDOMClient from "react-dom/client"
     import {
         Commissions
     } from './react-dist/reports/Commissions.js';
+    import { renderApp } from "./services/react/app-renderer.js";
 
-    ReactDOMClient.createRoot(document.getElementById('report-commissions')).render(React.createElement(Commissions));
+    renderApp(Commissions, 'report-commissions');
 </script>
 
 <?php

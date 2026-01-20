@@ -35,7 +35,7 @@ $resumenPaciente = [
     '
 ]
 
-?>
+  ?>
 
 <style type="text/css">
   .custom-btn {
@@ -50,9 +50,10 @@ $resumenPaciente = [
     margin-bottom: 5px;
     /* Espaciado opcional entre botones */
   }
-  .breadcrumb{
 
-    margin: 1rem 0 2rem 0  !important;
+  .breadcrumb {
+
+    margin: 1rem 0 2rem 0 !important;
     background: rgba(0, 0, 0, 0.02);
   }
 
@@ -76,12 +77,12 @@ $resumenPaciente = [
         <h2 class="mb-0">
           <? echo $nombres ?>
         </h2>
-<div class="col-12 col-md-12 col-lg-5">
+        <div class="col-12 col-md-12 col-lg-5">
           <div id="patientProfile"></div>
           <?php
           // include './infoPaciente.php';
           ?>
-        
+
         </div>
 
         <div class="col-md-7 ps-3">
@@ -90,8 +91,8 @@ $resumenPaciente = [
             <div class="accordion" id="accordionExample">
               <div class="accordion-item border border-0">
                 <h2 class="accordion-header px-3" id="headingOne">
-                  <button class="accordion-button" type="button" data-bs-toggle="collapse"
-                    data-bs-target="#collapseOne" aria-expanded="false" aria-controls="collapseOne">
+                  <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne"
+                    aria-expanded="false" aria-controls="collapseOne">
                     <h5 class="card-title mb-0">Evolución del paciente</h5>
                   </button>
                 </h2>
@@ -111,16 +112,14 @@ $resumenPaciente = [
               <div class="accordion-item border border-0">
                 <h2 class="accordion-header px-3" id="resumenHeading">
                   <button class="accordion-button" type="button" data-bs-toggle="collapse"
-                    data-bs-target="#resumenCollapse" aria-expanded="false"
-                    aria-controls="resumenCollapse">
+                    data-bs-target="#resumenCollapse" aria-expanded="false" aria-controls="resumenCollapse">
                     <h5 class="card-title mb-0">Resumen del paciente</h5>
                   </button>
                 </h2>
-                <div class="accordion-collapse collapse" id="resumenCollapse"
-                  aria-labelledby="resumenHeading" data-bs-parent="#resumenAccordion">
+                <div class="accordion-collapse collapse" id="resumenCollapse" aria-labelledby="resumenHeading"
+                  data-bs-parent="#resumenAccordion">
                   <div class="accordion-body pt-3">
-                    <div class="patient-summary-container" id="resumenPacienteContainer"
-                      style="margin-left: 1.2rem;">
+                    <div class="patient-summary-container" id="resumenPacienteContainer" style="margin-left: 1.2rem;">
                       <!-- Contenido del resumen irá aquí -->
                     </div>
                   </div>
@@ -166,30 +165,29 @@ $resumenPaciente = [
 </template>
 
 <script type="module">
-  import React from "react"
-  import ReactDOMClient from "react-dom/client"
   import {
     PreviewCurrentUserPatientViewCards
   } from './react-dist/fe-config/speciality/components/PreviewCurrentUserPatientViewCards.js';
 
-  ReactDOMClient.createRoot(document.getElementById('tabsReact')).render(React.createElement(PreviewCurrentUserPatientViewCards));
+  import { renderApp } from "./services/react/app-renderer.js";
+
+  renderApp(PreviewCurrentUserPatientViewCards, "tabsReact");
 </script>
 
 
 <script type="module">
-  import React from "react"
-  import ReactDOMClient from "react-dom/client"
   import {
     PatientProfileCard
   } from './react-dist/patients/patientProfile/components/PatientProfileCard.js';
+  import { renderApp } from "./services/react/app-renderer.js";
 
-  ReactDOMClient.createRoot(document.getElementById('patientProfile')).render(React.createElement(PatientProfileCard));
+  renderApp(PatientProfileCard, "patientProfile");
 </script>
 
 <script>
   const resumenPaciente = {
     resumenGeneral: "Paciente masculino de mediana edad, con cuadro clínico estable, bajo tratamiento por enfermedad cardiovascular crónica. Evolución favorable en los últimos controles, adherente al tratamiento y con seguimiento activo en consultas ambulatorias.",
-    
+
     diagnosticos: [
       "Angina de pecho estable",
       "Hipertensión arterial esencial",
@@ -204,17 +202,17 @@ $resumenPaciente = [
     ],
 
     citasRecientes: [{
-        fecha: "2025-03-20",
-        especialidad: "Cardiología",
-        motivo: "Control de angina y ajuste de tratamiento",
-        observaciones: "Paciente sin dolor torácico, se mantiene con buena tolerancia al esfuerzo"
-      },
-      {
-        fecha: "2025-02-15",
-        especialidad: "Medicina Interna",
-        motivo: "Control general",
-        observaciones: "Se solicitó perfil lipídico y ECG de control"
-      }
+      fecha: "2025-03-20",
+      especialidad: "Cardiología",
+      motivo: "Control de angina y ajuste de tratamiento",
+      observaciones: "Paciente sin dolor torácico, se mantiene con buena tolerancia al esfuerzo"
+    },
+    {
+      fecha: "2025-02-15",
+      especialidad: "Medicina Interna",
+      motivo: "Control general",
+      observaciones: "Se solicitó perfil lipídico y ECG de control"
+    }
     ],
 
     tratamientos: [
@@ -224,20 +222,20 @@ $resumenPaciente = [
     ],
 
     medicamentos: [{
-        nombre: "Aspirina",
-        dosis: "100 mg",
-        frecuencia: "1 vez al día"
-      },
-      {
-        nombre: "Atorvastatina",
-        dosis: "20 mg",
-        frecuencia: "1 vez al día"
-      },
-      {
-        nombre: "Metoprolol",
-        dosis: "50 mg",
-        frecuencia: "2 veces al día"
-      }
+      nombre: "Aspirina",
+      dosis: "100 mg",
+      frecuencia: "1 vez al día"
+    },
+    {
+      nombre: "Atorvastatina",
+      dosis: "20 mg",
+      frecuencia: "1 vez al día"
+    },
+    {
+      nombre: "Metoprolol",
+      dosis: "50 mg",
+      frecuencia: "2 veces al día"
+    }
     ],
 
     planManejo: "Continuar con tratamiento actual. Se recomienda control cardiológico trimestral, adherencia al tratamiento, realizar dieta baja en grasas saturadas, mantener ejercicio regular y evitar factores de riesgo como el estrés y el consumo de alcohol."
@@ -273,9 +271,9 @@ $resumenPaciente = [
         <h6 class="fw-bold">Medicamentos</h6>
         <p class="mb-2">Al paciente se le han recetado los siguientes medicamentos:</p>
         <ul class="ps-3">
-          ${resumenPaciente.medicamentos.map(m => 
-            `<li>${m.nombre} (${m.dosis}, ${m.frecuencia})</li>`
-          ).join('')}
+          ${resumenPaciente.medicamentos.map(m =>
+      `<li>${m.nombre} (${m.dosis}, ${m.frecuencia})</li>`
+    ).join('')}
         </ul>
       </div>
       
@@ -350,7 +348,7 @@ $resumenPaciente = [
   } from './services/api/index.js';
   import UserManager from './services/userManager.js';
 
-  document.addEventListener('DOMContentLoaded', async function() {
+  document.addEventListener('DOMContentLoaded', async function () {
     const clinicalRecordCard = document.getElementById('consulta');
     clinicalRecordCard.style.display = 'none';
     const patientId = new URLSearchParams(window.location.search).get('id') || new URLSearchParams(window
@@ -540,227 +538,227 @@ $resumenPaciente = [
 
 
 <style type="text/css">
-    .componente {
-        padding: 1rem 0;
-    }
-    
-    .container-small {
-        max-width: 1200px;
-        margin: 0 auto;
-        padding: 0 15px;
-    }
-    
+  .componente {
+    padding: 1rem 0;
+  }
+
+  .container-small {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 15px;
+  }
+
+  .cards-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 2rem;
+    margin-top: 2rem;
+  }
+
+  .dashboard-card {
+    background: #fff;
+    border-radius: 16px;
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.08), 0 2px 4px rgba(0, 0, 0, 0.05);
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    overflow: hidden;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    border: 1px solid rgba(0, 0, 0, 0.06);
+    position: relative;
+  }
+
+  .dashboard-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, #4a6cf7, #6c8eff);
+    transform: scaleX(0);
+    transition: transform 0.3s ease;
+  }
+
+  .dashboard-card:hover {
+    transform: translateY(-12px);
+    box-shadow: 0 20px 30px rgba(0, 0, 0, 0.15), 0 10px 20px rgba(0, 0, 0, 0.1);
+  }
+
+  .dashboard-card:hover::before {
+    transform: scaleX(1);
+  }
+
+  .dashboard-card .card-body {
+    padding: 2rem 1.5rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    flex-grow: 1;
+    position: relative;
+    z-index: 1;
+  }
+
+  .dashboard-card .card-icon {
+    margin-bottom: 1.2rem;
+    color: #4a6cf7;
+    font-size: 1.2rem;
+    transition: all 0.3s ease;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .dashboard-card .card-title {
+    font-size: 1.3rem;
+    font-weight: 700;
+    margin-bottom: 1rem;
+    color: #2d3748;
+    line-height: 1.3;
+  }
+
+  .dashboard-card .card-text {
+    color: #718096;
+    margin-bottom: 2rem;
+    flex-grow: 1;
+    line-height: 1.6;
+    max-width: 90%;
+  }
+
+  .dashboard-card .btn {
+    background: #132030;
+    border: none;
+    border-radius: 10px;
+    padding: 0.75rem 1.5rem;
+    transition: all 0.3s ease;
+    margin-top: auto;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .dashboard-card .btn::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+    transition: left 0.5s ease;
+  }
+
+  .dashboard-card .btn:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 20px rgba(74, 108, 247, 0.4);
+    background: linear-gradient(120deg, #1A99FB);
+  }
+
+  .dashboard-card .btn:hover::before {
+    left: 100%;
+  }
+
+  /* Responsive adjustments */
+  @media (max-width: 992px) {
     .cards-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-        gap: 2rem;
-        margin-top: 2rem;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 1.5rem;
     }
-    
-    .dashboard-card {
-        background: #fff;
-        border-radius: 16px;
-        box-shadow: 0 6px 12px rgba(0, 0, 0, 0.08), 0 2px 4px rgba(0, 0, 0, 0.05);
-        transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-        overflow: hidden;
-        height: 100%;
-        display: flex;
-        flex-direction: column;
-        border: 1px solid rgba(0, 0, 0, 0.06);
-        position: relative;
-    }
-    
-    .dashboard-card::before {
-        content: '';
-        position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        height: 4px;
-        background: linear-gradient(90deg, #4a6cf7, #6c8eff);
-        transform: scaleX(0);
-        transition: transform 0.3s ease;
-    }
-    
-    .dashboard-card:hover {
-        transform: translateY(-12px);
-        box-shadow: 0 20px 30px rgba(0, 0, 0, 0.15), 0 10px 20px rgba(0, 0, 0, 0.1);
-    }
-    
-    .dashboard-card:hover::before {
-        transform: scaleX(1);
-    }
-    
+
     .dashboard-card .card-body {
-        padding: 2rem 1.5rem;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        text-align: center;
-        flex-grow: 1;
-        position: relative;
-        z-index: 1;
+      padding: 1.5rem 1.25rem;
     }
-    
+
     .dashboard-card .card-icon {
-        margin-bottom: 1.2rem;
-        color: #4a6cf7;
-        font-size: 1.2rem;
-        transition: all 0.3s ease;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        position: relative;
-        overflow: hidden;
+      font-size: 2.6rem;
+      width: 80px;
+      height: 80px;
+    }
+  }
+
+  @media (max-width: 768px) {
+    .cards-grid {
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 1.25rem;
     }
 
     .dashboard-card .card-title {
-        font-size: 1.3rem;
-        font-weight: 700;
-        margin-bottom: 1rem;
-        color: #2d3748;
-        line-height: 1.3;
-    }
-    
-    .dashboard-card .card-text {
-        color: #718096;
-        margin-bottom: 2rem;
-        flex-grow: 1;
-        line-height: 1.6;
-        max-width: 90%;
-    }
-    
-    .dashboard-card .btn {
-        background: #132030 ;
-        border: none;
-        border-radius: 10px;
-        padding: 0.75rem 1.5rem;
-        transition: all 0.3s ease;
-        margin-top: auto;
-        font-weight: 600;
-        letter-spacing: 0.5px;
-        position: relative;
-        overflow: hidden;
-    }
-    
-    .dashboard-card .btn::before {
-        content: '';
-        position: absolute;
-        top: 0;
-        left: -100%;
-        width: 100%;
-        height: 100%;
-        background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
-        transition: left 0.5s ease;
-    }
-    
-    .dashboard-card .btn:hover {
-        transform: translateY(-3px);
-        box-shadow: 0 8px 20px rgba(74, 108, 247, 0.4);
-        background: linear-gradient(120deg, #1A99FB);
-    }
-    
-    .dashboard-card .btn:hover::before {
-        left: 100%;
-    }
-    
-    /* Responsive adjustments */
-    @media (max-width: 992px) {
-        .cards-grid {
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 1.5rem;
-        }
-        
-        .dashboard-card .card-body {
-            padding: 1.5rem 1.25rem;
-        }
-        
-        .dashboard-card .card-icon {
-            font-size: 2.6rem;
-            width: 80px;
-            height: 80px;
-        }
-    }
-    
-    @media (max-width: 768px) {
-        .cards-grid {
-            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-            gap: 1.25rem;
-        }
-        
-        .dashboard-card .card-title {
-            font-size: 1.2rem;
-        }
-        
-        .dashboard-card .card-text {
-            font-size: 0.9rem;
-        }
-    }
-    
-    @media (max-width: 576px) {
-        .cards-grid {
-            grid-template-columns: 1fr;
-            max-width: 400px;
-            margin-left: auto;
-            margin-right: auto;
-            gap: 1.25rem;
-        }
-        
-        .dashboard-card .card-body {
-            padding: 1.25rem 1rem;
-        }
-        
-        .dashboard-card .card-icon {
-            font-size: 1rem;
-            width: 70px;
-            height: 70px;
-        }
-    }
-    
-    /* Estilos para el tema oscuro */
-    html[data-bs-theme="dark"] .dashboard-card {
-        background: linear-gradient(135deg, #2d3748, #1a202c);
-        border-color: #4a5568;
-    }
-    
-    html[data-bs-theme="dark"] .dashboard-card .card-title {
-        color: #f7fafc;
-    }
-    
-    html[data-bs-theme="dark"] .dashboard-card .card-text {
-        color: #cbd5e0;
-    }
-    
-    html[data-bs-theme="dark"] .dashboard-card .card-icon {
-        background: linear-gradient(135deg, rgba(74, 108, 247, 0.2), rgba(108, 142, 255, 0.1));
-    }
-    
-    /* Estilos para el breadcrumb */
-    .breadcrumb {
-        font-size: 0.9rem;
-        padding: 1rem 1.5rem;
-        margin: -1rem -1.5rem 2rem -1.5rem;
-        background: rgba(0, 0, 0, 0.02);
-        border-radius: 8px;
-    }
-    
-    html[data-bs-theme="dark"] .breadcrumb {
-        background: rgba(255, 255, 255, 0.05);
-    }
-    
-    .custom-btn {
-        width: 150px;
-        height: 40px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        text-align: center;
-        margin-bottom: 5px;
+      font-size: 1.2rem;
     }
 
-    .custom-btn i {
-        margin-right: 5px;
+    .dashboard-card .card-text {
+      font-size: 0.9rem;
     }
+  }
+
+  @media (max-width: 576px) {
+    .cards-grid {
+      grid-template-columns: 1fr;
+      max-width: 400px;
+      margin-left: auto;
+      margin-right: auto;
+      gap: 1.25rem;
+    }
+
+    .dashboard-card .card-body {
+      padding: 1.25rem 1rem;
+    }
+
+    .dashboard-card .card-icon {
+      font-size: 1rem;
+      width: 70px;
+      height: 70px;
+    }
+  }
+
+  /* Estilos para el tema oscuro */
+  html[data-bs-theme="dark"] .dashboard-card {
+    background: linear-gradient(135deg, #2d3748, #1a202c);
+    border-color: #4a5568;
+  }
+
+  html[data-bs-theme="dark"] .dashboard-card .card-title {
+    color: #f7fafc;
+  }
+
+  html[data-bs-theme="dark"] .dashboard-card .card-text {
+    color: #cbd5e0;
+  }
+
+  html[data-bs-theme="dark"] .dashboard-card .card-icon {
+    background: linear-gradient(135deg, rgba(74, 108, 247, 0.2), rgba(108, 142, 255, 0.1));
+  }
+
+  /* Estilos para el breadcrumb */
+  .breadcrumb {
+    font-size: 0.9rem;
+    padding: 1rem 1.5rem;
+    margin: -1rem -1.5rem 2rem -1.5rem;
+    background: rgba(0, 0, 0, 0.02);
+    border-radius: 8px;
+  }
+
+  html[data-bs-theme="dark"] .breadcrumb {
+    background: rgba(255, 255, 255, 0.05);
+  }
+
+  .custom-btn {
+    width: 150px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    margin-bottom: 5px;
+  }
+
+  .custom-btn i {
+    margin-right: 5px;
+  }
 </style>
 
 <?php

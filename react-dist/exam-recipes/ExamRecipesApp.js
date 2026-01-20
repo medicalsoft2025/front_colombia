@@ -323,6 +323,18 @@ const TableActionsMenu = ({
     command: () => {
       onCancel();
     }
+  }, {
+    label: "Imprimir",
+    icon: "pi pi-print",
+    command: () => {
+      onPrint();
+    }
+  }, {
+    label: "Descargar",
+    icon: "pi pi-download",
+    command: () => {
+      onDownload();
+    }
   }] : []), ...(rowData.status === "uploaded" ? [{
     label: "Visualizar resultados",
     icon: "pi pi-eye",

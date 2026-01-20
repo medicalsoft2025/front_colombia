@@ -6,6 +6,10 @@ import { HtmlRenderer } from "../../components/HtmlRenderer";
 import { Badge } from "primereact/badge";
 import { Menu } from "primereact/menu";
 import { Button } from "primereact/button";
+import { Dialog } from "primereact/dialog";
+import { PatientEvolutionForm } from "../../patient-evolutions/components/PatientEvolutionForm";
+import { PatientEvolutionsTable } from "../../patient-evolutions/components/PatientEvolutionsTable";
+import { PersistentQueryProvider } from "../../wrappers/PersistentQueryProvider";
 
 interface PatientClinicalRecordsTableItem {
   id: string;
@@ -20,11 +24,12 @@ interface PatientClinicalRecordsTableItem {
   user: any;
   data: any;
   clinicalRecordTypeId: string;
+  clinicalRecordTypeObject: any;
 }
 
 interface PatientClinicalRecordsTableProps {
   records: PatientClinicalRecordDto[];
-  onSeeDetail?: (id: string, clinicalRecordType: string) => void;
+  onSeeDetail?: (id: string, clinicalRecordTypeObject: any) => void;
   onCancelItem?: (id: string) => void;
   onPrintItem?: (data: any, id: string, title: string) => void;
   onDownloadItem?: (id: string, title: string) => void;
@@ -63,6 +68,9 @@ export const PatientClinicalRecordsTable: React.FC<
     >([]);
     const [sortField, setSortField] = useState<string>('createdAt');
     const [sortOrder, setSortOrder] = useState<-1 | 1>(1); // 1 for asc, -1 for desc
+    const [showEvolutionNoteFormDialog, setShowEvolutionNoteFormDialog] = useState<boolean>(false);
+    const [showEvolutionNotesDialog, setShowEvolutionNotesDialog] = useState<boolean>(false);
+    const [selectedRecord, setSelectedRecord] = useState<PatientClinicalRecordsTableItem | null>(null);
 
     useEffect(() => {
       const mappedRecords: PatientClinicalRecordsTableItem[] = records
@@ -92,6 +100,7 @@ export const PatientClinicalRecordsTable: React.FC<
             user: clinicalRecord.created_by_user,
             data: clinicalRecord.data,
             clinicalRecordTypeId: clinicalRecord.clinical_record_type.id,
+            clinicalRecordTypeObject: clinicalRecord.clinical_record_type,
           };
         })
         .sort((a, b) => {
@@ -129,6 +138,18 @@ export const PatientClinicalRecordsTable: React.FC<
       if (onSort) {
         onSort(e);
       }
+    };
+
+    const handleAddEvolutionNote = (record: PatientClinicalRecordsTableItem) => {
+      console.log("Agregar nota de evolución", record);
+      setSelectedRecord(record);
+      setShowEvolutionNoteFormDialog(true);
+    };
+
+    const handleShowEvolutionNotes = (record: PatientClinicalRecordsTableItem) => {
+      console.log("Ver notas de evolución", record);
+      setSelectedRecord(record);
+      setShowEvolutionNotesDialog(true);
     };
 
     const columns: CustomPRTableColumnProps[] = [
@@ -190,6 +211,8 @@ export const PatientClinicalRecordsTable: React.FC<
             onPrintItem={onPrintItem}
             onDownloadItem={onDownloadItem}
             onShareItem={onShareItem}
+            onAddEvolutionNote={() => handleAddEvolutionNote(data)}
+            onShowEvolutionNotes={() => handleShowEvolutionNotes(data)}
           />
         )
       },
@@ -216,18 +239,51 @@ export const PatientClinicalRecordsTable: React.FC<
             />
           </div>
         </div>
+
+        <Dialog
+          visible={showEvolutionNoteFormDialog}
+          onHide={() => setShowEvolutionNoteFormDialog(false)}
+          header="Agregar nota de evolución"
+          style={{ width: "50vw" }}
+        >
+          {selectedRecord && (
+            <PatientEvolutionForm
+              clinicalRecordId={selectedRecord.id}
+            />
+          )}
+        </Dialog>
+
+        <Dialog
+          visible={showEvolutionNotesDialog}
+          onHide={() => setShowEvolutionNotesDialog(false)}
+          header="Notas de evolución"
+          style={{ width: "50vw" }}
+        >
+          {selectedRecord && (
+            <PersistentQueryProvider>
+              <PatientEvolutionsTable
+                clinicalRecordId={selectedRecord.id}
+                initialFieldStates={{
+                  clinicalRecordTypeId: { visible: false, disabled: true }
+                }}
+              />
+            </PersistentQueryProvider>
+          )}
+        </Dialog>
       </>
     );
   };
 
 const TableActionsMenu: React.FC<{
   data: PatientClinicalRecordsTableItem;
-  onSeeDetail?: (id: string, clinicalRecordType: string) => void;
+  onSeeDetail?: (id: string, clinicalRecordTypeObject: any) => void;
   onCancelItem?: (id: string) => void;
   onPrintItem?: (data: any, id: string, title: string) => void;
   onDownloadItem?: (id: string, title: string) => void;
   onShareItem?: (data: any, type: string) => void;
-}> = ({ data, onSeeDetail, onCancelItem, onPrintItem, onDownloadItem, onShareItem }) => {
+  onAddEvolutionNote?: (id: string) => void;
+  onShowEvolutionNotes?: (id: string) => void;
+}> = ({ data, onSeeDetail, onCancelItem, onPrintItem, onDownloadItem, onShareItem, onAddEvolutionNote, onShowEvolutionNotes }) => {
   const menu = useRef<Menu>(null);
   const [openMenuId, setOpenMenuId] = useState<string | null>(null);
 
@@ -235,7 +291,7 @@ const TableActionsMenu: React.FC<{
     {
       label: "Ver detalle",
       icon: <i className="fa fa-eye me-2"></i>,
-      command: () => onSeeDetail && onSeeDetail(data.id, data.clinicalRecordType)
+      command: () => onSeeDetail && onSeeDetail(data.id, data.clinicalRecordTypeObject)
     },
     {
       label: "Realizar revisión",
@@ -244,6 +300,16 @@ const TableActionsMenu: React.FC<{
       command: () => {
         console.log("Realizar revisión");
       }
+    },
+    {
+      label: "Agregar nota de evolución",
+      icon: <i className="fa fa-plus me-2"></i>,
+      command: () => onAddEvolutionNote && onAddEvolutionNote(data.id)
+    },
+    {
+      label: "Ver notas de evolución",
+      icon: <i className="fa fa-eye me-2"></i>,
+      command: () => onShowEvolutionNotes && onShowEvolutionNotes(data.id)
     },
     {
       label: "Solicitar cancelación",

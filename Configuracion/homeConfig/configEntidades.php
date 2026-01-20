@@ -28,13 +28,10 @@ include "../../header.php";
     </div>
 </div>
 <script type="module">
-    import React from "react"
-    import ReactDOMClient from "react-dom/client"
     import { EntitiesConfig } from './react-dist/config/entities/EntitiesConfig.js';
+    import { renderApp } from './services/react/app-renderer.js';
 
-    ReactDOMClient.createRoot(document.getElementById('EntitiesConfig')).render(
-        React.createElement(EntitiesConfig)
-    );
+    renderApp(EntitiesConfig, 'EntitiesConfig');
 </script>
 <?php
 include "../../footer.php";

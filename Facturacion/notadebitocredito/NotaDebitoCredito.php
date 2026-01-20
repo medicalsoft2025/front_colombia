@@ -54,13 +54,10 @@ include "../../header.php";
     </div>
 </div>
 <script type="module">
-    import React from "react"
-    import ReactDOMClient from "react-dom/client"
     import { FormDebitCreditNotes } from './react-dist/invoices/form/FormDebitCreditNotes.js';
+    import { renderApp } from "./services/react/app-renderer.js";
 
-    ReactDOMClient.createRoot(document.getElementById('FormDebitCreditNotes')).render(
-        React.createElement(FormDebitCreditNotes)
-    );
+    renderApp(FormDebitCreditNotes, "FormDebitCreditNotes");
 </script>
 <?php
 include "../../footer.php";

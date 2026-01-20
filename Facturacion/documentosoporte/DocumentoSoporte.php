@@ -51,13 +51,10 @@ include "../../header.php";
     </div>
 </div>
 <script type="module">
-    import React from "react"
-    import ReactDOMClient from "react-dom/client"
     import { FormDocumentSupport } from './react-dist/invoices/form/FormDocumentSupport.js';
+    import { renderApp } from "./services/react/app-renderer.js";
 
-    ReactDOMClient.createRoot(document.getElementById('FormDocumentSupport')).render(
-        React.createElement(FormDocumentSupport)
-    );
+    renderApp(FormDocumentSupport, "FormDocumentSupport");
 </script>
 <?php
 include "../../footer.php";

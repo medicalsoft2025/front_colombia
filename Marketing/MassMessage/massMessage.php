@@ -25,11 +25,10 @@ include "../../footer.php";
 ?>
 
 <script type="module">
-    import React from "react"
-    import ReactDOMClient from "react-dom/client"
     import {
         MassMessageApp
     } from './react-dist/marketing/mass-message/MassMessageApp.js';
+    import { renderApp } from "./services/react/app-renderer.js";
 
-    ReactDOMClient.createRoot(document.getElementById('massMessageApp')).render(React.createElement(MassMessageApp));
+    renderApp(MassMessageApp, "massMessageApp");
 </script>

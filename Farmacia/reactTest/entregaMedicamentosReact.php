@@ -8,14 +8,12 @@ include "../../header.php";
 </div>
 
 <script type="module">
-    import React from "react";
-    import ReactDOMClient from "react-dom/client";
     import {
         ProductsDelivery
     } from './react-dist/pharmacy/medication-delivery/MedicationsDelivery.js';
+    import { renderApp } from "./services/react/app-renderer.js";
 
-    const rootElement = document.getElementById('entregaMedicamentosRoot');
-    ReactDOMClient.createRoot(rootElement).render(React.createElement(ProductsDelivery));
+    renderApp(ProductsDelivery, "entregaMedicamentosRoot");
 </script>
 
 <?php include "../../footer.php"; ?>

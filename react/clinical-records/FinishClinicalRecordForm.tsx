@@ -44,6 +44,7 @@ interface FinishClinicalRecordFormProps {
     appointmentId?: string;
     patientId?: string;
     clinicalRecordId?: string;
+    clinicalRecordTypeId?: string;
     specialtyName?: string;
     ref?: any;
 }
@@ -154,7 +155,7 @@ export const FinishClinicalRecordForm: React.FC<FinishClinicalRecordFormProps> =
         const [loadLastPrescriptionCheck, setLoadLastPrescriptionCheck] = useState<boolean>(false);
 
         const [clinicalRecordTypeId, setClinicalRecordTypeId] =
-            useState<string>("");
+            useState<string>(props.clinicalRecordTypeId || "");
         const [currentUser, setCurrentUser] = useState<any | null>(null);
         const [currentAppointment, setCurrentAppointment] = useState<any | null>(
             null
@@ -535,7 +536,16 @@ export const FinishClinicalRecordForm: React.FC<FinishClinicalRecordFormProps> =
                 }
             };
 
-            fetchClinicalRecordType();
+            if (
+                finalClinicalRecordType &&
+                finalClinicalRecordType !== "" &&
+                finalClinicalRecordType !== undefined &&
+                finalClinicalRecordType !== null &&
+                finalClinicalRecordType !== "null" &&
+                finalClinicalRecordType !== "undefined"
+            ) {
+                fetchClinicalRecordType();
+            }
         }, [finalClinicalRecordType]);
 
         useEffect(() => {

@@ -1,11 +1,10 @@
 <script type="module">
-    import React from "react"
-    import ReactDOMClient from "react-dom/client"
     import {
         ModuleApp
     } from './react-dist/modules/ModuleApp.js';
+    import { renderApp } from './services/react/app-renderer.js';
 
-    ReactDOMClient.createRoot(document.getElementById('gestionarModulosReact')).render(React.createElement(ModuleApp));
+    renderApp(ModuleApp, 'gestionarModulosReact');
 </script>
 
 <div id="gestionarModulosReact"></div>

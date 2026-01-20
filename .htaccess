@@ -186,6 +186,8 @@ RewriteRule ^verIncapacidades$  Incapacidades/verIncapacidades.php
 
 #DocumentosInformados (Consentimientos/informes)
 RewriteRule ^verConcentimientos$  Documentos/verDocumentos.php
+RewriteRule ^consentsListGeneral$  Documentos/verDocumentosGeneral.php
+RewriteRule ^publicSignature$  Documentos/publicSignature.php
 
 #Antecedentes
 RewriteRule ^verAntecedentes$  Antecedentes/verAntecedentes.php
@@ -415,3 +417,9 @@ RewriteRule ^inventoryMovementReport$ InventoryReports/InventoryMovementReport.p
 RewriteRule ^testCachedData$ r-test/testCachedData.php
 RewriteRule ^formBuilderTest$ r-test/formBuilderTest.php
 RewriteRule ^patientEvolutions$ Evoluciones/evolucionesReact.php
+RewriteRule ^patientEvolutionsDos$ Evoluciones/evolucionesReactDos.php
+RewriteRule ^planEstudioReact$ r-test/planEstudioReact.php
+RewriteRule ^appForms$ AppForms/appForms.php
+RewriteRule ^clinicalRecordTypes$ Consultas/clinicalRecordTypes.php
+RewriteRule ^clinicalRecordFormReactTest$ Consultas/clinicalRecordFormReactTest.php
+RewriteRule ^clinicalRecordForm$ Consultas/clinicalRecordForm.php

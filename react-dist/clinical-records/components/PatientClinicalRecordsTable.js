@@ -5,6 +5,10 @@ import { HtmlRenderer } from "../../components/HtmlRenderer.js";
 import { Badge } from "primereact/badge";
 import { Menu } from "primereact/menu";
 import { Button } from "primereact/button";
+import { Dialog } from "primereact/dialog";
+import { PatientEvolutionForm } from "../../patient-evolutions/components/PatientEvolutionForm.js";
+import { PatientEvolutionsTable } from "../../patient-evolutions/components/PatientEvolutionsTable.js";
+import { PersistentQueryProvider } from "../../wrappers/PersistentQueryProvider.js";
 export const PatientClinicalRecordsTable = ({
   records,
   onSeeDetail,
@@ -24,7 +28,9 @@ export const PatientClinicalRecordsTable = ({
   const [tableRecords, setTableRecords] = useState([]);
   const [sortField, setSortField] = useState('createdAt');
   const [sortOrder, setSortOrder] = useState(1); // 1 for asc, -1 for desc
-
+  const [showEvolutionNoteFormDialog, setShowEvolutionNoteFormDialog] = useState(false);
+  const [showEvolutionNotesDialog, setShowEvolutionNotesDialog] = useState(false);
+  const [selectedRecord, setSelectedRecord] = useState(null);
   useEffect(() => {
     const mappedRecords = records.map(clinicalRecord => {
       const formattedDate = new Date(clinicalRecord.created_at).toLocaleString("es-ES", {
@@ -48,7 +54,8 @@ export const PatientClinicalRecordsTable = ({
         createdAt: formattedDate,
         user: clinicalRecord.created_by_user,
         data: clinicalRecord.data,
-        clinicalRecordTypeId: clinicalRecord.clinical_record_type.id
+        clinicalRecordTypeId: clinicalRecord.clinical_record_type.id,
+        clinicalRecordTypeObject: clinicalRecord.clinical_record_type
       };
     }).sort((a, b) => {
       // Función para convertir el string en fecha
@@ -78,6 +85,16 @@ export const PatientClinicalRecordsTable = ({
     if (onSort) {
       onSort(e);
     }
+  };
+  const handleAddEvolutionNote = record => {
+    console.log("Agregar nota de evolución", record);
+    setSelectedRecord(record);
+    setShowEvolutionNoteFormDialog(true);
+  };
+  const handleShowEvolutionNotes = record => {
+    console.log("Ver notas de evolución", record);
+    setSelectedRecord(record);
+    setShowEvolutionNotesDialog(true);
   };
   const columns = [{
     field: "clinicalRecordName",
@@ -127,7 +144,9 @@ export const PatientClinicalRecordsTable = ({
       onCancelItem: onCancelItem,
       onPrintItem: onPrintItem,
       onDownloadItem: onDownloadItem,
-      onShareItem: onShareItem
+      onShareItem: onShareItem,
+      onAddEvolutionNote: () => handleAddEvolutionNote(data),
+      onShowEvolutionNotes: () => handleShowEvolutionNotes(data)
     })
   }];
   return /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("div", {
@@ -148,6 +167,30 @@ export const PatientClinicalRecordsTable = ({
     onSearch: onSearch,
     onReload: onReload,
     onSort: handleSort
+  }))), /*#__PURE__*/React.createElement(Dialog, {
+    visible: showEvolutionNoteFormDialog,
+    onHide: () => setShowEvolutionNoteFormDialog(false),
+    header: "Agregar nota de evoluci\xF3n",
+    style: {
+      width: "50vw"
+    }
+  }, selectedRecord && /*#__PURE__*/React.createElement(PatientEvolutionForm, {
+    clinicalRecordId: selectedRecord.id
+  })), /*#__PURE__*/React.createElement(Dialog, {
+    visible: showEvolutionNotesDialog,
+    onHide: () => setShowEvolutionNotesDialog(false),
+    header: "Notas de evoluci\xF3n",
+    style: {
+      width: "50vw"
+    }
+  }, selectedRecord && /*#__PURE__*/React.createElement(PersistentQueryProvider, null, /*#__PURE__*/React.createElement(PatientEvolutionsTable, {
+    clinicalRecordId: selectedRecord.id,
+    initialFieldStates: {
+      clinicalRecordTypeId: {
+        visible: false,
+        disabled: true
+      }
+    }
   }))));
 };
 const TableActionsMenu = ({
@@ -156,7 +199,9 @@ const TableActionsMenu = ({
   onCancelItem,
   onPrintItem,
   onDownloadItem,
-  onShareItem
+  onShareItem,
+  onAddEvolutionNote,
+  onShowEvolutionNotes
 }) => {
   const menu = useRef(null);
   const [openMenuId, setOpenMenuId] = useState(null);
@@ -165,7 +210,7 @@ const TableActionsMenu = ({
     icon: /*#__PURE__*/React.createElement("i", {
       className: "fa fa-eye me-2"
     }),
-    command: () => onSeeDetail && onSeeDetail(data.id, data.clinicalRecordType)
+    command: () => onSeeDetail && onSeeDetail(data.id, data.clinicalRecordTypeObject)
   }, {
     label: "Realizar revisión",
     icon: /*#__PURE__*/React.createElement("i", {
@@ -175,6 +220,18 @@ const TableActionsMenu = ({
     command: () => {
       console.log("Realizar revisión");
     }
+  }, {
+    label: "Agregar nota de evolución",
+    icon: /*#__PURE__*/React.createElement("i", {
+      className: "fa fa-plus me-2"
+    }),
+    command: () => onAddEvolutionNote && onAddEvolutionNote(data.id)
+  }, {
+    label: "Ver notas de evolución",
+    icon: /*#__PURE__*/React.createElement("i", {
+      className: "fa fa-eye me-2"
+    }),
+    command: () => onShowEvolutionNotes && onShowEvolutionNotes(data.id)
   }, {
     label: "Solicitar cancelación",
     icon: /*#__PURE__*/React.createElement("i", {

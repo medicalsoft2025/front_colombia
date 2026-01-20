@@ -1,11 +1,10 @@
 <div id="userAbsencesAppReact"></div>
 
 <script type="module">
-    import React from "react"
-    import ReactDOMClient from "react-dom/client"
     import {
         UserAbsenceApp
     } from './react-dist/user-absences/UserAbsenceApp.js';
+    import { renderApp } from './services/react/app-renderer.js';
 
-    ReactDOMClient.createRoot(document.getElementById('userAbsencesAppReact')).render(React.createElement(UserAbsenceApp));
+    renderApp(UserAbsenceApp, 'userAbsencesAppReact');
 </script>

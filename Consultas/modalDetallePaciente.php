@@ -155,13 +155,13 @@ $consultas = [
     }
 
     .card-text {
-        font-family: 'Inter', sans-serif ;
+        font-family: 'Inter', sans-serif;
         overflow: hidden;
         text-overflow: ellipsis;
         max-height: 3em;
         /* Limita el texto */
         line-height: 1.5;
-     
+
 
     }
 
@@ -276,24 +276,17 @@ $consultas = [
     import {
         PreadmissionTable
     } from './react-dist/appointments/PreadmissionTable.js';
+    import { renderApp } from "./services/react/app-renderer.js";
 
-    ReactDOMClient.createRoot(document.getElementById('modalBodyInfoPacientesReact')).render(React.createElement(
-        PatientInfoContainer, {
-            patientId: (
-                new URLSearchParams(window.location.search).get('id') ||
-                new URLSearchParams(window.location.search).get('patient_id')
-            )
-        }));
-    ReactDOMClient.createRoot(document.getElementById('modalBodyAntecedentesDetalleReact')).render(React.createElement(
-        PastMedicalHistoryDetail));
-    ReactDOMClient.createRoot(document.getElementById('modalBodyHistorialReact')).render(React.createElement(
-        PatientEvolution))
-
-    ReactDOMClient.createRoot(document.getElementById('modalBodyHistoryRecipes')).render(React.createElement(
-        PrescriptionApp));
-
-    ReactDOMClient.createRoot(document.getElementById('modalBodyHistoryExams')).render(React.createElement(ExamApp));
-
-    ReactDOMClient.createRoot(document.getElementById('history-preadmission-data-content')).render(React.createElement(
-        PreadmissionTable));
+    renderApp(PatientInfoContainer, "modalBodyInfoPacientesReact", {
+        patientId: (
+            new URLSearchParams(window.location.search).get('id') ||
+            new URLSearchParams(window.location.search).get('patient_id')
+        )
+    });
+    renderApp(PastMedicalHistoryDetail, "modalBodyAntecedentesDetalleReact");
+    renderApp(PatientEvolution, "modalBodyHistorialReact");
+    renderApp(PrescriptionApp, "modalBodyHistoryRecipes");
+    renderApp(ExamApp, "modalBodyHistoryExams");
+    renderApp(PreadmissionTable, "history-preadmission-data-content");
 </script>

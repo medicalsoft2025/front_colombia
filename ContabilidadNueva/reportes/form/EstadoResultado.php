@@ -20,13 +20,12 @@ include "../../../header.php";
 </div>
 
 <script type="module">
-    import React from "react"
-    import ReactDOMClient from "react-dom/client"
     import {
         StatusResult
     } from './react-dist/billing/reports/StatusResult.js';
+    import { renderApp } from "./services/react/app-renderer.js";
 
-    ReactDOMClient.createRoot(document.getElementById('estadoResultados')).render(React.createElement(StatusResult));
+    renderApp(StatusResult, "estadoResultados");
 </script>
 
 

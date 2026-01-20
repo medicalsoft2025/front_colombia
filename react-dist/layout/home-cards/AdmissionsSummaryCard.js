@@ -7,7 +7,6 @@ export const AdmissionsSummaryCard = () => {
   };
   const {
     admisionCount,
-    fetchAdmisionCurrentMonth,
     toast: ErrorAdmisions
   } = useAdmisionsCurrentMonth();
   return /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement(Toast, {

@@ -1,11 +1,10 @@
 <script type="module">
-    import React from "react"
-    import ReactDOMClient from "react-dom/client"
     import {
         UserAvailabilityApp
     } from './react-dist/user-availabilities/UserAvailabilityApp.js';
+    import { renderApp } from './services/react/app-renderer.js';
 
-    ReactDOMClient.createRoot(document.getElementById('userAvailabilityAppReact')).render(React.createElement(UserAvailabilityApp));
+    renderApp(UserAvailabilityApp, 'userAvailabilityAppReact');
 </script>
 
 <div id="userAvailabilityAppReact"></div>

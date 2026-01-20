@@ -1,10 +1,12 @@
 import React from 'react';
 import { AppointmentFormModal } from "../../appointments/AppointmentFormModal.js";
+import { useAppointmentsActiveCount } from "./hooks/useAppointmentsActiveCount.js";
 export const AppointmentsSummaryCard = () => {
   const [showAppointmentFormModal, setShowAppointmentFormModal] = React.useState(false);
-  const handleViewAppointments = () => {
-    window.location.href = 'citasControl';
-  };
+  const {
+    count,
+    isFetching
+  } = useAppointmentsActiveCount();
   return /*#__PURE__*/React.createElement("div", {
     className: "card dashboard-card"
   }, /*#__PURE__*/React.createElement("div", {
@@ -15,11 +17,13 @@ export const AppointmentsSummaryCard = () => {
     className: "far fa-calendar-check ml-2"
   }), " Citas Generadas"), /*#__PURE__*/React.createElement("div", {
     className: "card-content"
-  }, /*#__PURE__*/React.createElement("h3", {
-    id: "appointmentsActiveCount"
-  }, "Cargando..."), /*#__PURE__*/React.createElement("span", {
+  }, isFetching ? /*#__PURE__*/React.createElement("span", {
     className: "text-span-descripcion"
-  }, "Citas este mes")), /*#__PURE__*/React.createElement("div", {
+  }, "Cargando...") : /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("h3", {
+    id: "appointmentsActiveCount"
+  }, count), /*#__PURE__*/React.createElement("span", {
+    className: "text-span-descripcion"
+  }, "Citas este mes"))), /*#__PURE__*/React.createElement("div", {
     className: "card-button"
   }, /*#__PURE__*/React.createElement("button", {
     className: "btn btn-phoenix-secondary me-1 mb-1",

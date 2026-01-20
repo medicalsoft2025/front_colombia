@@ -3,11 +3,64 @@ import { FieldValues, UseFormReturn, UseFieldArrayReturn } from "react-hook-form
 import { DataTable } from "primereact/datatable";
 import { Column } from "primereact/column";
 import { Button } from "primereact/button";
-import { DynamicFormContainerConfig, DynamicFieldConfig, DynamicFormElementConfig } from "../../interfaces/models";
+import { DynamicFormElementConfig } from "../../interfaces/models";
 import { FormProvider } from "../../providers/FormProvider";
 import { DynamicFormContainer } from "./DynamicFormContainer";
 import { useFieldConditions } from "../../hooks/useFieldConditions";
 import { useFormContext } from "../../context/FormContext";
+
+// Componente celda extraido para permitir el uso correcto de hooks
+const DynamicTableArrayCell = <T extends FieldValues>({
+    colNode,
+    rowData,
+    fields,
+    form,
+    parentPath
+}: {
+    colNode: DynamicFormElementConfig;
+    rowData: any;
+    fields: any[];
+    form: UseFormReturn<T>;
+    parentPath: string;
+}) => {
+    // Calcular index real basado en el ID del field array
+    const realIndex = fields.findIndex((f) => f.id === rowData.id);
+
+    // Hooks ahora se ejecutan incondicionalmente dentro del componente
+    const { fieldStates } = useFieldConditions({
+        config: colNode,
+        form,
+        basePath: `${parentPath}.${realIndex}`,
+        // Importante: pasar un key único o asegurar que basePath cambia
+    });
+
+    const parentContext = useFormContext();
+
+    const mergedFieldStates = {
+        ...parentContext.fieldStates,
+        ...fieldStates,
+    };
+
+    // Si no encontramos el index (e.g. durante borrado), retornar null o fallback
+    if (realIndex === -1) return null;
+
+    return (
+        <FormProvider value={{
+            fieldStates: mergedFieldStates,
+            form: form as UseFormReturn<FieldValues>,
+            setFieldState: parentContext.setFieldState,
+            onElementSelect: parentContext.onElementSelect,
+            sources: parentContext.sources
+        }}>
+            <DynamicFormContainer
+                config={colNode}
+                form={form}
+                parentPath={`${parentPath}.${realIndex}`}
+                className="w-full"
+            />
+        </FormProvider>
+    );
+};
 
 interface DynamicTableArrayProps<T extends FieldValues> {
     config: DynamicFormElementConfig;
@@ -60,37 +113,16 @@ export const DynamicTableArray = <T extends FieldValues>({
         </div>
     );
 
+    // Wrapper para el body template que renderiza el componente Cell
     const cellBodyTemplate = (colNode: DynamicFormElementConfig) => (rowData: any) => {
-
-        const realIndex = getRealIndex(rowData);
-
-        const { fieldStates } = useFieldConditions({
-            config: config || colNode,
-            form,
-            basePath: `${parentPath}.${realIndex}`,
-        });
-
-        const parentContext = useFormContext();
-
-        const mergedFieldStates = {
-            ...parentContext.fieldStates,
-            ...fieldStates,
-        };
-
         return (
-            <FormProvider value={{
-                fieldStates: mergedFieldStates,
-                form: form as UseFormReturn<FieldValues>,
-                setFieldState: parentContext.setFieldState,
-                onElementSelect: parentContext.onElementSelect,
-            }}>
-                <DynamicFormContainer
-                    config={colNode}
-                    form={form}
-                    parentPath={`${parentPath}.${realIndex}`}
-                    className="w-full"
-                />
-            </FormProvider>
+            <DynamicTableArrayCell
+                colNode={colNode}
+                rowData={rowData}
+                fields={fields}
+                form={form}
+                parentPath={parentPath}
+            />
         );
     };
 
@@ -109,6 +141,8 @@ export const DynamicTableArray = <T extends FieldValues>({
                 rows={tableConfig.rows || 5}
                 tableStyle={{ minWidth: '50rem' }}
                 emptyMessage="No hay registros"
+                // Importante: usar dataKey para estabilidad
+                dataKey="id"
             >
                 {(config?.children || config?.containers)?.map((col, i) => {
                     const key = col.name || `col-${i}`;

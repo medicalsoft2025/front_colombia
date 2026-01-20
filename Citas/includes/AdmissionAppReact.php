@@ -1,11 +1,10 @@
 <div id="admissionAppReact"></div>
 
 <script type="module">
-    import React from "react"
-    import ReactDOMClient from "react-dom/client"
     import {
         AdmissionAppReact
     } from './react-dist/admissions/AdmissionAppReact.js';
+    import { renderApp } from "./services/react/app-renderer.js";
 
-    ReactDOMClient.createRoot(document.getElementById('LobbyAppointments')).render(React.createElement(LobbyAppointments));
+    renderApp(AdmissionAppReact, "admissionAppReact");
 </script>

@@ -32,13 +32,12 @@ include "../header.php";
 </div>
 
 <script type="module">
-    import React from "react";
-    import ReactDOMClient from "react-dom/client";
     import {
         AuditLogsApp
     } from './react-dist/audit/AuditLogsApp.js';
+    import { renderApp } from './services/react/app-renderer.js';
 
-    ReactDOMClient.createRoot(document.getElementById('logsAuditoriaAppReact')).render(React.createElement(AuditLogsApp));
+    renderApp(AuditLogsApp, "logsAuditoriaAppReact");
 </script>
 
 <?php

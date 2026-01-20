@@ -1,11 +1,10 @@
 <div id="userRoleAppReact"></div>
 
 <script type="module">
-  import React from "react"
-  import ReactDOMClient from "react-dom/client"
   import {
     UserRoleApp
   } from './react-dist/user-roles/UserRoleApp.js';
+  import { renderApp } from './services/react/app-renderer.js';
 
-  ReactDOMClient.createRoot(document.getElementById('userRoleAppReact')).render(React.createElement(UserRoleApp));
+  renderApp(UserRoleApp, 'userRoleAppReact');
 </script>

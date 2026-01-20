@@ -30,7 +30,8 @@ export const DynamicField = ({
   } = form;
   const {
     fieldStates,
-    onElementSelect
+    onElementSelect,
+    fieldSuggestions
   } = useContext(FormContext);
   const {
     isVisible: parentVisibility
@@ -314,5 +315,24 @@ export const DynamicField = ({
     className: "form-label"
   }, field.label, field.required && /*#__PURE__*/React.createElement("span", {
     className: "required"
-  }, "*")), renderController(), getFormErrorMessage(fieldName));
+  }, "*")), renderController(), getFormErrorMessage(fieldName), fieldSuggestions && fieldSuggestions[fieldName] && fieldSuggestions[fieldName].length > 0 && /*#__PURE__*/React.createElement("div", {
+    className: "field-suggestions mt-1 d-flex flex-wrap gap-2"
+  }, /*#__PURE__*/React.createElement("small", {
+    className: "text-muted w-100 mb-1"
+  }, /*#__PURE__*/React.createElement("i", {
+    className: "fa fa-magic me-1"
+  }), "Sugerencias IA:"), fieldSuggestions[fieldName].map((suggestion, idx) => /*#__PURE__*/React.createElement("span", {
+    key: idx,
+    className: "badge bg-light text-dark border cursor-pointer hover-shadow",
+    style: {
+      cursor: 'pointer'
+    },
+    onClick: e => {
+      e.stopPropagation();
+      form.setValue(fieldName, suggestion, {
+        shouldValidate: true,
+        shouldDirty: true
+      });
+    }
+  }, typeof suggestion === 'object' ? JSON.stringify(suggestion) : suggestion))));
 };

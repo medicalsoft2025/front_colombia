@@ -37,6 +37,7 @@ const DebouncedCalendar = ({
             hourFormat="12"
             onChange={(e) => onChange(e.value)}
             onBlur={controllerField.onBlur}
+            selectionMode={field.calendarMode || "single"}
         />
     );
 };

@@ -5,7 +5,7 @@ include "../header.php";
 
 
 <div class="main-content">
-            <div class="component-container">
+    <div class="component-container">
         <div id="asignar-consentimiento"></div>
     </div>
 </div>
@@ -30,14 +30,10 @@ include "./modalDocumento.php";
     //         element.href = `verPaciente?id=${patient.id}`
     //     }
     // })
-    import React from "react";
-    import ReactDOMClient from "react-dom/client";
     import AsignarConsentimiento from '../../react-dist/config/asignar-consentimiento/AsignarConsentimiento.js';
+    import { renderApp } from "./services/react/app-renderer.js";
 
-    const rootElement = document.getElementById('asignar-consentimiento');
-    if (rootElement) {
-        ReactDOMClient.createRoot(rootElement).render(React.createElement(AsignarConsentimiento));
-    }
+    renderApp(AsignarConsentimiento, "asignar-consentimiento");
 </script>
 <?php
 include "../footer.php";

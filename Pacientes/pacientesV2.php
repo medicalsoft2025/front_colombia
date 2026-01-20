@@ -4,8 +4,7 @@ include "../header.php";
 ?>
 
 <style type="text/css">
-
-       .breadcrumb {
+    .breadcrumb {
         font-size: 0.9rem;
         padding: 1rem 1.5rem;
         margin: 1rem 0 2rem 0;
@@ -13,7 +12,7 @@ include "../header.php";
         border-radius: 12px;
         border: 1px solid rgba(0, 0, 0, 0.05);
     }
- 
+
     .container-small {
         max-width: 1200px;
         margin: 0 auto;
@@ -21,14 +20,14 @@ include "../header.php";
     }
 
     .content {
-        padding: calc(var(--phoenix-navbar-top-height) + 0.2rem) 1.5rem 6.375rem 1.5rem; 
-   }
+        padding: calc(var(--phoenix-navbar-top-height) + 0.2rem) 1.5rem 6.375rem 1.5rem;
+    }
 
     html[data-bs-theme="dark"] .breadcrumb {
         background: rgba(255, 255, 255, 0.05);
         border-color: rgba(255, 255, 255, 0.1);
     }
-    
+
     .custom-btn {
         width: 150px;
         height: 40px;
@@ -150,14 +149,12 @@ include "../header.php";
 <script src="https://js.pusher.com/8.2.0/pusher.min.js"></script>
 
 <script type="module">
-    import React from "react";
-    import ReactDOMClient from "react-dom/client";
     import {
         PatientConsultationList
     } from './react-dist/patients/PatientConsultationList.js';
+    import { renderApp } from "./services/react/app-renderer.js";
 
-    const rootElement = document.getElementById('patientConsultationListReact');
-    ReactDOMClient.createRoot(rootElement).render(React.createElement(PatientConsultationList));
+    renderApp(PatientConsultationList, "patientConsultationListReact");
 </script>
 
 <?php

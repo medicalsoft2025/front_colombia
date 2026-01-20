@@ -6,6 +6,7 @@ export const useClinicalRecordTypes = () => {
   const [loading, setLoading] = useState(true);
   const fetchClinicalRecordTypes = async () => {
     try {
+      setLoading(true);
       const data = await clinicalRecordTypeService.getAll();
       setClinicalRecordTypes(data);
     } catch (err) {

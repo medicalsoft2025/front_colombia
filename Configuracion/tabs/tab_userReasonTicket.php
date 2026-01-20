@@ -8,18 +8,17 @@
 </nav>        
 <div class="main-content">            
 <div class="component-container">                 -->
-<div id="ReasonTicket"></div>            
+<div id="ReasonTicket"></div>
 <!-- </div>        
 </div>    
 </div>
 </div> -->
 
 <script type="module">
-    import React from "react"
-    import ReactDOMClient from "react-dom/client"
     import {
         ReasonTicket
     } from './react-dist/reason-ticket/ReasonTicket.js';
+    import { renderApp } from './services/react/app-renderer.js';
 
-    ReactDOMClient.createRoot(document.getElementById('ReasonTicket')).render(React.createElement(ReasonTicket));
+    renderApp(ReasonTicket, 'ReasonTicket');
 </script>

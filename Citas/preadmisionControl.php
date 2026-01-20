@@ -28,13 +28,12 @@ include "../header.php";
 </div>
 
 <script type="module">
-    import React from "react"
-    import ReactDOMClient from "react-dom/client"
     import {
         PreadmissionsControlApp
     } from './react-dist/appointments/PreadmissionsControlApp.js';
+    import { renderApp } from './services/react/app-renderer.js';
 
-    ReactDOMClient.createRoot(document.getElementById('preadmissionsControlAppReact')).render(React.createElement(PreadmissionsControlApp));
+    renderApp(PreadmissionsControlApp, 'preadmissionsControlAppReact');
 </script>
 
 <?php

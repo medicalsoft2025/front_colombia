@@ -21,13 +21,12 @@ include "../header.php";
     </div>
 </div>
 <script type="module">
-    import React from "react"
-    import ReactDOMClient from "react-dom/client"
-    import { AccountsCollectPay } from './react-dist/accounting/accountsCollectPay/AccountsCollectPay.js';
+    import {
+        AccountsCollectPay
+    } from './react-dist/accounting/accountsCollectPay/AccountsCollectPay.js';
+    import { renderApp } from "./services/react/app-renderer.js";
 
-    ReactDOMClient.createRoot(document.getElementById('accountscollectPay')).render(
-        React.createElement(AccountsCollectPay)
-    );
+    renderApp(AccountsCollectPay, "accountscollectPay");
 </script>
 
 <?php

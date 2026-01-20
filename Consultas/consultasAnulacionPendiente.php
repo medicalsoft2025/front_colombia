@@ -75,7 +75,8 @@ $historiasClinicas = [
         <nav class="mb-3" aria-label="breadcrumb">
             <ol class="breadcrumb mb-0">
                 <li class="breadcrumb-item"><a href="Dashboard">Inicio</a></li>
-                <li class="breadcrumb-item active" onclick="location.reload()">Consultas - Solicitudes de anulación pendientes</li>
+                <li class="breadcrumb-item active" onclick="location.reload()">Consultas - Solicitudes de anulación
+                    pendientes</li>
             </ol>
         </nav>
 
@@ -145,14 +146,12 @@ $historiasClinicas = [
     </script>
 
     <script type="module">
-        import React from "react";
-        import ReactDOMClient from "react-dom/client";
         import {
             ClinicalRecordsPendingCancellation
         } from './react-dist/clinical-records/ClinicalRecordsPendingCancellation.js';
+        import { renderApp } from "./services/react/app-renderer.js";
 
-        const rootElement = document.getElementById('clinicalRecordsPendingCancellationReact');
-        ReactDOMClient.createRoot(rootElement).render(React.createElement(ClinicalRecordsPendingCancellation));
+        renderApp(ClinicalRecordsPendingCancellation, "clinicalRecordsPendingCancellationReact");
     </script>
 
     <?php include "../footer.php"; ?>

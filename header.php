@@ -106,13 +106,15 @@
                             <div class="card-header p-2 mt-1">
                                 <div class="d-flex justify-content-between">
                                     <h5 class="card-title mb-0">Notificaciones</h5>
-                                    <button id="markAllButton" class="btn btn-link p-0 fs-9 fw-normal" type="button">Marcar como
+                                    <button id="markAllButton" class="btn btn-link p-0 fs-9 fw-normal"
+                                        type="button">Marcar como
                                         leídas</button>
                                 </div>
                             </div>
 
                             <!-- Cuerpo del menú con lista de notificaciones -->
-                            <div id="bodyNotificaciones" class="card-body p-0" style="max-height: 500px; overflow-y: auto;">
+                            <div id="bodyNotificaciones" class="card-body p-0"
+                                style="max-height: 500px; overflow-y: auto;">
                                 <!-- Notificaciones cargadas por medio del script -->
                             </div>
 
@@ -128,10 +130,12 @@
 
 
 
-                <li class="nav-item dropdown"><a class="nav-link lh-1 pe-0" id="navbarDropdownUser" href="#!" role="button"
-                        data-bs-toggle="dropdown" data-bs-auto-close="outside" aria-haspopup="true" aria-expanded="false">
+                <li class="nav-item dropdown"><a class="nav-link lh-1 pe-0" id="navbarDropdownUser" href="#!"
+                        role="button" data-bs-toggle="dropdown" data-bs-auto-close="outside" aria-haspopup="true"
+                        aria-expanded="false">
                         <div class="avatar avatar-l ">
-                            <img class="rounded-circle user-avatar" src="assets/img/profile/profile_default.jpg" alt="" />
+                            <img class="rounded-circle user-avatar" src="assets/img/profile/profile_default.jpg"
+                                alt="" />
 
                         </div>
                     </a>
@@ -141,8 +145,8 @@
                             <div class="card-body p-0">
                                 <div class="text-center pt-4 pb-3">
                                     <div class="avatar avatar-xl ">
-                                        <img class="rounded-circle user-avatar" src="assets/img/profile/profile_default.jpg"
-                                            alt="" />
+                                        <img class="rounded-circle user-avatar"
+                                            src="assets/img/profile/profile_default.jpg" alt="" />
 
                                     </div>
                                     <h6 class="mt-2 text-body-emphasis username"></h6>
@@ -164,8 +168,8 @@
                                                 data-feather="sliders"></span>Personalizar</a></li>
                                 </ul>
                             </div>
-                            <div class="px-3"> <a class="btn btn-phoenix-secondary d-flex flex-center w-100" id="btn-logout"
-                                    href="#">
+                            <div class="px-3"> <a class="btn btn-phoenix-secondary d-flex flex-center w-100"
+                                    id="btn-logout" href="#">
                                     <span class="me-2" data-feather="log-out"> </span>Cerrar Sesión</a></div>
                             <div class="my-2 text-center fw-bold fs-10 text-body-quaternary"><a
                                     class="text-body-quaternary me-1" href="#!">Privacy policy</a>&bull;<a
@@ -183,11 +187,10 @@
 <script src="./funciones/funcionesJS/utils.js"></script>
 
 <script type="module">
-    import React from "react"
-    import ReactDOMClient from "react-dom/client"
     import NavbarHeader from './react-dist/layout/menu/NavbarHeader.js';
+    import { renderApp } from './services/react/app-renderer.js';
 
-    ReactDOMClient.createRoot(document.getElementById('NavbarHeader')).render(React.createElement(NavbarHeader));
+    renderApp(NavbarHeader, 'NavbarHeader');
 
     import {
         userService
@@ -203,7 +206,7 @@
     } from "./services/utilidades.js";
 
 
-    document.addEventListener('DOMContentLoaded', async function() {
+    document.addEventListener('DOMContentLoaded', async function () {
         // Aplicar middleware de autenticación
         // authMiddleware();        
         const user = await userService.getCachedLoggedUser(getJWTPayload().sub);
@@ -324,97 +327,97 @@
     // Objeto que contiene las notificaciones
     const notificationsData = {
         notifications: [{
-                id: 1,
-                user: {
-                    name: "Jessie Samson",
-                    avatar: "https://i.pinimg.com/736x/6c/6e/d7/6c6ed7f4011b7f926b3f1505475aba16.jpg",
-                    status: "online"
-                },
-                type: "comment",
-                message: "Ha comentado tu post",
-                time: "10:41",
-                date: "2021-08-07",
-                read: false
+            id: 1,
+            user: {
+                name: "Jessie Samson",
+                avatar: "https://i.pinimg.com/736x/6c/6e/d7/6c6ed7f4011b7f926b3f1505475aba16.jpg",
+                status: "online"
             },
-            {
-                id: 2,
-                user: {
-                    name: "MedicalSoft",
-                    avatar: null,
-                    initials: "M",
-                    status: "online"
-                },
-                type: "event",
-                message: "Ha creado un evento",
-                time: "10:20",
-                date: "2021-08-07",
-                read: false
+            type: "comment",
+            message: "Ha comentado tu post",
+            time: "10:41",
+            date: "2021-08-07",
+            read: false
+        },
+        {
+            id: 2,
+            user: {
+                name: "MedicalSoft",
+                avatar: null,
+                initials: "M",
+                status: "online"
             },
-            {
-                id: 3,
-                user: {
-                    name: "Kiera Anderson",
-                    avatar: "https://i.pinimg.com/736x/6c/6e/d7/6c6ed7f4011b7f926b3f1505475aba16.jpg",
-                    status: "offline"
-                },
-                type: "like",
-                message: "Le ha gustado tu post",
-                time: "09:30",
-                date: "2021-08-07",
-                read: true
+            type: "event",
+            message: "Ha creado un evento",
+            time: "10:20",
+            date: "2021-08-07",
+            read: false
+        },
+        {
+            id: 3,
+            user: {
+                name: "Kiera Anderson",
+                avatar: "https://i.pinimg.com/736x/6c/6e/d7/6c6ed7f4011b7f926b3f1505475aba16.jpg",
+                status: "offline"
             },
-            {
-                id: 4,
-                user: {
-                    name: "Herman Carter",
-                    avatar: "https://i.pinimg.com/736x/6c/6e/d7/6c6ed7f4011b7f926b3f1505475aba16.jpg",
-                    status: "online"
-                },
-                type: "appointment",
-                message: "Ha solicitado una cita",
-                time: "09:11",
-                date: "2021-08-07",
-                read: false
+            type: "like",
+            message: "Le ha gustado tu post",
+            time: "09:30",
+            date: "2021-08-07",
+            read: true
+        },
+        {
+            id: 4,
+            user: {
+                name: "Herman Carter",
+                avatar: "https://i.pinimg.com/736x/6c/6e/d7/6c6ed7f4011b7f926b3f1505475aba16.jpg",
+                status: "online"
             },
-            {
-                id: 4,
-                user: {
-                    name: "Herman Carter",
-                    avatar: "https://i.pinimg.com/736x/6c/6e/d7/6c6ed7f4011b7f926b3f1505475aba16.jpg",
-                    status: "online"
-                },
-                type: "appointment",
-                message: "Ha solicitado una cita",
-                time: "09:11",
-                date: "2021-08-07",
-                read: false
+            type: "appointment",
+            message: "Ha solicitado una cita",
+            time: "09:11",
+            date: "2021-08-07",
+            read: false
+        },
+        {
+            id: 4,
+            user: {
+                name: "Herman Carter",
+                avatar: "https://i.pinimg.com/736x/6c/6e/d7/6c6ed7f4011b7f926b3f1505475aba16.jpg",
+                status: "online"
             },
-            {
-                id: 4,
-                user: {
-                    name: "Herman Carter",
-                    avatar: "https://i.pinimg.com/736x/6c/6e/d7/6c6ed7f4011b7f926b3f1505475aba16.jpg",
-                    status: "online"
-                },
-                type: "appointment",
-                message: "Ha solicitado una cita",
-                time: "09:11",
-                date: "2021-08-07",
-                read: false
+            type: "appointment",
+            message: "Ha solicitado una cita",
+            time: "09:11",
+            date: "2021-08-07",
+            read: false
+        },
+        {
+            id: 4,
+            user: {
+                name: "Herman Carter",
+                avatar: "https://i.pinimg.com/736x/6c/6e/d7/6c6ed7f4011b7f926b3f1505475aba16.jpg",
+                status: "online"
             },
-            {
-                id: 4,
-                user: {
-                    name: "Herman Carter",
-                    avatar: "https://i.pinimg.com/736x/6c/6e/d7/6c6ed7f4011b7f926b3f1505475aba16.jpg",
-                    status: "online"
-                },
-                type: "appointment",
-                message: "Ha solicitado una cita",
-                time: "09:11",
-                date: "2021-08-07",
-                read: false
-            }
+            type: "appointment",
+            message: "Ha solicitado una cita",
+            time: "09:11",
+            date: "2021-08-07",
+            read: false
+        },
+        {
+            id: 4,
+            user: {
+                name: "Herman Carter",
+                avatar: "https://i.pinimg.com/736x/6c/6e/d7/6c6ed7f4011b7f926b3f1505475aba16.jpg",
+                status: "online"
+            },
+            type: "appointment",
+            message: "Ha solicitado una cita",
+            time: "09:11",
+            date: "2021-08-07",
+            read: false
+        }
         ],
         unreadCount: 3
     };
@@ -531,7 +534,7 @@
     }
 
     // Inicializar cuando el DOM esté cargado
-    document.addEventListener('DOMContentLoaded', function() {
+    document.addEventListener('DOMContentLoaded', function () {
         // Renderizar notificaciones iniciales
         renderNotifications();
 

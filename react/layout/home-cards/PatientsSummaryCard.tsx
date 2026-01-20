@@ -1,6 +1,10 @@
 import React from 'react';
+import { usePatientsActiveCount } from './hooks/usePatientsActiveCount';
 
 export const PatientsSummaryCard = () => {
+
+    const { count, isFetching, isLoading } = usePatientsActiveCount();
+
     const handleViewPatients = () => {
         window.location.href = 'pacientescontrol';
     };
@@ -12,8 +16,14 @@ export const PatientsSummaryCard = () => {
                     <i className="fa-solid fa-restroom ml-2"></i> Pacientes
                 </h5>
                 <div className="card-content">
-                    <h3 id="patientsActiveCount">Cargando...</h3>
-                    <span className="text-span-descripcion">Pacientes Creados</span>
+                    {isFetching || isLoading ? (
+                        <span className="text-span-descripcion">Cargando...</span>
+                    ) : (
+                        <>
+                            <h3 id="patientsActiveCount">{count}</h3>
+                            <span className="text-span-descripcion">Pacientes Creados</span>
+                        </>
+                    )}
                 </div>
                 <div className="card-button">
                     <button

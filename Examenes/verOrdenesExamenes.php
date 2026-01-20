@@ -19,12 +19,13 @@ $examenes = [
 ?>
 
 <style>
-       .container-small {
+    .container-small {
         max-width: 100% !important;
         width: 100%;
         padding: 0;
         margin: 0;
     }
+
     .custom-btn {
         width: 150px;
         height: 40px;
@@ -115,9 +116,8 @@ include './ModalExamenes.php';
 </script>
 
 <script type="module">
-    import React from "react"
-    import ReactDOMClient from "react-dom/client"
     import ExamApp from './react-dist/exams/ExamApp.js';
+    import { renderApp } from "./services/react/app-renderer.js";
 
-    ReactDOMClient.createRoot(document.getElementById('examsAppReact')).render(React.createElement(ExamApp));
+    renderApp(ExamApp, "examsAppReact");
 </script>

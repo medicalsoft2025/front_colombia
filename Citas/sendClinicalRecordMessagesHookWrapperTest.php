@@ -12,24 +12,20 @@ include "../header.php";
 
 <script type="module">
     import React from "react";
-    import ReactDOMClient from "react-dom/client";
     import {
         SendClinicalRecordMessagesHookWrapper
     } from './react-dist/wrappers/SendMessagesWrapper.js';
+    import { renderApp } from "./services/react/app-renderer.js";
 
     const sendClinicalRecordMessagesHookWrapperRef = React.createRef();
 
-    const rootElement = document.getElementById('appointmentModalRoot');
-    ReactDOMClient.createRoot(rootElement).render(React.createElement(SendClinicalRecordMessagesHookWrapper, {
+    renderApp(SendClinicalRecordMessagesHookWrapper, "appointmentModalRoot", {
         clinicalRecordId: 58,
         ref: sendClinicalRecordMessagesHookWrapperRef
-    }));
-
-    console.log(sendClinicalRecordMessagesHookWrapperRef);
+    });
 
     document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('btnTest').addEventListener('click', () => {
-            console.log(sendClinicalRecordMessagesHookWrapperRef.current);
             sendClinicalRecordMessagesHookWrapperRef.current.sendClinicalRecordMessages();
         });
     });

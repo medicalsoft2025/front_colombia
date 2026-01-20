@@ -52,8 +52,6 @@ $examenes = [
 </div>
 
 <script type="module">
-    import React from "react"
-    import ReactDOMClient from "react-dom/client"
     import {
         ExamResultsForm
     } from './react-dist/exams/components/ExamResultsForm.js';
@@ -87,8 +85,9 @@ $examenes = [
     import {
         TimerApp
     } from './react-dist/components/timer/TimerApp.js';
+    import { renderApp } from "./services/react/app-renderer.js";
 
-    ReactDOMClient.createRoot(document.getElementById('timerReact')).render(React.createElement(TimerApp));
+    renderApp(TimerApp, "timerReact");
 
     console.log('hola');
 
@@ -177,11 +176,9 @@ $examenes = [
         const dataToFile = await generatePdfFile(exam);
 
         const replacements = {
-            NOMBRE_PACIENTE: `${exam.exam_order.patient.first_name ?? ""} ${
-          exam.exam_order.patient.middle_name ?? ""
-        } ${exam.exam_order.patient.last_name ?? ""} ${
-          exam.exam_order.patient.second_last_name ?? ""
-        }`,
+            NOMBRE_PACIENTE: `${exam.exam_order.patient.first_name ?? ""} ${exam.exam_order.patient.middle_name ?? ""
+                } ${exam.exam_order.patient.last_name ?? ""} ${exam.exam_order.patient.second_last_name ?? ""
+                }`,
             NOMBRE_EXAMEN: `${exam.exam_order.exam_type.name}`,
             FECHA_EXAMEN: `${formatDate(exam.created_at, true)}`,
             "ENLACE DOCUMENTO": "",
@@ -207,7 +204,7 @@ $examenes = [
             minio_id: dataToFile?.id,
             webhook_url: "https://example.com/webhook",
         };
-        messaging.sendMessage(dataMessage).then(() => {});
+        messaging.sendMessage(dataMessage).then(() => { });
     }
 
     await appointmentService.changeStatus(appointmentId, 'in_consultation')
@@ -235,18 +232,18 @@ $examenes = [
 
     document.getElementById('productName').textContent = examOrder?.exam_type?.name || 'Cargar Resultados de Examen';
 
-    ReactDOMClient.createRoot(document.getElementById('examsAppReact')).render(React.createElement(ExamResultsForm, {
+    renderApp(ExamResultsForm, "examsAppReact", {
         examId: examOrder.id,
         handleSave: (data) => {
             const formattedTime = formatTimeByMilliseconds(localStorage.getItem(generateURLStorageKey('elapsedTime')));
             examResultService.create({
-                    "exam_order_id": examOrder.id,
-                    "created_by_user_id": UserManager.getUser().id,
-                    "results": data,
-                    "exam_order_update_data": {
-                        duration: `${formattedTime.hours}:${formattedTime.minutes}:${formattedTime.seconds}`
-                    }
-                })
+                "exam_order_id": examOrder.id,
+                "created_by_user_id": UserManager.getUser().id,
+                "results": data,
+                "exam_order_update_data": {
+                    duration: `${formattedTime.hours}:${formattedTime.minutes}:${formattedTime.seconds}`
+                }
+            })
                 .then(async (response) => {
 
                     await sendMessageWhatsapp(response);
@@ -269,5 +266,5 @@ $examenes = [
                     }
                 });
         }
-    }));
+    });
 </script>

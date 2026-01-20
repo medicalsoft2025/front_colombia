@@ -10,14 +10,12 @@ include "../header.php";
 </div>
 
 <script type="module">
-    import React from "react";
-    import ReactDOMClient from "react-dom/client";
     import {
         InventoryMovementReport
     } from './react-dist/inventory/reports/InventoryMovementReport.js';
+    import { renderApp } from "./services/react/app-renderer.js";
 
-    const rootElement = document.getElementById('inventoryMovementModalRoot');
-    ReactDOMClient.createRoot(rootElement).render(React.createElement(InventoryMovementReport));
+    renderApp(InventoryMovementReport, "inventoryMovementModalRoot");
 </script>
 
 <?php include "../footer.php"; ?>

@@ -10,14 +10,12 @@ include "../../header.php";
 </div>
 
 <script type="module">
-    import React from "react";
-    import ReactDOMClient from "react-dom/client";
     import {
         SystemConfigApp
     } from './react-dist/config/system-config/SystemConfigApp.js';
+    import { renderApp } from './services/react/app-renderer.js';
 
-    const rootElement = document.getElementById('systemConfigReactTest');
-    ReactDOMClient.createRoot(rootElement).render(React.createElement(SystemConfigApp));
+    renderApp(SystemConfigApp, 'systemConfigReactTest');
 </script>
 
 <?php include "../../footer.php"; ?>

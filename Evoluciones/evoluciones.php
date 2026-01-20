@@ -22,13 +22,12 @@ $jsonData = json_encode($evolucionesData);
 ?>
 
 <script type="module">
-    import React from "react"
-    import ReactDOMClient from "react-dom/client"
     import {
         EvolutionsContent
     } from './react-dist/evolutions/EvolutionsContent.js';
+    import { renderApp } from "./services/react/app-renderer.js";
 
-    ReactDOMClient.createRoot(document.getElementById('evolution-data-content')).render(React.createElement(EvolutionsContent));
+    renderApp(EvolutionsContent, "evolution-data-content");
 </script>
 
 <style type="text/css">
@@ -112,7 +111,8 @@ $jsonData = json_encode($evolucionesData);
                         </li>
                     </ul>
                     <div class="tab-content mt-3" id="myTabContent">
-                        <div class="tab-pane fade show active" id="tab-evoluciones" role="tabpanel" aria-labelledby="evoluciones-tab">
+                        <div class="tab-pane fade show active" id="tab-evoluciones" role="tabpanel"
+                            aria-labelledby="evoluciones-tab">
                             <div id="evolution-data-content"></div>
                         </div>
                     </div>

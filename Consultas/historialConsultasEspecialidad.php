@@ -276,7 +276,7 @@ $tiposEspecialidad = $tiposHistorias[$especialidad] ?? [];
                                     <ul class="dropdown-menu" style="z-index: 10000;">
                                         <?php
                                         if ($historia['estado'] == 'approved') {
-                                        ?>
+                                            ?>
                                             <li>
                                                 <a class="dropdown-item" href="#" onclick="solicitarAnulacion(<?= $historia['id'] ?>)">
                                                     <div class="d-flex gap-2 align-items-center">
@@ -335,7 +335,7 @@ $tiposEspecialidad = $tiposHistorias[$especialidad] ?? [];
     </div>
 
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
+        document.addEventListener('DOMContentLoaded', function () {
             document.querySelectorAll('.especialidadName').forEach(div => {
                 div.textContent = new URLSearchParams(window.location.search).get('especialidad');
             })
@@ -370,13 +370,12 @@ $tiposEspecialidad = $tiposHistorias[$especialidad] ?? [];
 </div>
 
 <script type="module">
-    import React from "react"
-    import ReactDOMClient from "react-dom/client"
     import {
         PatientClinicalRecordHistory
     } from './react-dist/clinical-records/PatientClinicalRecordHistory.js';
+    import { renderApp } from "./services/react/app-renderer.js";
 
-    ReactDOMClient.createRoot(document.getElementById('patientClinicalRecordHistoryReact')).render(React.createElement(PatientClinicalRecordHistory));
+    renderApp(PatientClinicalRecordHistory, "patientClinicalRecordHistoryReact");
 </script>
 
 <script type="module">

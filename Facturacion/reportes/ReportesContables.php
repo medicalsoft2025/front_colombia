@@ -118,6 +118,7 @@ include "./includes/modals/modalNotaCredito.php";
                         import React from "react";
                         import ReactDOMClient from "react-dom/client";
                         import { ${componentName} } from './react-dist/billing/reports/${componentName}.js';
+                        import { renderApp } from "./services/react/app-renderer.js";
                         
                         const container = document.getElementById('${containerId}');
                         
@@ -126,8 +127,7 @@ include "./includes/modals/modalNotaCredito.php";
                             currentRoot.unmount();
                         }
                         
-                        currentRoot = ReactDOMClient.createRoot(container);
-                        currentRoot.render(React.createElement(${componentName}));
+                        renderApp(${componentName}, container);
                     `;
 
                         // Agregar el script al documento

@@ -1,11 +1,10 @@
 <script type="module">
-    import React from "react"
-    import ReactDOMClient from "react-dom/client"
     import {
         EstimateForm
     } from './react-dist/estimates/EstimateForm.js';
+    import { renderApp } from "./services/react/app-renderer.js";
 
-    ReactDOMClient.createRoot(document.getElementById('estimate-form-content')).render(React.createElement(EstimateForm));
+    renderApp(EstimateForm, 'estimate-form-content');
 </script>
 
 <div class="modal fade" id="modalCrearPresupuesto" tabindex="-1" aria-hidden="true">
@@ -31,8 +30,8 @@
 </div>
 </div>
 <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        document.getElementById('descuento').addEventListener('input', function() {
+    document.addEventListener('DOMContentLoaded', function () {
+        document.getElementById('descuento').addEventListener('input', function () {
             const precio = parseFloat(document.getElementById('precio').value);
             const cantidad = parseFloat(document.getElementById('cantidad').value);
             const descuentoInput = this.value.trim();
@@ -56,7 +55,7 @@
             subtotalField.value = subtotal.toFixed(2);
         });
 
-        document.getElementById('productForm').addEventListener('submit', function(event) {
+        document.getElementById('productForm').addEventListener('submit', function (event) {
             event.preventDefault();
 
             const descripcion = document.getElementById('producto').value;

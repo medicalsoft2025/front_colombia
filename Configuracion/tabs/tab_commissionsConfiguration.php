@@ -1,11 +1,10 @@
 <script type="module">
-  import React from "react"
-  import ReactDOMClient from "react-dom/client"
   import {
     ComissionApp
   } from './react-dist/users/ComissionsApp.js';
+  import { renderApp } from './services/react/app-renderer.js';
 
-  ReactDOMClient.createRoot(document.getElementById('ComissionApp')).render(React.createElement(ComissionApp));
+  renderApp(ComissionApp, 'ComissionApp');
 </script>
 
 <div id="ComissionApp"></div>

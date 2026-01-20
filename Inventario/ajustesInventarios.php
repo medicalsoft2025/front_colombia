@@ -23,13 +23,12 @@ include "../header.php";
 </div>
 
 <script type="module">
-    import React from "react";
-    import ReactDOMClient from "react-dom/client";
     import {
         InventoryAdjustmentsApp
     } from './react-dist/inventory/ajustes/ajustesInventario.js';
+    import { renderApp } from "./services/react/app-renderer.js";
 
-    ReactDOMClient.createRoot(document.getElementById('ajustesInventario')).render(React.createElement(InventoryAdjustmentsApp));
+    renderApp(InventoryAdjustmentsApp, "ajustesInventario");
 </script>
 
 <?php

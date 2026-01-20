@@ -25,11 +25,10 @@ include "../../footer.php";
 ?>
 
 <script type="module">
-    import React from "react"
-    import ReactDOMClient from "react-dom/client"
     import {
         SurveyPanelApp
     } from './react-dist/marketing/survey-panel/SurveyPanelApp.js';
+    import { renderApp } from "./services/react/app-renderer.js";
 
-    ReactDOMClient.createRoot(document.getElementById('surveyPanel')).render(React.createElement(SurveyPanelApp));
+    renderApp(SurveyPanelApp, "surveyPanel");
 </script>

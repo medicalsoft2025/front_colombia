@@ -343,10 +343,36 @@ $_SESSION["ID"] = 1;
       "primereact/chips": "https://esm.sh/primereact/chips?dev",
       "primereact/rating": "https://esm.sh/primereact/rating?dev",
       "primereact/slider": "https://esm.sh/primereact/slider?dev",
-      "primereact/contextmenu": "https://esm.sh/primereact/contextmenu?dev"
+      "primereact/contextmenu": "https://esm.sh/primereact/contextmenu?dev",
+      "@tanstack/react-query": "https://esm.sh/@tanstack/react-query?dev",
+      "@tanstack/query-sync-storage-persister": "https://esm.sh/@tanstack/query-sync-storage-persister?dev",
+      "@tanstack/react-query-persist-client": "https://esm.sh/@tanstack/react-query-persist-client?dev",
+      "idb-keyval": "https://esm.sh/idb-keyval?dev",
+      "primereact/speeddial": "https://esm.sh/primereact/speeddial?dev"
     }
   }
 </script>
+    <script type="module">
+        // Initialize global QueryClient (persistence will be handled at component level)
+        import { QueryClient } from '@tanstack/react-query';
+
+        // Create global QueryClient with optimized defaults
+        const globalQueryClient = new QueryClient({
+            defaultOptions: {
+                queries: {
+                    staleTime: 5 * 60 * 1000,      // 5 minutes - data stays fresh
+                    gcTime: 10 * 60 * 1000,         // 10 minutes - cache time
+                    retry: 1,                       // Retry failed requests once
+                    refetchOnWindowFocus: false,    // Don't refetch on window focus
+                },
+            },
+        });
+
+        // Store in window for global access
+        window.globalQueryClient = globalQueryClient;
+
+        console.log('✅ Global QueryClient initialized');
+    </script>
     <script>
         // Función para decodificar JWT
         function decodeJWT(token) {

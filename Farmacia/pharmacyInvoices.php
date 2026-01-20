@@ -32,11 +32,10 @@ include "../footer.php";
 ?>
 
 <script type="module">
-    import React from "react"
-    import ReactDOMClient from "react-dom/client"
     import {
         PharmacyApp
     } from './react-dist/pharmacy/PharmacyApp.js';
+    import { renderApp } from "./services/react/app-renderer.js";
 
-    ReactDOMClient.createRoot(document.getElementById('PharmacyApp')).render(React.createElement(PharmacyApp));
+    renderApp(PharmacyApp, "PharmacyApp");
 </script>

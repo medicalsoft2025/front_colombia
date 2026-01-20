@@ -26,13 +26,12 @@ include "../header.php";
 </div>
 
 <script type="module">
-    import React from "react"
-    import ReactDOMClient from "react-dom/client"
     import {
         AccountingVouchers
     } from './react-dist/billing/reports/AccountingVouchers.js';
+    import { renderApp } from "./services/react/app-renderer.js";
 
-    ReactDOMClient.createRoot(document.getElementById('ComprobantesContables')).render(React.createElement(AccountingVouchers));
+    renderApp(AccountingVouchers, "ComprobantesContables");
 </script>
 
 

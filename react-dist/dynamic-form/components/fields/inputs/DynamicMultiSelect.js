@@ -3,10 +3,14 @@ import React from "react";
 import { Controller } from "react-hook-form";
 import { MultiSelect } from "primereact/multiselect";
 import { useDebouncedChange } from "../../../hooks/useDebouncedChange.js";
+import { useAsyncOptions } from "../../../hooks/useAsyncOptions.js";
 const DebouncedMultiSelect = ({
   field,
   controllerField,
-  commonProps
+  commonProps,
+  finalOptions,
+  loading,
+  emptyMessage
 }) => {
   const {
     value,
@@ -17,13 +21,16 @@ const DebouncedMultiSelect = ({
   });
   return /*#__PURE__*/React.createElement(MultiSelect, _extends({}, commonProps, {
     value: value || [],
-    options: field.options || [],
+    options: finalOptions,
     className: "w-100",
     optionLabel: "label",
     optionValue: "value",
     onChange: e => onChange(e.value),
     onBlur: controllerField.onBlur,
-    display: "chip"
+    display: "chip",
+    disabled: commonProps.disabled || loading,
+    placeholder: loading ? "Cargando..." : commonProps.placeholder,
+    emptyMessage: emptyMessage
   }));
 };
 export const DynamicMultiSelect = ({
@@ -31,11 +38,21 @@ export const DynamicMultiSelect = ({
   form,
   fieldName,
   validationRules,
-  commonProps
+  commonProps,
+  options: propOptions
 }) => {
   const {
     control
   } = form;
+  const {
+    options: asyncOptions,
+    loading
+  } = useAsyncOptions({
+    config: field.asyncOptions,
+    fieldName
+  });
+  const finalOptions = propOptions && propOptions.length > 0 ? propOptions : asyncOptions && asyncOptions.length > 0 ? asyncOptions : field.options || [];
+  const emptyMessage = loading ? "Cargando..." : "No hay opciones disponibles";
   return /*#__PURE__*/React.createElement(Controller, {
     name: fieldName,
     control: control,
@@ -47,7 +64,10 @@ export const DynamicMultiSelect = ({
     }) => /*#__PURE__*/React.createElement(DebouncedMultiSelect, {
       field: field,
       controllerField: controllerField,
-      commonProps: commonProps
+      commonProps: commonProps,
+      finalOptions: finalOptions,
+      loading: loading,
+      emptyMessage: emptyMessage
     })
   });
 };

@@ -19,6 +19,9 @@ export const usePatientDocuments = (initialPatientId) => {
     firma: doc.image_signature,
     contenido: typeof doc.data === "string" ? doc.data : doc.data?.contenido || "",
     patient_id: doc.patient_id,
+    patient: doc.patient,
+    doctor: doc.doctor,
+    doctor_id: doc.doctor_id,
     created_at: doc.created_at,
     updated_at: doc.updated_at ?? doc.created_at
   });
@@ -44,8 +47,7 @@ export const usePatientDocuments = (initialPatientId) => {
     setState((prev) => ({ ...prev, loading: true, error: null }));
     try {
       const response = await templateService.getByPatientId(id);
-      console.log("response documents", response);
-      const mappedDocs = response.data.map(mapTemplate);
+      const mappedDocs = response.map(mapTemplate);
       setState((prev) => ({
         ...prev,
         documents: mappedDocs,

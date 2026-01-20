@@ -14,10 +14,10 @@ include "../header.php";
         </nav>
         <div class="main-content">
             <div class="component-container">
-                <div class="d-flex align-items-center justify-content-between"> 
+                <div class="d-flex align-items-center justify-content-between">
                     <h2>Sala de Espera</h2>
                     <div id="appointmentCreateFormModalButtonReact"></div>
-                </div>    
+                </div>
                 <div id="LobbyAppointments"></div>
             </div>
         </div>
@@ -25,18 +25,16 @@ include "../header.php";
 </div>
 
 <script type="module">
-    import React from "react"
-    import ReactDOMClient from "react-dom/client"
     import {
         AppointmentCreateFormModalButton
     } from './react-dist/appointments/AppointmentCreateFormModalButton.js';
     import {
         LobbyAppointments
     } from './react-dist/appointments/LobbyAppointments.js';
+    import { renderApp } from './services/react/app-renderer.js';
 
-    ReactDOMClient.createRoot(document.getElementById('LobbyAppointments')).render(React.createElement(
-        LobbyAppointments));
-    ReactDOMClient.createRoot(document.getElementById('appointmentCreateFormModalButtonReact')).render(React.createElement(AppointmentCreateFormModalButton));
+    renderApp(LobbyAppointments, 'LobbyAppointments');
+    renderApp(AppointmentCreateFormModalButton, 'appointmentCreateFormModalButtonReact');
 </script>
 
 <?php

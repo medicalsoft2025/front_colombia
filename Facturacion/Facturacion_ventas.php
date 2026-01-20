@@ -29,13 +29,12 @@ include "../header.php";
 </div>
 
 <script type="module">
-    import React from "react"
-    import ReactDOMClient from "react-dom/client"
     import {
         SalesBilling
     } from './react-dist/billing/sales_billing/SalesBilling.js';
+    import { renderApp } from "./services/react/app-renderer.js";
 
-    ReactDOMClient.createRoot(document.getElementById('FacturacionVentas')).render(React.createElement(SalesBilling));
+    renderApp(SalesBilling, "FacturacionVentas");
 </script>
 
 

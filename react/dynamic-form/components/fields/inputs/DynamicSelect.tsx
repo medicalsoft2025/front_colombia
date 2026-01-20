@@ -48,6 +48,7 @@ const DebouncedSelect = ({
             disabled={commonProps.disabled || loading}
             placeholder={loading ? "Cargando..." : commonProps.placeholder}
             emptyMessage={emptyMessage}
+            filter
         />
     );
 };

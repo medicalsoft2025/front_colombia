@@ -8,19 +8,30 @@ export const tableFilters = {
       contentStyleClass: "row g-3",
       children: [{
         type: "date",
-        name: "date",
+        name: "rangeDate",
         label: "Fechas",
-        styleClass: "col-md-6"
+        styleClass: "col-md-6",
+        calendarMode: "range"
       }, {
         type: "select",
-        name: "doctors",
+        name: "user_id",
         label: "Doctores",
-        styleClass: "col-md-6"
+        styleClass: "col-md-6",
+        asyncOptions: {
+          sourceKey: "doctors",
+          labelKey: "label",
+          valueKey: "value"
+        }
       }, {
         type: "select",
-        name: "clinicalRecordType",
+        name: "clinicalRecordTypeId",
         label: "Tipo de historia clínica",
-        styleClass: "col-md-12"
+        styleClass: "col-md-12",
+        asyncOptions: {
+          sourceKey: "clinicalRecordType",
+          labelKey: "label",
+          valueKey: "value"
+        }
       }]
     }]
   }]

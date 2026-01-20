@@ -28,14 +28,12 @@ include "../header.php";
   </div>
 </div>
 <script type="module">
-  import React from "react"
-  import ReactDOMClient from "react-dom/client"
   import {
     AccountingAccountsV2
   } from './react-dist/accounting/AccountingAccountsV2.js';
-  ReactDOMClient.createRoot(document.getElementById('NewAccountingAccount')).render(
-    React.createElement(AccountingAccountsV2)
-  );
+  import { renderApp } from "./services/react/app-renderer.js";
+
+  renderApp(AccountingAccountsV2, "NewAccountingAccount");
 </script>
 
 <?php

@@ -31,7 +31,8 @@
                                 <div class="col-6">
                                     <div class="input-group">
                                         <div class="form-floating">
-                                            <input type="text" class="form-control" id="nombrePaquete" required name="nombrePaquete">
+                                            <input type="text" class="form-control" id="nombrePaquete" required
+                                                name="nombrePaquete">
                                             <label for="nombrePaquete" class="form-label">Nombre del paquete</label>
                                             <div class="invalid-feedback">Por favor ingrese el nombre del paquete.</div>
                                         </div>
@@ -47,7 +48,8 @@
                                                 <option value="cups">CUPS</option>
                                             </select>
                                             <label for="seleccionarIncluidos" class="form-label">Relacionar a</label>
-                                            <div class="invalid-feedback">Por favor seleccione lo que desea incluir al paquete.</div>
+                                            <div class="invalid-feedback">Por favor seleccione lo que desea incluir al
+                                                paquete.</div>
                                         </div>
                                     </div>
                                 </div>
@@ -83,7 +85,8 @@
                                 <div class="col-6" style="display: none;" id="divCodeCup">
                                     <div class="input-group mt-3">
                                         <div class="form-floating">
-                                            <input type="text" class="form-control" id="codeCup" placeholder="Ingrese el código" />
+                                            <input type="text" class="form-control" id="codeCup"
+                                                placeholder="Ingrese el código" />
                                             <label for="codeCup" class="form-label">Código cup</label>
                                         </div>
                                         <input type="button" id="btnBuscarCup" class="btn btn-primary" value="Buscar">
@@ -93,7 +96,8 @@
                                 <div class="col-6" style="display: none;" id="divCodeCie">
                                     <div class="input-group mt-3">
                                         <div class="form-floating">
-                                            <input type="text" class="form-control" id="codeCie" placeholder="Ingrese el código" />
+                                            <input type="text" class="form-control" id="codeCie"
+                                                placeholder="Ingrese el código" />
                                             <label for="codeCie" class="form-label">Código Cie11</label>
                                         </div>
                                         <input type="button" id="btnBuscarCie" class="btn btn-primary" value="Buscar">
@@ -113,13 +117,16 @@
                                         <div class="row">
                                             <div class="col-4 mt-2">
                                                 <div class="form-check form-switch">
-                                                    <input class="form-check-input" id="checkMedicamentos" type="checkbox" />
-                                                    <label class="form-check-label" for="checkMedicamentos">Medicamentos</label>
+                                                    <input class="form-check-input" id="checkMedicamentos"
+                                                        type="checkbox" />
+                                                    <label class="form-check-label"
+                                                        for="checkMedicamentos">Medicamentos</label>
                                                 </div>
                                             </div>
                                             <div class="col-4 mt-2">
                                                 <div class="form-check form-switch">
-                                                    <input class="form-check-input" id="checkExamenes" type="checkbox" />
+                                                    <input class="form-check-input" id="checkExamenes"
+                                                        type="checkbox" />
                                                     <label class="form-check-label" for="checkExamenes">Exámenes</label>
                                                 </div>
                                             </div>
@@ -137,13 +144,16 @@
                                             </div>
                                             <div class="col-4 mt-2">
                                                 <div class="form-check form-switch">
-                                                    <input class="form-check-input" id="checkIncapacidad" type="checkbox" />
-                                                    <label class="form-check-label" for="checkIncapacidad">Incapacidad</label>
+                                                    <input class="form-check-input" id="checkIncapacidad"
+                                                        type="checkbox" />
+                                                    <label class="form-check-label"
+                                                        for="checkIncapacidad">Incapacidad</label>
                                                 </div>
                                             </div>
                                             <div class="col-4 mt-2">
                                                 <div class="form-check form-switch">
-                                                    <input class="form-check-input" id="checkRemision" type="checkbox" />
+                                                    <input class="form-check-input" id="checkRemision"
+                                                        type="checkbox" />
                                                     <label class="form-check-label" for="checkRemision">Remisión</label>
                                                 </div>
                                             </div>
@@ -310,7 +320,7 @@
     let insumos = [];
     let examenes = [];
 
-    document.addEventListener('DOMContentLoaded', async function() {
+    document.addEventListener('DOMContentLoaded', async function () {
 
         medicamentos = await packagesService.getPackagesByMedications();
         vacunas = await packagesService.getPackagesByVaccines();
@@ -534,94 +544,94 @@
 
 
     const procedimientos = [{
-            codigo: "001010",
-            nombre: "Consulta general"
-        },
-        {
-            codigo: "001020",
-            nombre: "Ecografía abdominal"
-        },
-        {
-            codigo: "001030",
-            nombre: "Electrocardiograma"
-        },
-        {
-            codigo: "001040",
-            nombre: "Ecocardiograma"
-        },
-        {
-            codigo: "001050",
-            nombre: "Biopsia tumoral"
-        },
-        {
-            codigo: "001060",
-            nombre: "Radiografía de tórax"
-        },
-        {
-            codigo: "001070",
-            nombre: "Papanicolaou"
-        },
-        {
-            codigo: "001080",
-            nombre: "Colposcopía"
-        },
-        {
-            codigo: "001090",
-            nombre: "Mastografía"
-        },
-        {
-            codigo: "001100",
-            nombre: "Tomografía computarizada"
-        }
+        codigo: "001010",
+        nombre: "Consulta general"
+    },
+    {
+        codigo: "001020",
+        nombre: "Ecografía abdominal"
+    },
+    {
+        codigo: "001030",
+        nombre: "Electrocardiograma"
+    },
+    {
+        codigo: "001040",
+        nombre: "Ecocardiograma"
+    },
+    {
+        codigo: "001050",
+        nombre: "Biopsia tumoral"
+    },
+    {
+        codigo: "001060",
+        nombre: "Radiografía de tórax"
+    },
+    {
+        codigo: "001070",
+        nombre: "Papanicolaou"
+    },
+    {
+        codigo: "001080",
+        nombre: "Colposcopía"
+    },
+    {
+        codigo: "001090",
+        nombre: "Mastografía"
+    },
+    {
+        codigo: "001100",
+        nombre: "Tomografía computarizada"
+    }
     ];
 
     const diagnosticos = [{
-            codigo: "1A00",
-            nombre: "COVID-19, enfermedad por coronavirus"
-        },
-        {
-            codigo: "A00",
-            nombre: "Cólera"
-        },
-        {
-            codigo: "B20",
-            nombre: "Infección por el virus de la inmunodeficiencia humana (VIH)"
-        },
-        {
-            codigo: "C50",
-            nombre: "Cáncer de mama"
-        },
-        {
-            codigo: "D50",
-            nombre: "Anemia por deficiencia de hierro"
-        },
-        {
-            codigo: "E11",
-            nombre: "Diabetes mellitus tipo 2"
-        },
-        {
-            codigo: "F32",
-            nombre: "Episodio depresivo mayor"
-        },
-        {
-            codigo: "G40",
-            nombre: "Epilepsia"
-        },
-        {
-            codigo: "I10",
-            nombre: "Hipertensión esencial (primaria)"
-        },
-        {
-            codigo: "J44",
-            nombre: "Enfermedad pulmonar obstructiva crónica (EPOC)"
-        }
+        codigo: "1A00",
+        nombre: "COVID-19, enfermedad por coronavirus"
+    },
+    {
+        codigo: "A00",
+        nombre: "Cólera"
+    },
+    {
+        codigo: "B20",
+        nombre: "Infección por el virus de la inmunodeficiencia humana (VIH)"
+    },
+    {
+        codigo: "C50",
+        nombre: "Cáncer de mama"
+    },
+    {
+        codigo: "D50",
+        nombre: "Anemia por deficiencia de hierro"
+    },
+    {
+        codigo: "E11",
+        nombre: "Diabetes mellitus tipo 2"
+    },
+    {
+        codigo: "F32",
+        nombre: "Episodio depresivo mayor"
+    },
+    {
+        codigo: "G40",
+        nombre: "Epilepsia"
+    },
+    {
+        codigo: "I10",
+        nombre: "Hipertensión esencial (primaria)"
+    },
+    {
+        codigo: "J44",
+        nombre: "Enfermedad pulmonar obstructiva crónica (EPOC)"
+    }
     ];
 
 
 
 
 
-    document.addEventListener('DOMContentLoaded', function() {
+    document.addEventListener('DOMContentLoaded', function () {
         const selectCupsCie = document.getElementById('CupsCie');
         const divCie = document.getElementById('divCie');
         const divCups = document.getElementById('divCups');
@@ -632,7 +642,7 @@
         const nextStep = document.getElementById('nextStep');
         const notaRem = document.getElementById('note');
 
-        selectCupsCie.addEventListener('change', function() {
+        selectCupsCie.addEventListener('change', function () {
 
             if (this.value === 'cie11') {
                 divCodeCie.style.display = 'block';
@@ -645,7 +655,7 @@
 
 
         // Función para manejar el evento click del botón guardar
-        document.getElementById('nextStep').addEventListener('click', function() {
+        document.getElementById('nextStep').addEventListener('click', function () {
             const diasIncapacidad = document.getElementById('dias').value;
             const motivoIncapacidad = document.getElementById('reason').value;
             // const userRemision = document.getElementById('user').value;
@@ -974,7 +984,7 @@
             divTomarCada.appendChild(selectTomarCada);
 
             // Evento para mostrar/ocultar campos según la selección
-            selectPresentacion.addEventListener('change', function() {
+            selectPresentacion.addEventListener('change', function () {
                 const seleccion = this.value;
                 divCantidad.style.display = (seleccion === 'crema' || seleccion === 'jarabe' || seleccion === 'inyeccion') ? 'block' : 'none';
                 divTomarCada.style.display = (seleccion === 'jarabe' || seleccion === 'tabletas') ? 'block' : 'none';
@@ -1204,7 +1214,7 @@
         divCantidadInsumos.appendChild(tablaInsumos);
     }
 
-    document.getElementById('finishStep').addEventListener('click', function() {
+    document.getElementById('finishStep').addEventListener('click', function () {
         // Recuperar datosPaquete del sessionStorage
         const datosPaquete = JSON.parse(sessionStorage.getItem('datosPaquete')) || {};
         event.preventDefault();
@@ -1396,13 +1406,13 @@
     } from './services/utilidades.js';
     let timeout;
     let userLogged;
-    document.addEventListener('DOMContentLoaded', function() {
+    document.addEventListener('DOMContentLoaded', function () {
         userLogged = getUserLogged();
     })
-    document.getElementById('btnBuscarCup').addEventListener('click', function() {
+    document.getElementById('btnBuscarCup').addEventListener('click', function () {
         queryCups();
     });
-    document.getElementById('btnBuscarCie').addEventListener('click', function() {
+    document.getElementById('btnBuscarCie').addEventListener('click', function () {
         queryCie();
     });
 
@@ -1685,40 +1695,40 @@
 
     }
 
-    document.getElementById('finishStep').addEventListener('click', async function() {
+    document.getElementById('finishStep').addEventListener('click', async function () {
         const requestData = obtenerValoresMedicamentos();
         console.log(requestData);
 
         await packagesService.createPackages(requestData).then(response => {
-                console.log(response);
-                // let contenidoResumen = `
-                //     <div style="margin-bottom: 15px;">
-                //         <ul style="margin-top: 5px; padding-left: 20px;">
-                //         <li>Documento #: ${response.data.invoice_code}</li>
-                //         </div>
-                // `;
-                // Swal.fire({
-                //     title: 'Admision creada',
-                //     html: contenidoResumen,
-                //     icon: 'success',
-                //     width: '600px',
-                //     confirmButtonText: 'Finalizar',
-                //     showCancelButton: true,
-                //     cancelButtonText: 'Imprimir factura',
-                //     confirmButtonColor: '#4CAF50'
-                // }).then((result) => {
-                //     console.log(result);
-                //     if (result.isConfirmed) {
+            console.log(response);
+            // let contenidoResumen = `
+            //     <div style="margin-bottom: 15px;">
+            //         <ul style="margin-top: 5px; padding-left: 20px;">
+            //         <li>Documento #: ${response.data.invoice_code}</li>
+            //         </div>
+            // `;
+            // Swal.fire({
+            //     title: 'Admision creada',
+            //     html: contenidoResumen,
+            //     icon: 'success',
+            //     width: '600px',
+            //     confirmButtonText: 'Finalizar',
+            //     showCancelButton: true,
+            //     cancelButtonText: 'Imprimir factura',
+            //     confirmButtonColor: '#4CAF50'
+            // }).then((result) => {
+            //     console.log(result);
+            //     if (result.isConfirmed) {
 
-                //         window.location.href = 'citasControl'; // Redireccionar a la página de éxito
-                //     } else {
-                //         generateInvoice(response.admission_data.appointment_id, true);
-                //         setTimeout(function() {
-                //             window.location.href = 'citasControl';
-                //         }, 3000);
-                //     }
-                // });
-            })
+            //         window.location.href = 'citasControl'; // Redireccionar a la página de éxito
+            //     } else {
+            //         generateInvoice(response.admission_data.appointment_id, true);
+            //         setTimeout(function() {
+            //             window.location.href = 'citasControl';
+            //         }, 3000);
+            //     }
+            // });
+        })
             .catch(error => {
                 console.error('Error al crear la admisión:', error);
             });
@@ -1726,11 +1736,10 @@
 </script>
 
 <script type="module">
-    import React from "react"
-    import ReactDOMClient from "react-dom/client"
     import {
         remissionsForm
     } from './react-dist/remissions/RemissionsForm.js';
+    import { renderApp } from "./services/react/app-renderer.js";
 
-    ReactDOMClient.createRoot(document.getElementById('formRemision')).render(React.createElement(remissionsForm));
+    renderApp(remissionsForm, "formRemision");
 </script>

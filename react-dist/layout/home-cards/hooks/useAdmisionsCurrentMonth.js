@@ -1,27 +1,27 @@
-import { useEffect, useState } from "react";
 import { admissionService } from "../../../../services/api/index.js";
 import { usePRToast } from "../../../hooks/usePRToast.js";
+import { useQuery } from "@tanstack/react-query";
 export const useAdmisionsCurrentMonth = () => {
-  const [admisionCount, setAdmisionCount] = useState(null);
   const {
     toast,
-    showSuccessToast,
     showServerErrorsToast
   } = usePRToast();
+  const {
+    data
+  } = useQuery({
+    queryKey: ['admisions-current-month'],
+    queryFn: () => fetchAdmisionCurrentMonth()
+  });
   const fetchAdmisionCurrentMonth = async () => {
     try {
       const response = await admissionService.getAdmisionsCurrentMonth();
-      const data = response.data;
-      setAdmisionCount(data);
+      return response.data;
     } catch (error) {
       showServerErrorsToast(error);
     }
   };
-  useEffect(() => {
-    fetchAdmisionCurrentMonth();
-  }, []);
   return {
-    admisionCount,
+    admisionCount: data,
     fetchAdmisionCurrentMonth,
     toast
   };

@@ -8,7 +8,7 @@ include "../header.php";
         <div class="">
             <nav class="mb-3" aria-label="breadcrumb">
                 <ol class="breadcrumb mt-5">
-                <li class="breadcrumb-item"><a href="Dashboard">Inicio</a></li>
+                    <li class="breadcrumb-item"><a href="Dashboard">Inicio</a></li>
                     <li class="breadcrumb-item"><a href="homeInventario">Inventario</a></li>
                     <li class="breadcrumb-item active" onclick="location.reload()">Vacunas</li>
                 </ol>
@@ -162,14 +162,12 @@ include "./modal/modalGrupoVacunas.php";
 </style>
 
 <script type="module">
-    import React from "react";
-    import ReactDOMClient from "react-dom/client";
     import {
         ProductWithLotInventoryApp
     } from './react-dist/inventory/ProductWithLotInventoryApp.js';
+    import { renderApp } from "./services/react/app-renderer.js";
 
-    ReactDOMClient.createRoot(document.getElementById('productInventoryAppReact')).render(React
-                .createElement(ProductWithLotInventoryApp, {
-                    type: 'vaccines'
-                }));
+    renderApp(ProductWithLotInventoryApp, "productInventoryAppReact", {
+        type: 'vaccines'
+    });
 </script>

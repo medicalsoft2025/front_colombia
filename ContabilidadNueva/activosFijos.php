@@ -4,12 +4,12 @@ include "../header.php";
 ?>
 
 <style>
-.container-small {
-    max-width: 100% !important;
-    width: 100%;
-    padding: 0;
-    margin: 0;
-}
+    .container-small {
+        max-width: 100% !important;
+        width: 100%;
+        padding: 0;
+        margin: 0;
+    }
 </style>
 <div class="content">
     <div class="container-small">
@@ -21,15 +21,12 @@ include "../header.php";
     </div>
 </div>
 <script type="module">
-import React from "react"
-import ReactDOMClient from "react-dom/client"
-import {
-    FixedAssetsTabs
-} from './react-dist/accounting/fixedAssets/FixedAssetsTabs.js';
+    import {
+        FixedAssetsTabs
+    } from './react-dist/accounting/fixedAssets/FixedAssetsTabs.js';
+    import { renderApp } from "./services/react/app-renderer.js";
 
-ReactDOMClient.createRoot(document.getElementById('activosFijos')).render(
-    React.createElement(FixedAssetsTabs)
-);
+    renderApp(FixedAssetsTabs, "activosFijos");
 </script>
 <?php
 include "../footer.php";

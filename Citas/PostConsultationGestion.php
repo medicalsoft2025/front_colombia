@@ -28,11 +28,10 @@ include "../header.php";
 include "../footer.php"; ?>
 
 <script type="module">
-    import React from "react"
-    import ReactDOMClient from "react-dom/client"
     import {
         PostConsultationGestion
     } from './react-dist/appointments/PostConsultationGestion.js';
+    import { renderApp } from './services/react/app-renderer.js';
 
-    ReactDOMClient.createRoot(document.getElementById('post-consultation-gestion-content')).render(React.createElement(PostConsultationGestion));
+    renderApp(PostConsultationGestion, 'post-consultation-gestion-content');
 </script>

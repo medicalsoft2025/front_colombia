@@ -43,7 +43,7 @@ export const DynamicField = <T extends FieldValues>({
         formState: { errors },
     } = form;
 
-    const { fieldStates, onElementSelect } = useContext(FormContext) as FormContextValue;
+    const { fieldStates, onElementSelect, fieldSuggestions } = useContext(FormContext) as FormContextValue;
     const { isVisible: parentVisibility } = useVisibility();
 
     const fieldState = fieldStates[fieldName] || {
@@ -403,6 +403,28 @@ export const DynamicField = <T extends FieldValues>({
             {renderController()}
 
             {getFormErrorMessage(fieldName)}
+
+            {/* AI Suggestions Rendering */}
+            {fieldSuggestions && fieldSuggestions[fieldName] && fieldSuggestions[fieldName].length > 0 && (
+                <div className="field-suggestions mt-1 d-flex flex-wrap gap-2">
+                    <small className="text-muted w-100 mb-1">
+                        <i className="fa fa-magic me-1"></i>Sugerencias IA:
+                    </small>
+                    {fieldSuggestions[fieldName].map((suggestion: string | any, idx: number) => (
+                        <span
+                            key={idx}
+                            className="badge bg-light text-dark border cursor-pointer hover-shadow"
+                            style={{ cursor: 'pointer' }}
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                form.setValue(fieldName as any, suggestion, { shouldValidate: true, shouldDirty: true });
+                            }}
+                        >
+                            {typeof suggestion === 'object' ? JSON.stringify(suggestion) : suggestion}
+                        </span>
+                    ))}
+                </div>
+            )}
         </div>
     );
 };

@@ -4,12 +4,12 @@ include "../header.php";
 ?>
 
 <style>
-    .container-small {
-        max-width: 100% !important;
-        width: 100%;
-        padding: 0;
-        margin: 0;
-    }
+  .container-small {
+    max-width: 100% !important;
+    width: 100%;
+    padding: 0;
+    margin: 0;
+  }
 </style>
 <div class="content">
   <div class="container-small">
@@ -32,7 +32,7 @@ include "../header.php";
   } from "../../services/api/index.js";
 
   const patientId = new URLSearchParams(window.location.search).get('patient_id');
-  
+
   if (patientId) {
     try {
       const patient = await patientService.get(patientId);
@@ -49,15 +49,13 @@ include "../header.php";
 </script>
 
 <script type="module">
-  import React from "react";
-  import ReactDOMClient from "react-dom/client";
   import {
     patientsNursingNotesApp
   } from './react-dist/patients/patientsNursingNotes/patientsNursingNotesApp.js';
+  import { renderApp } from "./services/react/app-renderer.js";
 
   const patientId = new URLSearchParams(window.location.search).get('patient_id');
   console.log("PHP - Rendering React app with patientId:", patientId);
-  
-  const root = ReactDOMClient.createRoot(document.getElementById('notasEnfermeriaAppReact'));
-  root.render(React.createElement(patientsNursingNotesApp, { patientId: patientId }));
+
+  renderApp(patientsNursingNotesApp, "notasEnfermeriaAppReact", { patientId });
 </script>

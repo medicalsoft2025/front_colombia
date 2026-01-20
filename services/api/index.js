@@ -249,7 +249,8 @@ export const paymentMethodService = new PaymentMethodService(
   "payment-methods"
 );
 export const clinicalRecordTypeService = new ClinicalRecordTypeService(
-  "medical"
+  "medical",
+  "clinical-record-types"
 );
 
 /* Control de caja */

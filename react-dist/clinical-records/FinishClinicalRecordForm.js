@@ -90,7 +90,7 @@ export const FinishClinicalRecordForm = /*#__PURE__*/forwardRef((props, ref) => 
   const [initialRemissionData, setInitialRemissionData] = useState(undefined);
   const [initialPrescriptionData, setInitialPrescriptionData] = useState(undefined);
   const [loadLastPrescriptionCheck, setLoadLastPrescriptionCheck] = useState(false);
-  const [clinicalRecordTypeId, setClinicalRecordTypeId] = useState("");
+  const [clinicalRecordTypeId, setClinicalRecordTypeId] = useState(props.clinicalRecordTypeId || "");
   const [currentUser, setCurrentUser] = useState(null);
   const [currentAppointment, setCurrentAppointment] = useState(null);
   const [activeTab, setActiveTab] = useState(null);
@@ -426,7 +426,9 @@ export const FinishClinicalRecordForm = /*#__PURE__*/forwardRef((props, ref) => 
         setClinicalRecordTypeId(currentClinicalRecordType.id);
       }
     };
-    fetchClinicalRecordType();
+    if (finalClinicalRecordType && finalClinicalRecordType !== "" && finalClinicalRecordType !== undefined && finalClinicalRecordType !== null && finalClinicalRecordType !== "null" && finalClinicalRecordType !== "undefined") {
+      fetchClinicalRecordType();
+    }
   }, [finalClinicalRecordType]);
   useEffect(() => {
     const fetchUser = async () => {

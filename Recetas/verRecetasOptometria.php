@@ -205,24 +205,25 @@ $historiasFiltradas = $historiasClinicas[$especialidad] ?? [];
 $tiposEspecialidad = $tiposHistorias[$especialidad] ?? [];
 ?>
 <style>
-  .custom-btn {
-    width: 150px;
-    height: 40px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin-bottom: 5px;
-  }
-     .container-small {
+    .custom-btn {
+        width: 150px;
+        height: 40px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: 5px;
+    }
+
+    .container-small {
         max-width: 100% !important;
         width: 100%;
         padding: 0;
         margin: 0;
     }
 
-  .custom-btn i {
-    margin-right: 5px;
-  }
+    .custom-btn i {
+        margin-right: 5px;
+    }
 </style>
 <div class="content">
     <div class="container-small">
@@ -284,7 +285,7 @@ $tiposEspecialidad = $tiposHistorias[$especialidad] ?? [];
                                     <ul class="dropdown-menu" style="z-index: 10000;">
                                         <?php
                                         if ($historia['estado'] == 'approved') {
-                                        ?>
+                                            ?>
                                             <li>
                                                 <a class="dropdown-item" href="#" onclick="solicitarAnulacion(<?= $historia['id'] ?>)">
                                                     <div class="d-flex gap-2 align-items-center">
@@ -343,7 +344,7 @@ $tiposEspecialidad = $tiposHistorias[$especialidad] ?? [];
     </div>
 
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
+        document.addEventListener('DOMContentLoaded', function () {
             document.querySelectorAll('.especialidadName').forEach(div => {
                 div.textContent = new URLSearchParams(window.location.search).get('especialidad');
             })
@@ -378,14 +379,12 @@ $tiposEspecialidad = $tiposHistorias[$especialidad] ?? [];
 </div>
 
 <script type="module">
-    import React from "react"
-    import ReactDOMClient from "react-dom/client"
     import {
         OptometryPrescriptionApp
     } from './react-dist/prescriptions/OptometryPrescriptionApp.js';
+    import { renderApp } from "./services/react/app-renderer.js";
 
-    ReactDOMClient.createRoot(document.getElementById('patientClinicalRecordHistoryReact')).render(React.createElement(
-        OptometryPrescriptionApp));
+    renderApp(OptometryPrescriptionApp, 'patientClinicalRecordHistoryReact');
 </script>
 
 <script type="module">

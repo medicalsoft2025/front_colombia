@@ -23,6 +23,8 @@ export const useTemplateBuilded = () => {
         return templateBuildedAppoinment(template, data);
       case "clinical_records":
         return templateBuildedClinicalRecords(template, data);
+      case "consents":
+        return templateBuildedConsents(template, data);
       default:
         break;
     }
@@ -94,6 +96,22 @@ export const useTemplateBuilded = () => {
       ESPECIALIDAD: `${data.appointment.assigned_user_availability.user.specialty.name}`,
       FECHA_HISTORIA: `${formatDate(data.created_at)}`,
       "ENLACE DOCUMENTO": ""
+    };
+    const templateFormatted = formatWhatsAppMessage(template, replacements);
+    return templateFormatted;
+  }
+  function templateBuildedConsents(template, data) {
+    const replacements = {
+      NOMBRE_PACIENTE: `${data.full_name_patient}`,
+      NOMBRE_DOCTOR: `${data.full_name_doctor}`,
+      FECHAACTUAL: `${data.current_date}`,
+      TELEFONO: `${data.phone_patient}`,
+      CIUDAD: `${data.city_patient}`,
+      EDAD: `${data.age_patient}`,
+      DOCUMENTO: `${data.document_patient}`,
+      FECHANACIMIENTO: `${data.birthdate_patient}`,
+      CORREOELECTRONICO: `${data.email_patient}`,
+      ENLACE_COSENTIMIENTOS: `${data.url_consent}`
     };
     const templateFormatted = formatWhatsAppMessage(template, replacements);
     return templateFormatted;

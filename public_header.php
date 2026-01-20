@@ -338,15 +338,6 @@ $_SESSION["ID"] = 1;
     }
   }
 </script>
-
-  <main class="main" id="top">
-    <div class="content">
-      <div class="container-small">
-        <div id="LoginApp"></div>
-      </div>
-    </div>
-  </main>
-
   <script>
     document.addEventListener('DOMContentLoaded', function() {
         // Paleta de colores de tu marca

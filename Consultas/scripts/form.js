@@ -1,5 +1,7 @@
 import { clinicalRecordService } from "../../services/api/index.js";
 import { AlertManager } from "../../services/alertManager.js";
+import { renderApp } from "../../services/react/app-renderer.js";
+import { ClinicalRecordDynamicForm } from "../../react-dist/clinical-records/components/ClinicalRecordDynamicForm.js";
 
 let formValues = {};
 
@@ -31,6 +33,20 @@ let formValues = {};
 // });
 
 document.addEventListener("DOMContentLoaded", async function () {
+  // const dynamicFormIdValue = new URLSearchParams(window.location.search).get("dynamic_form_id");
+  // console.log("Dynamic form id: ", dynamicFormIdValue);
+  // if (
+  //   dynamicFormIdValue &&
+  //   dynamicFormIdValue !== "" &&
+  //   dynamicFormIdValue !== null &&
+  //   dynamicFormIdValue !== undefined &&
+  //   dynamicFormIdValue !== "0" &&
+  //   dynamicFormIdValue !== "undefined" &&
+  //   dynamicFormIdValue !== "null"
+  // ) {
+  //   renderApp(ClinicalRecordDynamicForm, "reactForm", { dynamicFormId: dynamicFormIdValue });
+  //   return;
+  // }
   const params = new URLSearchParams(window.location.search);
   const jsonPath = `../../ConsultasJson/${params.get("tipo_historia")}.json`;
   // console.log("Historia: ", jsonPath);

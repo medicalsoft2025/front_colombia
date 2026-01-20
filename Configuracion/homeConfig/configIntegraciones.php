@@ -24,14 +24,12 @@ include "../../header.php";
 </div>
 
 <script type="module">
-    import React from "react";
-    import ReactDOMClient from "react-dom/client";
     import {
         IntegrationsApp
     } from './react-dist/integrations/IntegrationsApp.js';
+    import { renderApp } from './services/react/app-renderer.js';
 
-    const rootElement = document.getElementById('integracionesReactRoot');
-    ReactDOMClient.createRoot(rootElement).render(React.createElement(IntegrationsApp));
+    renderApp(IntegrationsApp, 'integracionesReactRoot');
 </script>
 
 <?php

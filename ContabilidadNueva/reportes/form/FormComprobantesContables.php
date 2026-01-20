@@ -33,13 +33,12 @@ include "../../../header.php";
     </div>
 
     <script type="module">
-        import React from "react"
-        import ReactDOMClient from "react-dom/client"
         import {
             FormAccoutingVouchers
         } from './react-dist/billing/reports/form/FormAccoutingVouchers.js';
+        import { renderApp } from "./services/react/app-renderer.js";
 
-        ReactDOMClient.createRoot(document.getElementById('crearComprobanteContables')).render(React.createElement(FormAccoutingVouchers));
+        renderApp(FormAccoutingVouchers, "crearComprobanteContables");
     </script>
 
 

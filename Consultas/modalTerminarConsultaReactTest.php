@@ -10,14 +10,13 @@ include "../header.php";
 </div>
 
 <script type="module">
-    import React from "react";
     import ReactDOMClient from "react-dom/client";
     import {
         FinishClinicalRecordModal
     } from './react-dist/clinical-records/FinishClinicalRecordModal.js';
+    import { renderApp } from "./services/react/app-renderer.js";
 
-    const rootElement = document.getElementById('appointmentModalRoot');
-    ReactDOMClient.createRoot(rootElement).render(React.createElement(FinishClinicalRecordModal, {
+    renderApp(FinishClinicalRecordModal, "appointmentModalRoot", {
         appointmentId: "1",
         clinicalRecordType: "historiaEndocrinologia",
         externalDynamicData: {},
@@ -26,7 +25,7 @@ include "../header.php";
         onClose: () => {
             ReactDOMClient.createRoot(rootElement).unmount();
         }
-    }));
+    });
 </script>
 
 <?php include "../footer.php"; ?>

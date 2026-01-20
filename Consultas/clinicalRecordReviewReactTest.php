@@ -10,14 +10,12 @@ include "../header.php";
 </div>
 
 <script type="module">
-    import React from "react";
-    import ReactDOMClient from "react-dom/client";
     import {
         ClinicalRecordReview
     } from './react-dist/clinical-records/ClinicalRecordReview.js';
+    import { renderApp } from './services/react/app-renderer.js';
 
-    const rootElement = document.getElementById('clinicalRecordReviewRoot');
-    ReactDOMClient.createRoot(rootElement).render(React.createElement(ClinicalRecordReview));
+    renderApp(ClinicalRecordReview, 'clinicalRecordReviewRoot');
 </script>
 
 <?php include "../footer.php"; ?>

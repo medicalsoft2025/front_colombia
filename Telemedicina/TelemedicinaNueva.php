@@ -19,15 +19,12 @@ include "../header.php";
     </div>
 </div>
 <script type="module">
-    import React from "react"
-    import ReactDOMClient from "react-dom/client"
     import {
         TelemedicinaMain
     } from './react-dist/telemedicine/TelemedicinaMain.js';
+    import { renderApp } from "./services/react/app-renderer.js";
 
-    ReactDOMClient.createRoot(document.getElementById('TelemedicinaMain')).render(
-        React.createElement(TelemedicinaMain)
-    );
+    renderApp(TelemedicinaMain, 'TelemedicinaMain');
 </script>
 <?php
 include "../footer.php";

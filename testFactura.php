@@ -8,8 +8,6 @@ $baner = "";
 ?>
 
 <script type="module">
-  import React from "react"
-  import ReactDOMClient from "react-dom/client"
   import {
     AppointmentsSummaryCard
   } from './react-dist/layout/home-cards/AppointmentsSummaryCard.js';
@@ -19,17 +17,15 @@ $baner = "";
   import {
     ConsultationsSummaryCard
   } from './react-dist/layout/home-cards/ConsultationsSummaryCard.js';
-    import {
+  import {
     AdmissionsSummaryCard
   } from './react-dist/layout/home-cards/AdmissionsSummaryCard.js';
+  import { renderApp } from "./services/react/app-renderer.js";
 
-  ReactDOMClient.createRoot(document.getElementById('appointmentsSummaryCardReact')).render(React.createElement(AppointmentsSummaryCard));
-  
-  ReactDOMClient.createRoot(document.getElementById('patientsSummaryCardReact')).render(React.createElement(PatientsSummaryCard));
-  
-  ReactDOMClient.createRoot(document.getElementById('consultationsSummaryCardReact')).render(React.createElement(ConsultationsSummaryCard));
-
- ReactDOMClient.createRoot(document.getElementById('AdmissionsSummaryCard')).render(React.createElement(AdmissionsSummaryCard));
+  renderApp(AppointmentsSummaryCard, 'appointmentsSummaryCardReact');
+  renderApp(PatientsSummaryCard, 'patientsSummaryCardReact');
+  renderApp(ConsultationsSummaryCard, 'consultationsSummaryCardReact');
+  renderApp(AdmissionsSummaryCard, 'AdmissionsSummaryCard');
 
 </script>
 
@@ -60,7 +56,7 @@ $baner = "";
     max-width: 90%;
     height: auto;
   }
-  
+
   /* Contenedor unificado para las tarjetas */
   .dashboard-cards-container {
     display: flex;
@@ -69,12 +65,12 @@ $baner = "";
     gap: 20px;
     margin-bottom: 2rem;
   }
-  
+
   .dashboard-card-wrapper {
     flex: 0 0 auto;
     margin-bottom: 1rem;
   }
-  
+
   .dashboard-card {
     width: 250px;
     height: 235px;
@@ -84,7 +80,7 @@ $baner = "";
     display: flex;
     flex-direction: column;
   }
-  
+
   .dashboard-card .card-body {
     display: flex;
     flex-direction: column;
@@ -92,7 +88,7 @@ $baner = "";
     height: 100%;
     padding: 1.25rem;
   }
-  
+
   .dashboard-card .card-title {
     text-align: center;
     color: #f8f9fa !important;
@@ -102,13 +98,13 @@ $baner = "";
     display: flex;
     align-items: center;
     justify-content: center;
-    gap:10px;
+    gap: 10px;
   }
-  
+
   .dashboard-card .card-title span[data-feather] {
     margin-right: 8px;
   }
-  
+
   .dashboard-card .card-content {
     flex-grow: 1;
     display: flex;
@@ -117,7 +113,7 @@ $baner = "";
     align-items: center;
     margin: 0.5rem 0;
   }
-  
+
   .dashboard-card h3 {
     text-align: center;
     color: #f8f9fa !important;
@@ -125,20 +121,20 @@ $baner = "";
     font-size: 1.8rem;
     font-weight: bold;
   }
-  
+
   .text-span-descripcion {
     text-align: center;
     font-weight: 700;
     color: rgba(var(--phoenix-secondary-lighter-rgb), var(--phoenix-text-opacity)) !important;
     margin-bottom: 0.5rem;
   }
-  
+
   .dashboard-card .card-button {
     display: flex;
     justify-content: center;
     margin-top: auto;
   }
-  
+
   /* Estilos específicos para los componentes React */
   #appointmentsSummaryCardReact,
   #patientsSummaryCardReact,
@@ -146,7 +142,7 @@ $baner = "";
     display: flex;
     justify-content: center;
   }
-  
+
   #appointmentsSummaryCardReact .card,
   #patientsSummaryCardReact .card,
   #consultationsSummaryCardReact .card {
@@ -158,7 +154,7 @@ $baner = "";
     display: flex !important;
     flex-direction: column !important;
   }
-  
+
   #appointmentsSummaryCardReact .card-body,
   #patientsSummaryCardReact .card-body,
   #consultationsSummaryCardReact .card-body {
@@ -168,7 +164,7 @@ $baner = "";
     height: 100% !important;
     padding: 1.25rem !important;
   }
-  
+
   #appointmentsSummaryCardReact .card-title,
   #patientsSummaryCardReact .card-title,
   #consultationsSummaryCardReact .card-title {
@@ -181,7 +177,7 @@ $baner = "";
     align-items: center !important;
     justify-content: center !important;
   }
-  
+
   #appointmentsSummaryCardReact .card-content,
   #patientsSummaryCardReact .card-content,
   #consultationsSummaryCardReact .card-content {
@@ -192,7 +188,7 @@ $baner = "";
     align-items: center !important;
     margin: 0.5rem 0 !important;
   }
-  
+
   #appointmentsSummaryCardReact h3,
   #patientsSummaryCardReact h3,
   #consultationsSummaryCardReact h3 {
@@ -202,7 +198,7 @@ $baner = "";
     font-size: 1.8rem !important;
     font-weight: bold !important;
   }
-  
+
   #appointmentsSummaryCardReact .text-span-descripcion,
   #patientsSummaryCardReact .text-span-descripcion,
   #consultationsSummaryCardReact .text-span-descripcion {
@@ -211,7 +207,7 @@ $baner = "";
     color: rgba(var(--phoenix-secondary-lighter-rgb), var(--phoenix-text-opacity)) !important;
     margin-bottom: 0.5rem !important;
   }
-  
+
   #appointmentsSummaryCardReact .card-button,
   #patientsSummaryCardReact .card-button,
   #consultationsSummaryCardReact .card-button {
@@ -230,14 +226,14 @@ $baner = "";
           </div>
         </div>
       <?php endif ?>
-      
+
       <div class="dashboard-cards-container">
         <!-- Componente React de Pacientes -->
         <div class="dashboard-card-wrapper" id="patientsSummaryCardReact"></div>
-        
+
         <!-- Componente React de Citas -->
         <div class="dashboard-card-wrapper" id="appointmentsSummaryCardReact"></div>
-        
+
         <!-- Componente React de Consultas -->
         <div class="dashboard-card-wrapper" id="consultationsSummaryCardReact"></div>
         <!-- Componente React de Admisiones -->
@@ -245,18 +241,20 @@ $baner = "";
         <div class="dashboard-card-wrapper" id="AdmissionsSummaryCard"></div>
 
       </div>
-      
+
       <hr class="bg-body-secondary mb-6 mt-4" />
 
       <!-- El resto del contenido permanece igual -->
       <div class="accordion mb-4" id="accordionFiltros">
         <div class="accordion-item">
           <h2 class="accordion-header" id="headingFiltros">
-            <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseFiltros" aria-expanded="false" aria-controls="collapseFiltros">
+            <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseFiltros"
+              aria-expanded="false" aria-controls="collapseFiltros">
               Filtros
             </button>
           </h2>
-          <div id="collapseFiltros" class="accordion-collapse collapse" aria-labelledby="headingFiltros" data-bs-parent="#accordionFiltros">
+          <div id="collapseFiltros" class="accordion-collapse collapse" aria-labelledby="headingFiltros"
+            data-bs-parent="#accordionFiltros">
             <div class="accordion-body">
               <div class="row">
                 <div class="col-md-6">
@@ -285,7 +283,7 @@ $baner = "";
 </div>
 
 <script>
-  document.addEventListener('DOMContentLoaded', function() {
+  document.addEventListener('DOMContentLoaded', function () {
 
     createDoughnutChart(
       "pie-chart-1",
@@ -293,17 +291,17 @@ $baner = "";
       "Cantidad de producto",
       "Productos",
       [{
-          value: 20,
-          name: "Vitaminas A"
-        },
-        {
-          value: 10,
-          name: "supositorios"
-        },
-        {
-          value: 5,
-          name: "Vendajes"
-        },
+        value: 20,
+        name: "Vitaminas A"
+      },
+      {
+        value: 10,
+        name: "supositorios"
+      },
+      {
+        value: 5,
+        name: "Vendajes"
+      },
       ]
     );
 
@@ -313,13 +311,13 @@ $baner = "";
       "Pacientes creados por genero",
       "Generos",
       [{
-          value: 100,
-          name: "Masculino"
-        },
-        {
-          value: 123,
-          name: "Femenino"
-        },
+        value: 100,
+        name: "Masculino"
+      },
+      {
+        value: 123,
+        name: "Femenino"
+      },
       ]
     );
   });
@@ -344,7 +342,7 @@ $baner = "";
     userSpecialtiesSelect
   } from "./services/selects.js";
 
-  document.addEventListener('DOMContentLoaded', async function() {
+  document.addEventListener('DOMContentLoaded', async function () {
 
     const specialtySelect = document.getElementById('specialtyFilter');
     const doctorSelect = document.getElementById('doctorFilter');
@@ -447,7 +445,7 @@ $baner = "";
         initialView: 'dayGridMonth',
         initialDate: TODAY,
 
-        events: function(fetchInfo, successCallback, failureCallback) {
+        events: function (fetchInfo, successCallback, failureCallback) {
 
           (async () => {
             try {
@@ -520,7 +518,7 @@ $baner = "";
           })();
         },
 
-        eventClick: async function(info) {
+        eventClick: async function (info) {
 
           const product = await inventoryService.getById(info.event._def.extendedProps.appointment.id) || "sin producto";
 
@@ -550,7 +548,7 @@ $baner = "";
         },
 
         // Esta función lo que hace es que al darle clic a un lugar del calendario abrira un modal de agendamiento
-        select: function(info) {
+        select: function (info) {
           var fechaInicioInicial = moment(info.start);
           var fechaFinalInicial = moment(info.end);
 
@@ -572,7 +570,7 @@ $baner = "";
         },
 
         // Esta función lo que hace es que al una cita se reagende
-        eventDrop: function(arg) {
+        eventDrop: function (arg) {
 
           let FechaHoraInicio = moment(arg.event.start).format();
           var usuario_modificar_cita = arg.event.extendedProps.resourceId;

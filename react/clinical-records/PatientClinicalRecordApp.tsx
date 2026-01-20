@@ -3,7 +3,6 @@ import { PrimeReactProvider } from "primereact/api";
 import { useSpecializables } from "../specializables/hooks/useSpecializables";
 import { useEffect } from "react";
 import {
-    ClinicalRecordTypeDto,
     PatientClinicalRecordDto,
 } from "../models/models";
 import { useState } from "react";
@@ -15,8 +14,9 @@ import { generarFormato } from "../../funciones/funcionesJS/generarPDF";
 import { SeePatientInfoButton } from "../patients/SeePatientInfoButton";
 import { Button } from "primereact/button";
 import { usePatient } from "../patients/hooks/usePatient";
+import { ClinicalRecordTypeDto } from "../clinical-record-types/interfaces/models";
 
-interface PatientClinicalRecordAppProps {}
+interface PatientClinicalRecordAppProps { }
 
 const specialtyId = new URLSearchParams(window.location.search).get(
     "especialidad"
@@ -59,7 +59,23 @@ export const PatientClinicalRecordApp: React.FC<
                     specialtyClinicalRecordIds.includes(record.id.toString())
             );
 
-            setSpecialtyClinicalRecords(filteredClinicalRecords);
+            const mappedClinicalRecords = filteredClinicalRecords.map(
+                (record) => {
+
+                    let url = `consultas?patient_id=${patientId}&especialidad=${specialtyId}&dynamic_form_id=${record.dynamic_form_id}&clinical_record_type_id=${record.id}&tipo_historia=${record.key_}&appointment_id=${appointmentId}`;
+
+                    if (record.dynamic_form_id) {
+                        url = `clinicalRecordForm?patient_id=${patientId}&especialidad=${specialtyId}&dynamic_form_id=${record.dynamic_form_id}&clinical_record_type_id=${record.id}&tipo_historia=${record.key_}&appointment_id=${appointmentId}`;
+                    }
+
+                    return {
+                        ...record,
+                        url: url,
+                    };
+                }
+            );
+
+            setSpecialtyClinicalRecords(mappedClinicalRecords);
             setTableClinicalRecords(
                 clinicalRecords.filter((record) =>
                     specialtyClinicalRecordIds.includes(
@@ -131,8 +147,13 @@ export const PatientClinicalRecordApp: React.FC<
         }
     };
 
-    const seeDetail = (id: string, clinicalRecordType: string) => {
-        window.location.href = `detalleConsulta?clinicalRecordId=${id}&patient_id=${patientId}&tipo_historia=${clinicalRecordType}&especialidad=${specialtyId}`;
+    const seeDetail = (id: string, clinicalRecordTypeObject: any) => {
+        console.log("Clinical Record Type Object: ", clinicalRecordTypeObject);
+        if (clinicalRecordTypeObject.dynamic_form_id) {
+            window.location.href = `clinicalRecordFormDetail?clinicalRecordId=${id}&patient_id=${patientId}&especialidad=${specialtyId}&clinicalRecordTypeId=${clinicalRecordTypeObject.id}&dynamic_form_id=${clinicalRecordTypeObject.dynamic_form_id}`;
+        } else {
+            window.location.href = `detalleConsulta?clinicalRecordId=${id}&patient_id=${patientId}&tipo_historia=${clinicalRecordTypeObject.key_}&especialidad=${specialtyId}`;
+        }
     };
 
     const nombreEspecialidad = new URLSearchParams(window.location.search).get(
@@ -172,7 +193,7 @@ export const PatientClinicalRecordApp: React.FC<
                                                     <li key={record.id}>
                                                         <a
                                                             className="dropdown-item"
-                                                            href={`consultas?patient_id=${patientId}&especialidad=${specialtyId}&tipo_historia=${record.key_}&appointment_id=${appointmentId}`}
+                                                            href={record.url}
                                                         >
                                                             <strong>
                                                                 Crear{" "}

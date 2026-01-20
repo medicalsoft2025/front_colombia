@@ -1,7 +1,13 @@
-import React from "react";
+import React from 'react';
+import { usePatientsActiveCount } from "./hooks/usePatientsActiveCount.js";
 export const PatientsSummaryCard = () => {
+  const {
+    count,
+    isFetching,
+    isLoading
+  } = usePatientsActiveCount();
   const handleViewPatients = () => {
-    window.location.href = "pacientescontrol";
+    window.location.href = 'pacientescontrol';
   };
   return /*#__PURE__*/React.createElement("div", {
     className: "card bg-secondary dashboard-card"
@@ -11,13 +17,15 @@ export const PatientsSummaryCard = () => {
     className: "card-title"
   }, /*#__PURE__*/React.createElement("i", {
     className: "fa-solid fa-restroom ml-2"
-  }), " Paciente"), /*#__PURE__*/React.createElement("div", {
+  }), " Pacientes"), /*#__PURE__*/React.createElement("div", {
     className: "card-content"
-  }, /*#__PURE__*/React.createElement("h3", {
-    id: "patientsActiveCount"
-  }, "Cargando..."), /*#__PURE__*/React.createElement("span", {
+  }, isFetching || isLoading ? /*#__PURE__*/React.createElement("span", {
     className: "text-span-descripcion"
-  }, "Pacientes Creados")), /*#__PURE__*/React.createElement("div", {
+  }, "Cargando...") : /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("h3", {
+    id: "patientsActiveCount"
+  }, count), /*#__PURE__*/React.createElement("span", {
+    className: "text-span-descripcion"
+  }, "Pacientes Creados"))), /*#__PURE__*/React.createElement("div", {
     className: "card-button"
   }, /*#__PURE__*/React.createElement("button", {
     className: "btn btn-phoenix-secondary me-1 mb-1",

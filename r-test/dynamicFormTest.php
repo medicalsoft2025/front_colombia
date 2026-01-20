@@ -10,15 +10,12 @@ include "../header.php";
 </div>
 
 <script type="module">
-    import React from "react";
-    import ReactDOMClient from "react-dom/client";
     import {
         UserForm
     } from './react-dist/dynamic-form/demos/forms/UserForm.js';
+    import { renderApp } from "./services/react/app-renderer.js";
 
-    const rootElement = document.getElementById('appointmentModalRoot');
-
-    ReactDOMClient.createRoot(rootElement).render(React.createElement(UserForm));
+    renderApp(UserForm, 'appointmentModalRoot');
 </script>
 
 <?php include "../footer.php"; ?>

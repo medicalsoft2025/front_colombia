@@ -578,15 +578,6 @@ export const elementConfigMetadata = {
       value: "stepper"
     }],
     rules: [{
-      conditions: [{
-        field: "$root.type",
-        operator: "equals",
-        value: "container"
-      }],
-      effect: {
-        visible: false
-      }
-    }, {
       // If parent is a container that strictly uses generic containers as children (like Stepper)
       conditions: [{
         field: "$parent.type",
@@ -711,6 +702,12 @@ export const elementConfigMetadata = {
     visible: {
       type: ["text", "number"]
     }
+  }, {
+    path: "aiSuggestion",
+    key: "aiSuggestion",
+    label: "Sugerencia para IA",
+    description: "Instrucción específica para que la IA sepa qué sugerir en este campo (Ej: 'Sugiere nombres de medicamentos genéricos')",
+    inputType: "textarea"
   }, {
     path: "arrayConfig",
     key: "arrayConfig",

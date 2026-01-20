@@ -17,7 +17,7 @@ export interface ConfigField {
     key: string;
     label: string;
     description?: string;
-    inputType: "text" | "number" | "select" | "checkbox" | "keyValueTable" | "objectArray" | "nestedObject" | "treeSelect" | "radio";
+    inputType: "text" | "textarea" | "number" | "select" | "checkbox" | "keyValueTable" | "objectArray" | "nestedObject" | "treeSelect" | "radio";
     required?: boolean;
     visible?: boolean | { [key: string]: any[] }; // Dependency visibility
     rules?: ConfigRule[]; // Advanced conditional rules

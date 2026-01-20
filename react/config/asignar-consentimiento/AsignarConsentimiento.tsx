@@ -14,9 +14,10 @@ import { MenuItem } from "primereact/menuitem";
 import { CustomPRTableMenu } from "../../components/CustomPRTableMenu";
 import { SwalManager } from "../../../services/alertManagerImported";
 import { consentimientoService } from "../../../services/api";
-import { getIndicativeByCountry } from "../../../services/utilidades";
+import { getAge, getIndicativeByCountry } from "../../../services/utilidades";
 import { useMassMessaging } from "../../hooks/useMassMessaging";
 import { patientService } from "../../../services/api";
+import { useTemplateBuilded } from "../../hooks/useTemplateBuilded";
 
 const AsignarConsentimiento: React.FC = () => {
   const [patientId, setPatientId] = useState("");
@@ -50,6 +51,7 @@ const AsignarConsentimiento: React.FC = () => {
     "MzE6MTI6MTc2Nzg4NDEzNTcxNTpTSUdOQVRVUkVfU0VDUkVUX0tFWQ";
 
   const { sendMessage: sendMessageWpp } = useMassMessaging();
+  const { fetchTemplate, switchTemplate } = useTemplateBuilded();
 
   const sendMessageWppRef = useRef(sendMessageWpp);
 
@@ -573,14 +575,14 @@ const AsignarConsentimiento: React.FC = () => {
 
   // Función para generar la URL pública
   const generatePublicSignatureUrl = async (
-    documentId: string,
+    document: any,
     documentTitle: string
   ): Promise<string> => {
     try {
       // Crear objeto con los datos
       const signatureData = {
-        docId: documentId,
-        patId: patientId,
+        docId: document.id,
+        patId: document.patient_id,
         title: documentTitle,
         timestamp: Date.now(),
         expires: Date.now() + 24 * 60 * 60 * 1000, // 24 horas
@@ -595,9 +597,40 @@ const AsignarConsentimiento: React.FC = () => {
 
       // Generar URL
       const baseUrl = window.location.origin;
-      const publicUrl = `${baseUrl}/firmar-publico?d=${encryptedData}`;
-      const patientData = await patientService.get(patientId);
-      sendMessageWhatsapp(patientData, publicUrl);
+      const publicUrl = `${baseUrl}/publicSignature?d=${encryptedData}`;
+      const tenant = window.location.hostname.split(".")[0];
+      const data = {
+        tenantId: tenant,
+        belongsTo: "consentimientos-compartir",
+        type: "whatsapp",
+      };
+      const template = await fetchTemplate(data);
+      const dataToReplace = {
+        full_name_patient: `${document.patient.first_name ?? ""} ${
+          document.patient.middle_name ?? ""
+        } ${document.patient.last_name ?? ""} ${
+          document.patient.second_last_name ?? ""
+        }`,
+        full_name_doctor: `${document.doctor.first_name ?? ""} ${
+          document.doctor.middle_name ?? ""
+        } ${document.doctor.last_name ?? ""} ${
+          document.doctor.second_last_name ?? ""
+        }`,
+        age_patient: getAge(document.patient.date_of_birth),
+        birthdate_patient: document.patient.date_of_birth,
+        current_date: new Date().toLocaleDateString(),
+        phone_patient: document.patient.whatsapp,
+        email_patient: document.patient.email,
+        city_patient: document.patient.city_id,
+        document_patient: document.patient.document_number,
+        url_consent: publicUrl,
+      };
+      const finishTemplate = await switchTemplate(
+        template.template,
+        "consents",
+        dataToReplace
+      );
+      sendMessageWhatsapp(document.patient, finishTemplate);
 
       toast.current?.show({
         severity: "success",
@@ -605,7 +638,6 @@ const AsignarConsentimiento: React.FC = () => {
         detail: "Se ha enviado la URL de firma al paciente vía WhatsApp.",
         life: 5000,
       });
-
     } catch (error) {
       console.error("Error generando URL:", error);
       throw error;
@@ -652,7 +684,7 @@ const AsignarConsentimiento: React.FC = () => {
       label: "Enviar",
       icon: <i className="fas fa-paper-plane me-2"></i>,
       command: () =>
-        generatePublicSignatureUrl(rowData.id, rowData.titulo || "Documento"),
+        generatePublicSignatureUrl(rowData, rowData.titulo || "Documento"),
       visible: !rowData.firmado,
     },
     {

@@ -6,7 +6,7 @@ export const AdmissionsSummaryCard = () => {
     const handleViewAdmissions = () => {
         window.location.href = 'citasControl';
     };
-    const { admisionCount, fetchAdmisionCurrentMonth, toast: ErrorAdmisions } = useAdmisionsCurrentMonth();
+    const { admisionCount, toast: ErrorAdmisions } = useAdmisionsCurrentMonth();
     return (
         <>
             <Toast ref={ErrorAdmisions} />

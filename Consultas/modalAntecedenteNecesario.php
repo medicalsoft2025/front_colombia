@@ -1,4 +1,5 @@
-<div class="modal fade" id="modalAntecedenteNecesario" tabindex="-1" aria-labelledby="modalAntecedenteLabel" aria-hidden="true">
+<div class="modal fade" id="modalAntecedenteNecesario" tabindex="-1" aria-labelledby="modalAntecedenteLabel"
+    aria-hidden="true">
     <div class="modal-dialog modal-xl modal-dialog-scrollable">
         <div class="modal-content">
             <div class="modal-header">
@@ -15,11 +16,10 @@
 </div>
 
 <script type="module">
-    import React from "react"
-    import ReactDOMClient from "react-dom/client"
     import {
         PastMedicalHistoryForm
     } from './react-dist/past-medical-history/PastMedicalHistoryForm.js';
+    import { renderApp } from "./services/react/app-renderer.js";
 
-    ReactDOMClient.createRoot(document.getElementById('form-content')).render(React.createElement(PastMedicalHistoryForm));
+    renderApp(PastMedicalHistoryForm, "form-content");
 </script>

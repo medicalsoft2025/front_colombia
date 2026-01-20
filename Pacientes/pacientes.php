@@ -202,14 +202,12 @@ include "../header.php";
 <script src="https://js.pusher.com/8.2.0/pusher.min.js"></script>
 
 <script type="module">
-    import React from "react";
-    import ReactDOMClient from "react-dom/client";
     import {
         PatientConsultationList
     } from './react-dist/patients/PatientConsultationList.js';
+    import { renderApp } from "./services/react/app-renderer.js";
 
-    const rootElement = document.getElementById('patientConsultationListReact');
-    ReactDOMClient.createRoot(rootElement).render(React.createElement(PatientConsultationList));
+    renderApp(PatientConsultationList, "patientConsultationListReact");
 </script>
 
 <script type="module">
@@ -346,7 +344,7 @@ include "../header.php";
         var hostname = window.location.hostname.split('.')[0];
         var channel = pusher.subscribe('waiting-room.' + hostname);
 
-        channel.bind('appointment.created', function(data) {
+        channel.bind('appointment.created', function (data) {
             console.log(data);
 
             pacientesData.forEach(paciente => {
@@ -359,7 +357,7 @@ include "../header.php";
             renderPacientes(pacientesData)
         });
 
-        channel.bind('appointment.state.updated', function(data) {
+        channel.bind('appointment.state.updated', function (data) {
             console.log(data);
 
             pacientesData.forEach(paciente => {
@@ -375,7 +373,7 @@ include "../header.php";
             renderPacientes(pacientesData)
         });
 
-        channel.bind('appointment.inactivated', function(data) {
+        channel.bind('appointment.inactivated', function (data) {
             console.log(data);
 
             pacientesData.forEach(paciente => {
@@ -608,8 +606,8 @@ include "../header.php";
     function sendMessageWhatsapp(data, currentAppointment) {
         const replacements = {
             NOMBRE_PACIENTE: `${data?.patient?.first_name ?? ""} ${data?.patient?.middle_name ?? ""
-          } ${data?.patient?.last_name ?? ""} ${data?.patient?.second_last_name ?? ""
-          }`,
+                } ${data?.patient?.last_name ?? ""} ${data?.patient?.second_last_name ?? ""
+                }`,
             TICKET: `${data?.ticket_number ?? ""}`,
             MODULO: `${data?.module?.name ?? ""}`,
             ESPECIALISTA: `${currentAppointment?.user_availability?.user?.specialty?.name ?? ""}`,
@@ -631,7 +629,7 @@ include "../header.php";
             message: templateFormatted,
             webhook_url: "https://example.com/webhook",
         };
-        messaging.sendMessage(dataMessage).then(() => {});
+        messaging.sendMessage(dataMessage).then(() => { });
     }
 
     function llamarPaciente(patientId, appointmentId) {

@@ -11,6 +11,7 @@ import { Dialog } from "primereact/dialog";
 import { classNames } from "primereact/utils";
 import { TreeSelect } from "primereact/treeselect";
 import { JsonHelpers } from "../../helpers/JsonHelpers";
+import { InputTextarea } from "primereact/inputtextarea";
 
 interface JsonConfiguratorProps {
     data: any;
@@ -142,6 +143,15 @@ const ConfigFieldRenderer = ({
                         className={classNames({ "p-invalid": !!error }, "w-100")}
                     />
                 );
+            case "textarea":
+                return (
+                    <InputTextarea
+                        value={value || ""}
+                        onChange={(e) => handleFieldChange(e.target.value)}
+                        placeholder={currentField.placeholder}
+                        className={classNames({ "p-invalid": !!error }, "w-100")}
+                    />
+                );
             case "number":
                 return (
                     <InputNumber
@@ -162,6 +172,7 @@ const ConfigFieldRenderer = ({
                         onChange={(e) => handleFieldChange(e.value)}
                         placeholder={currentField.placeholder || "Seleccionar"}
                         className={classNames({ "p-invalid": !!error }, "w-100")}
+                        filter
                     />
                 );
             case "checkbox":
@@ -218,11 +229,11 @@ const ConfigFieldRenderer = ({
     return (
         <div className="field mb-3">
             {computed.inputType !== "checkbox" && (
-                <label htmlFor={computed.key} className="block mb-1 font-bold">
+                <label htmlFor={computed.key} className="d-block mb-1 font-bold">
                     {computed.label} {computed.required && <span className="text-red-500">*</span>}
                 </label>
             )}
-            {computed.description && <small className="block text-gray-500 mb-2">{computed.description}</small>}
+            {computed.description && <small className="d-block text-gray-500 mb-2">{computed.description}</small>}
             {renderInput()}
             {error && <small className="text-red-500 block mt-1">{error}</small>}
         </div>

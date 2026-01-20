@@ -29,6 +29,7 @@ interface FinishClinicalRecordModalProps {
     patientId?: string;
     specialtyName?: string;
     clinicalRecordId?: string;
+    clinicalRecordTypeId?: string;
     ref?: any;
 }
 
@@ -56,6 +57,9 @@ export const FinishClinicalRecordModal: React.FC<FinishClinicalRecordModalProps>
             initialExternalDynamicData,
             clinicalRecordId = new URLSearchParams(window.location.search).get(
                 "clinical_record_id"
+            ) || "",
+            clinicalRecordTypeId = new URLSearchParams(window.location.search).get(
+                "clinical_record_type_id"
             ) || "",
         } = props;
 
@@ -330,6 +334,7 @@ export const FinishClinicalRecordModal: React.FC<FinishClinicalRecordModalProps>
                     <FinishClinicalRecordForm
                         ref={finishClinicalRecordFormRef}
                         clinicalRecordId={clinicalRecordId}
+                        clinicalRecordTypeId={clinicalRecordTypeId}
                     />
 
                     <div className="d-flex justify-content-end gap-2 mt-3">

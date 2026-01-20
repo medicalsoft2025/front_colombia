@@ -33,7 +33,17 @@ export const PatientClinicalRecordApp = () => {
     if (specializables && clinicalRecordTypes) {
       const specialtyClinicalRecordIds = specializables.filter(record => record.specialty_id === specialtyId && ["Historia Clínica", "clinical_record"].includes(record.specializable_type)).map(record => record.specializable_id.toString());
       const filteredClinicalRecords = clinicalRecordTypes.filter(record => specialtyClinicalRecordIds.includes(record.id.toString()));
-      setSpecialtyClinicalRecords(filteredClinicalRecords);
+      const mappedClinicalRecords = filteredClinicalRecords.map(record => {
+        let url = `consultas?patient_id=${patientId}&especialidad=${specialtyId}&dynamic_form_id=${record.dynamic_form_id}&clinical_record_type_id=${record.id}&tipo_historia=${record.key_}&appointment_id=${appointmentId}`;
+        if (record.dynamic_form_id) {
+          url = `clinicalRecordForm?patient_id=${patientId}&especialidad=${specialtyId}&dynamic_form_id=${record.dynamic_form_id}&clinical_record_type_id=${record.id}&tipo_historia=${record.key_}&appointment_id=${appointmentId}`;
+        }
+        return {
+          ...record,
+          url: url
+        };
+      });
+      setSpecialtyClinicalRecords(mappedClinicalRecords);
       setTableClinicalRecords(clinicalRecords.filter(record => specialtyClinicalRecordIds.includes(record.clinical_record_type_id.toString())));
     }
   }, [specializables, clinicalRecordTypes, clinicalRecords]);
@@ -66,8 +76,13 @@ export const PatientClinicalRecordApp = () => {
         break;
     }
   };
-  const seeDetail = (id, clinicalRecordType) => {
-    window.location.href = `detalleConsulta?clinicalRecordId=${id}&patient_id=${patientId}&tipo_historia=${clinicalRecordType}&especialidad=${specialtyId}`;
+  const seeDetail = (id, clinicalRecordTypeObject) => {
+    console.log("Clinical Record Type Object: ", clinicalRecordTypeObject);
+    if (clinicalRecordTypeObject.dynamic_form_id) {
+      window.location.href = `clinicalRecordFormDetail?clinicalRecordId=${id}&patient_id=${patientId}&especialidad=${specialtyId}&clinicalRecordTypeId=${clinicalRecordTypeObject.id}&dynamic_form_id=${clinicalRecordTypeObject.dynamic_form_id}`;
+    } else {
+      window.location.href = `detalleConsulta?clinicalRecordId=${id}&patient_id=${patientId}&tipo_historia=${clinicalRecordTypeObject.key_}&especialidad=${specialtyId}`;
+    }
   };
   const nombreEspecialidad = new URLSearchParams(window.location.search).get("especialidad");
   return /*#__PURE__*/React.createElement(PrimeReactProvider, null, /*#__PURE__*/React.createElement("div", {
@@ -98,7 +113,7 @@ export const PatientClinicalRecordApp = () => {
     key: record.id
   }, /*#__PURE__*/React.createElement("a", {
     className: "dropdown-item",
-    href: `consultas?patient_id=${patientId}&especialidad=${specialtyId}&tipo_historia=${record.key_}&appointment_id=${appointmentId}`
+    href: record.url
   }, /*#__PURE__*/React.createElement("strong", null, "Crear", " ", record.name))))))))))), /*#__PURE__*/React.createElement("div", {
     className: "row mt-4"
   }, /*#__PURE__*/React.createElement(PatientClinicalRecordsTable, {

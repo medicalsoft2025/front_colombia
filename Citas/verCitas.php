@@ -12,12 +12,13 @@ include "../header.php";
     justify-content: center;
     margin-bottom: 5px;
   }
-   .container-small {
-        max-width: 100% !important;
-        width: 100%;
-        padding: 0;
-        margin: 0;
-    }
+
+  .container-small {
+    max-width: 100% !important;
+    width: 100%;
+    padding: 0;
+    margin: 0;
+  }
 
   .custom-btn i {
     margin-right: 5px;
@@ -167,17 +168,14 @@ include "../header.php";
 </template>
 
 <script type="module">
-  import React from "react"
-  import ReactDOMClient from "react-dom/client"
   import {
     AppointmentsTable
   } from './react-dist/appointments/AppointmentsTable.js';
   import {
-    AppointmentCreateFormModalButton
-  } from './react-dist/appointments/AppointmentCreateFormModalButton.js';
+    renderApp
+  } from './services/react/app-renderer.js';
 
-  ReactDOMClient.createRoot(document.getElementById('appointmentsTableReact')).render(React.createElement(AppointmentsTable));
-  ReactDOMClient.createRoot(document.getElementById('appointmentCreateFormModalButtonReact')).render(React.createElement(AppointmentCreateFormModalButton));
+  renderApp(AppointmentsTable, 'appointmentsTableReact');
 </script>
 
 <script>

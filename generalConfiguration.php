@@ -333,24 +333,63 @@ $_SESSION["ID"] = 1;
       "jspdf": "https://esm.sh/jspdf?dev",
       "jspdf-autotable": "https://esm.sh/jspdf-autotable?dev",
       "react-dom/server": "https://esm.sh/react-dom/server?dev",
-      "primereact/galleria": "https://esm.sh/primereact/galleria?dev"
+      "primereact/splitter" : "https://esm.sh/primereact/splitter?dev",
+      "primereact/tree": "https://esm.sh/primereact/tree?dev",
+      "primereact/treenode": "https://esm.sh/primereact/treenode?dev",
+      "primereact/colorpicker": "https://esm.sh/primereact/colorpicker?dev",
+      "primereact/galleria": "https://esm.sh/primereact/galleria?dev",
+      "primereact/skeleton": "https://esm.sh/primereact/skeleton?dev",
+      "primereact/iconfield": "https://esm.sh/primereact/iconfield?dev",
+      "primereact/inputicon": "https://esm.sh/primereact/inputicon?dev",
+      "primereact/dataview": "https://esm.sh/primereact/dataview?dev",
+      "primereact/buttongroup": "https://esm.sh/primereact/buttongroup?dev",
+      "primereact/scrolltop": "https://esm.sh/primereact/scrolltop?dev",
+      "primereact/cascadeselect": "https://esm.sh/primereact/cascadeselect?dev",
+      "primereact/treeselect": "https://esm.sh/primereact/treeselect?dev",
+      "primereact/chips": "https://esm.sh/primereact/chips?dev",
+      "primereact/rating": "https://esm.sh/primereact/rating?dev",
+      "primereact/slider": "https://esm.sh/primereact/slider?dev",
+      "primereact/contextmenu": "https://esm.sh/primereact/contextmenu?dev",
+      "@tanstack/react-query": "https://esm.sh/@tanstack/react-query?dev",
+      "@tanstack/query-sync-storage-persister": "https://esm.sh/@tanstack/query-sync-storage-persister?dev",
+      "@tanstack/react-query-persist-client": "https://esm.sh/@tanstack/react-query-persist-client?dev",
+      "idb-keyval": "https://esm.sh/idb-keyval?dev",
+      "primereact/speeddial": "https://esm.sh/primereact/speeddial?dev"
     }
   }
 </script>
+    <script type="module">
+        // Initialize global QueryClient (persistence will be handled at component level)
+        import { QueryClient } from '@tanstack/react-query';
+
+        // Create global QueryClient with optimized defaults
+        const globalQueryClient = new QueryClient({
+            defaultOptions: {
+                queries: {
+                    staleTime: 5 * 60 * 1000,      // 5 minutes - data stays fresh
+                    gcTime: 10 * 60 * 1000,         // 10 minutes - cache time
+                    retry: 1,                       // Retry failed requests once
+                    refetchOnWindowFocus: false,    // Don't refetch on window focus
+                },
+            },
+        });
+
+        // Store in window for global access
+        window.globalQueryClient = globalQueryClient;
+
+        console.log('✅ Global QueryClient initialized');
+    </script>
 
     <main class="main" id="top">
         <div id="SystemConfiguration"></div>
 
         <script type="module">
-            import React from "react";
-            import ReactDOMClient from "react-dom/client";
             import {
                 SystemConfiguration
             } from './react-dist/config/general-configuration/SystemConfiguration.js';
+            import { renderApp } from "./services/react/app-renderer.js";
 
-            ReactDOMClient.createRoot(document.getElementById('SystemConfiguration')).render(
-                React.createElement(SystemConfiguration)
-            );
+            renderApp(SystemConfiguration, 'SystemConfiguration');
         </script>
     </main>
 </body>

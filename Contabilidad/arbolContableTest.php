@@ -10,14 +10,12 @@ include "../header.php";
 </div>
 
 <script type="module">
-    import React from "react";
-    import ReactDOMClient from "react-dom/client";
     import {
         AccountingAccountsV2
     } from './react-dist/accounting/AccountingAccountsV2.js';
+    import { renderApp } from "./services/react/app-renderer.js";
 
-    const rootElement = document.getElementById('arbolContableReactRoot');
-    ReactDOMClient.createRoot(rootElement).render(React.createElement(AccountingAccountsV2));
+    renderApp(AccountingAccountsV2, "arbolContableReactRoot");
 </script>
 
 <?php include "../footer.php"; ?>

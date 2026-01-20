@@ -6,6 +6,7 @@ import { userService } from '../../services/api';
 import { useExamRecipeResultCreate } from '../exam-recipe-results/hooks/useExamRecipeResultCreate';
 import { useExamRecipeResultUpdate } from '../exam-recipe-results/hooks/useExamRecipeResultUpdate';
 import { validFile } from '../../services/utilidades';
+import { Button } from 'primereact/button';
 
 export const AddParaclinicalButton: React.FC = () => {
 
@@ -41,9 +42,11 @@ export const AddParaclinicalButton: React.FC = () => {
 
     return (
         <div>
-            <button className="btn btn-primary" onClick={() => setShowAddParaclinicalFormModal(true)}>
-                <i className="fas fa-plus"></i> Agregar resultados
-            </button>
+            <Button
+                icon={<i className="fas fa-plus me-1"></i>}
+                label="Agregar resultados"
+                onClick={() => setShowAddParaclinicalFormModal(true)}
+            />
             <CustomFormModal
                 formId='createParaclinical'
                 show={showAddParaclinicalFormModal}

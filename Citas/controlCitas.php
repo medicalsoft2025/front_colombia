@@ -20,7 +20,7 @@ include "../header.php";
             </ol>
         </nav>
         <div class="main-content">
-            <div class="component-container">   
+            <div class="component-container">
                 <div id="appointmentsTableReact"></div>
             </div>
         </div>
@@ -28,18 +28,12 @@ include "../header.php";
 </div>
 
 <script type="module">
-    import React from "react"
-    import ReactDOMClient from "react-dom/client"
-    import {
-        AppointmentCreateFormModalButton
-    } from './react-dist/appointments/AppointmentCreateFormModalButton.js';
     import {
         AppointmentsTable
     } from './react-dist/appointments/AppointmentsTable.js';
+    import { renderApp } from './services/react/app-renderer.js';
 
-    ReactDOMClient.createRoot(document.getElementById('appointmentsTableReact')).render(React.createElement(
-        AppointmentsTable));
-    ReactDOMClient.createRoot(document.getElementById('appointmentCreateFormModalButtonReact')).render(React.createElement(AppointmentCreateFormModalButton));
+    renderApp(AppointmentsTable, "appointmentsTableReact")
 </script>
 
 <?php

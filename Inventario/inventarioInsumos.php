@@ -42,16 +42,14 @@ include "../header.php";
 </div>
 
 <script type="module">
-    import React from "react";
-    import ReactDOMClient from "react-dom/client";
     import {
         ProductInventoryApp
     } from './react-dist/inventory/ProductInventoryApp.js';
+    import { renderApp } from "./services/react/app-renderer.js";
 
-    ReactDOMClient.createRoot(document.getElementById('productInventoryAppReact')).render(React
-                .createElement(ProductInventoryApp, {
-                    type: 'supplies'
-                }));
+    renderApp(ProductInventoryApp, "productInventoryAppReact", {
+        type: 'supplies'
+    });
 </script>
 
 <?php include "../footer.php";

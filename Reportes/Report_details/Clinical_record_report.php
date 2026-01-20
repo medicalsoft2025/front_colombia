@@ -14,20 +14,19 @@ include "../../header.php";
         </nav>
         <div class="main-content">
             <div class="component-container">
-        <div id="report-clinical-record"></div>
+                <div id="report-clinical-record"></div>
             </div>
         </div>
     </div>
 </div>
 
 <script type="module">
-    import React from "react"
-    import ReactDOMClient from "react-dom/client"
     import {
         ClinicalRecord
     } from './react-dist/reports/ClinicalRecord.js';
+    import { renderApp } from "./services/react/app-renderer.js";
 
-    ReactDOMClient.createRoot(document.getElementById('report-clinical-record')).render(React.createElement(ClinicalRecord));
+    renderApp(ClinicalRecord, 'report-clinical-record');
 </script>
 
 <?php

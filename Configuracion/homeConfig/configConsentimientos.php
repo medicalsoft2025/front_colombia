@@ -22,17 +22,10 @@ include "../../header.php";
     </div>
 </div>
 <script type="module">
-    import React from "react";
-    import ReactDOMClient from "react-dom/client";
     import ConsentimientoApp from './react-dist/config/consentimiento/ConsentimientoApp.js';
+    import { renderApp } from './services/react/app-renderer.js';
 
-    const rootElement = document.getElementById('consentimiento');
-    if (rootElement) {
-
-        ReactDOMClient.createRoot(rootElement).render(
-            React.createElement(ConsentimientoApp)
-        );
-    }
+    renderApp(ConsentimientoApp, 'consentimiento');
 </script>
 <?php
 include "../modales/modalAgregarPlantillaConsentimiento.php";

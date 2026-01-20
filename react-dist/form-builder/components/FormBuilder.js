@@ -1,3 +1,4 @@
+function _extends() { return _extends = Object.assign ? Object.assign.bind() : function (n) { for (var e = 1; e < arguments.length; e++) { var t = arguments[e]; for (var r in t) ({}).hasOwnProperty.call(t, r) && (n[r] = t[r]); } return n; }, _extends.apply(null, arguments); }
 import React, { useCallback, useEffect, useState } from "react";
 import { DynamicForm } from "../../dynamic-form/components/DynamicForm.js";
 import { Divider } from "primereact/divider";
@@ -7,19 +8,45 @@ import { JsonConfigurator } from "./configurator/JsonConfigurator.js";
 import { finalNestedContainerConfigMetadata } from "../config/metadata.js";
 import { copyJSONWithFeedback, showNotification } from "../../../services/utilidades.js";
 import { InputText } from "primereact/inputtext";
-import { SplitButton } from "primereact/splitbutton";
 import { ContextMenu } from "primereact/contextmenu";
 import { Button } from "primereact/button";
 import { Dialog } from "primereact/dialog";
 import { InputTextarea } from "primereact/inputtextarea";
-export const FormBuilder = () => {
-  const [baseConfig, setBaseConfig] = useState({
-    name: "form",
-    type: "form",
-    label: "Formulario",
-    children: []
+import { Controller, useForm, useWatch } from "react-hook-form";
+import { SplitButton } from "primereact/splitbutton";
+export const FormBuilder = props => {
+  const {
+    onSubmit,
+    initialData,
+    loading = false
+  } = props;
+  const {
+    getValues,
+    control,
+    trigger,
+    reset,
+    formState: {
+      errors,
+      isValid
+    }
+  } = useForm({
+    defaultValues: initialData ?? {
+      configName: ""
+    }
   });
-  const [configName, setConfigName] = useState("Formulario");
+  const configName = useWatch({
+    control,
+    name: "configName"
+  });
+  const [baseConfig, setBaseConfig] = useState({
+    type: "container",
+    children: [{
+      name: "form",
+      type: "form",
+      label: "Formulario",
+      children: []
+    }]
+  });
   const [config, setConfigState] = useState(baseConfig);
   const [past, setPast] = useState([]);
   const [future, setFuture] = useState([]);
@@ -121,10 +148,13 @@ export const FormBuilder = () => {
       }
     }
   };
-  const handleSubmit = data => {
-    copyJSONWithFeedback({
-      jsonInput: data,
-      message: "Datos del formulario copiados al portapapeles"
+  const handleSubmit = async () => {
+    const isValid = await trigger();
+    if (!isValid) return;
+    const data = getValues();
+    onSubmit({
+      config,
+      configName: data.configName
     });
   };
   const copyConfig = () => {
@@ -231,14 +261,29 @@ export const FormBuilder = () => {
       setParentConfig(parentRes ? parentRes.parent : null);
     }
   };
+  const getFormErrorMessage = name => {
+    return errors[name] && /*#__PURE__*/React.createElement("small", {
+      className: "p-error"
+    }, errors[name].message);
+  };
   useEffect(() => {
-    const localConfig = localStorage.getItem(configName);
-    if (localConfig && localConfig !== "{}") {
-      setConfigState(JSON.parse(localConfig));
+    if (!initialData) {
+      const localConfig = localStorage.getItem(configName);
+      if (localConfig && localConfig !== "{}") {
+        setConfigState(JSON.parse(localConfig));
+      }
     }
-  }, [configName]);
+  }, [configName, initialData]);
+  useEffect(() => {
+    if (initialData) {
+      reset({
+        configName: initialData.configName
+      });
+      setConfigState(initialData.config);
+    }
+  }, [initialData]);
   return /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("div", {
-    className: "d-flex justify-content-between align-items-center mb-3 mt-3"
+    className: "d-flex justify-content-between align-items-center mb-3"
   }, /*#__PURE__*/React.createElement("div", {
     className: "d-flex gap-2 align-items-center"
   }, /*#__PURE__*/React.createElement(Button, {
@@ -257,20 +302,25 @@ export const FormBuilder = () => {
     onClick: redo,
     disabled: future.length === 0,
     tooltip: "Rehacer"
-  }), /*#__PURE__*/React.createElement(InputText, {
-    value: configName,
-    className: "w-100",
-    onChange: e => setConfigName(e.target.value)
-  })), /*#__PURE__*/React.createElement(SplitButton, {
+  }), /*#__PURE__*/React.createElement(Controller, {
+    name: "configName",
+    control: control,
+    rules: {
+      required: "El nombre del formulario es requerido"
+    },
+    render: ({
+      field
+    }) => /*#__PURE__*/React.createElement(InputText, _extends({}, field, {
+      className: "w-100"
+    }))
+  }), getFormErrorMessage("configName")), /*#__PURE__*/React.createElement(SplitButton, {
     label: "Guardar",
     icon: /*#__PURE__*/React.createElement("i", {
       className: "fa fa-save me-1"
     }),
     size: "small",
-    onClick: () => saveConfig({
-      message: "Configuración guardada",
-      clearRedoHistory: true
-    }),
+    onClick: handleSubmit,
+    disabled: !isValid || loading,
     model: [{
       label: 'Copiar',
       icon: /*#__PURE__*/React.createElement("i", {
@@ -282,10 +332,8 @@ export const FormBuilder = () => {
       icon: /*#__PURE__*/React.createElement("i", {
         className: "fa fa-save me-1"
       }),
-      command: () => saveConfig({
-        message: "Configuración guardada",
-        clearRedoHistory: true
-      })
+      command: handleSubmit,
+      disabled: !isValid
     }]
   })), /*#__PURE__*/React.createElement("div", {
     className: "d-flex gap-2",
@@ -432,7 +480,7 @@ export const FormBuilder = () => {
     }
   }, /*#__PURE__*/React.createElement("h5", null, "Formulario"), /*#__PURE__*/React.createElement(Divider, null), /*#__PURE__*/React.createElement(DynamicForm, {
     config: config,
-    onSubmit: handleSubmit,
+    onSubmit: () => {},
     onElementSelect: handleElementSelect
   })), /*#__PURE__*/React.createElement("div", {
     className: "d-flex flex-column",

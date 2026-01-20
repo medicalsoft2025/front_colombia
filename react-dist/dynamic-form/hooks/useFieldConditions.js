@@ -5,7 +5,8 @@ export function useFieldConditions({
   form,
   // This is full form context
   executeOnInit = true,
-  basePath = ""
+  basePath = "",
+  initialFieldStates = {}
 }) {
   const {
     watch,
@@ -14,7 +15,7 @@ export function useFieldConditions({
     setError,
     clearErrors
   } = form;
-  const [fieldStates, setFieldStates] = useState({});
+  const [fieldStates, setFieldStates] = useState(initialFieldStates);
   const timeoutRef = useRef(null);
   const fieldConfigs = useRef(new Map());
   const fieldPathMap = useRef(new Map());
@@ -36,7 +37,7 @@ export function useFieldConditions({
       if (isContainer) {
         collectFields(element, currentPath);
       } else {
-        const fieldPath = currentPath ? `${currentPath}.${element.name}` : element.name;
+        const fieldPath = currentPath ? `${currentPath}.${element.name}` : element.name || "";
         allFields.current.add(fieldPath);
         fieldPathMap.current.set(fieldPath, fieldPath);
         if (element.rules && element.rules.length > 0) {

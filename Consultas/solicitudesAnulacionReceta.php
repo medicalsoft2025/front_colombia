@@ -35,14 +35,12 @@ include "../header.php";
     </div>
 
     <script type="module">
-        import React from "react";
-        import ReactDOMClient from "react-dom/client";
         import {
             PrescriptionCancellationRequest
         } from './react-dist/clinical-records/PrescriptionCancellationRequest.js';
+        import { renderApp } from "./services/react/app-renderer.js";
 
-        const rootElement = document.getElementById('PrescriptionCancellationRequestReact');
-        ReactDOMClient.createRoot(rootElement).render(React.createElement(PrescriptionCancellationRequest));
+        renderApp(PrescriptionCancellationRequest, "PrescriptionCancellationRequestReact");
     </script>
 
     <?php include "../footer.php"; ?>

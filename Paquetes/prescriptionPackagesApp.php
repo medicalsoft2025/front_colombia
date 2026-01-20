@@ -17,14 +17,12 @@ include "../header.php";
 </div>
 
 <script type="module">
-    import React from "react";
-    import ReactDOMClient from "react-dom/client";
     import {
         PrescriptionPackagesApp
     } from './react-dist/pckges/PrescriptionPackagesApp.js';
+    import { renderApp } from "./services/react/app-renderer.js";
 
-    const rootElement = document.getElementById('prescriptionPackagesAppRoot');
-    ReactDOMClient.createRoot(rootElement).render(React.createElement(PrescriptionPackagesApp));
+    renderApp(PrescriptionPackagesApp, 'prescriptionPackagesAppRoot');
 </script>
 
 <?php include "../footer.php"; ?>

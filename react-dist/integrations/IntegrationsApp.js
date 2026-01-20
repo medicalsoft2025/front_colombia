@@ -7,6 +7,7 @@ import { SISPROIntegrationConfig } from "./forms/SISPROIntegrationConfig.js";
 import { OpenAIIntegrationConfig } from "./forms/OpenAIIntegrationConfig.js";
 import { CarnetIntegrationConfig } from "./forms/CarnetIntegrationConfig.js";
 import { GeminiIntegrationConfig } from "./forms/GeminiIntegrationConfig.js";
+import { IframeIntegration } from "./forms/IframeIntegration.js";
 export const IntegrationsApp = () => {
   const {
     configs
@@ -53,6 +54,11 @@ export const IntegrationsApp = () => {
     content: /*#__PURE__*/React.createElement(GeminiIntegrationConfig, {
       configs: configs
     })
+  }, {
+    id: "iframe-tab",
+    label: "Iframe",
+    icon: "fa-solid fa-brain",
+    content: /*#__PURE__*/React.createElement(IframeIntegration, null)
   }];
   return /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement(IntegrationsTabs, {
     tabs: tabs

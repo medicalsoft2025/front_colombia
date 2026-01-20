@@ -43,13 +43,12 @@ include "../footer.php";
 <script type="module" src="./Laboratorio/js/formCreador.js"></script>
 
 <script type="module">
-    import React from "react"
-    import ReactDOMClient from "react-dom/client"
     import {
         FormBuilder
     } from './react-dist/components/form-builder/FormBuilder.js';
+    import { renderApp } from "./services/react/app-renderer.js";
 
-    ReactDOMClient.createRoot(document.getElementById('formBuilderReact')).render(React.createElement(FormBuilder));
+    renderApp(FormBuilder, "formBuilderReact");
 </script>
 
 <div id="formBuilderReact"></div>

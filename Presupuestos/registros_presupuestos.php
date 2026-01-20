@@ -37,7 +37,7 @@ $presupuestos = [
         margin-right: 5px;
     }
 
-        .container-small {
+    .container-small {
         max-width: 100% !important;
         width: 100%;
         padding: 0;
@@ -46,13 +46,12 @@ $presupuestos = [
 </style>
 
 <script type="module">
-    import React from "react"
-    import ReactDOMClient from "react-dom/client"
     import {
         EstimatesTable
     } from './react-dist/estimates/EstimatesTable.js';
+    import { renderApp } from "./services/react/app-renderer.js";
 
-    ReactDOMClient.createRoot(document.getElementById('estimate-table-content')).render(React.createElement(EstimatesTable));
+    renderApp(EstimatesTable, 'estimate-table-content');
 </script>
 
 <div class="content">
@@ -102,16 +101,16 @@ include "../footer.php";
     import {
         thirdPartyService
     } from "./services/api/index.js";
+    import {
+        renderApp
+    } from "./services/react/app-renderer.js";
 
     const patientThirdParty = await thirdPartyService.getByExternalIdAndType({
         externalId: new URLSearchParams(window.location.search).get('patient_id'),
         externalType: "client"
     });
 
-    console.log(patientThirdParty);
-
-    const rootElement = document.getElementById('purchaseOrdersReact');
-    ReactDOMClient.createRoot(rootElement).render(React.createElement(PurchaseOrders, {
+    renderApp(PurchaseOrders, "purchaseOrdersReact", {
         initialFilters: {
             thirdId: patientThirdParty.id,
             type: "quote_of"
@@ -124,13 +123,13 @@ include "../footer.php";
                 disabled: true
             }
         },
-     componentConfigs: {
-        newPurchaseOrderBtn: {
-            label: "Nueva cotización",
-            redirect: `OrdenesCompra?patient_id=${new URLSearchParams(window.location.search).get('patient_id')}&type=quote_of`
+        componentConfigs: {
+            newPurchaseOrderBtn: {
+                label: "Nueva cotización",
+                redirect: `OrdenesCompra?patient_id=${new URLSearchParams(window.location.search).get('patient_id')}&type=quote_of`
+            }
         }
-    }
-    }));
+    });
 </script>
 
 <script type="module">
