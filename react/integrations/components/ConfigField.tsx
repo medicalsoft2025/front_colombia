@@ -1,9 +1,12 @@
 import React from "react";
-import { DynamicConfigFieldProps } from "../interfaces";
 import { ConfigFieldText } from "./ConfigFieldText";
 import { ConfigFieldFile } from "./ConfigFieldFile";
 import { ConfigFieldPassword } from "./ConfigFieldPassword";
 import { ConfigFieldList } from "./ConfigFieldList";
+import { ConfigFieldCheckbox } from "./ConfigFieldCheckbox";
+import { ConfigFieldTextArea } from "./ConfigFieldTextArea";
+import { ConfigFieldCodeEditor } from "./ConfigFieldCodeEditor";
+import { DynamicConfigFieldProps } from "../interfaces";
 
 export const ConfigField = (props: DynamicConfigFieldProps) => {
     const {
@@ -17,7 +20,7 @@ export const ConfigField = (props: DynamicConfigFieldProps) => {
         source,
         sourceType,
         placeholder,
-        description,
+        description
     } = props;
 
     return (
@@ -25,6 +28,24 @@ export const ConfigField = (props: DynamicConfigFieldProps) => {
             <div className="d-flex flex-column gap-2 mb-3 w-100">
                 {type === "text" && (
                     <ConfigFieldText
+                        field={field}
+                        label={label}
+                        initialValue={initialValue}
+                        onChange={onChange}
+                        placeholder={placeholder}
+                    />
+                )}
+                {type === "textarea" && (
+                    <ConfigFieldTextArea
+                        field={field}
+                        label={label}
+                        initialValue={initialValue}
+                        onChange={onChange}
+                        placeholder={placeholder}
+                    />
+                )}
+                {type === "code-editor" && (
+                    <ConfigFieldCodeEditor
                         field={field}
                         label={label}
                         initialValue={initialValue}
@@ -63,11 +84,16 @@ export const ConfigField = (props: DynamicConfigFieldProps) => {
                         placeholder={placeholder}
                     />
                 )}
-                <small>
-                    {description}
-                </small>
+                {type === "checkbox" && (
+                    <ConfigFieldCheckbox
+                        field={field}
+                        label={label}
+                        initialValue={initialValue}
+                        onChange={onChange}
+                    />
+                )}
+                <small className="text-muted">{description}</small>
             </div>
         </>
     );
 };
-

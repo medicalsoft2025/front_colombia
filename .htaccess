@@ -423,3 +423,11 @@ RewriteRule ^appForms$ AppForms/appForms.php
 RewriteRule ^clinicalRecordTypes$ Consultas/clinicalRecordTypes.php
 RewriteRule ^clinicalRecordFormReactTest$ Consultas/clinicalRecordFormReactTest.php
 RewriteRule ^clinicalRecordForm$ Consultas/clinicalRecordForm.php
+RewriteRule ^menusConfiguracion$ r-test/menuTest.php
+RewriteRule ^appFormsCrud$ AppForms/appFormsCrud.php
+
+RewriteRule ^TaxReports$ ContabilidadNueva/reportes/TaxReports.php
+RewriteRule ^Report606Purchases$ ContabilidadNueva/reportes/taxReports/report606Purchases.php
+RewriteRule ^Report607Sales$ ContabilidadNueva/reportes/taxReports/report607Sales.php
+
+RewriteRule ^Surveys$ Marketing/SurveyPanel/surveyPanel.php

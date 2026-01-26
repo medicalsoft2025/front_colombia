@@ -20,6 +20,7 @@ import { useAppointmentStates } from "../appointments/hooks/useAppointmentStates
 import { SwalManager } from "../../services/alertManagerImported";
 import UserManager from "../../services/userManager";
 import { useCallPatient } from "./hooks/useCallPatient";
+import { usePatient } from "./hooks/usePatient";
 
 export const PatientConsultationList = () => {
     const [patients, setPatients] = useState<any[]>([]);
@@ -60,6 +61,7 @@ export const PatientConsultationList = () => {
 
     const { appointmentStates } = useAppointmentStates();
     const { callPatient } = useCallPatient();
+    const { refetchPatientById } = usePatient()
 
     const appointmentStatesRef = useRef(appointmentStates);
 
@@ -112,11 +114,9 @@ export const PatientConsultationList = () => {
                         _fechaHoraCita: new Date(
                             `${cita.appointment_date}T${cita.appointment_time}`
                         ),
-                        fullName: `${paciente.first_name || ""} ${
-                            paciente.middle_name || ""
-                        } ${paciente.last_name || ""} ${
-                            paciente.second_last_name || ""
-                        }`,
+                        fullName: `${paciente.first_name || ""} ${paciente.middle_name || ""
+                            } ${paciente.last_name || ""} ${paciente.second_last_name || ""
+                            }`,
                     };
                 });
         });
@@ -137,11 +137,9 @@ export const PatientConsultationList = () => {
 
             if (searchText) {
                 const searchLower = searchText.toLowerCase();
-                const nombreCompleto = `${paciente.first_name || ""} ${
-                    paciente.middle_name || ""
-                } ${paciente.last_name || ""} ${
-                    paciente.second_last_name || ""
-                }`.toLowerCase();
+                const nombreCompleto = `${paciente.first_name || ""} ${paciente.middle_name || ""
+                    } ${paciente.last_name || ""} ${paciente.second_last_name || ""
+                    }`.toLowerCase();
                 const documento = paciente.document_number || "";
 
                 // Buscar tanto en el nombre completo como en el documento
@@ -379,6 +377,7 @@ export const PatientConsultationList = () => {
                     appointmentId,
                     "in_consultation"
                 );
+                await refetchPatientById(patientId)
                 window.location.href = `consultas-especialidad?patient_id=${patientId}&especialidad=${user.specialty.name}&appointment_id=${appointmentId}`;
             }
         });
@@ -390,11 +389,9 @@ export const PatientConsultationList = () => {
         const appointmentData = {
             id: citaData.cita.id,
             patientId: citaData.paciente.id,
-            patientName: `${citaData.paciente.first_name || ""} ${
-                citaData.paciente.middle_name || ""
-            } ${citaData.paciente.last_name || ""} ${
-                citaData.paciente.second_last_name || ""
-            }`,
+            patientName: `${citaData.paciente.first_name || ""} ${citaData.paciente.middle_name || ""
+                } ${citaData.paciente.last_name || ""} ${citaData.paciente.second_last_name || ""
+                }`,
             patient: citaData.paciente,
             appointment_date: citaData.cita.appointment_date,
             appointment_time: citaData.cita.appointment_time,
@@ -573,14 +570,11 @@ export const PatientConsultationList = () => {
                                             </div>
                                             <div
                                                 className="text-body-emphasis text-truncate"
-                                                title={`${
-                                                    paciente.first_name || ""
-                                                } ${
-                                                    paciente.middle_name || ""
-                                                } ${paciente.last_name || ""} ${
-                                                    paciente.second_last_name ||
+                                                title={`${paciente.first_name || ""
+                                                    } ${paciente.middle_name || ""
+                                                    } ${paciente.last_name || ""} ${paciente.second_last_name ||
                                                     ""
-                                                }`}
+                                                    }`}
                                             >
                                                 {paciente.first_name || ""}
                                                 {paciente.middle_name
@@ -621,22 +615,22 @@ export const PatientConsultationList = () => {
                                         {(estadoActual ===
                                             "pending_consultation" ||
                                             estadoActual === "called") && (
-                                            <Button
-                                                label="Llamar paciente"
-                                                className="btn-sm btn btn-primary"
-                                                onClick={() =>
-                                                    llamarPaciente(paciente.id)
-                                                }
-                                            />
-                                        )}
+                                                <Button
+                                                    label="Llamar paciente"
+                                                    className="btn-sm btn btn-primary"
+                                                    onClick={() =>
+                                                        llamarPaciente(paciente.id)
+                                                    }
+                                                />
+                                            )}
 
                                         {(estadoActual ===
                                             "pending_consultation" ||
                                             estadoActual === "called" ||
                                             estadoActual ===
-                                                "in_consultation") &&
+                                            "in_consultation") &&
                                             cita.attention_type ===
-                                                "CONSULTATION" && (
+                                            "CONSULTATION" && (
                                                 <Button
                                                     label="Realizar Consulta"
                                                     className="btn-sm btn btn-primary"
@@ -652,9 +646,9 @@ export const PatientConsultationList = () => {
                                             "pending_consultation" ||
                                             estadoActual === "called" ||
                                             estadoActual ===
-                                                "in_consultation") &&
+                                            "in_consultation") &&
                                             cita.attention_type ===
-                                                "PROCEDURE" && (
+                                            "PROCEDURE" && (
                                                 <>
                                                     <Button
                                                         label="Realizar Examen"

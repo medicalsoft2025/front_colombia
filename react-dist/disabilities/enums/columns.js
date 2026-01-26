@@ -1,9 +1,78 @@
-import React from "react";
-import { PrintTableAction } from "../../components/table-actions/PrintTableAction.js";
-import { DownloadTableAction } from "../../components/table-actions/DownloadTableAction.js";
-import { ShareTableAction } from "../../components/table-actions/ShareTableAction.js";
-import { EditTableAction } from "../../components/table-actions/EditTableAction.js";
-import TableActionsWrapper from "../../components/table-actions/TableActionsWrapper.js";
+import React, { useRef } from "react";
+import { Menu } from "primereact/menu";
+import { Button } from "primereact/button";
+// Componente de menú similar al de CommissionTable
+const DisabilityTableMenu = ({
+  rowData,
+  editDisability,
+  handlePrint,
+  handleDownload,
+  shareDisabilityWhatsApp
+}) => {
+  const menu = useRef(null);
+  const menuItems = [{
+    label: "Imprimir",
+    icon: /*#__PURE__*/React.createElement("i", {
+      className: "fas fa-print me-2"
+    }),
+    command: () => handlePrint(rowData.id.toString())
+  }, {
+    label: "Descargar",
+    icon: /*#__PURE__*/React.createElement("i", {
+      className: "fas fa-download me-2"
+    }),
+    command: () => handleDownload(rowData.id.toString())
+  }, {
+    label: "Editar",
+    icon: /*#__PURE__*/React.createElement("i", {
+      className: "fas fa-edit me-2"
+    }),
+    command: () => editDisability(rowData.id.toString())
+  }, {
+    label: "Compartir por WhatsApp",
+    icon: /*#__PURE__*/React.createElement("i", {
+      className: "fab fa-whatsapp me-2"
+    }),
+    command: () => shareDisabilityWhatsApp(rowData.id.toString())
+  }];
+  return /*#__PURE__*/React.createElement("div", {
+    style: {
+      position: "relative"
+    }
+  }, /*#__PURE__*/React.createElement(Button, {
+    className: "btn-primary flex items-center gap-2",
+    onClick: e => menu.current?.toggle(e),
+    "aria-controls": `popup_menu_disability_${rowData.id}`,
+    "aria-haspopup": true
+  }, "Acciones", /*#__PURE__*/React.createElement("i", {
+    className: "fas fa-cog ml-2"
+  })), /*#__PURE__*/React.createElement(Menu, {
+    model: menuItems,
+    popup: true,
+    ref: menu,
+    id: `popup_menu_disability_${rowData.id}`,
+    appendTo: document.body,
+    style: {
+      zIndex: 9999
+    }
+  }));
+};
+
+// Si necesitas mantener la estructura de tableItems similar al CommissionTable
+export const getTableItems = data => {
+  return data.map(disability => ({
+    id: disability.id,
+    start_date: disability.start_date,
+    end_date: disability.end_date,
+    reason: disability.reason,
+    is_active: disability.is_active,
+    user_first_name: disability.user.first_name,
+    user_last_name: disability.user.last_name,
+    specialty_name: disability.user.specialty?.name || 'N/A',
+    created_at: disability.created_at,
+    actions: disability // Mantener el objeto completo para las acciones
+  }));
+};
 export const getColumns = ({
   editDisability,
   handlePrint,
@@ -51,16 +120,20 @@ export const getColumns = ({
     return date.toLocaleDateString('es-ES');
   }
 }, {
-  field: "",
+  field: "actions",
+  // Campo específico para acciones como en CommissionTable
   header: "Acciones",
-  body: rowData => /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement(TableActionsWrapper, null, /*#__PURE__*/React.createElement(PrintTableAction, {
-    onTrigger: () => handlePrint(rowData.id.toString())
-  }), /*#__PURE__*/React.createElement(DownloadTableAction, {
-    onTrigger: () => handleDownload(rowData.id.toString())
-  }), /*#__PURE__*/React.createElement(EditTableAction, {
-    onTrigger: () => editDisability(rowData.id.toString())
-  }), /*#__PURE__*/React.createElement(ShareTableAction, {
-    shareType: "whatsapp",
-    onTrigger: () => shareDisabilityWhatsApp(rowData.id.toString())
-  })))
+  body: rowData => /*#__PURE__*/React.createElement("div", {
+    className: "flex align-items-center justify-content-center",
+    style: {
+      gap: "0.5rem",
+      minWidth: "120px"
+    }
+  }, /*#__PURE__*/React.createElement(DisabilityTableMenu, {
+    rowData: rowData,
+    editDisability: editDisability,
+    handlePrint: handlePrint,
+    handleDownload: handleDownload,
+    shareDisabilityWhatsApp: shareDisabilityWhatsApp
+  }))
 }];

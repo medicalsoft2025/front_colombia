@@ -10,6 +10,9 @@ import { Button } from "primereact/button";
 import { formatDate } from "../../services/utilidades.js";
 import { useServicesFormat } from "../documents-generation/hooks/reports-medical/commissions/useServicesFormat.js";
 import { useOrdersFormat } from "../documents-generation/hooks/reports-medical/commissions/useOrdersFormat.js";
+import { ProgressSpinner } from "primereact/progressspinner";
+import { Accordion, AccordionTab } from "primereact/accordion";
+import { InputText } from "primereact/inputtext";
 export const Commissions = () => {
   const today = new Date();
   const fiveDaysAgo = new Date();
@@ -25,7 +28,9 @@ export const Commissions = () => {
   const [proceduresOptions, setProceduresOptions] = useState([]);
   const [entitiesOptions, setEntitiesOptions] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [tableLoading, setTableLoading] = useState(false);
   const [activeTab, setActiveTab] = useState("tab-commissions");
+  const [globalFilter, setGlobalFilter] = useState("");
   const {
     company,
     setCompany,
@@ -56,7 +61,7 @@ export const Commissions = () => {
   }, []);
   const handleTabChange = async (tabId, filterParams) => {
     setActiveTab(tabId);
-    setLoading(true);
+    setTableLoading(true);
     try {
       switch (tabId) {
         case "tab-commissions":
@@ -67,13 +72,14 @@ export const Commissions = () => {
         case "tab-orders":
           const dataToOrders = await comissionConfig.comissionReportByOrders(filterParams);
           formatDataToTreeNodes(dataToOrders, "admissions_prescriber_doctor");
+          break;
         default:
           console.warn(`Tab no reconocido: ${tabId}`);
       }
     } catch (error) {
       console.error(`Error cargando datos para ${tabId}:`, error);
     } finally {
-      setLoading(false);
+      setTableLoading(false);
     }
   };
   const cargarServicios = async () => {
@@ -229,26 +235,26 @@ export const Commissions = () => {
       return /*#__PURE__*/React.createElement("div", {
         className: "d-flex gap-2"
       }, /*#__PURE__*/React.createElement(Button, {
-        tooltip: "Exportar a Excel",
-        tooltipOptions: {
-          position: "top"
-        },
-        className: "p-button-success d-flex justify-content-center",
+        className: "p-button-rounded p-button-success p-button-sm",
         onClick: e => {
           e.stopPropagation();
           handleDescargarExcel(node.data.rawData);
+        },
+        tooltip: "Exportar a Excel",
+        tooltipOptions: {
+          position: "right"
         }
       }, /*#__PURE__*/React.createElement("i", {
         className: "fa-solid fa-file-excel"
       })), /*#__PURE__*/React.createElement(Button, {
-        tooltip: "Exportar a PDF",
-        tooltipOptions: {
-          position: "top"
-        },
-        className: "p-button-secondary d-flex justify-content-center",
+        className: "p-button-rounded p-button-secondary p-button-sm",
         onClick: e => {
           e.stopPropagation();
           exportToPDF(node.data.rawData, node);
+        },
+        tooltip: "Exportar a PDF",
+        tooltipOptions: {
+          position: "right"
         }
       }, /*#__PURE__*/React.createElement("i", {
         className: "fa-solid fa-file-pdf"
@@ -314,55 +320,143 @@ export const Commissions = () => {
       paddingLeft: "30px"
     }
   }, node.data.profesional) : /*#__PURE__*/React.createElement("strong", null, node.data.profesional);
+  const renderTabContent = () => {
+    if (tableLoading) {
+      return /*#__PURE__*/React.createElement("div", {
+        className: "flex justify-content-center align-items-center",
+        style: {
+          height: "200px"
+        }
+      }, /*#__PURE__*/React.createElement(ProgressSpinner, null));
+    }
+    if (treeNodes.length === 0) {
+      return /*#__PURE__*/React.createElement("p", null, "No hay datos para mostrar");
+    }
+    return /*#__PURE__*/React.createElement("div", {
+      className: "card"
+    }, /*#__PURE__*/React.createElement(TreeTable, {
+      value: treeNodes,
+      expandedKeys: expandedKeys,
+      onToggle: e => setExpandedKeys(e.value),
+      scrollable: true,
+      scrollHeight: "600px",
+      className: "p-datatable-sm p-datatable-striped",
+      showGridlines: true
+    }, /*#__PURE__*/React.createElement(Column, {
+      field: "profesional",
+      header: "Profesional",
+      body: profesionalTemplate,
+      expander: true,
+      style: {
+        minWidth: "200px"
+      }
+    }), /*#__PURE__*/React.createElement(Column, {
+      field: "id",
+      header: "Id Factura",
+      body: idTemplate,
+      style: {
+        minWidth: "120px"
+      }
+    }), /*#__PURE__*/React.createElement(Column, {
+      field: "invoiceCode",
+      header: "C\xF3digo Factura",
+      body: invoiceCodeTemplate,
+      style: {
+        minWidth: "150px"
+      }
+    }), /*#__PURE__*/React.createElement(Column, {
+      field: "monto",
+      header: "Monto",
+      body: amountTemplate,
+      style: {
+        minWidth: "150px"
+      }
+    }), /*#__PURE__*/React.createElement(Column, {
+      field: "base",
+      header: "Base C\xE1lculo",
+      body: baseTemplate,
+      style: {
+        minWidth: "150px"
+      }
+    }), /*#__PURE__*/React.createElement(Column, {
+      field: "comision",
+      header: "Comisi\xF3n",
+      body: commissionTemplate,
+      style: {
+        minWidth: "150px"
+      }
+    }), /*#__PURE__*/React.createElement(Column, {
+      field: "retencion",
+      header: "Retenci\xF3n",
+      body: retentionTemplate,
+      style: {
+        minWidth: "150px"
+      }
+    }), /*#__PURE__*/React.createElement(Column, {
+      field: "netAmount",
+      header: "Neto a pagar",
+      body: netAmountTemplate,
+      style: {
+        minWidth: "150px"
+      }
+    }), /*#__PURE__*/React.createElement(Column, {
+      field: "Type",
+      header: "Tipo",
+      body: typeTemplate,
+      style: {
+        minWidth: "120px"
+      }
+    }), /*#__PURE__*/React.createElement(Column, {
+      field: "exportar",
+      header: "Exportar",
+      body: exportButtonTemplate,
+      style: {
+        minWidth: "120px"
+      }
+    })), /*#__PURE__*/React.createElement("div", {
+      className: "row align-items-center justify-content-between pe-0 fs-9 mt-3"
+    }, /*#__PURE__*/React.createElement("div", {
+      className: "col-auto d-flex"
+    }, /*#__PURE__*/React.createElement("p", {
+      className: "mb-0 d-none d-sm-block me-3 fw-semibold text-body"
+    }, "Mostrando ", treeNodes.length, " profesionales"))));
+  };
+  if (loading) {
+    return /*#__PURE__*/React.createElement("div", {
+      className: "flex justify-content-center align-items-center",
+      style: {
+        height: "50vh"
+      }
+    }, /*#__PURE__*/React.createElement(ProgressSpinner, null));
+  }
   return /*#__PURE__*/React.createElement("main", {
     className: "main",
     id: "top"
-  }, /*#__PURE__*/React.createElement("div", {
-    className: "content"
-  }, /*#__PURE__*/React.createElement("div", {
-    className: "pb-9"
-  }, /*#__PURE__*/React.createElement("h2", {
-    className: "mb-4"
-  }, "Comisiones por Profesional"), /*#__PURE__*/React.createElement("div", {
+  }, loading ? /*#__PURE__*/React.createElement("div", {
+    className: "flex justify-content-center align-items-center",
+    style: {
+      height: "50vh",
+      marginLeft: "900px",
+      marginTop: "300px"
+    }
+  }, /*#__PURE__*/React.createElement(ProgressSpinner, null)) : /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("div", {
     className: "row g-3 justify-content-between align-items-start mb-4"
   }, /*#__PURE__*/React.createElement("div", {
     className: "col-12"
-  }, /*#__PURE__*/React.createElement("ul", {
-    className: "nav nav-underline fs-9",
-    id: "myTab",
-    role: "tablist"
-  }, /*#__PURE__*/React.createElement("li", {
-    className: "nav-item"
-  }, /*#__PURE__*/React.createElement("a", {
-    className: "nav-link active",
-    id: "range-dates-tab",
-    "data-bs-toggle": "tab",
-    href: "#tab-range-dates",
-    role: "tab",
-    "aria-controls": "tab-range-dates",
-    "aria-selected": "true"
-  }, "Filtros"))), /*#__PURE__*/React.createElement("div", {
-    className: "tab-content mt-3",
-    id: "myTabContent"
   }, /*#__PURE__*/React.createElement("div", {
-    className: "tab-pane fade show active",
-    id: "tab-range-dates",
-    role: "tabpanel",
-    "aria-labelledby": "range-dates-tab"
-  }, /*#__PURE__*/React.createElement("div", {
-    className: "d-flex"
-  }, /*#__PURE__*/React.createElement("div", {
+    className: "card mb-3 text-body-emphasis rounded-3 p-3 w-100 w-md-100 w-lg-100 mx-auto",
     style: {
-      width: "100%"
+      minHeight: "400px"
     }
   }, /*#__PURE__*/React.createElement("div", {
-    className: "row"
+    className: "card-body h-100 w-100 d-flex flex-column",
+    style: {
+      marginTop: "-40px"
+    }
   }, /*#__PURE__*/React.createElement("div", {
-    className: "col-12 mb-3"
-  }, /*#__PURE__*/React.createElement("div", {
-    className: "card border border-light"
-  }, /*#__PURE__*/React.createElement("div", {
-    className: "card-body"
+    className: "tabs-professional-container mt-4"
+  }, /*#__PURE__*/React.createElement(Accordion, null, /*#__PURE__*/React.createElement(AccordionTab, {
+    header: "Filtros"
   }, /*#__PURE__*/React.createElement("div", {
     className: "row"
   }, /*#__PURE__*/React.createElement("div", {
@@ -371,14 +465,14 @@ export const Commissions = () => {
     className: "form-label",
     htmlFor: "dateRange"
   }, "Fecha inicio - fin Procedimiento"), /*#__PURE__*/React.createElement(Calendar, {
-    id: "dateRange",
     value: dateRange,
     onChange: e => setDateRange(e.value),
     selectionMode: "range",
     readOnlyInput: true,
     dateFormat: "dd/mm/yy",
     placeholder: "Seleccione un rango de fechas",
-    className: "w-100"
+    className: "w-100",
+    showIcon: true
   })), /*#__PURE__*/React.createElement("div", {
     className: "col-12 col-md-6 mb-3"
   }, /*#__PURE__*/React.createElement("label", {
@@ -391,7 +485,8 @@ export const Commissions = () => {
     placeholder: "Seleccione profesionales",
     className: "w-100",
     filter: true,
-    display: "chip"
+    display: "chip",
+    maxSelectedLabels: 3
   })), /*#__PURE__*/React.createElement("div", {
     className: "col-12 col-md-6 mb-3"
   }, /*#__PURE__*/React.createElement("label", {
@@ -403,7 +498,8 @@ export const Commissions = () => {
     optionLabel: "label",
     placeholder: "Seleccione procedimientos",
     className: "w-100",
-    display: "chip"
+    display: "chip",
+    maxSelectedLabels: 3
   })), /*#__PURE__*/React.createElement("div", {
     className: "col-12 col-md-6 mb-3"
   }, /*#__PURE__*/React.createElement("label", {
@@ -415,196 +511,65 @@ export const Commissions = () => {
     optionLabel: "label",
     placeholder: "Seleccione entidades",
     className: "w-100",
-    display: "chip"
-  }))), /*#__PURE__*/React.createElement("div", {
+    display: "chip",
+    maxSelectedLabels: 3
+  })), /*#__PURE__*/React.createElement("div", {
+    className: "col-12"
+  }, /*#__PURE__*/React.createElement("div", {
     className: "d-flex justify-content-end m-2"
-  }, /*#__PURE__*/React.createElement("button", {
-    type: "button",
-    className: "btn btn-primary",
+  }, /*#__PURE__*/React.createElement(Button, {
+    label: "Filtrar",
+    icon: "pi pi-filter",
     onClick: handleFilterClick,
-    disabled: loading
-  }, loading ? /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("i", {
-    className: "pi pi-spinner pi-spin me-2"
-  }), "Procesando...") : "Filtrar")))))))))))), /*#__PURE__*/React.createElement("div", {
-    className: "row gy-5"
-  }, /*#__PURE__*/React.createElement("div", {
-    className: "col-12 col-xxl-12"
-  }, /*#__PURE__*/React.createElement("ul", {
-    className: "nav nav-underline fs-9",
-    id: "myTab",
-    role: "tablist"
-  }, /*#__PURE__*/React.createElement("li", {
-    className: "nav-item"
-  }, /*#__PURE__*/React.createElement("a", {
-    className: `nav-link ${activeTab === "tab-commissions" ? "active" : ""}`,
-    id: "commissions-tab",
-    "data-bs-toggle": "tab",
-    href: "#tab-commissions",
-    role: "tab",
-    "aria-controls": "tab-commissions",
-    "aria-selected": activeTab === "tab-commissions",
+    loading: tableLoading,
+    className: "p-button-primary"
+  })))))), /*#__PURE__*/React.createElement("div", {
+    className: "tabs-header"
+  }, /*#__PURE__*/React.createElement("button", {
+    className: `tab-item ${activeTab === "tab-commissions" ? "active" : ""}`,
     onClick: () => handleTabChange("tab-commissions", obtenerFiltros())
-  }, "Servicios")), /*#__PURE__*/React.createElement("li", {
-    className: "nav-item"
-  }, /*#__PURE__*/React.createElement("a", {
-    className: `nav-link ${activeTab === "tab-orders" ? "active" : ""}`,
-    id: "orders-tab",
-    "data-bs-toggle": "tab",
-    href: "#tab-orders",
-    role: "tab",
-    "aria-controls": "tab-orders",
-    "aria-selected": activeTab === "tab-orders",
+  }, /*#__PURE__*/React.createElement("i", {
+    className: "fas fa-stethoscope"
+  }), "Servicios"), /*#__PURE__*/React.createElement("button", {
+    className: `tab-item ${activeTab === "tab-orders" ? "active" : ""}`,
     onClick: () => handleTabChange("tab-orders", obtenerFiltros())
-  }, "\xD3rdenes"))), /*#__PURE__*/React.createElement("div", {
-    className: "col-12 tab-content mt-3",
-    id: "myTabContent"
-  }, /*#__PURE__*/React.createElement("div", {
-    className: `tab-pane fade ${activeTab === "tab-commissions" ? "show active" : ""}`,
-    id: "tab-commissions",
-    role: "tabpanel",
-    "aria-labelledby": "commissions-tab"
-  }, /*#__PURE__*/React.createElement("div", {
-    className: "border-top border-translucent"
-  }, loading ? /*#__PURE__*/React.createElement("div", {
-    className: "text-center p-5"
   }, /*#__PURE__*/React.createElement("i", {
-    className: "pi pi-spinner pi-spin",
-    style: {
-      fontSize: "2rem"
-    }
-  }), /*#__PURE__*/React.createElement("p", null, "Cargando datos...")) : /*#__PURE__*/React.createElement("div", {
-    id: "purchasersSellersTable"
+    className: "fas fa-file-prescription"
+  }), "\xD3rdenes")), /*#__PURE__*/React.createElement("div", {
+    className: "tabs-content"
   }, /*#__PURE__*/React.createElement("div", {
-    className: "card"
-  }, /*#__PURE__*/React.createElement(TreeTable, {
-    value: treeNodes,
-    expandedKeys: expandedKeys,
-    onToggle: e => setExpandedKeys(e.value),
-    scrollable: true,
-    scrollHeight: "600px"
-  }, /*#__PURE__*/React.createElement(Column, {
-    field: "profesional",
-    header: "Profesional",
-    body: profesionalTemplate,
-    expander: true
-  }), /*#__PURE__*/React.createElement(Column, {
-    field: "id",
-    header: "Id Factura",
-    body: idTemplate
-  }), /*#__PURE__*/React.createElement(Column, {
-    field: "invoiceCode",
-    header: "Codigo Factura",
-    body: invoiceCodeTemplate
-  }), /*#__PURE__*/React.createElement(Column, {
-    field: "monto",
-    header: "Monto",
-    body: amountTemplate
-  }), /*#__PURE__*/React.createElement(Column, {
-    field: "base",
-    header: "Base C\xE1lculo",
-    body: baseTemplate
-  }), /*#__PURE__*/React.createElement(Column, {
-    field: "comision",
-    header: "Comisi\xF3n",
-    body: commissionTemplate
-  }), /*#__PURE__*/React.createElement(Column, {
-    field: "retencion",
-    header: "Retenci\xF3n",
-    body: retentionTemplate
-  }), /*#__PURE__*/React.createElement(Column, {
-    field: "netAmount",
-    header: "Neto a pagar",
-    body: netAmountTemplate
-  }), /*#__PURE__*/React.createElement(Column, {
-    field: "Type",
-    header: "Tipo",
-    body: typeTemplate
-  }), /*#__PURE__*/React.createElement(Column, {
-    field: "exportar",
-    header: "Exportar",
-    body: exportButtonTemplate,
-    style: {
-      width: "120px"
-    }
-  }))), /*#__PURE__*/React.createElement("div", {
-    className: "row align-items-center justify-content-between pe-0 fs-9 mt-3"
+    className: `tab-panel ${activeTab === "tab-commissions" ? "active" : ""}`
   }, /*#__PURE__*/React.createElement("div", {
-    className: "col-auto d-flex"
-  }, /*#__PURE__*/React.createElement("p", {
-    className: "mb-0 d-none d-sm-block me-3 fw-semibold text-body"
-  }, "Mostrando ", treeNodes.length, " profesionales")))))), /*#__PURE__*/React.createElement("div", {
-    className: `tab-pane fade ${activeTab === "tab-orders" ? "show active" : ""}`,
-    id: "tab-orders",
-    role: "tabpanel",
-    "aria-labelledby": "orders-tab"
-  }, /*#__PURE__*/React.createElement("div", {
-    className: "border-top border-translucent"
-  }, loading ? /*#__PURE__*/React.createElement("div", {
-    className: "text-center p-5"
+    className: "d-flex justify-content-between align-items-center mb-4"
+  }, /*#__PURE__*/React.createElement("span", {
+    className: "text-xl font-semibold"
+  }, "Comisiones por Servicios"), /*#__PURE__*/React.createElement("span", {
+    className: "p-input-icon-left"
   }, /*#__PURE__*/React.createElement("i", {
-    className: "pi pi-spinner pi-spin",
-    style: {
-      fontSize: "2rem"
-    }
-  }), /*#__PURE__*/React.createElement("p", null, "Cargando datos...")) : /*#__PURE__*/React.createElement("div", {
-    id: "purchasersSellersTable"
+    className: "pi pi-search"
+  }), /*#__PURE__*/React.createElement(InputText, {
+    type: "search",
+    onInput: e => setGlobalFilter(e.currentTarget.value),
+    placeholder: "Buscar..."
+  }))), renderTabContent()), /*#__PURE__*/React.createElement("div", {
+    className: `tab-panel ${activeTab === "tab-orders" ? "active" : ""}`
   }, /*#__PURE__*/React.createElement("div", {
-    className: "card"
-  }, /*#__PURE__*/React.createElement(TreeTable, {
-    value: treeNodes,
-    expandedKeys: expandedKeys,
-    onToggle: e => setExpandedKeys(e.value),
-    scrollable: true,
-    scrollHeight: "600px"
-  }, /*#__PURE__*/React.createElement(Column, {
-    field: "profesional",
-    header: "Profesional",
-    body: profesionalTemplate,
-    expander: true
-  }), /*#__PURE__*/React.createElement(Column, {
-    field: "id",
-    header: "Id Factura",
-    body: idTemplate
-  }), /*#__PURE__*/React.createElement(Column, {
-    field: "invoiceCode",
-    header: "Codigo Factura",
-    body: invoiceCodeTemplate
-  }), /*#__PURE__*/React.createElement(Column, {
-    field: "monto",
-    header: "Monto",
-    body: amountTemplate
-  }), /*#__PURE__*/React.createElement(Column, {
-    field: "base",
-    header: "Base C\xE1lculo",
-    body: baseTemplate
-  }), /*#__PURE__*/React.createElement(Column, {
-    field: "comision",
-    header: "Comisi\xF3n",
-    body: commissionTemplate
-  }), /*#__PURE__*/React.createElement(Column, {
-    field: "retencion",
-    header: "Retenci\xF3n",
-    body: retentionTemplate
-  }), /*#__PURE__*/React.createElement(Column, {
-    field: "netAmount",
-    header: "Neto a pagar",
-    body: netAmountTemplate
-  }), /*#__PURE__*/React.createElement(Column, {
-    field: "Type",
-    header: "Tipo",
-    body: typeTemplate
-  }), /*#__PURE__*/React.createElement(Column, {
-    field: "exportar",
-    header: "Exportar",
-    body: exportButtonTemplate,
-    style: {
-      width: "120px"
-    }
-  }))), /*#__PURE__*/React.createElement("div", {
-    className: "row align-items-center justify-content-between pe-0 fs-9 mt-3"
-  }, /*#__PURE__*/React.createElement("div", {
-    className: "col-auto d-flex"
-  }, /*#__PURE__*/React.createElement("p", {
-    className: "mb-0 d-none d-sm-block me-3 fw-semibold text-body"
-  }, "Mostrando ", treeNodes.length, " profesionales"))))))))))));
+    className: "d-flex justify-content-between align-items-center mb-4"
+  }, /*#__PURE__*/React.createElement("span", {
+    className: "text-xl font-semibold"
+  }, "Comisiones por \xD3rdenes"), /*#__PURE__*/React.createElement("span", {
+    className: "p-input-icon-left"
+  }, /*#__PURE__*/React.createElement("i", {
+    className: "pi pi-search"
+  }), /*#__PURE__*/React.createElement(InputText, {
+    type: "search",
+    onInput: e => setGlobalFilter(e.currentTarget.value),
+    placeholder: "Buscar..."
+  }))), renderTabContent())))))))), /*#__PURE__*/React.createElement("style", null, `   
+      th
+      {
+        background-color: #007bff !important;
+        color: white !important;
+        }
+   `));
 };

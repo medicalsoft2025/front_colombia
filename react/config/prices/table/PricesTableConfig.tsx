@@ -193,7 +193,7 @@ export const PricesTableConfig: React.FC<PriceTablesConfigProps> = ({ onEditItem
 
 
     return (
-        <div className="container-fluid mt-4" style={{ width: '100%', padding: '0 15px' }}>
+        <div className="card p-4" style={{ width: '100%', padding: '0 15px' }}>
             <DataTable
                 value={prices}
                 paginator

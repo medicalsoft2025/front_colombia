@@ -37,6 +37,31 @@ export function useDynamicForm<T extends FieldValues>({
     };
 
     useEffect(() => {
+        const registerField = (
+            field: DynamicFormContainerConfig,
+            currentPath: string
+        ) => {
+            if (!field.name) return;
+
+            const fieldPath = currentPath
+                ? `${currentPath}.${field.name}`
+                : field.name;
+
+            const rules: any = {
+                required: field.required ? "Este campo es requerido" : false,
+                ...field.validation,
+            };
+            form.register(fieldPath, rules);
+
+            const currentValue = form.getValues(fieldPath);
+            if (currentValue === undefined && field.value !== undefined) {
+                form.setValue(fieldPath, field.value, {
+                    shouldValidate: true,
+                    shouldDirty: false,
+                });
+            }
+        };
+
         const registerAllFields = (
             container: DynamicFormContainerConfig,
             parentPath: string = ""
@@ -48,34 +73,28 @@ export function useDynamicForm<T extends FieldValues>({
                     : container.name;
             }
 
+            // Legacy support for 'fields' and 'containers'
             container.fields?.forEach((field) => {
-                const fieldPath = currentPath
-                    ? `${currentPath}.${field.name}`
-                    : field.name;
-
-                const rules: any = {
-                    required: field.required ? "Este campo es requerido" : false,
-                    ...field.validation,
-                };
-                form.register(fieldPath, rules);
-
-                const currentValue = form.getValues(fieldPath);
-                if (currentValue === undefined && field.value !== undefined) {
-                    form.setValue(fieldPath, field.value, {
-                        shouldValidate: true,
-                        shouldDirty: false,
-                    });
-                }
+                registerField(field, currentPath);
             });
 
             container.containers?.forEach((childContainer) => {
                 registerAllFields(childContainer, currentPath);
             });
+
+            // Recursive support for 'children'
+            container.children?.forEach((child) => {
+                const isContainer = ["card", "form", "tabs", "tab", "accordion", "stepper", "container", "array"].includes(child.type);
+                if (isContainer) {
+                    registerAllFields(child, currentPath);
+                } else {
+                    registerField(child, currentPath);
+                }
+            });
         };
 
-        config.containers?.forEach((container) => {
-            registerAllFields(container);
-        });
+        // Start registration from the root config
+        registerAllFields(config);
     }, [config, form]);
 
     useEffect(() => {

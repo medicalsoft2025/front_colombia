@@ -88,4 +88,19 @@ export class MenuService extends BaseApiService {
 
         return { menus };
     }
+
+    async getAllMenuForRQ() {
+        const userService = new UserService("medical", "users");
+        const dataUser = await userService.getCachedLoggedUser();
+
+        try {
+            const menus = await this.httpClient.get(
+                `medical/menus/permissions/${dataUser.user_role_id}`
+            );
+            return { menus };
+        } catch (error) {
+            console.error("Error fetching all menus:", error);
+            throw error;
+        }
+    }
 }

@@ -733,7 +733,7 @@ const PatientFormModal: React.FC<PatientFormModalProps> = ({
 
             let errorMessage = patientData
                 ? "Error al actualizar el paciente"
-                : "Error al crear el paciente";
+                : error.message;
 
             if (error.response) {
                 if (error.response.data?.message) {

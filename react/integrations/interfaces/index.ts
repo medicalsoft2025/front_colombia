@@ -1,9 +1,10 @@
+export type ConfigFieldType = "text" | "list" | "file" | "password" | "checkbox" | "textarea" | "code-editor";
+
 export interface ConfigFieldI {
-    configKey: string;
     field: string;
     label: string;
-    type?: string;
-    initialValue?: string;
+    type?: ConfigFieldType;
+    initialValue?: any;
     source?: string;
     sourceType?: string;
     multiple?: boolean;
@@ -25,14 +26,14 @@ export interface DynamicIntegrationFormProps {
 export interface DynamicConfigFieldProps {
     field: string;
     label: string;
-    initialValue?: string;
+    initialValue?: any;
     source?: string;
     sourceType?: string;
     multiple?: boolean;
     placeholder?: string;
-    type?: string;
+    type?: ConfigFieldType;
     description?: string;
-    onChange: (value: string) => void;
+    onChange: (value: any) => void;
     onFileChange?: ({ field, file }: { field: string; file: File | null }) => void;
 }
 
@@ -47,4 +48,6 @@ export interface GenericListItemI {
 
 export interface IntegrationConfigFormProps {
     configs?: any;
+    configFields: ConfigFieldI[];
+    onSubmit?: (data: any) => void;
 }

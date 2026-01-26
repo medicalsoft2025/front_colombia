@@ -174,7 +174,7 @@ export const PricesTableConfig = ({
     }));
   };
   return /*#__PURE__*/React.createElement("div", {
-    className: "container-fluid mt-4",
+    className: "card p-4",
     style: {
       width: '100%',
       padding: '0 15px'

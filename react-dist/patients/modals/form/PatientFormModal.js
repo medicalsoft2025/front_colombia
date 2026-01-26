@@ -624,7 +624,7 @@ const PatientFormModal = ({
       if (onSuccess) onSuccess();
     } catch (error) {
       console.error("Error completo:", error);
-      let errorMessage = patientData ? "Error al actualizar el paciente" : "Error al crear el paciente";
+      let errorMessage = patientData ? "Error al actualizar el paciente" : error.message;
       if (error.response) {
         if (error.response.data?.message) {
           errorMessage = error.response.data.message;

@@ -38,7 +38,6 @@ export const PaymentMethodsConfig = ({ onConfigurationComplete }: { onConfigurat
     });
 
     const onCreate = () => {
-        console.log("Creando nuevo método de pago");
         setInitialData(undefined);
         setPaymentMethod(null);
         setShowFormModal(true);
@@ -46,7 +45,6 @@ export const PaymentMethodsConfig = ({ onConfigurationComplete }: { onConfigurat
 
     const handleSubmit = async (data: PaymentMethodFormInputs) => {
         try {
-            console.log("Enviando datos del formulario:", data);
 
             const paymentMethodData: CreatePaymentMethodDTO = {
                 method: data.name,
@@ -54,15 +52,14 @@ export const PaymentMethodsConfig = ({ onConfigurationComplete }: { onConfigurat
                 description: data.additionalDetails || '',
                 accounting_account_id: data.accounting_account_id || null,
                 category: data.category,
+                sub_category: data.sub_category,
                 is_cash: data.is_cash
             };
 
             if (paymentMethod) {
-                console.log("Actualizando método existente:", paymentMethod.id);
                 await updatePaymentMethod(paymentMethod.id.toString(), paymentMethodData);
                 SwalManager.success('Método actualizado correctamente');
             } else {
-                console.log("Creando nuevo método");
                 await createPaymentMethod(paymentMethodData);
                 SwalManager.success('Método creado correctamente');
             }
@@ -77,10 +74,8 @@ export const PaymentMethodsConfig = ({ onConfigurationComplete }: { onConfigurat
 
     const handleTableEdit = async (id: string) => {
         try {
-            console.log("Editando método con ID:", id);
 
             const paymentMethodData = await fetchPaymentMethodById(id);
-            console.log("paymentMethod encontrado:", paymentMethodData);
 
             if (paymentMethodData) {
                 setShowFormModal(true);
@@ -111,11 +106,11 @@ export const PaymentMethodsConfig = ({ onConfigurationComplete }: { onConfigurat
 
     useEffect(() => {
         if (paymentMethod) {
-            console.log("Setting initialData from paymentMethod:", paymentMethod);
             const data: PaymentMethodFormInputs = {
                 name: paymentMethod.method,
                 payment_type: paymentMethod.payment_type,
                 category: paymentMethod.category || 'other',
+                sub_category: paymentMethod.sub_category,
                 is_cash: paymentMethod.is_cash,
                 accounting_account_id: paymentMethod.accounting_account_id || null,
                 additionalDetails: paymentMethod.description,
@@ -163,7 +158,6 @@ export const PaymentMethodsConfig = ({ onConfigurationComplete }: { onConfigurat
                 isVisible={showFormModal}
                 onSave={handleSubmit}
                 onClose={() => {
-                    console.log("Cerrando modal");
                     setShowFormModal(false);
                     setPaymentMethod(null);
                     setInitialData(undefined);

@@ -8,9 +8,9 @@ export const IntegrationsTabs = props => {
   }, /*#__PURE__*/React.createElement("div", {
     className: "card mb-3 p-3"
   }, /*#__PURE__*/React.createElement("div", {
-    className: "d-flex"
+    className: "row"
   }, /*#__PURE__*/React.createElement("ul", {
-    className: "nav nav-underline fs-9 flex-column me-3",
+    className: "nav nav-underline fs-9 flex-column col-md-4 mx-3",
     id: "tabs-typeMessages",
     role: "tablist"
   }, tabs.map(tab => /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("li", {
@@ -29,7 +29,7 @@ export const IntegrationsTabs = props => {
   }, /*#__PURE__*/React.createElement("i", {
     className: tab.icon
   }), " ", tab.label))))), /*#__PURE__*/React.createElement("div", {
-    className: "tab-content w-100",
+    className: "tab-content col-md-8 flex-grow-1",
     id: "typeMessages-tabContent"
   }, tabs.map(tab => /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("div", {
     key: `#${tab.id}-pane`,

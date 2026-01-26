@@ -8,7 +8,7 @@ import { InputNumber } from "primereact/inputnumber";
 import { Tag } from "primereact/tag";
 import { Divider } from "primereact/divider";
 import { calculateTotal, calculatePaid, calculateChange, validateProductsStep, validatePaymentStep } from "../utils/helpers.js";
-import { useAppointmentProcedures } from "../../../appointments/hooks/useAppointmentProcedures.js";
+import { useAppointmentProceduresV2 } from "../../../appointments/hooks/useAppointmentsProcedureV2.js";
 import { usePaymentMethods } from "../../../payment-methods/hooks/usePaymentMethods.js";
 const ProductsPaymentStep = ({
   updateFormData,
@@ -34,7 +34,7 @@ const ProductsPaymentStep = ({
   const {
     procedureOptions,
     loadProcedures
-  } = useAppointmentProcedures();
+  } = useAppointmentProceduresV2();
   const {
     paymentMethods,
     fetchPaymentMethods
@@ -306,7 +306,8 @@ const ProductsPaymentStep = ({
     showClear: true,
     className: "w-100",
     panelClassName: "shadow-3 w-100",
-    emptyMessage: "No se encontraron procedimientos"
+    emptyMessage: "No se encontraron procedimientos",
+    appendTo: "self"
   })), /*#__PURE__*/React.createElement(Button, {
     label: "Agregar Producto",
     className: "p-button-primary d-flex",

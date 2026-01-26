@@ -54,28 +54,25 @@ export const PaymentMethodsConfig = ({
     };
   });
   const onCreate = () => {
-    console.log("Creando nuevo método de pago");
     setInitialData(undefined);
     setPaymentMethod(null);
     setShowFormModal(true);
   };
   const handleSubmit = async data => {
     try {
-      console.log("Enviando datos del formulario:", data);
       const paymentMethodData = {
         method: data.name,
         payment_type: data.payment_type || '',
         description: data.additionalDetails || '',
         accounting_account_id: data.accounting_account_id || null,
         category: data.category,
+        sub_category: data.sub_category,
         is_cash: data.is_cash
       };
       if (paymentMethod) {
-        console.log("Actualizando método existente:", paymentMethod.id);
         await updatePaymentMethod(paymentMethod.id.toString(), paymentMethodData);
         SwalManager.success('Método actualizado correctamente');
       } else {
-        console.log("Creando nuevo método");
         await createPaymentMethod(paymentMethodData);
         SwalManager.success('Método creado correctamente');
       }
@@ -88,9 +85,7 @@ export const PaymentMethodsConfig = ({
   };
   const handleTableEdit = async id => {
     try {
-      console.log("Editando método con ID:", id);
       const paymentMethodData = await fetchPaymentMethodById(id);
-      console.log("paymentMethod encontrado:", paymentMethodData);
       if (paymentMethodData) {
         setShowFormModal(true);
       } else {
@@ -118,11 +113,11 @@ export const PaymentMethodsConfig = ({
   };
   useEffect(() => {
     if (paymentMethod) {
-      console.log("Setting initialData from paymentMethod:", paymentMethod);
       const data = {
         name: paymentMethod.method,
         payment_type: paymentMethod.payment_type,
         category: paymentMethod.category || 'other',
+        sub_category: paymentMethod.sub_category,
         is_cash: paymentMethod.is_cash,
         accounting_account_id: paymentMethod.accounting_account_id || null,
         additionalDetails: paymentMethod.description
@@ -158,7 +153,6 @@ export const PaymentMethodsConfig = ({
     isVisible: showFormModal,
     onSave: handleSubmit,
     onClose: () => {
-      console.log("Cerrando modal");
       setShowFormModal(false);
       setPaymentMethod(null);
       setInitialData(undefined);

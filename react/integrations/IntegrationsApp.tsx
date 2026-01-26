@@ -1,58 +1,59 @@
 import React from "react";
-import { LabplusIntegrationConfig } from "./forms/LabplusIntegrationConfig";
 import { IntegrationsTabs } from "./components/IntegrationsTabs";
-import { useIntegrationConfigs } from "./hooks/useIntegrationConfigs";
-import { DGIIIntegrationConfig } from "./forms/DGIIIntegrationConfig";
-import { SISPROIntegrationConfig } from "./forms/SISPROIntegrationConfig";
-import { OpenAIIntegrationConfig } from "./forms/OpenAIIntegrationConfig";
-import { CarnetIntegrationConfig } from "./forms/CarnetIntegrationConfig";
-import { GeminiIntegrationConfig } from "./forms/GeminiIntegrationConfig";
+import { SystemConfigHelper } from "./helpers/SystemConfigHelper";
+import { carnetConfigFields, dgiiConfigFields, labplusConfigFields, aiConfigFields, sisproConfigFields } from "./config/formFields";
+import { IntegrationConfig } from "./forms/IntegrationConfig";
+import { useSystemConfigs } from "../system-configs/hooks/useSystemConfigs";
+import { useSystemConfigCreate } from "../system-configs/hooks/useSystemConfigCreate";
+import { Toast } from "primereact/toast";
 
 export const IntegrationsApp = () => {
 
-    const { configs } = useIntegrationConfigs();
+    const { systemConfigs: configs, refetch } = useSystemConfigs();
+    const { createSystemConfig, toast } = useSystemConfigCreate();
+
+    const handleSubmit = async (data: any) => {
+        const systemConfigs = SystemConfigHelper.formatDataToSystemConfigArray(data);
+        await createSystemConfig(systemConfigs);
+        refetch();
+    }
 
     const tabs = [
         {
             id: "labplus-tab",
             label: "Labplus",
             icon: "fa-solid fa-plus",
-            content: <LabplusIntegrationConfig configs={configs} />
+            content: <IntegrationConfig configs={configs} configFields={labplusConfigFields} onSubmit={handleSubmit} />
         },
         {
             id: "dgii-tab",
             label: "DGII",
             icon: "fa-solid fa-file-invoice",
-            content: <DGIIIntegrationConfig configs={configs} />
+            content: <IntegrationConfig configs={configs} configFields={dgiiConfigFields} onSubmit={handleSubmit} />
         },
         {
             id: "sispro-tab",
             label: "SISPRO",
             icon: "fa-solid fa-address-book",
-            content: <SISPROIntegrationConfig configs={configs} />
+            content: <IntegrationConfig configs={configs} configFields={sisproConfigFields} onSubmit={handleSubmit} />
         },
         {
             id: "carnet-tab",
             label: "Carnet",
             icon: "fa-solid fa-envelopes-bulk",
-            content: <CarnetIntegrationConfig configs={configs} />
+            content: <IntegrationConfig configs={configs} configFields={carnetConfigFields} onSubmit={handleSubmit} />
         },
         {
-            id: "openai-tab",
-            label: "OpenAI",
+            id: "ai-tab",
+            label: "AI",
             icon: "fa-solid fa-brain",
-            content: <OpenAIIntegrationConfig configs={configs} />
-        },
-        {
-            id: "gemini-tab",
-            label: "Gemini",
-            icon: "fa-solid fa-brain",
-            content: <GeminiIntegrationConfig configs={configs} />
+            content: <IntegrationConfig configs={configs} configFields={aiConfigFields} onSubmit={handleSubmit} />
         }
     ];
 
     return (
         <>
+            <Toast ref={toast} />
             <IntegrationsTabs tabs={tabs} />
         </>
     );

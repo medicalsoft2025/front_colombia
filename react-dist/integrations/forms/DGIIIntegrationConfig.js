@@ -2,23 +2,21 @@ import React from "react";
 import { DynamicIntegrationForm } from "./DynamicIntegrationForm.js";
 export const DGIIIntegrationConfig = props => {
   const {
-    configs = []
+    configs = [],
+    onSubmit
   } = props;
   const initialConfigFields = [{
-    configKey: "DGII_FILE",
-    field: "file",
+    field: "DGII_FILE",
     label: "Certificado P12",
     type: "file",
     description: "Certificado P12 del DGII"
   }, {
-    configKey: "DGII_PASSWORD",
-    field: "password",
+    field: "DGII_PASSWORD",
     label: "Contraseña",
     type: "password",
     description: "Contraseña del certificado P12"
   }, {
-    configKey: "DGII_TENANTS",
-    field: "tenants",
+    field: "DGII_TENANTS",
     label: "Tenants",
     type: "list",
     source: "DGII_TENANTS",
@@ -26,8 +24,7 @@ export const DGIIIntegrationConfig = props => {
     multiple: false,
     placeholder: "Seleccione un tenant"
   }, {
-    configKey: "DGII_USERS",
-    field: "users",
+    field: "DGII_USERS",
     label: "Usuarios",
     type: "list",
     source: "USERS",
@@ -36,7 +33,7 @@ export const DGIIIntegrationConfig = props => {
     placeholder: "Seleccione un usuario"
   }];
   const handleSubmit = data => {
-    console.log(data);
+    onSubmit?.(data);
   };
   return /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement(DynamicIntegrationForm, {
     configs: configs,

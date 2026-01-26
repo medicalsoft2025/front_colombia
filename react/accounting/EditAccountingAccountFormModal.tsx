@@ -65,9 +65,10 @@ export const EditAccountingAccountFormModal: React.FC<EditAccountingAccountFormM
     });
 
     const [showInputs, setShowInputs] = useState(false);
+    const [categories, setCategories] = useState<any[]>([]);
 
     const getFormErrorMessage = (
-      name: keyof EditAccountingAccountFormModalInputs
+      name: keyof EditAccountingAccountFormModalInputs,
     ) => {
       console.error(errors);
       return (
@@ -76,13 +77,6 @@ export const EditAccountingAccountFormModal: React.FC<EditAccountingAccountFormM
         )
       );
     };
-
-    const categoryOptions = [
-      { label: "Medicamentos", value: "medications" },
-      { label: "Vacunas", value: "vaccines" },
-      { label: "Inventariables", value: "inventariables" },
-      { label: "Insumos", value: "supplies" },
-    ];
 
     const onSubmit = (data: EditAccountingAccountFormModalInputs) => {
       const accountData: EditAccountingAccountFormModalData = {
@@ -101,6 +95,73 @@ export const EditAccountingAccountFormModal: React.FC<EditAccountingAccountFormM
       },
     }));
 
+    function loadCategories(selectedAccount: any) {
+      if (selectedAccount.account_code.startsWith("1")) {
+        setShowInputs(true);
+        setCategories([
+          { label: "Medicamentos", value: "medications" },
+          { label: "Vacunas", value: "vaccines" },
+          { label: "Inventariables", value: "inventariables" },
+          { label: "Insumos", value: "supplies" },
+        ]);
+      } else if (selectedAccount.account_code.startsWith("4")) {
+        setShowInputs(true);
+        setCategories([
+          {
+            label: "Ingresos por operaciones (No financieros)",
+            value: "operational_income_non_financial",
+          },
+          { label: "Ingresos Financieros", value: "financial_income" },
+          { label: "Ingresos Extraordinarios", value: "extraordinary_income" },
+          { label: "Ingresos por Arrendamientos", value: "rental_income" },
+          {
+            label: "Ingresos por Venta de Activo Depreciable",
+            value: "depreciable_asset_sale_income",
+          },
+          { label: "Otros Ingresos", value: "other_income" },
+        ]);
+      } else if (selectedAccount.account_code.startsWith("5")) {
+        setShowInputs(true);
+        setCategories([
+          { label: "Gastos de personal", value: "personal_expenses" },
+          {
+            label: "Gastos por trabajos, suministros y servicios",
+            value: "work_supplies_services",
+          },
+          { label: "Arrendamientos", value: "rentals" },
+          { label: "Gastos de activos fijos", value: "fixed_assets_expenses" },
+          {
+            label: "Gastos de representación",
+            value: "representation_expenses",
+          },
+          {
+            label: "Otras deducciones admitidas",
+            value: "other_allowed_deductions",
+          },
+          { label: "Gastos financieros", value: "financial_expenses" },
+          { label: "Gastos extraordinarios", value: "extraordinary_expenses" },
+          {
+            label: "Compras y gastos que formarán parte del costo de venta",
+            value: "purchase_sale_cost",
+          },
+          { label: "Adquisiciones de activos", value: "asset_acquisitions" },
+          { label: "Gastos de seguros", value: "insurance_expenses" },
+        ]);
+      } else {
+        setShowInputs(false);
+        setCategories([
+          [
+            { label: "ITBIS facturado", value: "itbis_billed" },
+            { label: "ISR Percibido", value: "isr_received" },
+            {
+              label: "Impuesto Selectivo al Consumo",
+              value: "consumption_tax",
+            },
+          ],
+        ]);
+      }
+    }
+
     useEffect(() => {
       if (selectedAccount) {
         setValue("account_name", selectedAccount.account_name);
@@ -108,9 +169,7 @@ export const EditAccountingAccountFormModal: React.FC<EditAccountingAccountFormM
         setValue("fiscal_difference", false);
         setValue("active", selectedAccount.status === "active");
         setValue("category", selectedAccount.category || "");
-        if (selectedAccount.account_code.startsWith("1")) {
-          setShowInputs(true);
-        }
+        loadCategories(selectedAccount);
       }
     }, [selectedAccount]);
 
@@ -192,7 +251,7 @@ export const EditAccountingAccountFormModal: React.FC<EditAccountingAccountFormM
                       className="w-100"
                       value={field.value}
                       onChange={(e) => field.onChange(e.value)}
-                      options={categoryOptions}
+                      options={categories}
                       placeholder="Seleccionar..."
                     />
                   )}
@@ -245,12 +304,19 @@ export const EditAccountingAccountFormModal: React.FC<EditAccountingAccountFormM
                 onClick={() => {
                   onHide();
                 }}
-              ><i className="fa fa-times me-2" style={{ marginLeft: "10px" }}></i></Button>
+              >
+                <i
+                  className="fa fa-times me-2"
+                  style={{ marginLeft: "10px" }}
+                ></i>
+              </Button>
               <Button
                 label="Guardar"
                 type="submit"
                 className="p-button-primary"
-              ><i className="fa fa-save" style={{ marginLeft: "10px" }}></i></Button>
+              >
+                <i className="fa fa-save" style={{ marginLeft: "10px" }}></i>
+              </Button>
             </div>
           </form>
         </Dialog>

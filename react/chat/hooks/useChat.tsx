@@ -1,14 +1,13 @@
 // hooks/useChat.ts
 import { useState, useEffect, useRef } from "react";
+import { getJWTPayload } from "../../../services/utilidades";
+import { patientService, userService } from "../../../services/api";
+import { useLoggedUser } from "../../users/hooks/useLoggedUser";
+import { useChatContext } from "./useChatContext";
+import { usePatientAIChat } from "./usePatientAIChat";
+import { useGeneralAIChat } from "./useGeneralAIChat";
+import { Message, MessageEvent, AI_USERS, AIUserType } from "../types";
 declare const io: any;
-
-interface Message {
-    from: string;
-    to: string;
-    text: string;
-    time: string;
-    timestamp: number;
-}
 
 interface UseChatProps {
     token: string;
@@ -17,12 +16,29 @@ interface UseChatProps {
 export function useChat({ token }: UseChatProps) {
     const [messages, setMessages] = useState<Message[]>([]);
     const [users, setUsers] = useState<string[]>([]);
-    const [selectedUser, setSelectedUser] = useState<string | null>(
-        "Medicalsoft AI"
-    );
+    const [selectedUser, setSelectedUser] = useState<string | null>(AI_USERS[AIUserType.GENERAL]);
     const [inputMessage, setInputMessage] = useState("");
     const [typingMessage, setTypingMessage] = useState("");
     const [username, setUsername] = useState<string>("");
+
+    const { loggedUser } = useLoggedUser();
+    const { isPatientContext, patientId } = useChatContext();
+
+    // Patient AI chat hook
+    const {
+        messages: patientAIMessages,
+        isLoadingHistory: isPatientAILoading,
+        isThinking: isPatientAIThinking,
+        sendQuestion: sendPatientQuestion,
+    } = usePatientAIChat({ patientId, username });
+
+    // General AI chat hook
+    const {
+        messages: generalAIMessages,
+        isLoadingHistory: isGeneralAILoading,
+        isThinking: isGeneralAIThinking,
+        sendQuestion: sendGeneralQuestion,
+    } = useGeneralAIChat({ username });
 
     const socketRef = useRef<any>(null);
     const typingTimeoutRef = useRef<number | null>(null);
@@ -81,34 +97,15 @@ export function useChat({ token }: UseChatProps) {
             setMessages(mapped.sort((a, b) => a.timestamp - b.timestamp));
         });
 
-        // Mensajes entrantes
-        const handleMessage = (data: any) => {
-            console.log("data", data);
-
-            const now = Date.now();
-            const msg: Message = {
-                from: data.from,
-                to: data.to || "all",
-                text: data.message,
-                time: new Date(now).toLocaleTimeString([], {
-                    hour: "2-digit",
-                    minute: "2-digit",
-                }),
-                timestamp: now,
-            };
-            setMessages((prev) =>
-                [...prev, msg].sort((a, b) => a.timestamp - b.timestamp)
-            );
-        };
-
         socket.on("message:receive", handleMessage);
 
-        // Lista de usuarios
+        // Lista de usuarios - include AI users based on context
         socket.on("user:list", (onlineUsers: string[]) => {
-            setUsers([
-                "Medicalsoft AI",
-                ...onlineUsers.filter((u) => u !== username),
-            ]);
+            const aiUsers = isPatientContext
+                ? [AI_USERS[AIUserType.GENERAL], AI_USERS[AIUserType.PATIENT]]
+                : [AI_USERS[AIUserType.GENERAL]];
+
+            setUsers([...aiUsers, ...onlineUsers.filter((u) => u !== username)]);
         });
 
         // Indicador de escribiendo
@@ -130,23 +127,86 @@ export function useChat({ token }: UseChatProps) {
             socket.off("message:receive", handleMessage);
             socket.disconnect();
         };
-    }, [username, token]);
+    }, [username, token, isPatientContext]);
+
+    // Update users list when context changes
+    useEffect(() => {
+        if (!socketRef.current) return;
+
+        // Manually update AI users when context changes
+        const aiUsers = isPatientContext
+            ? [AI_USERS[AIUserType.GENERAL], AI_USERS[AIUserType.PATIENT]]
+            : [AI_USERS[AIUserType.GENERAL]];
+
+        setUsers((prevUsers) => {
+            const realUsers = prevUsers.filter(
+                (u) => u !== AI_USERS[AIUserType.GENERAL] && u !== AI_USERS[AIUserType.PATIENT]
+            );
+            return [...aiUsers, ...realUsers];
+        });
+
+        // If selected user is patient AI and we're no longer in patient context, switch to general AI
+        if (!isPatientContext && selectedUser === AI_USERS[AIUserType.PATIENT]) {
+            setSelectedUser(AI_USERS[AIUserType.GENERAL]);
+        }
+    }, [isPatientContext, selectedUser]);
 
     // Filtrar mensajes según chat seleccionado
-    const filteredMessages = messages
-        .filter((msg) => {
-            if (!selectedUser || selectedUser === "all")
+    const filteredMessages = (() => {
+        console.log("Selected User:", selectedUser);
+        console.log("AI_USERS[AIUserType.PATIENT]:", AI_USERS[AIUserType.PATIENT]);
+        console.log("Patient AI Messages:", patientAIMessages);
+
+        // If patient AI is selected, return patient AI messages
+        if (selectedUser === AI_USERS[AIUserType.PATIENT]) {
+            console.log("Returning patient AI messages:", patientAIMessages);
+            return patientAIMessages;
+        }
+
+        // If general AI is selected, return general AI messages
+        if (selectedUser === AI_USERS[AIUserType.GENERAL]) {
+            return generalAIMessages;
+        }
+
+        // Otherwise, filter from regular messages
+        const filtered = messages
+            .filter((msg) => {
+                if (!selectedUser || selectedUser === "all")
+                    return (
+                        msg.to === "all" ||
+                        msg.from === username ||
+                        msg.to === username
+                    );
                 return (
-                    msg.to === "all" ||
-                    msg.from === username ||
-                    msg.to === username
+                    (msg.from === username && msg.to === selectedUser) ||
+                    (msg.from === selectedUser && msg.to === username)
                 );
-            return (
-                (msg.from === username && msg.to === selectedUser) ||
-                (msg.from === selectedUser && msg.to === username)
-            );
-        })
-        .sort((a, b) => a.timestamp - b.timestamp);
+            })
+            .sort((a, b) => a.timestamp - b.timestamp);
+
+        console.log("Filtered messages:", filtered);
+        return filtered;
+    })();
+
+    // Mensajes entrantes
+    const handleMessage = (data: MessageEvent) => {
+        console.log("data", data);
+
+        const now = Date.now();
+        const msg: Message = {
+            from: data.from,
+            to: data.to || "all",
+            text: data.message,
+            time: new Date(now).toLocaleTimeString([], {
+                hour: "2-digit",
+                minute: "2-digit",
+            }),
+            timestamp: now,
+        };
+        setMessages((prev) =>
+            [...prev, msg].sort((a, b) => a.timestamp - b.timestamp)
+        );
+    };
 
     // Enviar mensaje
     const sendMessage = () => {
@@ -164,6 +224,16 @@ export function useChat({ token }: UseChatProps) {
             timestamp: now,
         };
 
+        if (selectedUser === AI_USERS[AIUserType.GENERAL]) {
+            handleSendToGeneralAI(msg);
+        } else if (selectedUser === AI_USERS[AIUserType.PATIENT]) {
+            handleSendToPatientAI(msg);
+        } else {
+            handleSendToUser(msg);
+        }
+    };
+
+    const handleSendToUser = (msg: Message) => {
         socketRef.current?.emit("message:send", {
             message: msg.text,
             toUser: selectedUser || null,
@@ -174,6 +244,23 @@ export function useChat({ token }: UseChatProps) {
         });
         isTypingRef.current = false;
     };
+
+    const handleSendToGeneralAI = async (msg: Message) => {
+        setInputMessage("");
+        const aiResponse = await sendGeneralQuestion(msg.text);
+    };
+
+    const handleSendToPatientAI = async (msg: Message) => {
+        setInputMessage("");
+
+        // Send question and wait for response
+        const aiResponse = await sendPatientQuestion(msg.text);
+
+        // Note: The patient AI hook will automatically refetch history after sending,
+        // which will include both the question and the answer
+    };
+
+
 
     // Detectar escribiendo
     const handleInputChange = (value: string) => {
@@ -196,6 +283,11 @@ export function useChat({ token }: UseChatProps) {
         }, 1500);
     };
 
+    // Determine if AI is thinking
+    const isAIThinking =
+        (selectedUser === AI_USERS[AIUserType.GENERAL] && isGeneralAIThinking) ||
+        (selectedUser === AI_USERS[AIUserType.PATIENT] && isPatientAIThinking);
+
     return {
         username,
         users,
@@ -206,5 +298,7 @@ export function useChat({ token }: UseChatProps) {
         setInputMessage: handleInputChange,
         sendMessage,
         typingMessage,
+        isAIThinking,
+        isLoadingHistory: (selectedUser === AI_USERS[AIUserType.PATIENT] && isPatientAILoading) || (selectedUser === AI_USERS[AIUserType.GENERAL] && isGeneralAILoading),
     };
 }

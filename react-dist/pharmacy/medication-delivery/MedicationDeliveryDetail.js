@@ -209,7 +209,7 @@ export const MedicationDeliveryDetail = ({
   }, []);
   useEffect(() => {
     if (paymentMethods.length > 0) {
-      const paymentMethodsMapped = paymentMethods.filter(paymentMethod => paymentMethod.category === "transactional" && paymentMethod.payment_type === "sale");
+      const paymentMethodsMapped = paymentMethods.filter(paymentMethod => paymentMethod.category === "transactional" && (paymentMethod.payment_type === "sale" || paymentMethod.payment_type === "both"));
       setFinalPaymentMethods(paymentMethodsMapped);
     }
   }, [paymentMethods]);

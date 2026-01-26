@@ -26,5 +26,7 @@ export default function ChatMain() {
     className: "mb-8 border border-border rounded-lg p-4 shadow-sm"
   }, /*#__PURE__*/React.createElement(ChatApp, {
     token: token
-  }))), /*#__PURE__*/React.createElement(ChatBubble, null));
+  }))), /*#__PURE__*/React.createElement(ChatBubble, {
+    token: token
+  }));
 }

@@ -4,7 +4,7 @@ import { useFieldListOptionsApi } from "./useFieldListOptionsApi";
 import { GenericListItemI } from "../interfaces";
 
 export const useFieldListOptions = (source: string, sourceType: string) => {
-    const [options, setOptions] = useState<GenericListItemI[]>([]);
+    const [options, setOptions] = useState<any[]>([]);
 
     const { loadOptions: loadOptionsStatic } = useFieldListOptionsStatic(source);
     const { loadOptions: loadOptionsApi } = useFieldListOptionsApi(source);

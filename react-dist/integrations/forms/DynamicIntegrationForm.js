@@ -26,7 +26,10 @@ export const DynamicIntegrationForm = props => {
     source: field.source,
     sourceType: field.sourceType,
     multiple: field.multiple,
-    onChange: value => setValue(field.field, value),
+    onChange: value => {
+      console.log("value", value);
+      setValue(field.field, value);
+    },
     onFileChange: value => appendFile(value),
     placeholder: field.placeholder,
     description: field.description

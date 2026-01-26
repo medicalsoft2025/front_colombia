@@ -89,4 +89,8 @@ export class InvoiceService extends BaseApiService {
     async createGlossToInvoiceByEntity(data) {
         return await this.httpClient.post(`api/v1/admin/notes/credit/by-entity `, data);
     }
+
+    async taxReportFormats(data) {
+        return await this.httpClient.post(`api/v1/admin/invoices/report/tax-report-format `, data);
+    }
 }

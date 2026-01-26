@@ -348,7 +348,14 @@ $_SESSION["ID"] = 1;
       "@tanstack/query-sync-storage-persister": "https://esm.sh/@tanstack/query-sync-storage-persister?dev",
       "@tanstack/react-query-persist-client": "https://esm.sh/@tanstack/react-query-persist-client?dev",
       "idb-keyval": "https://esm.sh/idb-keyval?dev",
-      "primereact/speeddial": "https://esm.sh/primereact/speeddial?dev"
+      "primereact/speeddial": "https://esm.sh/primereact/speeddial?dev",
+      "codemirror": "https://esm.sh/codemirror?dev",
+      "@codemirror/lang-markdown": "https://esm.sh/@codemirror/lang-markdown?dev",
+      "@codemirror/language": "https://esm.sh/@codemirror/language?dev",
+      "@codemirror/state": "https://esm.sh/@codemirror/state?dev",
+      "@codemirror/view": "https://esm.sh/@codemirror/view?dev",
+      "marked": "https://esm.sh/marked?dev",
+      "primereact/timeline": "https://esm.sh/primereact/timeline?dev"
     }
   }
 </script>

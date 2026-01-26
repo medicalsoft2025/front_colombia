@@ -56,7 +56,7 @@ export const useAdmissionCreate = () => {
         payments: formData.payments.map((payment, index) => {
           return {
             method: payment.method,
-            amount: payment.amount,
+            amount: payment.total,
             authorization_number: payment.authorizationNumber,
             notes: payment.notes,
             payment_method_id: payment.id,

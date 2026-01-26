@@ -16,6 +16,9 @@ import { Button } from "primereact/button";
 import { formatDate } from "../../services/utilidades.js";
 import { useServicesFormat } from "../documents-generation/hooks/reports-medical/commissions/useServicesFormat";
 import { useOrdersFormat } from "../documents-generation/hooks/reports-medical/commissions/useOrdersFormat";
+import { ProgressSpinner } from "primereact/progressspinner";
+import { Accordion, AccordionTab } from "primereact/accordion";
+import { InputText } from "primereact/inputtext";
 
 export const Commissions = () => {
   const today = new Date();
@@ -32,7 +35,9 @@ export const Commissions = () => {
   const [proceduresOptions, setProceduresOptions] = useState([]);
   const [entitiesOptions, setEntitiesOptions] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [tableLoading, setTableLoading] = useState(false);
   const [activeTab, setActiveTab] = useState("tab-commissions");
+  const [globalFilter, setGlobalFilter] = useState("");
   const { company, setCompany, fetchCompany } = useCompany();
   const { generateFormatServices } = useServicesFormat();
   const { generateFormatOrders } = useOrdersFormat();
@@ -58,7 +63,7 @@ export const Commissions = () => {
 
   const handleTabChange = async (tabId: string, filterParams: any) => {
     setActiveTab(tabId);
-    setLoading(true);
+    setTableLoading(true);
 
     try {
       switch (tabId) {
@@ -74,13 +79,14 @@ export const Commissions = () => {
             filterParams
           );
           formatDataToTreeNodes(dataToOrders, "admissions_prescriber_doctor");
+          break;
         default:
           console.warn(`Tab no reconocido: ${tabId}`);
       }
     } catch (error) {
       console.error(`Error cargando datos para ${tabId}:`, error);
     } finally {
-      setLoading(false);
+      setTableLoading(false);
     }
   };
 
@@ -301,24 +307,24 @@ export const Commissions = () => {
       return (
         <div className="d-flex gap-2">
           <Button
-            tooltip="Exportar a Excel"
-            tooltipOptions={{ position: "top" }}
-            className="p-button-success d-flex justify-content-center"
+            className="p-button-rounded p-button-success p-button-sm"
             onClick={(e) => {
               e.stopPropagation();
               handleDescargarExcel(node.data.rawData);
             }}
+            tooltip="Exportar a Excel"
+            tooltipOptions={{ position: "right" }}
           >
             <i className="fa-solid fa-file-excel"></i>
           </Button>
           <Button
-            tooltip="Exportar a PDF"
-            tooltipOptions={{ position: "top" }}
-            className="p-button-secondary d-flex justify-content-center"
+            className="p-button-rounded p-button-secondary p-button-sm"
             onClick={(e) => {
               e.stopPropagation();
               exportToPDF(node.data.rawData, node);
             }}
+            tooltip="Exportar a PDF"
+            tooltipOptions={{ position: "right" }}
           >
             <i className="fa-solid fa-file-pdf"></i>
           </Button>
@@ -400,130 +406,275 @@ export const Commissions = () => {
       <strong>{node.data.profesional}</strong>
     );
 
+  const renderTabContent = () => {
+    if (tableLoading) {
+      return (
+        <div
+          className="flex justify-content-center align-items-center"
+          style={{ height: "200px" }}
+        >
+          <ProgressSpinner />
+        </div>
+      );
+    }
+
+    if (treeNodes.length === 0) {
+      return <p>No hay datos para mostrar</p>;
+    }
+
+    return (
+      <div className="card">
+        <TreeTable
+          value={treeNodes}
+          expandedKeys={expandedKeys}
+          onToggle={(e) => setExpandedKeys(e.value)}
+          scrollable
+          scrollHeight="600px"
+          className="p-datatable-sm p-datatable-striped"
+          showGridlines
+        >
+          <Column
+            field="profesional"
+            header="Profesional"
+            body={profesionalTemplate}
+            expander
+            style={{ minWidth: "200px" }}
+          />
+          <Column
+            field="id"
+            header="Id Factura"
+            body={idTemplate}
+            style={{ minWidth: "120px" }}
+          />
+          <Column
+            field="invoiceCode"
+            header="Código Factura"
+            body={invoiceCodeTemplate}
+            style={{ minWidth: "150px" }}
+          />
+          <Column
+            field="monto"
+            header="Monto"
+            body={amountTemplate}
+            style={{ minWidth: "150px" }}
+          />
+          <Column
+            field="base"
+            header="Base Cálculo"
+            body={baseTemplate}
+            style={{ minWidth: "150px" }}
+          />
+          <Column
+            field="comision"
+            header="Comisión"
+            body={commissionTemplate}
+            style={{ minWidth: "150px" }}
+          />
+          <Column
+            field="retencion"
+            header="Retención"
+            body={retentionTemplate}
+            style={{ minWidth: "150px" }}
+          />
+          <Column
+            field="netAmount"
+            header="Neto a pagar"
+            body={netAmountTemplate}
+            style={{ minWidth: "150px" }}
+          />
+          <Column
+            field="Type"
+            header="Tipo"
+            body={typeTemplate}
+            style={{ minWidth: "120px" }}
+          />
+          <Column
+            field="exportar"
+            header="Exportar"
+            body={exportButtonTemplate}
+            style={{ minWidth: "120px" }}
+          />
+        </TreeTable>
+        <div className="row align-items-center justify-content-between pe-0 fs-9 mt-3">
+          <div className="col-auto d-flex">
+            <p className="mb-0 d-none d-sm-block me-3 fw-semibold text-body">
+              Mostrando {treeNodes.length} profesionales
+            </p>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
+  if (loading) {
+    return (
+      <div
+        className="flex justify-content-center align-items-center"
+        style={{ height: "50vh" }}
+      >
+        <ProgressSpinner />
+      </div>
+    );
+  }
+
   return (
     <main className="main" id="top">
-      <div className="content">
-        <div className="pb-9">
-          <h2 className="mb-4">Comisiones por Profesional</h2>
+      {loading ? (
+        <div
+          className="flex justify-content-center align-items-center"
+          style={{
+            height: "50vh",
+            marginLeft: "900px",
+            marginTop: "300px",
+          }}
+        >
+          <ProgressSpinner />
+        </div>
+      ) : (
+        <>
           <div className="row g-3 justify-content-between align-items-start mb-4">
             <div className="col-12">
-              <ul className="nav nav-underline fs-9" id="myTab" role="tablist">
-                <li className="nav-item">
-                  <a
-                    className="nav-link active"
-                    id="range-dates-tab"
-                    data-bs-toggle="tab"
-                    href="#tab-range-dates"
-                    role="tab"
-                    aria-controls="tab-range-dates"
-                    aria-selected="true"
-                  >
-                    Filtros
-                  </a>
-                </li>
-              </ul>
-              <div className="tab-content mt-3" id="myTabContent">
-                <div
-                  className="tab-pane fade show active"
-                  id="tab-range-dates"
-                  role="tabpanel"
-                  aria-labelledby="range-dates-tab"
-                >
-                  <div className="d-flex">
-                    <div style={{ width: "100%" }}>
-                      <div className="row">
-                        <div className="col-12 mb-3">
-                          <div className="card border border-light">
-                            <div className="card-body">
-                              <div className="row">
-                                <div className="col-12 col-md-6 mb-3">
-                                  <label
-                                    className="form-label"
-                                    htmlFor="dateRange"
-                                  >
-                                    Fecha inicio - fin Procedimiento
-                                  </label>
-                                  <Calendar
-                                    id="dateRange"
-                                    value={dateRange}
-                                    onChange={(e: any) => setDateRange(e.value)}
-                                    selectionMode="range"
-                                    readOnlyInput
-                                    dateFormat="dd/mm/yy"
-                                    placeholder="Seleccione un rango de fechas"
-                                    className="w-100"
-                                  />
-                                </div>
-                                <div className="col-12 col-md-6 mb-3">
-                                  <label className="form-label">
-                                    Profesional
-                                  </label>
-                                  <MultiSelect
-                                    value={selectedEspecialistas}
-                                    options={especialistasOptions}
-                                    onChange={(e) =>
-                                      setSelectedEspecialistas(e.value)
-                                    }
-                                    optionLabel="label"
-                                    placeholder="Seleccione profesionales"
-                                    className="w-100"
-                                    filter
-                                    display="chip"
-                                  />
-                                </div>
-                                <div className="col-12 col-md-6 mb-3">
-                                  <label className="form-label">
-                                    Servicios
-                                  </label>
-                                  <MultiSelect
-                                    value={selectedProcedures}
-                                    options={proceduresOptions}
-                                    onChange={(e) =>
-                                      setSelectedProcedures(e.value)
-                                    }
-                                    optionLabel="label"
-                                    placeholder="Seleccione procedimientos"
-                                    className="w-100"
-                                    display="chip"
-                                  />
-                                </div>
-                                <div className="col-12 col-md-6 mb-3">
-                                  <label className="form-label">
-                                    Entidades
-                                  </label>
-                                  <MultiSelect
-                                    value={selectedEntities}
-                                    options={entitiesOptions}
-                                    onChange={(e) =>
-                                      setSelectedEntities(e.value)
-                                    }
-                                    optionLabel="label"
-                                    placeholder="Seleccione entidades"
-                                    className="w-100"
-                                    display="chip"
-                                  />
-                                </div>
-                              </div>
-                              <div className="d-flex justify-content-end m-2">
-                                <button
-                                  type="button"
-                                  className="btn btn-primary"
-                                  onClick={handleFilterClick}
-                                  disabled={loading}
-                                >
-                                  {loading ? (
-                                    <>
-                                      <i className="pi pi-spinner pi-spin me-2"></i>
-                                      Procesando...
-                                    </>
-                                  ) : (
-                                    "Filtrar"
-                                  )}
-                                </button>
-                              </div>
+              <div
+                className="card mb-3 text-body-emphasis rounded-3 p-3 w-100 w-md-100 w-lg-100 mx-auto"
+                style={{ minHeight: "400px" }}
+              >
+                <div className="card-body h-100 w-100 d-flex flex-column" style={{ marginTop: "-40px" }}>
+                  <div className="tabs-professional-container mt-4">
+                    <Accordion>
+                      <AccordionTab header="Filtros">
+                        <div className="row">
+                          <div className="col-12 col-md-6 mb-3">
+                            <label
+                              className="form-label"
+                              htmlFor="dateRange"
+                            >
+                              Fecha inicio - fin Procedimiento
+                            </label>
+                            <Calendar
+                              value={dateRange}
+                              onChange={(e: any) => setDateRange(e.value)}
+                              selectionMode="range"
+                              readOnlyInput
+                              dateFormat="dd/mm/yy"
+                              placeholder="Seleccione un rango de fechas"
+                              className="w-100"
+                              showIcon
+                            />
+                          </div>
+                          <div className="col-12 col-md-6 mb-3">
+                            <label className="form-label">
+                              Profesional
+                            </label>
+                            <MultiSelect
+                              value={selectedEspecialistas}
+                              options={especialistasOptions}
+                              onChange={(e) =>
+                                setSelectedEspecialistas(e.value)
+                              }
+                              optionLabel="label"
+                              placeholder="Seleccione profesionales"
+                              className="w-100"
+                              filter
+                              display="chip"
+                              maxSelectedLabels={3}
+                            />
+                          </div>
+                          <div className="col-12 col-md-6 mb-3">
+                            <label className="form-label">
+                              Servicios
+                            </label>
+                            <MultiSelect
+                              value={selectedProcedures}
+                              options={proceduresOptions}
+                              onChange={(e) =>
+                                setSelectedProcedures(e.value)
+                              }
+                              optionLabel="label"
+                              placeholder="Seleccione procedimientos"
+                              className="w-100"
+                              display="chip"
+                              maxSelectedLabels={3}
+                            />
+                          </div>
+                          <div className="col-12 col-md-6 mb-3">
+                            <label className="form-label">
+                              Entidades
+                            </label>
+                            <MultiSelect
+                              value={selectedEntities}
+                              options={entitiesOptions}
+                              onChange={(e) =>
+                                setSelectedEntities(e.value)
+                              }
+                              optionLabel="label"
+                              placeholder="Seleccione entidades"
+                              className="w-100"
+                              display="chip"
+                              maxSelectedLabels={3}
+                            />
+                          </div>
+                          <div className="col-12">
+                            <div className="d-flex justify-content-end m-2">
+                              <Button
+                                label="Filtrar"
+                                icon="pi pi-filter"
+                                onClick={handleFilterClick}
+                                loading={tableLoading}
+                                className="p-button-primary"
+                              />
                             </div>
                           </div>
                         </div>
+                      </AccordionTab>
+                    </Accordion>
+                    <div className="tabs-header">
+                      <button
+                        className={`tab-item ${activeTab === "tab-commissions" ? "active" : ""}`}
+                        onClick={() => handleTabChange("tab-commissions", obtenerFiltros())}
+                      >
+                        <i className="fas fa-stethoscope"></i>
+                        Servicios
+                      </button>
+                      <button
+                        className={`tab-item ${activeTab === "tab-orders" ? "active" : ""}`}
+                        onClick={() => handleTabChange("tab-orders", obtenerFiltros())}
+                      >
+                        <i className="fas fa-file-prescription"></i>
+                        Órdenes
+                      </button>
+                    </div>
+
+                    <div className="tabs-content">
+                      {/* Panel de Servicios */}
+                      <div className={`tab-panel ${activeTab === "tab-commissions" ? "active" : ""}`}>
+                        <div className="d-flex justify-content-between align-items-center mb-4">
+                          <span className="text-xl font-semibold">Comisiones por Servicios</span>
+                          <span className="p-input-icon-left">
+                            <i className="pi pi-search" />
+                            <InputText
+                              type="search"
+                              onInput={(e) => setGlobalFilter(e.currentTarget.value)}
+                              placeholder="Buscar..."
+                            />
+                          </span>
+                        </div>
+                        {renderTabContent()}
+                      </div>
+
+                      {/* Panel de Órdenes */}
+                      <div className={`tab-panel ${activeTab === "tab-orders" ? "active" : ""}`}>
+                        <div className="d-flex justify-content-between align-items-center mb-4">
+                          <span className="text-xl font-semibold">Comisiones por Órdenes</span>
+                          <span className="p-input-icon-left">
+                            <i className="pi pi-search" />
+                            <InputText
+                              type="search"
+                              onInput={(e) => setGlobalFilter(e.currentTarget.value)}
+                              placeholder="Buscar..."
+                            />
+                          </span>
+                        </div>
+                        {renderTabContent()}
                       </div>
                     </div>
                   </div>
@@ -531,237 +682,17 @@ export const Commissions = () => {
               </div>
             </div>
           </div>
-          <div className="row gy-5">
-            <div className="col-12 col-xxl-12">
-              <ul className="nav nav-underline fs-9" id="myTab" role="tablist">
-                <li className="nav-item">
-                  <a
-                    className={`nav-link ${
-                      activeTab === "tab-commissions" ? "active" : ""
-                    }`}
-                    id="commissions-tab"
-                    data-bs-toggle="tab"
-                    href="#tab-commissions"
-                    role="tab"
-                    aria-controls="tab-commissions"
-                    aria-selected={activeTab === "tab-commissions"}
-                    onClick={() =>
-                      handleTabChange("tab-commissions", obtenerFiltros())
-                    }
-                  >
-                    Servicios
-                  </a>
-                </li>
-                <li className="nav-item">
-                  <a
-                    className={`nav-link ${
-                      activeTab === "tab-orders" ? "active" : ""
-                    }`}
-                    id="orders-tab"
-                    data-bs-toggle="tab"
-                    href="#tab-orders"
-                    role="tab"
-                    aria-controls="tab-orders"
-                    aria-selected={activeTab === "tab-orders"}
-                    onClick={() =>
-                      handleTabChange("tab-orders", obtenerFiltros())
-                    }
-                  >
-                    Órdenes
-                  </a>
-                </li>
-              </ul>
-
-              <div className="col-12 tab-content mt-3" id="myTabContent">
-                <div
-                  className={`tab-pane fade ${
-                    activeTab === "tab-commissions" ? "show active" : ""
-                  }`}
-                  id="tab-commissions"
-                  role="tabpanel"
-                  aria-labelledby="commissions-tab"
-                >
-                  <div className="border-top border-translucent">
-                    {loading ? (
-                      <div className="text-center p-5">
-                        <i
-                          className="pi pi-spinner pi-spin"
-                          style={{ fontSize: "2rem" }}
-                        ></i>
-                        <p>Cargando datos...</p>
-                      </div>
-                    ) : (
-                      <div id="purchasersSellersTable">
-                        <div className="card">
-                          <TreeTable
-                            value={treeNodes}
-                            expandedKeys={expandedKeys}
-                            onToggle={(e) => setExpandedKeys(e.value)}
-                            scrollable
-                            scrollHeight="600px"
-                          >
-                            <Column
-                              field="profesional"
-                              header="Profesional"
-                              body={profesionalTemplate}
-                              expander
-                            />
-                            <Column
-                              field="id"
-                              header="Id Factura"
-                              body={idTemplate}
-                            />
-                            <Column
-                              field="invoiceCode"
-                              header="Codigo Factura"
-                              body={invoiceCodeTemplate}
-                            />
-                            <Column
-                              field="monto"
-                              header="Monto"
-                              body={amountTemplate}
-                            />
-                            <Column
-                              field="base"
-                              header="Base Cálculo"
-                              body={baseTemplate}
-                            />
-                            <Column
-                              field="comision"
-                              header="Comisión"
-                              body={commissionTemplate}
-                            />
-                            <Column
-                              field="retencion"
-                              header="Retención"
-                              body={retentionTemplate}
-                            />
-                            <Column
-                              field="netAmount"
-                              header="Neto a pagar"
-                              body={netAmountTemplate}
-                            />
-                            <Column
-                              field="Type"
-                              header="Tipo"
-                              body={typeTemplate}
-                            />
-                            <Column
-                              field="exportar"
-                              header="Exportar"
-                              body={exportButtonTemplate}
-                              style={{ width: "120px" }}
-                            />
-                          </TreeTable>
-                        </div>
-                        <div className="row align-items-center justify-content-between pe-0 fs-9 mt-3">
-                          <div className="col-auto d-flex">
-                            <p className="mb-0 d-none d-sm-block me-3 fw-semibold text-body">
-                              Mostrando {treeNodes.length} profesionales
-                            </p>
-                          </div>
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                </div>
-                <div
-                  className={`tab-pane fade ${
-                    activeTab === "tab-orders" ? "show active" : ""
-                  }`}
-                  id="tab-orders"
-                  role="tabpanel"
-                  aria-labelledby="orders-tab"
-                >
-                  <div className="border-top border-translucent">
-                    {loading ? (
-                      <div className="text-center p-5">
-                        <i
-                          className="pi pi-spinner pi-spin"
-                          style={{ fontSize: "2rem" }}
-                        ></i>
-                        <p>Cargando datos...</p>
-                      </div>
-                    ) : (
-                      <div id="purchasersSellersTable">
-                        <div className="card">
-                          <TreeTable
-                            value={treeNodes}
-                            expandedKeys={expandedKeys}
-                            onToggle={(e) => setExpandedKeys(e.value)}
-                            scrollable
-                            scrollHeight="600px"
-                          >
-                            <Column
-                              field="profesional"
-                              header="Profesional"
-                              body={profesionalTemplate}
-                              expander
-                            />
-                            <Column
-                              field="id"
-                              header="Id Factura"
-                              body={idTemplate}
-                            />
-                            <Column
-                              field="invoiceCode"
-                              header="Codigo Factura"
-                              body={invoiceCodeTemplate}
-                            />
-                            <Column
-                              field="monto"
-                              header="Monto"
-                              body={amountTemplate}
-                            />
-                            <Column
-                              field="base"
-                              header="Base Cálculo"
-                              body={baseTemplate}
-                            />
-                            <Column
-                              field="comision"
-                              header="Comisión"
-                              body={commissionTemplate}
-                            />
-                            <Column
-                              field="retencion"
-                              header="Retención"
-                              body={retentionTemplate}
-                            />
-                            <Column
-                              field="netAmount"
-                              header="Neto a pagar"
-                              body={netAmountTemplate}
-                            />
-                            <Column
-                              field="Type"
-                              header="Tipo"
-                              body={typeTemplate}
-                            />
-                            <Column
-                              field="exportar"
-                              header="Exportar"
-                              body={exportButtonTemplate}
-                              style={{ width: "120px" }}
-                            />
-                          </TreeTable>
-                        </div>
-                        <div className="row align-items-center justify-content-between pe-0 fs-9 mt-3">
-                          <div className="col-auto d-flex">
-                            <p className="mb-0 d-none d-sm-block me-3 fw-semibold text-body">
-                              Mostrando {treeNodes.length} profesionales
-                            </p>
-                          </div>
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
+        </>
+      )}
+      <style>
+        {`   
+      th
+      {
+        background-color: #007bff !important;
+        color: white !important;
+        }
+   `}
+      </style>
     </main>
   );
 };

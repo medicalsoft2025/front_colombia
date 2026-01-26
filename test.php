@@ -1,2 +1,2 @@
 <?php
-phpinfo();
+echo "hola Estoy en la raiz";

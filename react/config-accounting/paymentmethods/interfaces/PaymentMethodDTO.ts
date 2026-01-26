@@ -16,6 +16,7 @@ export interface CreatePaymentMethodDTO {
     description: string;
     accounting_account_id: number | null;
     category: string;
+    sub_category: string;
     is_cash: boolean;
 }
 

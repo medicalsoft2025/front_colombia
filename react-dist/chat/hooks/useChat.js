@@ -1,16 +1,47 @@
 // hooks/useChat.ts
 import { useState, useEffect, useRef } from "react";
-import { getJWTPayload } from "../../../services/utilidades.js";
+import { useLoggedUser } from "../../users/hooks/useLoggedUser.js";
+import { useChatContext } from "./useChatContext.js";
+import { usePatientAIChat } from "./usePatientAIChat.js";
+import { useGeneralAIChat } from "./useGeneralAIChat.js";
+import { AI_USERS, AIUserType } from "../types.js";
 export function useChat({
   token
 }) {
-  const AIUser = "Medicalsoft AI";
   const [messages, setMessages] = useState([]);
   const [users, setUsers] = useState([]);
-  const [selectedUser, setSelectedUser] = useState(AIUser);
+  const [selectedUser, setSelectedUser] = useState(AI_USERS[AIUserType.GENERAL]);
   const [inputMessage, setInputMessage] = useState("");
   const [typingMessage, setTypingMessage] = useState("");
   const [username, setUsername] = useState("");
+  const {
+    loggedUser
+  } = useLoggedUser();
+  const {
+    isPatientContext,
+    patientId
+  } = useChatContext();
+
+  // Patient AI chat hook
+  const {
+    messages: patientAIMessages,
+    isLoadingHistory: isPatientAILoading,
+    isThinking: isPatientAIThinking,
+    sendQuestion: sendPatientQuestion
+  } = usePatientAIChat({
+    patientId,
+    username
+  });
+
+  // General AI chat hook
+  const {
+    messages: generalAIMessages,
+    isLoadingHistory: isGeneralAILoading,
+    isThinking: isGeneralAIThinking,
+    sendQuestion: sendGeneralQuestion
+  } = useGeneralAIChat({
+    username
+  });
   const socketRef = useRef(null);
   const typingTimeoutRef = useRef(null);
   const isTypingRef = useRef(false);
@@ -59,9 +90,10 @@ export function useChat({
     });
     socket.on("message:receive", handleMessage);
 
-    // Lista de usuarios
+    // Lista de usuarios - include AI users based on context
     socket.on("user:list", onlineUsers => {
-      setUsers([AIUser, ...onlineUsers.filter(u => u !== username)]);
+      const aiUsers = isPatientContext ? [AI_USERS[AIUserType.GENERAL], AI_USERS[AIUserType.PATIENT]] : [AI_USERS[AIUserType.GENERAL]];
+      setUsers([...aiUsers, ...onlineUsers.filter(u => u !== username)]);
     });
 
     // Indicador de escribiendo
@@ -81,13 +113,50 @@ export function useChat({
       socket.off("message:receive", handleMessage);
       socket.disconnect();
     };
-  }, [username, token]);
+  }, [username, token, isPatientContext]);
+
+  // Update users list when context changes
+  useEffect(() => {
+    if (!socketRef.current) return;
+
+    // Manually update AI users when context changes
+    const aiUsers = isPatientContext ? [AI_USERS[AIUserType.GENERAL], AI_USERS[AIUserType.PATIENT]] : [AI_USERS[AIUserType.GENERAL]];
+    setUsers(prevUsers => {
+      const realUsers = prevUsers.filter(u => u !== AI_USERS[AIUserType.GENERAL] && u !== AI_USERS[AIUserType.PATIENT]);
+      return [...aiUsers, ...realUsers];
+    });
+
+    // If selected user is patient AI and we're no longer in patient context, switch to general AI
+    if (!isPatientContext && selectedUser === AI_USERS[AIUserType.PATIENT]) {
+      setSelectedUser(AI_USERS[AIUserType.GENERAL]);
+    }
+  }, [isPatientContext, selectedUser]);
 
   // Filtrar mensajes según chat seleccionado
-  const filteredMessages = messages.filter(msg => {
-    if (!selectedUser || selectedUser === "all") return msg.to === "all" || msg.from === username || msg.to === username;
-    return msg.from === username && msg.to === selectedUser || msg.from === selectedUser && msg.to === username;
-  }).sort((a, b) => a.timestamp - b.timestamp);
+  const filteredMessages = (() => {
+    console.log("Selected User:", selectedUser);
+    console.log("AI_USERS[AIUserType.PATIENT]:", AI_USERS[AIUserType.PATIENT]);
+    console.log("Patient AI Messages:", patientAIMessages);
+
+    // If patient AI is selected, return patient AI messages
+    if (selectedUser === AI_USERS[AIUserType.PATIENT]) {
+      console.log("Returning patient AI messages:", patientAIMessages);
+      return patientAIMessages;
+    }
+
+    // If general AI is selected, return general AI messages
+    if (selectedUser === AI_USERS[AIUserType.GENERAL]) {
+      return generalAIMessages;
+    }
+
+    // Otherwise, filter from regular messages
+    const filtered = messages.filter(msg => {
+      if (!selectedUser || selectedUser === "all") return msg.to === "all" || msg.from === username || msg.to === username;
+      return msg.from === username && msg.to === selectedUser || msg.from === selectedUser && msg.to === username;
+    }).sort((a, b) => a.timestamp - b.timestamp);
+    console.log("Filtered messages:", filtered);
+    return filtered;
+  })();
 
   // Mensajes entrantes
   const handleMessage = data => {
@@ -120,8 +189,10 @@ export function useChat({
       }),
       timestamp: now
     };
-    if (selectedUser === AIUser) {
-      handleSendToAI(msg);
+    if (selectedUser === AI_USERS[AIUserType.GENERAL]) {
+      handleSendToGeneralAI(msg);
+    } else if (selectedUser === AI_USERS[AIUserType.PATIENT]) {
+      handleSendToPatientAI(msg);
     } else {
       handleSendToUser(msg);
     }
@@ -137,68 +208,18 @@ export function useChat({
     });
     isTypingRef.current = false;
   };
-  const handleSendToAI = async msg => {
-    handleMessage({
-      from: msg.from,
-      to: msg.to,
-      message: msg.text
-    });
+  const handleSendToGeneralAI = async msg => {
     setInputMessage("");
-    const aiResponse = await getAIResponse(msg);
-    handleMessage({
-      from: AIUser,
-      to: username,
-      message: aiResponse
-    });
+    const aiResponse = await sendGeneralQuestion(msg.text);
   };
-  const getAIWebhookByURL = () => {
-    const jwtPayload = getJWTPayload();
-    const location = window.location.href.split("/").reverse()[0];
-    const sessionId = `${jwtPayload.tenant_id}-user-${jwtPayload.sub}-${location}`;
-    const token = sessionStorage.getItem("auth_token");
-    const defaultBody = {
-      sessionId
-    };
-    const defaultHeaders = {
-      Authorization: `Bearer ${token}`,
-      "X-Tenant-ID": jwtPayload.tenant_id,
-      "X-OpenAI-API-Key": "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"
-    };
-    if (location.startsWith("verPaciente")) {
-      return {
-        url: "https://unlucky-zebra-40.hooks.n8n.cloud/webhook-test/clinical-summary",
-        body: {
-          ...defaultBody,
-          patientId: new URLSearchParams(window.location.search).get("id")
-        },
-        headers: defaultHeaders
-      };
-    }
-    return {
-      url: "https://hooks.medicalsoft.ai/webhook/test",
-      body: defaultBody,
-      headers: defaultHeaders
-    };
-  };
-  const getAIResponse = async msg => {
-    const {
-      url,
-      body,
-      headers
-    } = getAIWebhookByURL();
-    const response = await fetch(url, {
-      method: "POST",
-      headers: {
-        ...headers,
-        "Content-Type": "application/json" // Inform the server that we are sending JSON data
-      },
-      body: JSON.stringify({
-        ...body,
-        message: msg.text
-      })
-    });
-    const data = await response.text();
-    return data;
+  const handleSendToPatientAI = async msg => {
+    setInputMessage("");
+
+    // Send question and wait for response
+    const aiResponse = await sendPatientQuestion(msg.text);
+
+    // Note: The patient AI hook will automatically refetch history after sending,
+    // which will include both the question and the answer
   };
 
   // Detectar escribiendo
@@ -219,6 +240,9 @@ export function useChat({
       });
     }, 1500);
   };
+
+  // Determine if AI is thinking
+  const isAIThinking = selectedUser === AI_USERS[AIUserType.GENERAL] && isGeneralAIThinking || selectedUser === AI_USERS[AIUserType.PATIENT] && isPatientAIThinking;
   return {
     username,
     users,
@@ -228,6 +252,8 @@ export function useChat({
     inputMessage,
     setInputMessage: handleInputChange,
     sendMessage,
-    typingMessage
+    typingMessage,
+    isAIThinking,
+    isLoadingHistory: selectedUser === AI_USERS[AIUserType.PATIENT] && isPatientAILoading || selectedUser === AI_USERS[AIUserType.GENERAL] && isGeneralAILoading
   };
 }

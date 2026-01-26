@@ -302,7 +302,7 @@ export const MedicationDeliveryDetail = ({
             const paymentMethodsMapped = paymentMethods.filter(
                 (paymentMethod: any) =>
                     paymentMethod.category === "transactional" &&
-                    paymentMethod.payment_type === "sale"
+                    (paymentMethod.payment_type === "sale" || paymentMethod.payment_type === "both")
             );
             setFinalPaymentMethods(paymentMethodsMapped);
         }

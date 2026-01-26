@@ -40,10 +40,10 @@ export const useAdmissionCreate = () => {
                         : "",
                     authorization_date:
                         formData.billing.facturacionEntidad &&
-                        formData.billing.authorizationDate
+                            formData.billing.authorizationDate
                             ? formData.billing.authorizationDate
-                                  .toISOString()
-                                  .split("T")[0]
+                                .toISOString()
+                                .split("T")[0]
                             : "",
                     appointment_id: appointmentData?.id,
                     koneksi_claim_id: null,
@@ -62,7 +62,7 @@ export const useAdmissionCreate = () => {
                         (sum, product) =>
                             sum +
                             (product.price * product.quantity * product.tax) /
-                                100,
+                            100,
                         0
                     ),
                     total_amount: calculateTotal(
@@ -98,7 +98,7 @@ export const useAdmissionCreate = () => {
                 payments: formData.payments.map((payment, index) => {
                     return {
                         method: payment.method,
-                        amount: payment.amount,
+                        amount: payment.total,
                         authorization_number: payment.authorizationNumber,
                         notes: payment.notes,
                         payment_method_id: payment.id,

@@ -20,6 +20,9 @@ const NavbarHeader = () => {
         label: item.label,
         url: item.url
       };
+      if (item.dynamic_form_id) {
+        processedItem.url = `appFormsCrud?dynamic_form_id=${item.dynamic_form_id}`;
+      }
       if (item.icon) {
         processedItem.icon = () => iconTemplate(item.icon);
       }

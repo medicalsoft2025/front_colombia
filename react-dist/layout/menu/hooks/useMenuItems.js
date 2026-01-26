@@ -1,5 +1,5 @@
-import { useEffect, useState } from "react";
 import { menuService } from "../../../../services/api/index.js";
+import { useQuery } from "@tanstack/react-query";
 const transformBackendMenu = backendItems => {
   return backendItems.map(item => ({
     label: item.name,
@@ -26,27 +26,21 @@ const removeEmptySections = menu => {
   }).filter(Boolean);
 };
 export const useMenuItems = () => {
-  const [menuItems, setMenuItems] = useState([]);
-  const [loading, setLoading] = useState(true);
-  useEffect(() => {
-    const loadMenu = async () => {
-      setLoading(true);
-      try {
-        const allMenus = await menuService.getAllMenu();
-        // const transformedMenus = transformBackendMenu(allMenus.menus);
-        // const cleanedMenus = removeEmptySections(transformedMenus);
-        setMenuItems(allMenus.menus);
-      } catch (error) {
-        console.error("error fetching menu", error);
-        // setMenuItems(allMenus);
-      } finally {
-        setLoading(false);
-      }
-    };
-    loadMenu();
-  }, []);
+  const {
+    data,
+    isLoading,
+    isFetching,
+    refetch
+  } = useQuery({
+    queryKey: ["logged-user-menus"],
+    queryFn: () => menuService.getAllMenuForRQ(),
+    placeholderData: {
+      menus: []
+    }
+  });
   return {
-    menuItems,
-    loading
+    menuItems: data?.menus.menus || [],
+    loading: isLoading || isFetching,
+    refetch
   };
 };

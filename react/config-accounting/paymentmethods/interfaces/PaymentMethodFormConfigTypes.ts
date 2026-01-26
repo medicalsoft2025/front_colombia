@@ -2,6 +2,7 @@ export interface PaymentMethodFormInputs {
   name: string;
   payment_type: string;
   category: string;
+  sub_category: string;
   accounting_account_id: number | null;
   additionalDetails: string;
   is_cash: boolean;

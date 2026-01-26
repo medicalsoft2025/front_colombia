@@ -184,117 +184,16 @@ $resumenPaciente = [
   renderApp(PatientProfileCard, "patientProfile");
 </script>
 
-<script>
-  const resumenPaciente = {
-    resumenGeneral: "Paciente masculino de mediana edad, con cuadro clínico estable, bajo tratamiento por enfermedad cardiovascular crónica. Evolución favorable en los últimos controles, adherente al tratamiento y con seguimiento activo en consultas ambulatorias.",
+<script type="module">
+  import {
+    PatientSummary
+  } from './react-dist/patients/PatientSummary.js';
+  import { renderApp } from "./services/react/app-renderer.js";
 
-    diagnosticos: [
-      "Angina de pecho estable",
-      "Hipertensión arterial esencial",
-      "Dislipidemia mixta"
-    ],
-
-    antecedentes: [
-      "Hipertensión diagnosticada hace 8 años",
-      "Exfumador (último consumo hace 2 años)",
-      "Antecedentes familiares de cardiopatía isquémica",
-      "Colesterol elevado desde hace 5 años"
-    ],
-
-    citasRecientes: [{
-      fecha: "2025-03-20",
-      especialidad: "Cardiología",
-      motivo: "Control de angina y ajuste de tratamiento",
-      observaciones: "Paciente sin dolor torácico, se mantiene con buena tolerancia al esfuerzo"
-    },
-    {
-      fecha: "2025-02-15",
-      especialidad: "Medicina Interna",
-      motivo: "Control general",
-      observaciones: "Se solicitó perfil lipídico y ECG de control"
-    }
-    ],
-
-    tratamientos: [
-      "Control farmacológico de factores de riesgo cardiovascular",
-      "Modificación de estilo de vida: alimentación saludable y ejercicio regular",
-      "Monitoreo periódico con pruebas funcionales"
-    ],
-
-    medicamentos: [{
-      nombre: "Aspirina",
-      dosis: "100 mg",
-      frecuencia: "1 vez al día"
-    },
-    {
-      nombre: "Atorvastatina",
-      dosis: "20 mg",
-      frecuencia: "1 vez al día"
-    },
-    {
-      nombre: "Metoprolol",
-      dosis: "50 mg",
-      frecuencia: "2 veces al día"
-    }
-    ],
-
-    planManejo: "Continuar con tratamiento actual. Se recomienda control cardiológico trimestral, adherencia al tratamiento, realizar dieta baja en grasas saturadas, mantener ejercicio regular y evitar factores de riesgo como el estrés y el consumo de alcohol."
-  };
-
-  function mostrarResumenPacienteTextual(resumenPaciente) {
-    const container = document.getElementById('resumenPacienteContainer');
-
-    container.innerHTML = `
-    <div class="resumen-textual">
-      <div class="mb-4">
-        <h6 class="fw-bold">Resumen general</h6>
-        <p class="mb-0">${resumenPaciente.resumenGeneral}</p>
-      </div>
-      
-      <div class="mb-4">
-        <h6 class="fw-bold">Diagnósticos</h6>
-        <p class="mb-2">El paciente presenta los siguientes diagnósticos registrados:</p>
-        <ul class="ps-3">
-          ${resumenPaciente.diagnosticos.map(d => `<li>${d}</li>`).join('')}
-        </ul>
-      </div>
-      
-      <div class="mb-4">
-        <h6 class="fw-bold">Antecedentes relevantes</h6>
-        <p class="mb-2">En su historial médico se destacan:</p>
-        <ul class="ps-3">
-          ${resumenPaciente.antecedentes.map(a => `<li>${a}</li>`).join('')}
-        </ul>
-      </div>
-      
-      <div class="mb-4">
-        <h6 class="fw-bold">Medicamentos</h6>
-        <p class="mb-2">Al paciente se le han recetado los siguientes medicamentos:</p>
-        <ul class="ps-3">
-          ${resumenPaciente.medicamentos.map(m =>
-      `<li>${m.nombre} (${m.dosis}, ${m.frecuencia})</li>`
-    ).join('')}
-        </ul>
-      </div>
-      
-      <div class="mb-4">
-        <h6 class="fw-bold">Tratamiento actual</h6>
-        <p class="mb-2">El plan de manejo incluye:</p>
-        <ul class="ps-3">
-          ${resumenPaciente.tratamientos.map(t => `<li>${t}</li>`).join('')}
-        </ul>
-      </div>
-      
-      <div>
-        <h6 class="fw-bold">Plan de seguimiento</h6>
-        <p>${resumenPaciente.planManejo}</p>
-      </div>
-    </div>
-  `;
-  }
-
-  // Llamar a la función con los datos del paciente
-  mostrarResumenPacienteTextual(resumenPaciente);
+  renderApp(PatientSummary, "resumenPacienteContainer", {
+    patientId: new URLSearchParams(window.location.search).get('id') || new URLSearchParams(window
+      .location.search).get('patient_id')
+  });
 </script>
 
 <!-- <script type="module">
@@ -344,38 +243,13 @@ $resumenPaciente = [
 
 <script type="module">
   import {
-    patientService
-  } from './services/api/index.js';
-  import UserManager from './services/userManager.js';
+    PatientTimeline
+  } from './react-dist/patients/PatientTimeline.js';
+  import { renderApp } from "./services/react/app-renderer.js";
 
-  document.addEventListener('DOMContentLoaded', async function () {
-    const clinicalRecordCard = document.getElementById('consulta');
-    clinicalRecordCard.style.display = 'none';
-    const patientId = new URLSearchParams(window.location.search).get('id') || new URLSearchParams(window
-      .location.search).get('patient_id');
-    const exampleData = await patientService.evolution(patientId);
-
-    UserManager.onAuthChange((isAuthenticated, user) => {
-      if (user) {
-        clinicalRecordCard.style.display = 'block';
-        clinicalRecordCard.setAttribute('data-url',
-          `historialConsultasEspecialidad?patient_id=${patientId}&especialidad=${user.specialty.name}`
-        );
-      }
-    })
-
-    const container = document.getElementById('patient-evolution-container');
-    const template = document.getElementById('patient-evolution').content;
-
-    exampleData.forEach(item => {
-      const clone = document.importNode(template, true);
-      const date = new Date(item.created_at);
-      clone.querySelector('.timeline-item-date').innerHTML =
-        `${date.toLocaleDateString()}<br>${date.toLocaleTimeString()}`;
-      clone.querySelector('.timeline-item-content h5').textContent = item.title;
-      clone.querySelector('.timeline-item-content p').textContent = item.content;
-      container.appendChild(clone);
-    });
+  renderApp(PatientTimeline, "patient-evolution-container", {
+    patientId: new URLSearchParams(window.location.search).get('id') || new URLSearchParams(window
+      .location.search).get('patient_id')
   });
 </script>
 

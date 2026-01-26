@@ -1,26 +1,18 @@
-import { useState, useEffect } from 'react';
 import { clinicalRecordTypeService } from "../../../services/api/index.js";
-import { ErrorHandler } from "../../../services/errorHandler.js";
+import { useQuery } from '@tanstack/react-query';
 export const useClinicalRecordTypes = () => {
-  const [clinicalRecordTypes, setClinicalRecordTypes] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const fetchClinicalRecordTypes = async () => {
-    try {
-      setLoading(true);
-      const data = await clinicalRecordTypeService.getAll();
-      setClinicalRecordTypes(data);
-    } catch (err) {
-      ErrorHandler.generic(err);
-    } finally {
-      setLoading(false);
-    }
-  };
-  useEffect(() => {
-    fetchClinicalRecordTypes();
-  }, []);
+  const {
+    data,
+    isLoading,
+    isFetching,
+    refetch
+  } = useQuery({
+    queryKey: ['clinical-record-types'],
+    queryFn: () => clinicalRecordTypeService.getAll()
+  });
   return {
-    clinicalRecordTypes,
-    fetchClinicalRecordTypes,
-    loading
+    clinicalRecordTypes: data,
+    refetch,
+    loading: isLoading || isFetching
   };
 };

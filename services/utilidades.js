@@ -349,13 +349,13 @@ export function cleanJsonObject(obj) {
 }
 
 export const debounce = (callback, wait) => {
-  let timeoutId = null;
-  return (...args) => {
-    window.clearTimeout(timeoutId);
-    timeoutId = window.setTimeout(() => {
-      callback(...args);
-    }, wait);
-  };
+    let timeoutId = null;
+    return (...args) => {
+        window.clearTimeout(timeoutId);
+        timeoutId = window.setTimeout(() => {
+            callback(...args);
+        }, wait);
+    };
 }
 
 export function formatWhatsAppMessage(html, replacements) {
@@ -698,7 +698,7 @@ export const formatDateRange = (dateRange) => {
     return dateRange?.map((date) => date?.toISOString().split('T')[0]).filter((date) => date !== null).join(' - ') || '';
 }
 
-export const extractDataFromTree = ({tree, key, childrenKey}) => {
+export const extractDataFromTree = ({ tree, key, childrenKey }) => {
     const data = [];
 
     function traverse(node) {
@@ -749,41 +749,41 @@ export function getValueByPath(obj, path, defaultValue = undefined) {
     if (typeof obj !== 'object' || obj === null) {
         return defaultValue;
     }
-    
+
     if (typeof path !== 'string' || path.trim() === '') {
         return defaultValue;
     }
-    
+
     // Normalizar el path: eliminar espacios y separar
     const normalizedPath = path.trim();
-    
+
     try {
         return normalizedPath.split('.')
             .reduce((current, key) => {
                 // Manejar arrays con notación [index]
                 const arrayMatch = key.match(/^([^\[\]]+)\[(\d+)\]$/);
-                
+
                 if (arrayMatch) {
                     const [_, prop, index] = arrayMatch;
                     const arr = current ? current[prop] : undefined;
-                    
+
                     if (Array.isArray(arr)) {
                         return arr[parseInt(index, 10)];
                     }
                     return undefined;
                 }
-                
+
                 // Manejar acceso directo a array con [index]
                 if (key.match(/^\[(\d+)\]$/)) {
                     const match = key.match(/^\[(\d+)\]$/);
                     const index = parseInt(match[1], 10);
-                    
+
                     if (Array.isArray(current)) {
                         return current[index];
                     }
                     return undefined;
                 }
-                
+
                 // Acceso normal a propiedad
                 return current ? current[key] : undefined;
             }, obj);
@@ -799,38 +799,38 @@ export function getValueByPath(obj, path, defaultValue = undefined) {
  * @returns {Promise<boolean>} - True si se copió exitosamente, false si hubo error
  */
 export async function copyJSONToClipboard(jsonInput, formatted = true) {
-  try {
-    // Parsear la entrada
-    let parsedJSON;
-    
-    if (typeof jsonInput === 'string') {
-      try {
-        parsedJSON = JSON.parse(jsonInput);
-      } catch (e) {
-        // Si no es un JSON válido, copiar el string tal cual
-        return await copyTextToClipboard(jsonInput);
-      }
-    } else if (typeof jsonInput === 'object' && jsonInput !== null) {
-      parsedJSON = jsonInput;
-    } else {
-      throw new Error('Entrada no válida. Debe ser un JSON string o un objeto.');
-    }
+    try {
+        // Parsear la entrada
+        let parsedJSON;
 
-    // Convertir a string formateado o minificado
-    let jsonString;
-    if (formatted) {
-      jsonString = JSON.stringify(parsedJSON, null, 2);
-    } else {
-      jsonString = JSON.stringify(parsedJSON);
-    }
+        if (typeof jsonInput === 'string') {
+            try {
+                parsedJSON = JSON.parse(jsonInput);
+            } catch (e) {
+                // Si no es un JSON válido, copiar el string tal cual
+                return await copyTextToClipboard(jsonInput);
+            }
+        } else if (typeof jsonInput === 'object' && jsonInput !== null) {
+            parsedJSON = jsonInput;
+        } else {
+            throw new Error('Entrada no válida. Debe ser un JSON string o un objeto.');
+        }
 
-    // Usar la API del portapapeles moderna
-    return await copyTextToClipboard(jsonString);
-    
-  } catch (error) {
-    console.error('Error al copiar JSON:', error);
-    return false;
-  }
+        // Convertir a string formateado o minificado
+        let jsonString;
+        if (formatted) {
+            jsonString = JSON.stringify(parsedJSON, null, 2);
+        } else {
+            jsonString = JSON.stringify(parsedJSON);
+        }
+
+        // Usar la API del portapapeles moderna
+        return await copyTextToClipboard(jsonString);
+
+    } catch (error) {
+        console.error('Error al copiar JSON:', error);
+        return false;
+    }
 }
 
 /**
@@ -839,20 +839,20 @@ export async function copyJSONToClipboard(jsonInput, formatted = true) {
  * @returns {Promise<boolean>} - True si se copió exitosamente
  */
 export async function copyTextToClipboard(text) {
-  try {
-    // Método moderno (navegadores modernos)
-    if (navigator.clipboard && window.isSecureContext) {
-      await navigator.clipboard.writeText(text);
-      return true;
-    } else {
-      // Método de respaldo para navegadores más antiguos o contextos no seguros (HTTP)
-      return copyUsingExecCommand(text);
+    try {
+        // Método moderno (navegadores modernos)
+        if (navigator.clipboard && window.isSecureContext) {
+            await navigator.clipboard.writeText(text);
+            return true;
+        } else {
+            // Método de respaldo para navegadores más antiguos o contextos no seguros (HTTP)
+            return copyUsingExecCommand(text);
+        }
+    } catch (error) {
+        console.error('Error en copyTextToClipboard:', error);
+        // Intentar con método de respaldo
+        return copyUsingExecCommand(text);
     }
-  } catch (error) {
-    console.error('Error en copyTextToClipboard:', error);
-    // Intentar con método de respaldo
-    return copyUsingExecCommand(text);
-  }
 }
 
 /**
@@ -861,32 +861,32 @@ export async function copyTextToClipboard(text) {
  * @returns {boolean} - True si se copió exitosamente
  */
 export function copyUsingExecCommand(text) {
-  try {
-    // Crear un elemento textarea temporal
-    const textarea = document.createElement('textarea');
-    textarea.value = text;
-    
-    // Hacerlo invisible
-    textarea.style.position = 'fixed';
-    textarea.style.opacity = '0';
-    
-    // Añadirlo al DOM
-    document.body.appendChild(textarea);
-    
-    // Seleccionar y copiar
-    textarea.select();
-    textarea.setSelectionRange(0, textarea.value.length);
-    
-    const success = document.execCommand('copy');
-    
-    // Limpiar
-    document.body.removeChild(textarea);
-    
-    return success;
-  } catch (error) {
-    console.error('Error en copyUsingExecCommand:', error);
-    return false;
-  }
+    try {
+        // Crear un elemento textarea temporal
+        const textarea = document.createElement('textarea');
+        textarea.value = text;
+
+        // Hacerlo invisible
+        textarea.style.position = 'fixed';
+        textarea.style.opacity = '0';
+
+        // Añadirlo al DOM
+        document.body.appendChild(textarea);
+
+        // Seleccionar y copiar
+        textarea.select();
+        textarea.setSelectionRange(0, textarea.value.length);
+
+        const success = document.execCommand('copy');
+
+        // Limpiar
+        document.body.removeChild(textarea);
+
+        return success;
+    } catch (error) {
+        console.error('Error en copyUsingExecCommand:', error);
+        return false;
+    }
 }
 
 /**
@@ -896,75 +896,75 @@ export function copyUsingExecCommand(text) {
  * @returns {Promise<boolean>} - True si se copió exitosamente
  */
 export async function copyJSONLikeChromeInspector(jsonInput) {
-  try {
-    let parsedJSON;
-    
-    // Parsear la entrada
-    if (typeof jsonInput === 'string') {
-      parsedJSON = JSON.parse(jsonInput);
-    } else {
-      parsedJSON = jsonInput;
-    }
-    
-    // Función para formatear con colores (solo para demostración)
-    const formatWithColors = (obj, indent = '') => {
-      const entries = Object.entries(obj);
-      let result = '{\n';
-      
-      entries.forEach(([key, value], index) => {
-        const isLast = index === entries.length - 1;
-        const lineEnd = isLast ? '' : ',';
-        
-        // Formato de clave (como lo hace Chrome)
-        const keyPart = `  ${indent}"${key}": `;
-        
-        // Formato de valor
-        let valuePart;
-        if (value === null) {
-          valuePart = 'null';
-        } else if (typeof value === 'string') {
-          valuePart = `"${value}"`;
-        } else if (typeof value === 'object') {
-          if (Array.isArray(value)) {
-            valuePart = `[${value.length} items]`; // Chrome muestra "[X items]" para arrays largos
-          } else {
-            valuePart = `{${Object.keys(value).length} properties}`; // Chrome muestra propiedades anidadas
-          }
+    try {
+        let parsedJSON;
+
+        // Parsear la entrada
+        if (typeof jsonInput === 'string') {
+            parsedJSON = JSON.parse(jsonInput);
         } else {
-          valuePart = String(value);
+            parsedJSON = jsonInput;
         }
-        
-        result += `${keyPart}${valuePart}${lineEnd}\n`;
-      });
-      
-      result += `${indent}}`;
-      return result;
-    };
-    
-    // Crear una versión formateada similar a Chrome
-    const chromeLikeFormat = formatWithColors(parsedJSON);
-    
-    // Copiar al portapapeles
-    return await copyTextToClipboard(JSON.stringify(parsedJSON, null, 2));
-    
-  } catch (error) {
-    console.error('Error en copyJSONLikeChromeInspector:', error);
-    return false;
-  }
+
+        // Función para formatear con colores (solo para demostración)
+        const formatWithColors = (obj, indent = '') => {
+            const entries = Object.entries(obj);
+            let result = '{\n';
+
+            entries.forEach(([key, value], index) => {
+                const isLast = index === entries.length - 1;
+                const lineEnd = isLast ? '' : ',';
+
+                // Formato de clave (como lo hace Chrome)
+                const keyPart = `  ${indent}"${key}": `;
+
+                // Formato de valor
+                let valuePart;
+                if (value === null) {
+                    valuePart = 'null';
+                } else if (typeof value === 'string') {
+                    valuePart = `"${value}"`;
+                } else if (typeof value === 'object') {
+                    if (Array.isArray(value)) {
+                        valuePart = `[${value.length} items]`; // Chrome muestra "[X items]" para arrays largos
+                    } else {
+                        valuePart = `{${Object.keys(value).length} properties}`; // Chrome muestra propiedades anidadas
+                    }
+                } else {
+                    valuePart = String(value);
+                }
+
+                result += `${keyPart}${valuePart}${lineEnd}\n`;
+            });
+
+            result += `${indent}}`;
+            return result;
+        };
+
+        // Crear una versión formateada similar a Chrome
+        const chromeLikeFormat = formatWithColors(parsedJSON);
+
+        // Copiar al portapapeles
+        return await copyTextToClipboard(JSON.stringify(parsedJSON, null, 2));
+
+    } catch (error) {
+        console.error('Error en copyJSONLikeChromeInspector:', error);
+        return false;
+    }
 }
 
 // Ejemplos de uso:
 
 // Ejemplo 1: Uso básico
 export const exampleJSON = {
-  nombre: "Juan",
-  edad: 30,
-  ciudad: "Madrid",
-  intereses: ["programación", "música", "deportes"],
-  contacto: {
-    email: "juan@example.com",
-    telefono: "+123456789"
-  }
+    nombre: "Juan",
+    edad: 30,
+    ciudad: "Madrid",
+    intereses: ["programación", "música", "deportes"],
+    contacto: {
+        email: "juan@example.com",
+        telefono: "+123456789"
+    }
 };
 
 // Uso 1: Copiar como objeto JavaScript
@@ -978,27 +978,27 @@ export const exampleJSON = {
 // copyJSONLikeChromeInspector(exampleJSON);
 
 // Función con feedback para el usuario
-export async function copyJSONWithFeedback({jsonInput, formatted = true, message = 'JSON copiado al portapapeles'}) {
-  const success = await copyJSONToClipboard(jsonInput, formatted);
-  
-  if (success) {
-    console.log('✓ ' + message);
-    // Podrías agregar aquí una notificación para el usuario
-    showNotification({message, type: 'success'});
-  } else {
-    console.error('✗ Error al copiar el JSON');
-    showNotification({message: 'Error al copiar el JSON', type: 'error'});
-  }
-  
-  return success;
+export async function copyJSONWithFeedback({ jsonInput, formatted = true, message = 'JSON copiado al portapapeles' }) {
+    const success = await copyJSONToClipboard(jsonInput, formatted);
+
+    if (success) {
+        console.log('✓ ' + message);
+        // Podrías agregar aquí una notificación para el usuario
+        showNotification({ message, type: 'success' });
+    } else {
+        console.error('✗ Error al copiar el JSON');
+        showNotification({ message: 'Error al copiar el JSON', type: 'error' });
+    }
+
+    return success;
 }
 
 // Función auxiliar para mostrar notificaciones (opcional)
-export function showNotification({message, type = 'info'}) {
-  // Crear elemento de notificación
-  const notification = document.createElement('div');
-  notification.textContent = message;
-  notification.style.cssText = `
+export function showNotification({ message, type = 'info' }) {
+    // Crear elemento de notificación
+    const notification = document.createElement('div');
+    notification.textContent = message;
+    notification.style.cssText = `
     position: fixed;
     top: 20px;
     right: 20px;
@@ -1009,35 +1009,35 @@ export function showNotification({message, type = 'info'}) {
     z-index: 10000;
     animation: slideIn 0.3s ease;
   `;
-  
-  // Estilos según tipo
-  if (type === 'success') {
-    notification.style.backgroundColor = '#4CAF50';
-  } else if (type === 'error') {
-    notification.style.backgroundColor = '#F44336';
-  } else {
-    notification.style.backgroundColor = '#2196F3';
-  }
-  
-  // Añadir al DOM
-  document.body.appendChild(notification);
-  
-  // Remover después de 3 segundos
-  setTimeout(() => {
-    notification.style.animation = 'slideOut 0.3s ease';
+
+    // Estilos según tipo
+    if (type === 'success') {
+        notification.style.backgroundColor = '#4CAF50';
+    } else if (type === 'error') {
+        notification.style.backgroundColor = '#F44336';
+    } else {
+        notification.style.backgroundColor = '#2196F3';
+    }
+
+    // Añadir al DOM
+    document.body.appendChild(notification);
+
+    // Remover después de 3 segundos
     setTimeout(() => {
-      if (notification.parentNode) {
-        document.body.removeChild(notification);
-      }
-    }, 300);
-  }, 3000);
+        notification.style.animation = 'slideOut 0.3s ease';
+        setTimeout(() => {
+            if (notification.parentNode) {
+                document.body.removeChild(notification);
+            }
+        }, 300);
+    }, 3000);
 }
 
 // Añadir estilos CSS para las animaciones
 if (!document.querySelector('#clipboard-styles')) {
-  const style = document.createElement('style');
-  style.id = 'clipboard-styles';
-  style.textContent = `
+    const style = document.createElement('style');
+    style.id = 'clipboard-styles';
+    style.textContent = `
     @keyframes slideIn {
       from {
         transform: translateX(100%);
@@ -1060,7 +1060,7 @@ if (!document.querySelector('#clipboard-styles')) {
       }
     }
   `;
-  document.head.appendChild(style);
+    document.head.appendChild(style);
 }
 
 // Exportar las funciones (si estás usando módulos)
@@ -1068,74 +1068,96 @@ if (!document.querySelector('#clipboard-styles')) {
 
 export function flattenToStringArray(...args) {
     const result = [];
-    
+
     // Si se pasa un array como segundo parámetro, lo aplanamos
     const items = args.length === 1 && Array.isArray(args[0]) ? args[0] : args;
-    
+
     // Función recursiva para aplanar cualquier valor
     const flatten = (value) => {
         // Casos base: null, undefined, o valores primitivos
         if (value === null) return ['null'];
         if (value === undefined) return ['undefined'];
-        
+
         // Manejar Date
         if (value instanceof Date) return [value.toISOString()];
-        
+
         // Manejar booleanos
         if (typeof value === 'boolean') return [value.toString()];
-        
+
         // Manejar números
         if (typeof value === 'number') return [value.toString()];
-        
+
         // Manejar strings
         if (typeof value === 'string') return [value];
-        
+
         // Manejar BigInt
         if (typeof value === 'bigint') return [value.toString()];
-        
+
         // Manejar Symbol
         if (typeof value === 'symbol') return [value.toString()];
-        
+
         // Manejar funciones
         if (typeof value === 'function') return [`function:${value.name || 'anonymous'}`];
-        
+
         // Manejar arrays (recursivamente)
         if (Array.isArray(value)) {
             return value.flatMap(item => flatten(item));
         }
-        
+
         // Manejar objetos (incluyendo Map, Set, etc.)
         if (typeof value === 'object') {
             // Casos especiales para objetos built-in
             if (value instanceof Map) {
                 return flatten(Array.from(value.entries()));
             }
-            
+
             if (value instanceof Set) {
                 return flatten(Array.from(value));
             }
-            
+
             if (value instanceof RegExp) {
                 return [value.toString()];
             }
-            
+
             if (value instanceof Error) {
                 return [`Error:${value.message}`];
             }
-            
+
             // Objeto plano - aplanar recursivamente sus valores
             return Object.values(value).flatMap(val => flatten(val));
         }
-        
+
         // Por si acaso queda algún tipo extraño
         return [String(value)];
     };
-    
+
     // Procesar todos los argumentos
     for (const arg of items) {
         const flattened = flatten(arg);
         result.push(...flattened);
     }
-    
+
     return result;
+}
+
+export function addHexHash(color) {
+    // Check if it's a string
+    if (typeof color !== 'string') {
+        return color;
+    }
+
+    // Remove leading/trailing whitespace
+    color = color.trim();
+
+    // If it already has #, return it
+    if (color.startsWith('#')) {
+        return color;
+    }
+
+    // If it's empty, return just #
+    if (color.length === 0) {
+        return '#';
+    }
+
+    return '#' + color;
 }

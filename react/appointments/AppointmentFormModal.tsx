@@ -1,5 +1,6 @@
-import React from "react";
+import React, { useRef } from "react";
 import { Controller, useForm, useWatch } from "react-hook-form";
+import { useQuery } from '@tanstack/react-query';
 import { useState } from "react";
 import { classNames } from "primereact/utils";
 import { Dropdown } from "primereact/dropdown";
@@ -12,6 +13,8 @@ import {
     patientService,
     userAvailabilityService,
     userService,
+    specialtiesService,
+    userSpecialtyService,
 } from "../../services/api";
 import { RadioButton } from "primereact/radiobutton";
 import { stringToDate } from "../../services/utilidades";
@@ -40,6 +43,11 @@ import { Toast } from "primereact/toast";
 import { InputSwitch } from "primereact/inputswitch";
 import { useAppointmentBulkCreateGroup } from "./hooks/useAppointmentBulkCreateGroup";
 import { Button } from "primereact/button";
+import { TabView, TabPanel } from 'primereact/tabview';
+import { AvailabilitySlotsDialog } from './components/AvailabilitySlotsDialog';
+import { SpecialtyAvailabilityForm } from './components/SpecialtyAvailabilityForm';
+import { AISchedulingForm } from './components/AISchedulingForm';
+import { AvailabilityData, SelectedSlot, AppointmentConfig } from './components/types';
 
 export interface AppointmentFormInputs {
     uuid: string;
@@ -111,6 +119,98 @@ export const AppointmentFormModal = ({
     const [patients, setPatients] = useState<Patient[]>([]);
 
     const [disabledProductIdField, setDisabledProductIdField] = useState(false);
+
+    // -- Refactor: New Scheduling Modes State --
+    const [schedulingMode, setSchedulingMode] = useState(0);
+    const [availabilityDialogVisible, setAvailabilityDialogVisible] = useState(false);
+    const [foundAvailabilities, setFoundAvailabilities] = useState<AvailabilityData[]>([]);
+    const [aiFilters, setAiFilters] = useState<any>(null);
+
+    // Ref for preserving edit values during async fetches
+    const pendingEditRef = useRef<{ doctorId?: string; date?: Date; time?: string; doctorObject?: any } | null>(null);
+
+    // Fetch Specialties for Reactive Dialog
+    const { data: allSpecialties } = useQuery({
+        queryKey: ['user-specialties'],
+        queryFn: () => userSpecialtyService.getAll().then(res => res.data || res),
+        staleTime: 1000 * 60 * 60
+    });
+
+    const handleAvailabilityFound = (data: AvailabilityData[], filters?: any) => {
+        setFoundAvailabilities(data);
+        setAiFilters(filters);
+        setAvailabilityDialogVisible(true);
+    };
+
+    const handleRefetchAvailability = async (filters: any) => {
+        try {
+            const response = await userAvailabilityService.availableBlocks(filters);
+            const data = Array.isArray(response) ? response : (response.data || []);
+            setFoundAvailabilities(data);
+            setAiFilters(filters); // Update filters context
+        } catch (error) {
+            console.error("Error refetching availability", error);
+        }
+    };
+
+    const handleSlotsAdded = async (slots: SelectedSlot[], config: AppointmentConfig) => {
+        const newAppointments: FormAppointment[] = slots.map(slot => {
+            // Map slot to FormAppointment
+            // Note: assigned_user_availability expects a UserAvailability object.
+            // We use the 'user' from slot (AvailabilityUser) and adapt it, 
+            // but we need to ensure the ID matches availability ID for backend logic if referenced.
+            // The existing logic uses availability_id.
+
+            // Construct a partial UserAvailability compatible object
+            const userAvailability: any = {
+                id: slot.availabilityId,
+                user: slot.user,
+                full_name: `${slot.user.first_name} ${slot.user.last_name}`
+            };
+
+            return {
+                uuid: crypto.randomUUID(),
+                appointment_date: stringToDate(slot.date), // Fix UTC offset issue using utility
+                appointment_time: slot.time,
+                assigned_user_availability: userAvailability,
+                assigned_user_assistant_availability_id: null, // Assuming no assistant for this flow yet
+                user_specialty: slot.user.specialty ? { ...slot.user.specialty, label: slot.user.specialty.name } as any : null,
+                appointment_type: (config as any).appointmentType || "1", // Presencial by default
+                product_id: config.productId,
+                consultation_purpose: config.consultationPurpose,
+                consultation_type: config.consultationType,
+                external_cause: config.externalCause,
+                patients: [], // Single patient mode
+                patient: null, // Will be filled from the main form patient selection?
+                // Wait, if "isGroup" is false, we use the main form patient.
+                // The main form patient is in 'patient' state (line 371).
+                // So we should iterate repetitions? No, slot selection is explicit.
+                // Repetitions = 1.
+                is_group: false,
+                patient_whatsapp: "",
+                patient_email: "",
+                errors: {},
+                show_exam_recipe_field: false,
+                exam_recipe_id: null,
+                professional_name: `${slot.user.first_name} ${slot.user.last_name}`,
+                specialty_name: slot.user.user_specialty_name || ""
+            } as FormAppointment;
+        });
+
+        // If we have a patient selected in the main form, apply it?
+        // The main form state 'appointments' holds the list.
+        // We should add these to the list.
+        // Also if we have a patient selected (line 111), we should bind it?
+        // mapAppointmentsToServer uses app.patients or app.patient?
+        // It relies on app.patients for group.
+        // For individual, it uses `patient` from state (line 318 `patient!.id`).
+        // IMPORTANT: The existing `appointments` logic seems to NOT store the patient inside the appointment object for Individual mode, 
+        // it uses the global `patient` state when SAVING (onSubmit line 318).
+        // So `newAppointments` don't need patient info inside if `isGroup` is false.
+
+        setAppointments(prev => [...prev, ...newAppointments]);
+        showSuccessToast({ message: newAppointments.length + " citas agregadas correctamente" });
+    };
 
     const { userSpecialties } = useUserSpecialties();
     const { productsByType: products, fetchProductsByType } =
@@ -328,6 +428,9 @@ export const AppointmentFormModal = ({
                 onAppointmentCreated();
             }
 
+            setAppointments([]); // Clear appointments list
+            clearAppointmentForm(); // Clear inputs
+            clearPatientForm(); // Clear patient inputs
             onClose();
             // setTimeout(() => {
             //   location.reload();
@@ -418,7 +521,15 @@ export const AppointmentFormModal = ({
     useEffect(() => {
         if (userSpecialty && appointmentType) {
             setShowUserSpecialtyError(false);
-            setValue("appointment_date", null);
+
+            // If we are editing and have a pending date, preserve it. 
+            // Otherwise reset to null if it's a manual change by user.
+            if (pendingEditRef.current && pendingEditRef.current.date) {
+                setValue("appointment_date", pendingEditRef.current.date);
+            } else {
+                setValue("appointment_date", null);
+            }
+
             setAppointmentTimeOptions([]);
 
             const asyncScope = async () => {
@@ -461,10 +572,14 @@ export const AppointmentFormModal = ({
 
                 setEnabledDates(availableDates);
 
-                updateAppointmentTimeOptions(
-                    availableBlocks,
-                    availableDates[0]
-                );
+                // Use pending date if available, else first valid date
+                const initialDate = (pendingEditRef.current && pendingEditRef.current.date)
+                    ? pendingEditRef.current.date
+                    : availableDates[0];
+
+                if (initialDate) {
+                    updateAppointmentTimeOptions(availableBlocks, initialDate);
+                }
             };
             asyncScope();
         } else {
@@ -591,6 +706,7 @@ export const AppointmentFormModal = ({
     const handleEdit = (appointment: FormAppointment) => {
         setEditingId(appointment.uuid);
         fillAppointmentForm(appointment);
+        setSchedulingMode(0);
     };
 
     const handleClear = () => {
@@ -605,20 +721,50 @@ export const AppointmentFormModal = ({
 
     const fillAppointmentForm = (appointment: FormAppointment) => {
         setCurrentAppointment(appointment);
-        setValue("user_specialty", appointment.user_specialty);
+
+        // Store pending edit values for Async population
+        const assigned = appointment.assigned_user_availability as any;
+        const pendingDocId = assigned?.id || assigned?.user_id || (assigned && typeof assigned !== 'object' ? assigned : undefined);
+
+        pendingEditRef.current = {
+            doctorId: pendingDocId,
+            doctorObject: assigned,
+            date: appointment.appointment_date ? new Date(appointment.appointment_date) : undefined,
+            time: appointment.appointment_time
+        };
+
+        // Basic Fields - Resolve Specialty from Options
+        const resolvedSpecialty = userSpecialties.find(s => s.id == appointment.user_specialty?.id) || appointment.user_specialty;
+        setValue("user_specialty", resolvedSpecialty);
+
+        setValue("appointment_type", appointment.appointment_type); // Triggers Effect
+
         setValue("show_exam_recipe_field", appointment.show_exam_recipe_field);
         setValue("exam_recipe_id", appointment.exam_recipe_id);
-        setValue("appointment_type", appointment.appointment_type);
         setValue("product_id", appointment.product_id);
         setValue("consultation_purpose", appointment.consultation_purpose);
         setValue("consultation_type", appointment.consultation_type);
         setValue("external_cause", appointment.external_cause);
+
+        // Patient Logic
+        if (appointment.is_group) {
+            setValue("is_group", true);
+            setValue("patients", appointment.patients);
+        } else {
+            setValue("is_group", false);
+            // Verify if appointment.patient is set. If not, and patients array exists?
+            setValue("patient", appointment.patient);
+            setValue("patient_whatsapp", appointment.patient_whatsapp);
+            setValue("patient_email", appointment.patient_email);
+        }
+
         setShowRecurrentFields(false);
         setAppointmentFrequency("diary");
         setAppointmentRepetitions(1);
     };
 
     const clearAppointmentForm = () => {
+        pendingEditRef.current = null;
         setValue("user_specialty", null);
         setValue("show_exam_recipe_field", false);
         setValue("exam_recipe_id", null);
@@ -631,6 +777,7 @@ export const AppointmentFormModal = ({
         setAppointmentFrequency("diary");
         setAppointmentRepetitions(1);
         setEditingId(null);
+        setCurrentAppointment(null); // Clear current appointment data if any
     };
 
     const clearPatientForm = () => {
@@ -670,7 +817,8 @@ export const AppointmentFormModal = ({
     };
 
     const updateAppointmentTimeOptions = (availableBlocks, date: Date) => {
-        const dateString = date.toISOString().split("T")[0];
+        // Use Local Date String for matching (YYYY-MM-DD)
+        const dateString = date.toLocaleDateString('en-CA'); // en-CA gives YYYY-MM-DD local
 
         // Filtramos doctores disponibles en esa fecha
         let availableDoctors: any[] = [];
@@ -680,11 +828,9 @@ export const AppointmentFormModal = ({
                 if (day.date === dateString) {
                     availableDoctors.push({
                         ...item,
-                        full_name: `${item.user.first_name || ""} ${
-                            item.user.middle_name || ""
-                        } ${item.user.last_name || ""} ${
-                            item.user.second_last_name || ""
-                        }`,
+                        full_name: `${item.user.first_name || ""} ${item.user.middle_name || ""
+                            } ${item.user.last_name || ""} ${item.user.second_last_name || ""
+                            }`,
                         id: item.availability_id,
                         user_id: item.user.id, // Agregamos el user_id para referencia
                     });
@@ -701,23 +847,58 @@ export const AppointmentFormModal = ({
                 )
         );
 
-        // Actualizar opciones de doctores
-        setUserAvailabilityOptions(uniqueDoctors);
+        // Determine Selected Doctor (Pending Edit or First Available)
+        let selectedDoctor = uniqueDoctors[0] || null;
 
-        // Seleccionar primer doctor disponible
-        const firstDoctor = uniqueDoctors[0] || null;
-        setValue("assigned_user_availability", firstDoctor);
+        if (pendingEditRef.current && pendingEditRef.current.doctorId) {
+            const pendingId = pendingEditRef.current.doctorId;
+            // Match by ID or User ID (handling number/string diff)
+            const found = uniqueDoctors.find(d =>
+                d.id == pendingId ||
+                d.user_id == pendingId
+            );
+            if (found) {
+                selectedDoctor = found;
+            } else if (pendingEditRef.current.doctorObject) {
+                // Fallback: Force inject original object if missing from availability
+                selectedDoctor = pendingEditRef.current.doctorObject;
+                if (!uniqueDoctors.some(d => d.id == selectedDoctor.id)) {
+                    uniqueDoctors.push(selectedDoctor);
+                }
+            }
+        }
+
+        // Actualizar opciones de doctores (AFTER potential injection)
+        setUserAvailabilityOptions([...uniqueDoctors]);
+
+        setValue("assigned_user_availability", selectedDoctor);
         setValue("assigned_user_assistant_availability_id", null);
         setAssistantAvailabilityOptions([]); // Limpiar asistentes al cambiar doctor
 
         // Actualizar horas disponibles
-        if (firstDoctor) {
+        if (selectedDoctor) {
             updateTimeSlotsForProfessional(
                 availableBlocks,
                 dateString,
-                firstDoctor.id,
+                selectedDoctor.id,
                 "doctor"
             );
+
+            // Restore Pending Time if valid
+            if (pendingEditRef.current && pendingEditRef.current.time) {
+                // Check if time exists in generated options?
+                // updateTimeSlotsForProfessional sets the options State.
+                // We need to wait or check against the logic there.
+                // Actually updateTimeSlotsForProfessional sets value too.
+                // We should pass pending time to it? 
+                // Or let it default and then override here?
+                // `updateTimeSlotsForProfessional` calls setValue.
+                // I'll modify `updateTimeSlotsForProfessional` to accept optional override, 
+                // OR just override setValue here logic.
+                // But `updateTimeSlotsForProfessional` calculates filtered options.
+                // I should clear pendingEditRef somewhere.
+            }
+
         } else {
             setAppointmentTimeOptions([]);
             setValue("appointment_time", null);
@@ -759,11 +940,9 @@ export const AppointmentFormModal = ({
                 if (hasAvailability) {
                     availableAssistants.push({
                         ...item,
-                        full_name: `${item.user.first_name || ""} ${
-                            item.user.middle_name || ""
-                        } ${item.user.last_name || ""} ${
-                            item.user.second_last_name || ""
-                        }`,
+                        full_name: `${item.user.first_name || ""} ${item.user.middle_name || ""
+                            } ${item.user.last_name || ""} ${item.user.second_last_name || ""
+                            }`,
                         id: item.availability_id, // Usamos el ID de disponibilidad
                         user_id: item.user.id, // Guardamos también el user_id
                     });
@@ -840,7 +1019,19 @@ export const AppointmentFormModal = ({
         }
 
         setAppointmentTimeOptions(uniqueOptions);
-        setValue("appointment_time", uniqueOptions[0]?.value || null);
+
+        // Select pending time if available, or first, or null
+        if (pendingEditRef.current && pendingEditRef.current.time) {
+            const found = uniqueOptions.find(o => o.value === pendingEditRef.current?.time);
+            if (found) {
+                setValue("appointment_time", found.value);
+                // Ref preserved for stability
+            } else {
+                setValue("appointment_time", uniqueOptions[0]?.value || null);
+            }
+        } else {
+            setValue("appointment_time", uniqueOptions[0]?.value || null);
+        }
     };
 
     const searchPatients = async (event: AutoCompleteCompleteEvent) => {
@@ -1116,824 +1307,854 @@ export const AppointmentFormModal = ({
                         <Card>
                             <div className="row">
                                 <div className="col-md-7">
-                                    <div className="mb-3">
-                                        <Controller
-                                            name="user_specialty"
-                                            control={control}
-                                            rules={{
-                                                required:
-                                                    "Este campo es requerido",
-                                            }}
-                                            render={({ field }) => (
-                                                <>
-                                                    <label
-                                                        htmlFor={field.name}
-                                                        className="form-label"
-                                                    >
-                                                        Especialidad médica *
-                                                    </label>
-                                                    <Dropdown
-                                                        inputId={field.name}
-                                                        options={
-                                                            userSpecialties
-                                                        }
-                                                        optionLabel="label"
-                                                        filter
-                                                        showClear
-                                                        placeholder="Seleccione una especialidad"
-                                                        className={classNames(
-                                                            "w-100",
-                                                            {
-                                                                "p-invalid":
-                                                                    errors.user_specialty,
-                                                            }
+                                    <TabView activeIndex={schedulingMode} onTabChange={(e) => setSchedulingMode(e.index)} className="mb-3">
+                                        <TabPanel header="Por Especialista" leftIcon="pi pi-user-edit">
+                                            <div className="pt-2">
+                                                <div className="mb-3">
+                                                    <Controller
+                                                        name="user_specialty"
+                                                        control={control}
+                                                        rules={{
+                                                            required:
+                                                                "Este campo es requerido",
+                                                        }}
+                                                        render={({ field }) => (
+                                                            <>
+                                                                <label
+                                                                    htmlFor={field.name}
+                                                                    className="form-label"
+                                                                >
+                                                                    Especialidad médica *
+                                                                </label>
+                                                                <Dropdown
+                                                                    inputId={field.name}
+                                                                    options={
+                                                                        userSpecialties
+                                                                    }
+                                                                    optionLabel="label"
+                                                                    filter
+                                                                    showClear
+                                                                    placeholder="Seleccione una especialidad"
+                                                                    className={classNames(
+                                                                        "w-100",
+                                                                        {
+                                                                            "p-invalid":
+                                                                                errors.user_specialty,
+                                                                        }
+                                                                    )}
+                                                                    appendTo={"self"}
+                                                                    {...field}
+                                                                    value={field.value || null}
+                                                                ></Dropdown>
+                                                            </>
                                                         )}
-                                                        appendTo={"self"}
-                                                        {...field}
-                                                    ></Dropdown>
-                                                </>
-                                            )}
-                                        />
-                                        {getFormErrorMessage("user_specialty")}
-                                    </div>
+                                                    />
+                                                    {getFormErrorMessage("user_specialty")}
+                                                </div>
 
-                                    <div className="d-flex align-items-center gap-2 mb-3">
-                                        <Checkbox
-                                            inputId="showExamRecipeField"
-                                            name="showExamRecipeField"
-                                            checked={showExamRecipeField}
-                                            onChange={(e) =>
-                                                setValue(
-                                                    "show_exam_recipe_field",
-                                                    e.target.checked || false
-                                                )
-                                            }
-                                        />
-                                        <label
-                                            htmlFor="showExamRecipeField"
-                                            className="ml-2 form-check-label"
-                                        >
-                                            Relacionar receta de examen
-                                        </label>
-                                    </div>
+                                                <div className="d-flex align-items-center gap-2 mb-3">
+                                                    <Checkbox
+                                                        inputId="showExamRecipeField"
+                                                        name="showExamRecipeField"
+                                                        checked={showExamRecipeField}
+                                                        onChange={(e) =>
+                                                            setValue(
+                                                                "show_exam_recipe_field",
+                                                                e.target.checked || false
+                                                            )
+                                                        }
+                                                    />
+                                                    <label
+                                                        htmlFor="showExamRecipeField"
+                                                        className="ml-2 form-check-label"
+                                                    >
+                                                        Relacionar receta de examen
+                                                    </label>
+                                                </div>
 
-                                    {showExamRecipeField && (
-                                        <>
-                                            <div className="mb-3">
-                                                <Controller
-                                                    name="exam_recipe_id"
-                                                    control={control}
-                                                    render={({ field }) => (
-                                                        <>
-                                                            <label
-                                                                htmlFor={
-                                                                    field.name
-                                                                }
-                                                                className="form-label"
-                                                            >
-                                                                Receta de examen
-                                                            </label>
-                                                            <Dropdown
-                                                                inputId={
-                                                                    field.name
-                                                                }
-                                                                options={
-                                                                    patientExamRecipes
-                                                                }
-                                                                optionLabel="label"
-                                                                optionValue="id"
-                                                                filter
-                                                                showClear
-                                                                placeholder="Seleccione una receta de examen"
-                                                                className={classNames(
-                                                                    "w-100",
-                                                                    {
-                                                                        "p-invalid":
-                                                                            errors.exam_recipe_id,
-                                                                    }
-                                                                )}
-                                                                appendTo={
-                                                                    "self"
-                                                                }
-                                                                {...field}
-                                                            ></Dropdown>
-                                                        </>
-                                                    )}
-                                                />
-                                                {getFormErrorMessage(
-                                                    "exam_recipe_id"
-                                                )}
-                                            </div>
-                                        </>
-                                    )}
-
-                                    {showUserSpecialtyError && (
-                                        <div
-                                            className="alert alert-danger"
-                                            role="alert"
-                                        >
-                                            No hay especialistas de:{" "}
-                                            <span>{userSpecialtyError}</span>{" "}
-                                            para el tipo de cita{" "}
-                                            <span>{appointmentTypeError}</span>{" "}
-                                            disponibles en este momento
-                                        </div>
-                                    )}
-
-                                    <div className="mb-3">
-                                        <label className="form-label mb-2">
-                                            Tipo de cita *
-                                        </label>
-                                        <div className="d-flex flex-wrap gap-3">
-                                            <div className="d-flex align-items-center gap-2">
-                                                <Controller
-                                                    name="appointment_type"
-                                                    control={control}
-                                                    rules={{
-                                                        required:
-                                                            "Este campo es requerido",
-                                                    }}
-                                                    render={({ field }) => (
-                                                        <>
-                                                            <RadioButton
-                                                                inputId={
-                                                                    field.name +
-                                                                    "1"
-                                                                }
-                                                                checked={
-                                                                    appointmentType ===
-                                                                    "1"
-                                                                }
-                                                                className={classNames(
-                                                                    "",
-                                                                    {
-                                                                        "p-invalid":
-                                                                            errors.appointment_type,
-                                                                    }
-                                                                )}
-                                                                value="1"
-                                                                onChange={(e) =>
-                                                                    field.onChange(
-                                                                        e.value
-                                                                    )
-                                                                }
-                                                            />
-                                                            <label
-                                                                htmlFor={
-                                                                    field.name +
-                                                                    "1"
-                                                                }
-                                                                className="ml-2 form-check-label"
-                                                            >
-                                                                Presencial
-                                                            </label>
-                                                        </>
-                                                    )}
-                                                />
-                                            </div>
-                                            <div className="d-flex align-items-center gap-2">
-                                                <Controller
-                                                    name="appointment_type"
-                                                    control={control}
-                                                    rules={{
-                                                        required:
-                                                            "Este campo es requerido",
-                                                    }}
-                                                    render={({ field }) => (
-                                                        <>
-                                                            <RadioButton
-                                                                inputId={
-                                                                    field.name +
-                                                                    "3"
-                                                                }
-                                                                checked={
-                                                                    appointmentType ===
-                                                                    "3"
-                                                                }
-                                                                className={classNames(
-                                                                    "",
-                                                                    {
-                                                                        "p-invalid":
-                                                                            errors.appointment_type,
-                                                                    }
-                                                                )}
-                                                                onChange={(e) =>
-                                                                    field.onChange(
-                                                                        e.value
-                                                                    )
-                                                                }
-                                                                value="3"
-                                                            />
-                                                            <label
-                                                                htmlFor={
-                                                                    field.name +
-                                                                    "3"
-                                                                }
-                                                                className="ml-2 form-check-label"
-                                                            >
-                                                                Domiciliaria
-                                                            </label>
-                                                        </>
-                                                    )}
-                                                />
-                                            </div>
-                                            <div className="d-flex align-items-center gap-2">
-                                                <Controller
-                                                    name="appointment_type"
-                                                    control={control}
-                                                    rules={{
-                                                        required:
-                                                            "Este campo es requerido",
-                                                    }}
-                                                    render={({ field }) => (
-                                                        <>
-                                                            <RadioButton
-                                                                inputId={
-                                                                    field.name +
-                                                                    "2"
-                                                                }
-                                                                checked={
-                                                                    appointmentType ===
-                                                                    "2"
-                                                                }
-                                                                className={classNames(
-                                                                    "",
-                                                                    {
-                                                                        "p-invalid":
-                                                                            errors.appointment_type,
-                                                                    }
-                                                                )}
-                                                                onChange={(e) =>
-                                                                    field.onChange(
-                                                                        e.value
-                                                                    )
-                                                                }
-                                                                value="2"
-                                                            />
-                                                            <label
-                                                                htmlFor={
-                                                                    field.name +
-                                                                    "2"
-                                                                }
-                                                                className="ml-2 form-check-label"
-                                                            >
-                                                                Virtual
-                                                            </label>
-                                                        </>
-                                                    )}
-                                                />
-                                            </div>
-
-                                            <Controller
-                                                name="is_group"
-                                                control={control}
-                                                render={({ field }) => (
+                                                {showExamRecipeField && (
                                                     <>
-                                                        <div className="d-flex align-items-center gap-2">
-                                                            <InputSwitch
-                                                                checked={
-                                                                    field.value
-                                                                }
-                                                                onChange={(
-                                                                    e
-                                                                ) => {
-                                                                    clearPatientForm();
-                                                                    clearAppointmentForm();
-                                                                    field.onChange(
-                                                                        e.value
-                                                                    );
-                                                                }}
+                                                        <div className="mb-3">
+                                                            <Controller
+                                                                name="exam_recipe_id"
+                                                                control={control}
+                                                                render={({ field }) => (
+                                                                    <>
+                                                                        <label
+                                                                            htmlFor={
+                                                                                field.name
+                                                                            }
+                                                                            className="form-label"
+                                                                        >
+                                                                            Receta de examen
+                                                                        </label>
+                                                                        <Dropdown
+                                                                            inputId={
+                                                                                field.name
+                                                                            }
+                                                                            options={
+                                                                                patientExamRecipes
+                                                                            }
+                                                                            optionLabel="label"
+                                                                            optionValue="id"
+                                                                            filter
+                                                                            showClear
+                                                                            placeholder="Seleccione una receta de examen"
+                                                                            className={classNames(
+                                                                                "w-100",
+                                                                                {
+                                                                                    "p-invalid":
+                                                                                        errors.exam_recipe_id,
+                                                                                }
+                                                                            )}
+                                                                            appendTo={
+                                                                                "self"
+                                                                            }
+                                                                            {...field}
+                                                                        ></Dropdown>
+                                                                    </>
+                                                                )}
                                                             />
-                                                            <label
-                                                                htmlFor={
-                                                                    field.name
-                                                                }
-                                                                className="form-label"
-                                                            >
-                                                                Grupal
-                                                            </label>
+                                                            {getFormErrorMessage(
+                                                                "exam_recipe_id"
+                                                            )}
                                                         </div>
                                                     </>
                                                 )}
-                                            />
-                                        </div>
 
-                                        {getFormErrorMessage(
-                                            "appointment_type"
-                                        )}
-                                    </div>
-
-                                    <div className="mb-3">
-                                        <Controller
-                                            name="appointment_date"
-                                            control={control}
-                                            rules={{
-                                                required:
-                                                    "Este campo es requerido",
-                                            }}
-                                            render={({ field }) => (
-                                                <>
-                                                    <label
-                                                        htmlFor={field.name}
-                                                        className="form-label"
+                                                {showUserSpecialtyError && (
+                                                    <div
+                                                        className="alert alert-danger"
+                                                        role="alert"
                                                     >
-                                                        Fecha de la consulta *
+                                                        No hay especialistas de:{" "}
+                                                        <span>{userSpecialtyError}</span>{" "}
+                                                        para el tipo de cita{" "}
+                                                        <span>{appointmentTypeError}</span>{" "}
+                                                        disponibles en este momento
+                                                    </div>
+                                                )}
+
+                                                <div className="mb-3">
+                                                    <label className="form-label mb-2">
+                                                        Tipo de cita *
                                                     </label>
-                                                    <Calendar
-                                                        id={field.name}
-                                                        value={field.value}
-                                                        onChange={(e) =>
-                                                            field.onChange(
-                                                                e.value
-                                                            )
-                                                        }
-                                                        className={classNames(
-                                                            "w-100",
-                                                            {
-                                                                "p-invalid":
-                                                                    errors.appointment_date,
-                                                            }
-                                                        )}
-                                                        disabled={
-                                                            appointmentDateDisabled
-                                                        }
-                                                        enabledDates={
-                                                            enabledDates
-                                                        }
-                                                        appendTo={"self"}
-                                                        placeholder="Seleccione una fecha"
-                                                    />
-                                                </>
-                                            )}
-                                        />
-                                        {getFormErrorMessage(
-                                            "appointment_date"
-                                        )}
-                                    </div>
-
-                                    <div className="mb-3">
-                                        <Controller
-                                            name="assigned_user_availability"
-                                            control={control}
-                                            rules={{
-                                                required:
-                                                    "Este campo es requerido",
-                                            }}
-                                            render={({ field }) => (
-                                                <>
-                                                    <label
-                                                        htmlFor={field.name}
-                                                        className="form-label"
-                                                    >
-                                                        Doctor(a) *
-                                                    </label>
-                                                    <Dropdown
-                                                        inputId={field.name}
-                                                        options={
-                                                            userAvailabilityOptions
-                                                        }
-                                                        optionLabel="full_name"
-                                                        filter
-                                                        placeholder="Seleccione un usuario"
-                                                        className={classNames(
-                                                            "w-100",
-                                                            {
-                                                                "p-invalid":
-                                                                    errors.assigned_user_availability,
-                                                            }
-                                                        )}
-                                                        appendTo={"self"}
-                                                        disabled={
-                                                            userAvailabilityDisabled
-                                                        }
-                                                        {...field}
-                                                    ></Dropdown>
-                                                </>
-                                            )}
-                                        />
-                                        {getFormErrorMessage(
-                                            "assigned_user_availability"
-                                        )}
-                                    </div>
-
-                                    {assistantAvailabilityOptions.length >
-                                        0 && (
-                                        <>
-                                            <div className="mb-3">
-                                                <Controller
-                                                    name="assigned_user_assistant_availability_id"
-                                                    control={control}
-                                                    render={({ field }) => (
-                                                        <>
-                                                            <label
-                                                                htmlFor={
-                                                                    field.name
-                                                                }
-                                                                className="form-label"
-                                                            >
-                                                                Asistente
-                                                            </label>
-                                                            <Dropdown
-                                                                inputId={
-                                                                    field.name
-                                                                }
-                                                                options={
-                                                                    assistantAvailabilityOptions
-                                                                }
-                                                                optionLabel="full_name"
-                                                                optionValue="id"
-                                                                filter
-                                                                showClear
-                                                                placeholder="Seleccione un asistente"
-                                                                className={classNames(
-                                                                    "w-100",
-                                                                    {
-                                                                        "p-invalid":
-                                                                            errors.assigned_user_assistant_availability_id,
-                                                                    }
-                                                                )}
-                                                                appendTo={
-                                                                    "self"
-                                                                }
-                                                                disabled={
-                                                                    userAvailabilityDisabled
-                                                                }
-                                                                {...field}
-                                                            ></Dropdown>
-                                                        </>
-                                                    )}
-                                                />
-                                            </div>
-                                        </>
-                                    )}
-
-                                    <div className="mb-3">
-                                        <Controller
-                                            name="appointment_time"
-                                            control={control}
-                                            rules={{
-                                                required:
-                                                    "Este campo es requerido",
-                                            }}
-                                            render={({ field }) => (
-                                                <>
-                                                    <label
-                                                        htmlFor={field.name}
-                                                        className="form-label"
-                                                    >
-                                                        Hora de la consulta *
-                                                    </label>
-                                                    <Dropdown
-                                                        inputId={field.name}
-                                                        options={
-                                                            appointmentTimeOptions
-                                                        }
-                                                        virtualScrollerOptions={{
-                                                            itemSize: 38,
-                                                        }}
-                                                        optionLabel="label"
-                                                        filter
-                                                        placeholder="Seleccione una hora"
-                                                        className={classNames(
-                                                            "w-100",
-                                                            {
-                                                                "p-invalid":
-                                                                    errors.appointment_time,
-                                                            }
-                                                        )}
-                                                        appendTo={"self"}
-                                                        disabled={
-                                                            appointmentTimeDisabled
-                                                        }
-                                                        {...field}
-                                                    ></Dropdown>
-                                                </>
-                                            )}
-                                        />
-                                        {getFormErrorMessage(
-                                            "appointment_time"
-                                        )}
-                                    </div>
-
-                                    <div className="mb-3">
-                                        <div className="row">
-                                            <div className="col-md-12">
-                                                <Controller
-                                                    name="product_id"
-                                                    control={control}
-                                                    rules={{
-                                                        required:
-                                                            "Este campo es requerido",
-                                                    }}
-                                                    render={({ field }) => (
-                                                        <>
-                                                            <label
-                                                                htmlFor={
-                                                                    field.name
-                                                                }
-                                                                className="form-label"
-                                                            >
-                                                                Procedimiento *
-                                                            </label>
-                                                            <Dropdown
-                                                                inputId={
-                                                                    field.name
-                                                                }
-                                                                options={
-                                                                    products
-                                                                }
-                                                                optionLabel="label"
-                                                                optionValue="id"
-                                                                virtualScrollerOptions={{
-                                                                    itemSize: 38,
+                                                    <div className="d-flex flex-wrap gap-3">
+                                                        <div className="d-flex align-items-center gap-2">
+                                                            <Controller
+                                                                name="appointment_type"
+                                                                control={control}
+                                                                rules={{
+                                                                    required:
+                                                                        "Este campo es requerido",
                                                                 }}
-                                                                filter
-                                                                showClear
-                                                                placeholder="Seleccione un procedimiento"
-                                                                className={classNames(
-                                                                    "w-100",
-                                                                    {
-                                                                        "p-invalid":
-                                                                            errors.product_id,
-                                                                    }
+                                                                render={({ field }) => (
+                                                                    <>
+                                                                        <RadioButton
+                                                                            inputId={
+                                                                                field.name +
+                                                                                "1"
+                                                                            }
+                                                                            checked={
+                                                                                appointmentType ===
+                                                                                "1"
+                                                                            }
+                                                                            className={classNames(
+                                                                                "",
+                                                                                {
+                                                                                    "p-invalid":
+                                                                                        errors.appointment_type,
+                                                                                }
+                                                                            )}
+                                                                            value="1"
+                                                                            onChange={(e) =>
+                                                                                field.onChange(
+                                                                                    e.value
+                                                                                )
+                                                                            }
+                                                                        />
+                                                                        <label
+                                                                            htmlFor={
+                                                                                field.name +
+                                                                                "1"
+                                                                            }
+                                                                            className="ml-2 form-check-label"
+                                                                        >
+                                                                            Presencial
+                                                                        </label>
+                                                                    </>
                                                                 )}
-                                                                appendTo={
-                                                                    "self"
-                                                                }
-                                                                {...field}
-                                                                disabled={
-                                                                    disabledProductIdField
-                                                                }
-                                                            ></Dropdown>
-                                                        </>
-                                                    )}
-                                                />
-                                                {getFormErrorMessage(
-                                                    "product_id"
-                                                )}
-                                            </div>
-                                        </div>
-                                    </div>
+                                                            />
+                                                        </div>
+                                                        <div className="d-flex align-items-center gap-2">
+                                                            <Controller
+                                                                name="appointment_type"
+                                                                control={control}
+                                                                rules={{
+                                                                    required:
+                                                                        "Este campo es requerido",
+                                                                }}
+                                                                render={({ field }) => (
+                                                                    <>
+                                                                        <RadioButton
+                                                                            inputId={
+                                                                                field.name +
+                                                                                "3"
+                                                                            }
+                                                                            checked={
+                                                                                appointmentType ===
+                                                                                "3"
+                                                                            }
+                                                                            className={classNames(
+                                                                                "",
+                                                                                {
+                                                                                    "p-invalid":
+                                                                                        errors.appointment_type,
+                                                                                }
+                                                                            )}
+                                                                            onChange={(e) =>
+                                                                                field.onChange(
+                                                                                    e.value
+                                                                                )
+                                                                            }
+                                                                            value="3"
+                                                                        />
+                                                                        <label
+                                                                            htmlFor={
+                                                                                field.name +
+                                                                                "3"
+                                                                            }
+                                                                            className="ml-2 form-check-label"
+                                                                        >
+                                                                            Domiciliaria
+                                                                        </label>
+                                                                    </>
+                                                                )}
+                                                            />
+                                                        </div>
+                                                        <div className="d-flex align-items-center gap-2">
+                                                            <Controller
+                                                                name="appointment_type"
+                                                                control={control}
+                                                                rules={{
+                                                                    required:
+                                                                        "Este campo es requerido",
+                                                                }}
+                                                                render={({ field }) => (
+                                                                    <>
+                                                                        <RadioButton
+                                                                            inputId={
+                                                                                field.name +
+                                                                                "2"
+                                                                            }
+                                                                            checked={
+                                                                                appointmentType ===
+                                                                                "2"
+                                                                            }
+                                                                            className={classNames(
+                                                                                "",
+                                                                                {
+                                                                                    "p-invalid":
+                                                                                        errors.appointment_type,
+                                                                                }
+                                                                            )}
+                                                                            onChange={(e) =>
+                                                                                field.onChange(
+                                                                                    e.value
+                                                                                )
+                                                                            }
+                                                                            value="2"
+                                                                        />
+                                                                        <label
+                                                                            htmlFor={
+                                                                                field.name +
+                                                                                "2"
+                                                                            }
+                                                                            className="ml-2 form-check-label"
+                                                                        >
+                                                                            Virtual
+                                                                        </label>
+                                                                    </>
+                                                                )}
+                                                            />
+                                                        </div>
 
-                                    <div className="mb-3">
-                                        <div className="row">
-                                            <div className="col-md-6">
-                                                <Controller
-                                                    name="consultation_purpose"
-                                                    control={control}
-                                                    rules={{
-                                                        required:
-                                                            "Este campo es requerido",
-                                                    }}
-                                                    render={({ field }) => (
-                                                        <>
-                                                            <label
-                                                                htmlFor={
-                                                                    field.name
-                                                                }
-                                                                className="form-label"
-                                                            >
-                                                                Finalidad de la
-                                                                consulta *
-                                                            </label>
-                                                            <Dropdown
-                                                                inputId={
-                                                                    field.name
-                                                                }
-                                                                options={
-                                                                    consultationPurposes
-                                                                }
-                                                                optionValue="value"
-                                                                optionLabel="label"
-                                                                filter
-                                                                showClear
-                                                                placeholder="Seleccione una finalidad"
-                                                                className={classNames(
-                                                                    "w-100 dropdown-appointment",
-                                                                    {
-                                                                        "p-invalid":
-                                                                            errors.consultation_purpose,
-                                                                    }
-                                                                )}
-                                                                appendTo={
-                                                                    "self"
-                                                                }
-                                                                {...field}
-                                                            ></Dropdown>
-                                                        </>
-                                                    )}
-                                                />
-                                                {getFormErrorMessage(
-                                                    "consultation_purpose"
-                                                )}
-                                            </div>
-                                            <div className="col-md-6">
-                                                <Controller
-                                                    name="consultation_type"
-                                                    control={control}
-                                                    rules={{
-                                                        required:
-                                                            "Este campo es requerido",
-                                                    }}
-                                                    render={({ field }) => (
-                                                        <>
-                                                            <label
-                                                                htmlFor={
-                                                                    field.name
-                                                                }
-                                                                className="form-label"
-                                                            >
-                                                                Tipo de consulta
-                                                                *
-                                                            </label>
-                                                            <Dropdown
-                                                                inputId={
-                                                                    field.name
-                                                                }
-                                                                options={
-                                                                    consultationTypes
-                                                                }
-                                                                optionLabel="label"
-                                                                optionValue="value"
-                                                                filter
-                                                                showClear
-                                                                placeholder="Seleccione un tipo de consulta"
-                                                                className={classNames(
-                                                                    "w-100 dropdown-appointment",
-                                                                    {
-                                                                        "p-invalid":
-                                                                            errors.consultation_type,
-                                                                    }
-                                                                )}
-                                                                appendTo={
-                                                                    "self"
-                                                                }
-                                                                {...field}
-                                                            ></Dropdown>
-                                                        </>
-                                                    )}
-                                                />
-                                                {getFormErrorMessage(
-                                                    "consultation_type"
-                                                )}
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    <div className="mb-3">
-                                        <div className="row">
-                                            <div className="col-md-6">
-                                                <Controller
-                                                    name="external_cause"
-                                                    control={control}
-                                                    render={({ field }) => (
-                                                        <>
-                                                            <label
-                                                                htmlFor={
-                                                                    field.name
-                                                                }
-                                                                className="form-label"
-                                                            >
-                                                                Causa externa
-                                                            </label>
-                                                            <Dropdown
-                                                                inputId={
-                                                                    field.name
-                                                                }
-                                                                options={
-                                                                    externalCauses
-                                                                }
-                                                                optionLabel="label"
-                                                                optionValue="value"
-                                                                filter
-                                                                showClear
-                                                                placeholder="Seleccione una causa externa"
-                                                                className={classNames(
-                                                                    "w-100 dropdown-appointment"
-                                                                )}
-                                                                appendTo={
-                                                                    "self"
-                                                                }
-                                                                {...field}
-                                                            ></Dropdown>
-                                                        </>
-                                                    )}
-                                                />
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    <div className="mb-4">
-                                        {!editingId && (
-                                            <div className="d-flex align-items-center gap-2">
-                                                <Checkbox
-                                                    inputId="recurrent"
-                                                    name="recurrent"
-                                                    checked={
-                                                        showRecurrentFields
-                                                    }
-                                                    onChange={(e) =>
-                                                        setShowRecurrentFields(
-                                                            e.target.checked ||
-                                                                false
-                                                        )
-                                                    }
-                                                />
-                                                <label
-                                                    htmlFor="recurrent"
-                                                    className="ml-2 form-check-label"
-                                                >
-                                                    Cita recurrente
-                                                </label>
-                                            </div>
-                                        )}
-                                        {showRecurrentFields && (
-                                            <div className="mt-3">
-                                                <div className="row">
-                                                    <div className="col-md-6">
-                                                        <label
-                                                            htmlFor="appointment_frequency"
-                                                            className="form-label"
-                                                        >
-                                                            Frecuencia de la
-                                                            cita
-                                                        </label>
-                                                        <Dropdown
-                                                            inputId="appointment_frequency"
-                                                            options={
-                                                                frequencies
-                                                            }
-                                                            optionLabel="label"
-                                                            optionValue="value"
-                                                            filter
-                                                            showClear
-                                                            placeholder="Seleccione una frecuencia"
-                                                            className={classNames(
-                                                                "w-100"
+                                                        <Controller
+                                                            name="is_group"
+                                                            control={control}
+                                                            render={({ field }) => (
+                                                                <>
+                                                                    <div className="d-flex align-items-center gap-2">
+                                                                        <InputSwitch
+                                                                            checked={
+                                                                                field.value
+                                                                            }
+                                                                            onChange={(
+                                                                                e
+                                                                            ) => {
+                                                                                clearPatientForm();
+                                                                                clearAppointmentForm();
+                                                                                field.onChange(
+                                                                                    e.value
+                                                                                );
+                                                                            }}
+                                                                        />
+                                                                        <label
+                                                                            htmlFor={
+                                                                                field.name
+                                                                            }
+                                                                            className="form-label"
+                                                                        >
+                                                                            Grupal
+                                                                        </label>
+                                                                    </div>
+                                                                </>
                                                             )}
-                                                            appendTo={"self"}
-                                                            value={
-                                                                appointmentFrequency
-                                                            }
-                                                            onChange={(e) =>
-                                                                setAppointmentFrequency(
-                                                                    e.value
-                                                                )
-                                                            }
                                                         />
                                                     </div>
-                                                    <div className="col-md-6">
-                                                        <label
-                                                            htmlFor="appointment_repetitions"
-                                                            className="form-label"
-                                                        >
-                                                            Número de
-                                                            repeticiones
-                                                        </label>
-                                                        <InputNumber
-                                                            inputId="appointment_repetitions"
-                                                            value={
-                                                                appointmentRepetitions
-                                                            }
-                                                            onValueChange={(
-                                                                e
-                                                            ) =>
-                                                                setAppointmentRepetitions(
-                                                                    e.value
-                                                                )
-                                                            }
-                                                            className="w-100"
-                                                            min={1}
-                                                        />
+
+                                                    {getFormErrorMessage(
+                                                        "appointment_type"
+                                                    )}
+                                                </div>
+
+                                                <div className="mb-3">
+                                                    <Controller
+                                                        name="appointment_date"
+                                                        control={control}
+                                                        rules={{
+                                                            required:
+                                                                "Este campo es requerido",
+                                                        }}
+                                                        render={({ field }) => (
+                                                            <>
+                                                                <label
+                                                                    htmlFor={field.name}
+                                                                    className="form-label"
+                                                                >
+                                                                    Fecha de la consulta *
+                                                                </label>
+                                                                <Calendar
+                                                                    id={field.name}
+                                                                    value={field.value}
+                                                                    onChange={(e) =>
+                                                                        field.onChange(
+                                                                            e.value
+                                                                        )
+                                                                    }
+                                                                    className={classNames(
+                                                                        "w-100",
+                                                                        {
+                                                                            "p-invalid":
+                                                                                errors.appointment_date,
+                                                                        }
+                                                                    )}
+                                                                    disabled={
+                                                                        appointmentDateDisabled
+                                                                    }
+                                                                    enabledDates={
+                                                                        enabledDates
+                                                                    }
+                                                                    appendTo={"self"}
+                                                                    placeholder="Seleccione una fecha"
+                                                                />
+                                                            </>
+                                                        )}
+                                                    />
+                                                    {getFormErrorMessage(
+                                                        "appointment_date"
+                                                    )}
+                                                </div>
+
+                                                <div className="mb-3">
+                                                    <Controller
+                                                        name="assigned_user_availability"
+                                                        control={control}
+                                                        rules={{
+                                                            required:
+                                                                "Este campo es requerido",
+                                                        }}
+                                                        render={({ field }) => (
+                                                            <>
+                                                                <label
+                                                                    htmlFor={field.name}
+                                                                    className="form-label"
+                                                                >
+                                                                    Doctor(a) *
+                                                                </label>
+                                                                <Dropdown
+                                                                    inputId={field.name}
+                                                                    options={
+                                                                        userAvailabilityOptions
+                                                                    }
+                                                                    optionLabel="full_name"
+                                                                    filter
+                                                                    placeholder="Seleccione un usuario"
+                                                                    className={classNames(
+                                                                        "w-100",
+                                                                        {
+                                                                            "p-invalid":
+                                                                                errors.assigned_user_availability,
+                                                                        }
+                                                                    )}
+                                                                    appendTo={"self"}
+                                                                    dataKey="id"
+                                                                    disabled={
+                                                                        userAvailabilityDisabled
+                                                                    }
+                                                                    {...field}
+                                                                    onChange={(e) => {
+                                                                        pendingEditRef.current = null;
+                                                                        field.onChange(e.value);
+                                                                    }}
+                                                                ></Dropdown>
+                                                            </>
+                                                        )}
+                                                    />
+                                                    {getFormErrorMessage(
+                                                        "assigned_user_availability"
+                                                    )}
+                                                </div>
+
+                                                {assistantAvailabilityOptions.length >
+                                                    0 && (
+                                                        <>
+                                                            <div className="mb-3">
+                                                                <Controller
+                                                                    name="assigned_user_assistant_availability_id"
+                                                                    control={control}
+                                                                    render={({ field }) => (
+                                                                        <>
+                                                                            <label
+                                                                                htmlFor={
+                                                                                    field.name
+                                                                                }
+                                                                                className="form-label"
+                                                                            >
+                                                                                Asistente
+                                                                            </label>
+                                                                            <Dropdown
+                                                                                inputId={
+                                                                                    field.name
+                                                                                }
+                                                                                options={
+                                                                                    assistantAvailabilityOptions
+                                                                                }
+                                                                                optionLabel="full_name"
+                                                                                optionValue="id"
+                                                                                filter
+                                                                                showClear
+                                                                                placeholder="Seleccione un asistente"
+                                                                                className={classNames(
+                                                                                    "w-100",
+                                                                                    {
+                                                                                        "p-invalid":
+                                                                                            errors.assigned_user_assistant_availability_id,
+                                                                                    }
+                                                                                )}
+                                                                                appendTo={
+                                                                                    "self"
+                                                                                }
+                                                                                disabled={
+                                                                                    userAvailabilityDisabled
+                                                                                }
+                                                                                {...field}
+                                                                            ></Dropdown>
+                                                                        </>
+                                                                    )}
+                                                                />
+                                                            </div>
+                                                        </>
+                                                    )}
+
+                                                <div className="mb-3">
+                                                    <Controller
+                                                        name="appointment_time"
+                                                        control={control}
+                                                        rules={{
+                                                            required:
+                                                                "Este campo es requerido",
+                                                        }}
+                                                        render={({ field }) => (
+                                                            <>
+                                                                <label
+                                                                    htmlFor={field.name}
+                                                                    className="form-label"
+                                                                >
+                                                                    Hora de la consulta *
+                                                                </label>
+                                                                <Dropdown
+                                                                    inputId={field.name}
+                                                                    options={
+                                                                        appointmentTimeOptions
+                                                                    }
+                                                                    virtualScrollerOptions={{
+                                                                        itemSize: 38,
+                                                                    }}
+                                                                    optionLabel="label"
+                                                                    filter
+                                                                    placeholder="Seleccione una hora"
+                                                                    className={classNames(
+                                                                        "w-100",
+                                                                        {
+                                                                            "p-invalid":
+                                                                                errors.appointment_time,
+                                                                        }
+                                                                    )}
+                                                                    appendTo={"self"}
+                                                                    disabled={
+                                                                        appointmentTimeDisabled
+                                                                    }
+                                                                    {...field}
+                                                                ></Dropdown>
+                                                            </>
+                                                        )}
+                                                    />
+                                                    {getFormErrorMessage(
+                                                        "appointment_time"
+                                                    )}
+                                                </div>
+
+                                                <div className="mb-3">
+                                                    <div className="row">
+                                                        <div className="col-md-12">
+                                                            <Controller
+                                                                name="product_id"
+                                                                control={control}
+                                                                rules={{
+                                                                    required:
+                                                                        "Este campo es requerido",
+                                                                }}
+                                                                render={({ field }) => (
+                                                                    <>
+                                                                        <label
+                                                                            htmlFor={
+                                                                                field.name
+                                                                            }
+                                                                            className="form-label"
+                                                                        >
+                                                                            Procedimiento *
+                                                                        </label>
+                                                                        <Dropdown
+                                                                            inputId={
+                                                                                field.name
+                                                                            }
+                                                                            options={
+                                                                                products
+                                                                            }
+                                                                            optionLabel="label"
+                                                                            optionValue="id"
+                                                                            virtualScrollerOptions={{
+                                                                                itemSize: 38,
+                                                                            }}
+                                                                            filter
+                                                                            showClear
+                                                                            placeholder="Seleccione un procedimiento"
+                                                                            className={classNames(
+                                                                                "w-100",
+                                                                                {
+                                                                                    "p-invalid":
+                                                                                        errors.product_id,
+                                                                                }
+                                                                            )}
+                                                                            appendTo={
+                                                                                "self"
+                                                                            }
+                                                                            {...field}
+                                                                            disabled={
+                                                                                disabledProductIdField
+                                                                            }
+                                                                        ></Dropdown>
+                                                                    </>
+                                                                )}
+                                                            />
+                                                            {getFormErrorMessage(
+                                                                "product_id"
+                                                            )}
+                                                        </div>
                                                     </div>
                                                 </div>
-                                            </div>
-                                        )}
-                                    </div>
 
-                                    <div className="d-flex justify-content-between">
-                                        <Button
-                                            type="button"
-                                            className="p-button-primary"
-                                            onClick={() => handleClear()}
-                                        >
-                                            Limpiar
-                                        </Button>
-                                        <Button
-                                            type="button"
-                                            className="p-button-primary"
-                                            onClick={handleSubmit(
-                                                addAppointments
-                                            )}
-                                        >
-                                            {editingId &&
-                                            appointments.find(
-                                                (a) => a.uuid === editingId
-                                            )
-                                                ? "Actualizar cita"
-                                                : "Agregar cita"}
-                                        </Button>
-                                    </div>
+                                                <div className="mb-3">
+                                                    <div className="row">
+                                                        <div className="col-md-6">
+                                                            <Controller
+                                                                name="consultation_purpose"
+                                                                control={control}
+                                                                rules={{
+                                                                    required:
+                                                                        "Este campo es requerido",
+                                                                }}
+                                                                render={({ field }) => (
+                                                                    <>
+                                                                        <label
+                                                                            htmlFor={
+                                                                                field.name
+                                                                            }
+                                                                            className="form-label"
+                                                                        >
+                                                                            Finalidad de la
+                                                                            consulta *
+                                                                        </label>
+                                                                        <Dropdown
+                                                                            inputId={
+                                                                                field.name
+                                                                            }
+                                                                            options={
+                                                                                consultationPurposes
+                                                                            }
+                                                                            optionValue="value"
+                                                                            optionLabel="label"
+                                                                            filter
+                                                                            showClear
+                                                                            placeholder="Seleccione una finalidad"
+                                                                            className={classNames(
+                                                                                "w-100 dropdown-appointment",
+                                                                                {
+                                                                                    "p-invalid":
+                                                                                        errors.consultation_purpose,
+                                                                                }
+                                                                            )}
+                                                                            appendTo={
+                                                                                "self"
+                                                                            }
+                                                                            {...field}
+                                                                        ></Dropdown>
+                                                                    </>
+                                                                )}
+                                                            />
+                                                            {getFormErrorMessage(
+                                                                "consultation_purpose"
+                                                            )}
+                                                        </div>
+                                                        <div className="col-md-6">
+                                                            <Controller
+                                                                name="consultation_type"
+                                                                control={control}
+                                                                rules={{
+                                                                    required:
+                                                                        "Este campo es requerido",
+                                                                }}
+                                                                render={({ field }) => (
+                                                                    <>
+                                                                        <label
+                                                                            htmlFor={
+                                                                                field.name
+                                                                            }
+                                                                            className="form-label"
+                                                                        >
+                                                                            Tipo de consulta
+                                                                            *
+                                                                        </label>
+                                                                        <Dropdown
+                                                                            inputId={
+                                                                                field.name
+                                                                            }
+                                                                            options={
+                                                                                consultationTypes
+                                                                            }
+                                                                            optionLabel="label"
+                                                                            optionValue="value"
+                                                                            filter
+                                                                            showClear
+                                                                            placeholder="Seleccione un tipo de consulta"
+                                                                            className={classNames(
+                                                                                "w-100 dropdown-appointment",
+                                                                                {
+                                                                                    "p-invalid":
+                                                                                        errors.consultation_type,
+                                                                                }
+                                                                            )}
+                                                                            appendTo={
+                                                                                "self"
+                                                                            }
+                                                                            {...field}
+                                                                        ></Dropdown>
+                                                                    </>
+                                                                )}
+                                                            />
+                                                            {getFormErrorMessage(
+                                                                "consultation_type"
+                                                            )}
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                                <div className="mb-3">
+                                                    <div className="row">
+                                                        <div className="col-md-6">
+                                                            <Controller
+                                                                name="external_cause"
+                                                                control={control}
+                                                                render={({ field }) => (
+                                                                    <>
+                                                                        <label
+                                                                            htmlFor={
+                                                                                field.name
+                                                                            }
+                                                                            className="form-label"
+                                                                        >
+                                                                            Causa externa
+                                                                        </label>
+                                                                        <Dropdown
+                                                                            inputId={
+                                                                                field.name
+                                                                            }
+                                                                            options={
+                                                                                externalCauses
+                                                                            }
+                                                                            optionLabel="label"
+                                                                            optionValue="value"
+                                                                            filter
+                                                                            showClear
+                                                                            placeholder="Seleccione una causa externa"
+                                                                            className={classNames(
+                                                                                "w-100 dropdown-appointment"
+                                                                            )}
+                                                                            appendTo={
+                                                                                "self"
+                                                                            }
+                                                                            {...field}
+                                                                        ></Dropdown>
+                                                                    </>
+                                                                )}
+                                                            />
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                                <div className="mb-4">
+                                                    {!editingId && (
+                                                        <div className="d-flex align-items-center gap-2">
+                                                            <Checkbox
+                                                                inputId="recurrent"
+                                                                name="recurrent"
+                                                                checked={
+                                                                    showRecurrentFields
+                                                                }
+                                                                onChange={(e) =>
+                                                                    setShowRecurrentFields(
+                                                                        e.target.checked ||
+                                                                        false
+                                                                    )
+                                                                }
+                                                            />
+                                                            <label
+                                                                htmlFor="recurrent"
+                                                                className="ml-2 form-check-label"
+                                                            >
+                                                                Cita recurrente
+                                                            </label>
+                                                        </div>
+                                                    )}
+                                                    {showRecurrentFields && (
+                                                        <div className="mt-3">
+                                                            <div className="row">
+                                                                <div className="col-md-6">
+                                                                    <label
+                                                                        htmlFor="appointment_frequency"
+                                                                        className="form-label"
+                                                                    >
+                                                                        Frecuencia de la
+                                                                        cita
+                                                                    </label>
+                                                                    <Dropdown
+                                                                        inputId="appointment_frequency"
+                                                                        options={
+                                                                            frequencies
+                                                                        }
+                                                                        optionLabel="label"
+                                                                        optionValue="value"
+                                                                        filter
+                                                                        showClear
+                                                                        placeholder="Seleccione una frecuencia"
+                                                                        className={classNames(
+                                                                            "w-100"
+                                                                        )}
+                                                                        appendTo={"self"}
+                                                                        value={
+                                                                            appointmentFrequency
+                                                                        }
+                                                                        onChange={(e) =>
+                                                                            setAppointmentFrequency(
+                                                                                e.value
+                                                                            )
+                                                                        }
+                                                                    />
+                                                                </div>
+                                                                <div className="col-md-6">
+                                                                    <label
+                                                                        htmlFor="appointment_repetitions"
+                                                                        className="form-label"
+                                                                    >
+                                                                        Número de
+                                                                        repeticiones
+                                                                    </label>
+                                                                    <InputNumber
+                                                                        inputId="appointment_repetitions"
+                                                                        value={
+                                                                            appointmentRepetitions
+                                                                        }
+                                                                        onValueChange={(
+                                                                            e
+                                                                        ) =>
+                                                                            setAppointmentRepetitions(
+                                                                                e.value
+                                                                            )
+                                                                        }
+                                                                        className="w-100"
+                                                                        min={1}
+                                                                    />
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    )}
+                                                </div>
+
+                                                <div className="d-flex justify-content-between">
+                                                    <Button
+                                                        type="button"
+                                                        className="p-button-primary"
+                                                        onClick={() => handleClear()}
+                                                    >
+                                                        Limpiar
+                                                    </Button>
+                                                    <Button
+                                                        type="button"
+                                                        className="p-button-primary"
+                                                        onClick={handleSubmit(
+                                                            addAppointments
+                                                        )}
+                                                    >
+                                                        {editingId &&
+                                                            appointments.find(
+                                                                (a) => a.uuid === editingId
+                                                            )
+                                                            ? "Actualizar cita"
+                                                            : "Agregar cita"}
+                                                    </Button>
+                                                </div>
+                                            </div>
+                                        </TabPanel>
+
+                                        <TabPanel header="Por Especialidad" leftIcon="pi pi-briefcase">
+                                            <div className="pt-2">
+                                                <SpecialtyAvailabilityForm
+                                                    onAvailabilityFound={handleAvailabilityFound}
+                                                    onLoading={() => { }}
+                                                />
+                                            </div>
+                                        </TabPanel>
+
+                                        <TabPanel header="Agendar con IA" leftIcon="pi pi-android">
+                                            <div className="pt-2">
+                                                <AISchedulingForm
+                                                    onAvailabilityFound={handleAvailabilityFound}
+                                                    onLoading={() => { }}
+                                                />
+                                            </div>
+                                        </TabPanel>
+                                    </TabView>
                                 </div>
 
                                 <div className="col-md-5">
@@ -1955,18 +2176,15 @@ export const AppointmentFormModal = ({
 
                                                 return (
                                                     <div
-                                                        key={`${
-                                                            appointment.uuid
-                                                        }-${
-                                                            Object.keys(
+                                                        key={`${appointment.uuid
+                                                            }-${Object.keys(
                                                                 appointment.errors
                                                             ).length
-                                                        }`}
-                                                        className={`custom-appointment-card ${
-                                                            hasErrors
-                                                                ? "appointment-error border-danger"
-                                                                : "appointment-success border-success"
-                                                        }`}
+                                                            }`}
+                                                        className={`custom-appointment-card ${hasErrors
+                                                            ? "appointment-error border-danger"
+                                                            : "appointment-success border-success"
+                                                            }`}
                                                     >
                                                         <div className="card-body p-3">
                                                             <div className="d-flex justify-content-between align-items-start w-100">
@@ -2083,7 +2301,7 @@ export const AppointmentFormModal = ({
                                 </div>
                             </div>
                         </Card>
-                    </div>
+                    </div >
                     <div className="d-flex justify-content-end gap-2">
                         <Button
                             className="p-button-secondary px-3 my-0"
@@ -2108,8 +2326,20 @@ export const AppointmentFormModal = ({
                             ></i>
                         </Button>
                     </div>
-                </form>
-            </Dialog>
+                </form >
+                <AvailabilitySlotsDialog
+                    visible={availabilityDialogVisible}
+                    onHide={() => setAvailabilityDialogVisible(false)}
+                    availabilities={foundAvailabilities}
+                    filtersUsed={aiFilters}
+                    onAddSelected={handleSlotsAdded}
+                    consultationPurposes={consultationPurposes}
+                    consultationTypes={consultationTypes}
+                    externalCauses={externalCauses}
+                    onFetchAvailability={handleRefetchAvailability}
+                    specialties={allSpecialties || []}
+                />
+            </Dialog >
         </>
     );
 };

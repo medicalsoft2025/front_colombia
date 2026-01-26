@@ -12,6 +12,7 @@ import { Divider } from "primereact/divider";
 import { Dropdown } from "primereact/dropdown";
 export const AccountingAccountFormModal = /*#__PURE__*/forwardRef((props, ref) => {
   const [showInputs, setShowInputs] = useState(false);
+  const [categories, setCategories] = useState([]);
   const {
     visible,
     onHide,
@@ -42,10 +43,7 @@ export const AccountingAccountFormModal = /*#__PURE__*/forwardRef((props, ref) =
   });
   useEffect(() => {
     if (selectedAccount) {
-      setValue("account_code", selectedAccount.account_code);
-      if (selectedAccount.account_code.startsWith("1")) {
-        setShowInputs(true);
-      }
+      loadCategories(selectedAccount);
     }
   }, [selectedAccount]);
   const getFormErrorMessage = name => {
@@ -53,19 +51,95 @@ export const AccountingAccountFormModal = /*#__PURE__*/forwardRef((props, ref) =
       className: "p-error"
     }, errors[name].message);
   };
-  const categoryOptions = [{
-    label: "Medicamentos",
-    value: "medications"
-  }, {
-    label: "Vacunas",
-    value: "vaccines"
-  }, {
-    label: "Inventariables",
-    value: "inventariables"
-  }, {
-    label: "Insumos",
-    value: "supplies"
-  }];
+  function loadCategories(selectedAccount) {
+    setValue("account_code", selectedAccount.account_code);
+    if (selectedAccount.account_code.startsWith("1")) {
+      setShowInputs(true);
+      setCategories([{
+        label: "Medicamentos",
+        value: "medications"
+      }, {
+        label: "Vacunas",
+        value: "vaccines"
+      }, {
+        label: "Inventariables",
+        value: "inventariables"
+      }, {
+        label: "Insumos",
+        value: "supplies"
+      }]);
+    } else if (selectedAccount.account_code.startsWith("4")) {
+      setShowInputs(true);
+      setCategories([{
+        label: "Ingresos por operaciones (No financieros)",
+        value: "operational_income_non_financial"
+      }, {
+        label: "Ingresos Financieros",
+        value: "financial_income"
+      }, {
+        label: "Ingresos Extraordinarios",
+        value: "extraordinary_income"
+      }, {
+        label: "Ingresos por Arrendamientos",
+        value: "rental_income"
+      }, {
+        label: "Ingresos por Venta de Activo Depreciable",
+        value: "depreciable_asset_sale_income"
+      }, {
+        label: "Otros Ingresos",
+        value: "other_income"
+      }]);
+    } else if (selectedAccount.account_code.startsWith("5")) {
+      setShowInputs(true);
+      setCategories([{
+        label: "Gastos de personal",
+        value: "personal_expenses"
+      }, {
+        label: "Gastos por trabajos, suministros y servicios",
+        value: "work_supplies_services"
+      }, {
+        label: "Arrendamientos",
+        value: "rentals"
+      }, {
+        label: "Gastos de activos fijos",
+        value: "fixed_assets_expenses"
+      }, {
+        label: "Gastos de representación",
+        value: "representation_expenses"
+      }, {
+        label: "Otras deducciones admitidas",
+        value: "other_allowed_deductions"
+      }, {
+        label: "Gastos financieros",
+        value: "financial_expenses"
+      }, {
+        label: "Gastos extraordinarios",
+        value: "extraordinary_expenses"
+      }, {
+        label: "Compras y gastos que formarán parte del costo de venta",
+        value: "purchase_sale_cost"
+      }, {
+        label: "Adquisiciones de activos",
+        value: "asset_acquisitions"
+      }, {
+        label: "Gastos de seguros",
+        value: "insurance_expenses"
+      }]);
+    } else {
+      setShowInputs(false);
+      setCategories([{
+        label: "ITBIS facturado",
+        value: "itbis_billed"
+      }, {
+        label: "ISR Percibido",
+        value: "isr_received"
+      }, {
+        label: "Impuesto Selectivo al Consumo",
+        value: "consumption_tax"
+      }]);
+    }
+  }
+  ;
   const onSubmit = data => {
     const accountData = {
       account_code: data.account_code,
@@ -197,7 +271,7 @@ export const AccountingAccountFormModal = /*#__PURE__*/forwardRef((props, ref) =
       className: "w-100",
       value: field.value,
       onChange: e => field.onChange(e.value),
-      options: categoryOptions,
+      options: categories,
       placeholder: "Seleccionar..."
     })
   })), /*#__PURE__*/React.createElement("div", {

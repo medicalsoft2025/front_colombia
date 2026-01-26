@@ -15,6 +15,7 @@ import { SeePatientInfoButton } from "../patients/SeePatientInfoButton";
 import { Button } from "primereact/button";
 import { usePatient } from "../patients/hooks/usePatient";
 import { ClinicalRecordTypeDto } from "../clinical-record-types/interfaces/models";
+import { consentimientoService } from "../../services/api";
 
 interface PatientClinicalRecordAppProps { }
 
@@ -110,13 +111,34 @@ export const PatientClinicalRecordApp: React.FC<
         console.log("Paciente: ", patient);
     }, [patient]);
 
-    const printClinicalRecord = (id: string, title: string) => {
+    const printClinicalRecord = (data: any, title: string) => {
+        const clinicalRecord = clinicalRecords.find(
+            (record) => record.id == data.id
+        );
+        if (clinicalRecord?.clinical_record_type?.dynamic_form_id) {
+            consentimientoService.previewPdf({
+                model_type: "App\\Models\\ClinicalRecord",
+                model_id: data.id
+            })
+            return
+        }
         //@ts-ignore
-        generarFormato("Consulta", id, "Impresion");
+        generarFormato("Consulta", data, "Impresion");
         // crearDocumento(id, "Impresion", "Consulta", "Completa", title);
     };
 
-    const downloadClinicalRecord = (id: string, title: string) => {
+    const downloadClinicalRecord = (id: any, title: string) => {
+        const clinicalRecord = clinicalRecords.find(
+            (record) => record.id == id
+        );
+
+        if (clinicalRecord?.clinical_record_type?.dynamic_form_id) {
+            consentimientoService.downloadPdf({
+                model_type: "App\\Models\\ClinicalRecord",
+                model_id: id
+            })
+            return
+        }
         //@ts-ignore
         generarFormato("Consulta", id, "Descarga");
         // crearDocumento(id, "Descarga", "Consulta", "Completa", title);
@@ -148,9 +170,12 @@ export const PatientClinicalRecordApp: React.FC<
     };
 
     const seeDetail = (id: string, clinicalRecordTypeObject: any) => {
-        console.log("Clinical Record Type Object: ", clinicalRecordTypeObject);
         if (clinicalRecordTypeObject.dynamic_form_id) {
-            window.location.href = `clinicalRecordFormDetail?clinicalRecordId=${id}&patient_id=${patientId}&especialidad=${specialtyId}&clinicalRecordTypeId=${clinicalRecordTypeObject.id}&dynamic_form_id=${clinicalRecordTypeObject.dynamic_form_id}`;
+            consentimientoService.previewPdf({
+                model_type: "App\\Models\\ClinicalRecord",
+                model_id: id
+            })
+            return
         } else {
             window.location.href = `detalleConsulta?clinicalRecordId=${id}&patient_id=${patientId}&tipo_historia=${clinicalRecordTypeObject.key_}&especialidad=${specialtyId}`;
         }
@@ -173,7 +198,7 @@ export const PatientClinicalRecordApp: React.FC<
                         <div className="d-flex align-items-center gap-2 justify-content-end">
                             <SeePatientInfoButton patientId={patientId} />
 
-                            {patient && patient.current_appointment && (
+                            {patient && (patient.current_appointment || appointmentId) && (
                                 <>
                                     <div className="dropdown">
                                         <Button

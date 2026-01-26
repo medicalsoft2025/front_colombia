@@ -4,26 +4,23 @@ import { IntegrationConfigFormProps, ConfigFieldI } from "../interfaces";
 
 export const DGIIIntegrationConfig = (props: IntegrationConfigFormProps) => {
 
-    const { configs = [] } = props;
+    const { configs = [], onSubmit } = props;
 
     const initialConfigFields: ConfigFieldI[] = [
         {
-            configKey: "DGII_FILE",
-            field: "file",
+            field: "DGII_FILE",
             label: "Certificado P12",
             type: "file",
             description: "Certificado P12 del DGII"
         },
         {
-            configKey: "DGII_PASSWORD",
-            field: "password",
+            field: "DGII_PASSWORD",
             label: "Contraseña",
             type: "password",
             description: "Contraseña del certificado P12"
         },
         {
-            configKey: "DGII_TENANTS",
-            field: "tenants",
+            field: "DGII_TENANTS",
             label: "Tenants",
             type: "list",
             source: "DGII_TENANTS",
@@ -32,8 +29,7 @@ export const DGIIIntegrationConfig = (props: IntegrationConfigFormProps) => {
             placeholder: "Seleccione un tenant",
         },
         {
-            configKey: "DGII_USERS",
-            field: "users",
+            field: "DGII_USERS",
             label: "Usuarios",
             type: "list",
             source: "USERS",
@@ -44,7 +40,7 @@ export const DGIIIntegrationConfig = (props: IntegrationConfigFormProps) => {
     ];
 
     const handleSubmit = (data: any) => {
-        console.log(data);
+        onSubmit?.(data);
     };
 
     return (

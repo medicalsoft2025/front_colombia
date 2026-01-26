@@ -11,6 +11,7 @@ import { generarFormato } from "../../funciones/funcionesJS/generarPDF.js";
 import { SeePatientInfoButton } from "../patients/SeePatientInfoButton.js";
 import { Button } from "primereact/button";
 import { usePatient } from "../patients/hooks/usePatient.js";
+import { consentimientoService } from "../../services/api/index.js";
 const specialtyId = new URLSearchParams(window.location.search).get("especialidad");
 const patientId = new URLSearchParams(window.location.search).get("patient_id") || new URLSearchParams(window.location.search).get("id") || "";
 const appointmentId = new URLSearchParams(window.location.search).get("appointment_id") || "";
@@ -56,12 +57,28 @@ export const PatientClinicalRecordApp = () => {
   useEffect(() => {
     console.log("Paciente: ", patient);
   }, [patient]);
-  const printClinicalRecord = (id, title) => {
+  const printClinicalRecord = (data, title) => {
+    const clinicalRecord = clinicalRecords.find(record => record.id == data.id);
+    if (clinicalRecord?.clinical_record_type?.dynamic_form_id) {
+      consentimientoService.previewPdf({
+        model_type: "App\\Models\\ClinicalRecord",
+        model_id: data.id
+      });
+      return;
+    }
     //@ts-ignore
-    generarFormato("Consulta", id, "Impresion");
+    generarFormato("Consulta", data, "Impresion");
     // crearDocumento(id, "Impresion", "Consulta", "Completa", title);
   };
   const downloadClinicalRecord = (id, title) => {
+    const clinicalRecord = clinicalRecords.find(record => record.id == id);
+    if (clinicalRecord?.clinical_record_type?.dynamic_form_id) {
+      consentimientoService.downloadPdf({
+        model_type: "App\\Models\\ClinicalRecord",
+        model_id: id
+      });
+      return;
+    }
     //@ts-ignore
     generarFormato("Consulta", id, "Descarga");
     // crearDocumento(id, "Descarga", "Consulta", "Completa", title);
@@ -77,9 +94,12 @@ export const PatientClinicalRecordApp = () => {
     }
   };
   const seeDetail = (id, clinicalRecordTypeObject) => {
-    console.log("Clinical Record Type Object: ", clinicalRecordTypeObject);
     if (clinicalRecordTypeObject.dynamic_form_id) {
-      window.location.href = `clinicalRecordFormDetail?clinicalRecordId=${id}&patient_id=${patientId}&especialidad=${specialtyId}&clinicalRecordTypeId=${clinicalRecordTypeObject.id}&dynamic_form_id=${clinicalRecordTypeObject.dynamic_form_id}`;
+      consentimientoService.previewPdf({
+        model_type: "App\\Models\\ClinicalRecord",
+        model_id: id
+      });
+      return;
     } else {
       window.location.href = `detalleConsulta?clinicalRecordId=${id}&patient_id=${patientId}&tipo_historia=${clinicalRecordTypeObject.key_}&especialidad=${specialtyId}`;
     }
@@ -97,7 +117,7 @@ export const PatientClinicalRecordApp = () => {
     className: "d-flex align-items-center gap-2 justify-content-end"
   }, /*#__PURE__*/React.createElement(SeePatientInfoButton, {
     patientId: patientId
-  }), patient && patient.current_appointment && /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("div", {
+  }), patient && (patient.current_appointment || appointmentId) && /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("div", {
     className: "dropdown"
   }, /*#__PURE__*/React.createElement(Button, {
     label: "Crear Historia Cl\xEDnica",

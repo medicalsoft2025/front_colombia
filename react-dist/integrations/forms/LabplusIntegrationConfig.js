@@ -2,21 +2,20 @@ import React from "react";
 import { DynamicIntegrationForm } from "./DynamicIntegrationForm.js";
 export const LabplusIntegrationConfig = props => {
   const {
-    configs = []
+    configs = [],
+    onSubmit
   } = props;
   const initialConfigFields = [{
-    configKey: "LABPLUS_URL",
-    field: "url",
+    field: "LABPLUS_URL",
     label: "URL",
     type: "text"
   }, {
-    configKey: "LABPLUS_TOKEN",
-    field: "token",
+    field: "LABPLUS_TOKEN",
     label: "Token",
     type: "text"
   }];
   const handleSubmit = data => {
-    console.log(data);
+    onSubmit?.(data);
   };
   return /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement(DynamicIntegrationForm, {
     configs: configs,

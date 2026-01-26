@@ -1,8 +1,8 @@
 import React from "react";
 import { Button } from "primereact/button";
 import { useIntegrationForm } from "../hooks/useIntegrationForm";
-import { ConfigField } from "../components/ConfigField";
 import { ConfigFieldI, DynamicIntegrationFormProps } from "../interfaces";
+import { ConfigField } from "../components/ConfigField";
 
 export const DynamicIntegrationForm = (props: DynamicIntegrationFormProps) => {
     const { configs, initialConfigFields, onSubmit } = props;
@@ -19,7 +19,10 @@ export const DynamicIntegrationForm = (props: DynamicIntegrationFormProps) => {
                     source={field.source}
                     sourceType={field.sourceType}
                     multiple={field.multiple}
-                    onChange={(value) => setValue(field.field, value)}
+                    onChange={(value) => {
+                        console.log("value", value);
+                        setValue(field.field, value)
+                    }}
                     onFileChange={(value) => appendFile(value)}
                     placeholder={field.placeholder}
                     description={field.description}

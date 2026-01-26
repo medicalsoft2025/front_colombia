@@ -10,7 +10,7 @@ export const useIntegrationForm = (props: UseIntegrationFormProps) => {
         [key: string]: any
     }>();
 
-    const { fields, append: appendFile, remove: removeFile, update: updateFile } = useFieldArray({
+    const { append: appendFile, remove: removeFile, update: updateFile } = useFieldArray({
         control,
         name: "files"
     });
@@ -23,11 +23,12 @@ export const useIntegrationForm = (props: UseIntegrationFormProps) => {
         }
 
         initialConfigFields.forEach((field) => {
-            const config = configs.find((config: any) => config.key === field.configKey);
+            const config = configs.find((config: any) => config.key_ === field.field);
             if (config) {
                 field.initialValue = config.value;
             }
         });
+
         setConfigFields(initialConfigFields);
     }, [configs, initialConfigFields]);
 

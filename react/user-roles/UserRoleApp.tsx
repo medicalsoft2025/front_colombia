@@ -10,6 +10,7 @@ import { useUserRoleCreate } from './hooks/useUserRoleCreate';
 import { useUserRoleUpdate } from './hooks/useUserRoleUpdate';
 import { userRolesService } from '../../services/api';
 import { SwalManager } from '../../services/alertManagerImported';
+import { useMenuItems } from '../layout/menu/hooks/useMenuItems';
 
 interface UserRoleAppProps {
     onConfigurationComplete?: (isComplete: boolean) => void;
@@ -29,6 +30,7 @@ export const UserRoleApp = ({
     const { updateUserRole } = useUserRoleUpdate();
     const { deleteUserRole } = useUserRoleDelete();
     const { userRole, fetchUserRole, setUserRole } = useUserRole();
+    const { refetch: refetchLoggedUserMenus } = useMenuItems();
 
     const isComplete = userRoles && userRoles.length > 0;
     const showValidations = isConfigurationContext;
@@ -73,6 +75,7 @@ export const UserRoleApp = ({
             }
 
             fetchUserRoles();
+            refetchLoggedUserMenus();
             setShowFormModal(false);
             setUserRole(null);
             setEditingRoleId(undefined);

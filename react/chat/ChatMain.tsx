@@ -34,7 +34,7 @@ export default function ChatMain() {
       </div>
 
       {/* Chat flotante */}
-      <ChatBubble />
+      <ChatBubble token={token} />
     </main>
   )
 }

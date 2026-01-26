@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
-import { PrimeReactProvider } from 'primereact/api';
-import { useEffect } from 'react';
+import React, { useState } from "react";
+import { PrimeReactProvider } from "primereact/api";
+import { useEffect } from "react";
 import { ExamConfigTable } from "./components/ExamConfigTable.js";
 import { useExamTypes } from "./hooks/useExamTypes.js";
 import { useExamTypeCreate } from "./hooks/useExamTypeCreate.js";
@@ -10,6 +10,7 @@ import { useExamType } from "./hooks/useExamType.js";
 import { ExamConfigFormModal } from "./components/ExamConfigFormModal.js";
 export const ExamConfigApp = () => {
   const [showExamTypeFormModal, setShowExamTypeFormModal] = useState(false);
+  const [refreshTrigger, setRefreshTrigger] = useState(0);
   const [initialData, setInitialData] = useState(undefined);
   const {
     examTypes,
@@ -35,7 +36,6 @@ export const ExamConfigApp = () => {
     setShowExamTypeFormModal(true);
   };
   const handleSubmit = async data => {
-    console.log(data);
     const mappedData = {
       ...data,
       form_config: data.form_config || {}
@@ -47,6 +47,7 @@ export const ExamConfigApp = () => {
     }
     fetchExamTypes();
     setShowExamTypeFormModal(false);
+    setRefreshTrigger(prev => prev + 1);
   };
   const handleTableEdit = id => {
     fetchExamType(id);
@@ -55,18 +56,19 @@ export const ExamConfigApp = () => {
   const handleTableDelete = async id => {
     const confirmed = await deleteExamType(id);
     if (confirmed) fetchExamTypes();
+    setRefreshTrigger(prev => prev + 1);
   };
   useEffect(() => {
     setInitialData({
-      name: examType?.name ?? '',
-      description: examType?.description ?? '',
-      type: examType?.type ?? '',
+      name: examType?.name ?? "",
+      description: examType?.description ?? "",
+      type: examType?.type ?? "",
       form_config: examType?.form_config ?? null
     });
   }, [examType]);
   return /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement(PrimeReactProvider, {
     value: {
-      appendTo: 'self',
+      appendTo: "self",
       zIndex: {
         overlay: 100000
       }
@@ -83,11 +85,11 @@ export const ExamConfigApp = () => {
   }, /*#__PURE__*/React.createElement("i", {
     className: "fas fa-plus"
   }), " Nuevo"))), /*#__PURE__*/React.createElement(ExamConfigTable, {
-    exams: examTypes,
+    refreshTrigger: refreshTrigger,
     onEditItem: handleTableEdit,
     onDeleteItem: handleTableDelete
   }), /*#__PURE__*/React.createElement(ExamConfigFormModal, {
-    title: examType ? 'Editar exámen' : 'Crear exámen',
+    title: examType ? "Editar exámen" : "Crear exámen",
     show: showExamTypeFormModal,
     handleSubmit: handleSubmit,
     onHide: () => {

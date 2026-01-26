@@ -10,7 +10,7 @@ import {
   PaymentMethodFormInputs,
   PaymentMethodFormProps,
 } from "../interfaces/PaymentMethodFormConfigTypes";
-import { Checkbox } from 'primereact/checkbox';
+import { Checkbox } from "primereact/checkbox";
 
 const categories = [
   { label: "Transaccional", value: "transactional" },
@@ -19,6 +19,14 @@ const categories = [
   { label: "Vencimiento Clientes", value: "customer_expiration" },
   { label: "Anticipo Clientes", value: "customer_advance" },
   { label: "Anticipo Proveedores", value: "supplier_advance" },
+];
+
+const sub_categories = [
+  { label: "Cheque/Transferencia/Depósito", value: "transfer" },
+  { label: "Tarjeta Débito/Crédito", value: "card" },
+  { label: "Venta a Crédito", value: "credit" },
+  { label: "Bonos o Certificados de Regalo", value: "gift_certificate" },
+  { label: "Permuta", value: "swap" },
 ];
 
 const TypeMethod = [
@@ -45,10 +53,11 @@ const PaymentMethodFormConfig: React.FC<PaymentMethodFormProps> = ({
     defaultValues: initialData || {
       name: "",
       category: "",
+      sub_category: "",
       payment_type: "",
       accounting_account_id: null,
       additionalDetails: "",
-      is_cash: false
+      is_cash: false,
     },
   });
 
@@ -69,8 +78,8 @@ const PaymentMethodFormConfig: React.FC<PaymentMethodFormProps> = ({
         payment_type: "",
         accounting_account_id: null,
         additionalDetails: "",
-        is_cash: false
-      }
+        is_cash: false,
+      },
     );
   }, [initialData, reset]);
 
@@ -138,39 +147,6 @@ const PaymentMethodFormConfig: React.FC<PaymentMethodFormProps> = ({
               )}
             />
           </div>
-        </div>
-
-        {/* Columna derecha */}
-        <div className="col-md-6">
-          <div className="field mb-4">
-            <label htmlFor="category" className="font-medium block mb-2">
-              Categoría *
-            </label>
-            <Controller
-              name="category"
-              control={control}
-              rules={{ required: "La categoría es requerida" }}
-              render={({ field, fieldState }) => (
-                <>
-                  <Dropdown
-                    id={field.name}
-                    value={field.value}
-                    onChange={(e) => field.onChange(e.value)}
-                    options={categories}
-                    optionLabel="label"
-                    optionValue="value"
-                    placeholder="Seleccione una categoría"
-                    className={classNames("w-full", {
-                      "p-invalid": fieldState.error,
-                    })}
-                    showClear
-                    filter
-                  />
-                  {getFormErrorMessage("category")}
-                </>
-              )}
-            />
-          </div>
 
           <div className="row">
             <div className="col-8">
@@ -211,7 +187,7 @@ const PaymentMethodFormConfig: React.FC<PaymentMethodFormProps> = ({
                     <Checkbox
                       id={field.name}
                       checked={field.value}
-                      onChange={e => field.onChange(e.checked)}
+                      onChange={(e) => field.onChange(e.checked)}
                       className={classNames("w-full", {})}
                       inputId={field.name}
                     />
@@ -219,13 +195,72 @@ const PaymentMethodFormConfig: React.FC<PaymentMethodFormProps> = ({
                   </>
                 )}
               />
-              <label
-                htmlFor="isCash"
-                className="font-medium block mb-0"
-              >
+              <label htmlFor="isCash" className="font-medium block mb-0">
                 Es efectivo
               </label>
             </div>
+          </div>
+        </div>
+
+        {/* Columna derecha */}
+        <div className="col-md-6">
+          <div className="field mb-4">
+            <label htmlFor="category" className="font-medium block mb-2">
+              Categoría *
+            </label>
+            <Controller
+              name="category"
+              control={control}
+              rules={{ required: "La categoría es requerida" }}
+              render={({ field, fieldState }) => (
+                <>
+                  <Dropdown
+                    id={field.name}
+                    value={field.value}
+                    onChange={(e) => field.onChange(e.value)}
+                    options={categories}
+                    optionLabel="label"
+                    optionValue="value"
+                    placeholder="Seleccione una categoría"
+                    className={classNames("w-full", {
+                      "p-invalid": fieldState.error,
+                    })}
+                    showClear
+                    filter
+                  />
+                  {getFormErrorMessage("category")}
+                </>
+              )}
+            />
+          </div>
+
+          <div className="field mb-4">
+            <label htmlFor="sub_category" className="font-medium block mb-2">
+              Sub categoría *
+            </label>
+            <Controller
+              name="sub_category"
+              control={control}
+              render={({ field, fieldState }) => (
+                <>
+                  <Dropdown
+                    id={field.name}
+                    value={field.value}
+                    onChange={(e) => field.onChange(e.value)}
+                    options={sub_categories}
+                    optionLabel="label"
+                    optionValue="value"
+                    placeholder="Seleccione una sub categoría"
+                    className={classNames("w-full", {
+                      "p-invalid": fieldState.error,
+                    })}
+                    showClear
+                    filter
+                  />
+                  {getFormErrorMessage("sub_category")}
+                </>
+              )}
+            />
           </div>
         </div>
       </div>
@@ -234,7 +269,10 @@ const PaymentMethodFormConfig: React.FC<PaymentMethodFormProps> = ({
       <div className="row">
         <div className="col-12">
           <div className="field mb-4">
-            <label htmlFor="additionalDetails" className="font-medium block mb-2">
+            <label
+              htmlFor="additionalDetails"
+              className="font-medium block mb-2"
+            >
               Detalles Adicionales
             </label>
             <Controller

@@ -43,7 +43,7 @@ export const ClinicalRecordTypesForm = props => {
   const dynamicForm = dynamicForms?.find(form => form.id == dynamicFormId);
   const {
     save,
-    isLoadingForm,
+    isFetchingForm: isLoadingForm,
     toastCreate: toastCreateForm
   } = useAppForms();
   const getFormErrorMessage = name => {

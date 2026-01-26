@@ -7,7 +7,7 @@ import { Button } from "primereact/button";
 import { InputTextarea } from "primereact/inputtextarea";
 import { Dropdown } from "primereact/dropdown";
 import { useAccountingAccounts } from "../../../accounting/hooks/useAccountingAccounts.js";
-import { Checkbox } from 'primereact/checkbox';
+import { Checkbox } from "primereact/checkbox";
 const categories = [{
   label: "Transaccional",
   value: "transactional"
@@ -25,6 +25,22 @@ const categories = [{
 }, {
   label: "Anticipo Proveedores",
   value: "supplier_advance"
+}];
+const sub_categories = [{
+  label: "Cheque/Transferencia/Depósito",
+  value: "transfer"
+}, {
+  label: "Tarjeta Débito/Crédito",
+  value: "card"
+}, {
+  label: "Venta a Crédito",
+  value: "credit"
+}, {
+  label: "Bonos o Certificados de Regalo",
+  value: "gift_certificate"
+}, {
+  label: "Permuta",
+  value: "swap"
 }];
 const TypeMethod = [{
   label: "Compras",
@@ -58,6 +74,7 @@ const PaymentMethodFormConfig = ({
     defaultValues: initialData || {
       name: "",
       category: "",
+      sub_category: "",
       payment_type: "",
       accounting_account_id: null,
       additionalDetails: "",
@@ -139,36 +156,6 @@ const PaymentMethodFormConfig = ({
       loading: isLoadingAccounts,
       appendTo: "self"
     }))
-  }))), /*#__PURE__*/React.createElement("div", {
-    className: "col-md-6"
-  }, /*#__PURE__*/React.createElement("div", {
-    className: "field mb-4"
-  }, /*#__PURE__*/React.createElement("label", {
-    htmlFor: "category",
-    className: "font-medium block mb-2"
-  }, "Categor\xEDa *"), /*#__PURE__*/React.createElement(Controller, {
-    name: "category",
-    control: control,
-    rules: {
-      required: "La categoría es requerida"
-    },
-    render: ({
-      field,
-      fieldState
-    }) => /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement(Dropdown, {
-      id: field.name,
-      value: field.value,
-      onChange: e => field.onChange(e.value),
-      options: categories,
-      optionLabel: "label",
-      optionValue: "value",
-      placeholder: "Seleccione una categor\xEDa",
-      className: classNames("w-full", {
-        "p-invalid": fieldState.error
-      }),
-      showClear: true,
-      filter: true
-    }), getFormErrorMessage("category"))
   })), /*#__PURE__*/React.createElement("div", {
     className: "row"
   }, /*#__PURE__*/React.createElement("div", {
@@ -217,7 +204,62 @@ const PaymentMethodFormConfig = ({
   }), /*#__PURE__*/React.createElement("label", {
     htmlFor: "isCash",
     className: "font-medium block mb-0"
-  }, "Es efectivo"))))), /*#__PURE__*/React.createElement("div", {
+  }, "Es efectivo")))), /*#__PURE__*/React.createElement("div", {
+    className: "col-md-6"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "field mb-4"
+  }, /*#__PURE__*/React.createElement("label", {
+    htmlFor: "category",
+    className: "font-medium block mb-2"
+  }, "Categor\xEDa *"), /*#__PURE__*/React.createElement(Controller, {
+    name: "category",
+    control: control,
+    rules: {
+      required: "La categoría es requerida"
+    },
+    render: ({
+      field,
+      fieldState
+    }) => /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement(Dropdown, {
+      id: field.name,
+      value: field.value,
+      onChange: e => field.onChange(e.value),
+      options: categories,
+      optionLabel: "label",
+      optionValue: "value",
+      placeholder: "Seleccione una categor\xEDa",
+      className: classNames("w-full", {
+        "p-invalid": fieldState.error
+      }),
+      showClear: true,
+      filter: true
+    }), getFormErrorMessage("category"))
+  })), /*#__PURE__*/React.createElement("div", {
+    className: "field mb-4"
+  }, /*#__PURE__*/React.createElement("label", {
+    htmlFor: "sub_category",
+    className: "font-medium block mb-2"
+  }, "Sub categor\xEDa *"), /*#__PURE__*/React.createElement(Controller, {
+    name: "sub_category",
+    control: control,
+    render: ({
+      field,
+      fieldState
+    }) => /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement(Dropdown, {
+      id: field.name,
+      value: field.value,
+      onChange: e => field.onChange(e.value),
+      options: sub_categories,
+      optionLabel: "label",
+      optionValue: "value",
+      placeholder: "Seleccione una sub categor\xEDa",
+      className: classNames("w-full", {
+        "p-invalid": fieldState.error
+      }),
+      showClear: true,
+      filter: true
+    }), getFormErrorMessage("sub_category"))
+  })))), /*#__PURE__*/React.createElement("div", {
     className: "row"
   }, /*#__PURE__*/React.createElement("div", {
     className: "col-12"

@@ -8,6 +8,8 @@ export const useDynamicForm = (id: string) => {
         data: dynamicForm,
         isFetching,
         isLoading,
+        isRefetching,
+        isPending,
         error,
         refetch: refetchForm
     } = useQuery({
@@ -21,7 +23,7 @@ export const useDynamicForm = (id: string) => {
     return {
         dynamicForm,
         isFetching,
-        isLoading,
+        isLoading: isLoading || isRefetching || isPending || isFetching,
         error,
         refetchForm
     };

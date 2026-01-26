@@ -3,6 +3,9 @@ import { ConfigFieldText } from "./ConfigFieldText.js";
 import { ConfigFieldFile } from "./ConfigFieldFile.js";
 import { ConfigFieldPassword } from "./ConfigFieldPassword.js";
 import { ConfigFieldList } from "./ConfigFieldList.js";
+import { ConfigFieldCheckbox } from "./ConfigFieldCheckbox.js";
+import { ConfigFieldTextArea } from "./ConfigFieldTextArea.js";
+import { ConfigFieldCodeEditor } from "./ConfigFieldCodeEditor.js";
 export const ConfigField = props => {
   const {
     field,
@@ -20,6 +23,18 @@ export const ConfigField = props => {
   return /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("div", {
     className: "d-flex flex-column gap-2 mb-3 w-100"
   }, type === "text" && /*#__PURE__*/React.createElement(ConfigFieldText, {
+    field: field,
+    label: label,
+    initialValue: initialValue,
+    onChange: onChange,
+    placeholder: placeholder
+  }), type === "textarea" && /*#__PURE__*/React.createElement(ConfigFieldTextArea, {
+    field: field,
+    label: label,
+    initialValue: initialValue,
+    onChange: onChange,
+    placeholder: placeholder
+  }), type === "code-editor" && /*#__PURE__*/React.createElement(ConfigFieldCodeEditor, {
     field: field,
     label: label,
     initialValue: initialValue,
@@ -47,5 +62,12 @@ export const ConfigField = props => {
     source: source,
     sourceType: sourceType,
     placeholder: placeholder
-  }), /*#__PURE__*/React.createElement("small", null, description)));
+  }), type === "checkbox" && /*#__PURE__*/React.createElement(ConfigFieldCheckbox, {
+    field: field,
+    label: label,
+    initialValue: initialValue,
+    onChange: onChange
+  }), /*#__PURE__*/React.createElement("small", {
+    className: "text-muted"
+  }, description)));
 };

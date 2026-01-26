@@ -7,9 +7,9 @@ import { UserRoleTable } from "./components/UserRoleTable.js";
 import { UserRoleFormModal } from "./components/UserRoleFormModal.js";
 import { useUserRoleCreate } from "./hooks/useUserRoleCreate.js";
 import { useUserRoleUpdate } from "./hooks/useUserRoleUpdate.js";
-import { menuService, userRolesService } from "../../services/api/index.js";
+import { userRolesService } from "../../services/api/index.js";
 import { SwalManager } from "../../services/alertManagerImported.js";
-import { extractDataFromTree } from "../../services/utilidades.js";
+import { useMenuItems } from "../layout/menu/hooks/useMenuItems.js";
 export const UserRoleApp = ({
   onConfigurationComplete,
   isConfigurationContext = false
@@ -35,6 +35,9 @@ export const UserRoleApp = ({
     fetchUserRole,
     setUserRole
   } = useUserRole();
+  const {
+    refetch: refetchLoggedUserMenus
+  } = useMenuItems();
   const isComplete = userRoles && userRoles.length > 0;
   const showValidations = isConfigurationContext;
   useEffect(() => {
@@ -67,21 +70,8 @@ export const UserRoleApp = ({
         SwalManager.success();
         console.log("Rol básico creado exitosamente");
       }
-      const menus = await menuService.getAllMenu();
-      await fetch('./saveMenus', {
-        method: 'POST',
-        body: JSON.stringify({
-          menus: extractDataFromTree({
-            tree: menus.menus,
-            key: 'url',
-            childrenKey: 'items'
-          })
-        }),
-        headers: {
-          'Content-Type': 'application/json'
-        }
-      });
       fetchUserRoles();
+      refetchLoggedUserMenus();
       setShowFormModal(false);
       setUserRole(null);
       setEditingRoleId(undefined);

@@ -12,7 +12,6 @@ export const useIntegrationForm = props => {
     control
   } = useForm();
   const {
-    fields,
     append: appendFile,
     remove: removeFile,
     update: updateFile
@@ -26,7 +25,7 @@ export const useIntegrationForm = props => {
       return;
     }
     initialConfigFields.forEach(field => {
-      const config = configs.find(config => config.key === field.configKey);
+      const config = configs.find(config => config.key_ === field.field);
       if (config) {
         field.initialValue = config.value;
       }

@@ -3,6 +3,7 @@ import React from "react";
 import { navbarMenuStyle } from "./styles/navBarMegaMenu";
 import { useMenuItems } from "./hooks/useMenuItems";
 import NavbarSkeleton from "../skeleton/NavbarSkeleton";
+import { MenuItem } from "primereact/menuitem";
 
 const NavbarHeader = () => {
     const { menuItems: menuItemsFromHook, loading } = useMenuItems();
@@ -15,10 +16,14 @@ const NavbarHeader = () => {
         if (!items || !Array.isArray(items)) return [];
 
         return items.map((item) => {
-            const processedItem = {
+            const processedItem: MenuItem = {
                 label: item.label,
                 url: item.url,
             };
+
+            if (item.dynamic_form_id) {
+                processedItem.url = `appFormsCrud?dynamic_form_id=${item.dynamic_form_id}`;
+            }
 
             if (item.icon) {
                 processedItem.icon = () => iconTemplate(item.icon);

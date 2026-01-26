@@ -1,31 +1,15 @@
-import React, { useEffect, useState } from "react";
-import { UserDto } from "../../models/models";
 import { userService } from "../../../services/api";
-import { ErrorHandler } from "../../../services/errorHandler";
 import { getJWTPayload } from "../../../services/utilidades";
+import { useQuery } from "@tanstack/react-query";
 
 export const useLoggedUser = () => {
-    const [loggedUser, setLoggedUser] = useState<UserDto | null>(null);
-    const [loading, setLoading] = useState(true);
-
-    const fetchUser = async () => {
-        try {
-            const data = await userService.getByExternalId(getJWTPayload().sub);
-
-            setLoggedUser(data);
-        } catch (err) {
-            ErrorHandler.generic(err);
-        } finally {
-            setLoading(false);
-        }
-    };
-
-    useEffect(() => {
-        fetchUser();
-    }, []);
+    const { data: loggedUser, isLoading, isFetching } = useQuery({
+        queryKey: ['logged-user'],
+        queryFn: () => userService.getByExternalId(getJWTPayload().sub)
+    })
 
     return {
         loggedUser,
-        loading
+        loading: isLoading || isFetching
     };
 };

@@ -180,11 +180,11 @@ export const ControlCashFlow = () => {
       return {
         procedimiento: item?.invoice.details.map(detail => detail.product.name).join(","),
         codigo_entidad: item?.authorization_number,
-        copago: item?.invoice?.type === "entity" ? formatCurrency(item?.invoice?.total_amount) : formatCurrency(0),
-        particular: item?.invoice?.type === "public" ? formatCurrency(item?.invoice?.total_amount) : formatCurrency(0),
-        monto_autorizado: item?.entity_authorized_amount,
         fecha: formatDateUtils(item?.created_at),
-        ingresos: formatCurrency(parseInt(item?.invoice?.total_amount) + (parseInt(item?.entity_authorized_amount) || 0) || 0),
+        copago: item?.invoice?.sub_type === "entity" && item?.invoice.status !== "cancelled" ? formatCurrency(item?.invoice?.total_amount) : formatCurrency(0),
+        particular: item?.invoice?.sub_type === "public" && item?.invoice.status !== "cancelled" ? formatCurrency(item?.invoice?.total_amount) : formatCurrency(0),
+        monto_autorizado: item?.invoice?.sub_type === "entity" && item?.invoice?.status !== "cancelled" ? formatCurrency(item?.entity_authorized_amount) : formatCurrency(0),
+        ingresos: formatCurrency(parseInt(item?.invoice?.total_amount) || 0),
         salidas: item?.invoice?.status === "cancelled" ? formatCurrency(item?.invoice.notes.reduce((acc, note) => acc + parseInt(note.amount) || 0, 0)) : formatCurrency(0)
       };
     });
@@ -232,18 +232,21 @@ export const ControlCashFlow = () => {
         pdf: true
       });
       const dataExport = reportData;
-      const fullIncome = reportData.reduce((acc, item) => acc + (parseInt(item?.invoice?.total_amount) + (parseInt(item?.entity_authorized_amount) || 0) || 0), 0);
+      const fullIncome = reportData.reduce((acc, item) => acc + parseInt(item?.invoice?.total_amount), 0);
       const fullOutflows = reportData.reduce((acc, item) => acc + (item?.invoice?.status === "cancelled" ? item?.invoice.notes.reduce((acc, note) => acc + parseInt(note.amount) || 0, 0) : 0), 0);
+      const fullCopayments = reportData.reduce((acc, item) => acc + (item?.invoice?.sub_type === "entity" && item?.invoice.status !== "cancelled" ? parseInt(item?.invoice?.total_amount) || 0 : 0), 0);
+      const fullParticular = reportData.reduce((acc, item) => acc + (item?.invoice?.sub_type === "public" && item?.invoice.status !== "cancelled" ? parseInt(item?.invoice?.total_amount) || 0 : 0), 0);
+      const fullAuthorizedAmount = reportData.reduce((acc, item) => acc + (item?.invoice?.status !== "cancelled" ? parseInt(item?.entity_authorized_amount) || 0 : 0), 0);
 
       // Generar las cabeceras de la tabla
       const headers = `
           <tr>
               <th>Procedimiento</th>
               <th>Codigo Entidad</th>
+                            <th>Fecha</th>
               <th>Copago</th>
               <th>Particular</th>
               <th>Monto autorizado</th>
-              <th>Fecha</th>
               <th>Ingresos</th>
               <th>Salidas</th>
           </tr>
@@ -288,17 +291,20 @@ export const ControlCashFlow = () => {
                 <tr>
                   <td>${rowData?.invoice?.details.length <= 1 ? rowData?.invoice?.details[0]?.product?.name || "" : "Laboratorio"}</td>
                   <td>${rowData?.authorization_number || ""}</td>
-                  <td>${rowData?.invoice?.type === "entity" ? formatCurrency(rowData?.invoice?.total_amount || 0) : formatCurrency(0)}</td>
-                  <td>${rowData?.invoice?.type === "public" ? formatCurrency(rowData?.invoice?.total_amount || 0) : formatCurrency(0)}</td>
-                  <td>${formatCurrency(rowData?.entity_authorized_amount || 0)}</td>
-                  <td>${formatDateUtils(rowData.created_at)}</td>
-                  <td class="right">${formatCurrency((parseInt(rowData?.invoice?.total_amount) || 0) + (parseInt(rowData?.entity_authorized_amount) || 0))}</td>
+                                    <td>${formatDateUtils(rowData.created_at)}</td>
+                  <td>${rowData?.invoice?.sub_type === "entity" && rowData?.invoice.status !== "cancelled" ? formatCurrency(rowData?.invoice?.total_amount || 0) : formatCurrency(0)}</td>
+                  <td>${rowData?.invoice?.sub_type === "public" && rowData?.invoice.status !== "cancelled" ? formatCurrency(rowData?.invoice?.total_amount || 0) : formatCurrency(0)}</td>
+                  <td>${rowData?.invoice?.status !== "cancelled" ? formatCurrency(rowData?.entity_authorized_amount || 0) : formatCurrency(0)}</td>
+                  <td class="right">${formatCurrency(parseInt(rowData?.invoice?.total_amount) || 0)}</td>
                   <td class="right">${rowData?.invoice?.status === "cancelled" ? formatCurrency(rowData?.invoice.notes.reduce((acc, note) => acc + parseInt(note.amount) || 0, 0)) : formatCurrency(0)}</td>
                 </tr>
               `, "")}
               <!-- Fila de totales -->
               <tr class="total-row">
-                <td colspan="6" class="total-label">TOTALES:</td>
+                <td colspan="3" class="total-label">TOTALES:</td>
+                <td>${formatCurrency(fullCopayments)}</td>
+                <td>${formatCurrency(fullParticular)}</td>
+                <td>${formatCurrency(fullAuthorizedAmount)}</td>
                 <td class="right">${formatCurrency(fullIncome)}</td>
                 <td class="right">${formatCurrency(fullOutflows)}</td>
               </tr>
@@ -335,43 +341,52 @@ export const ControlCashFlow = () => {
     header: "Procedimiento",
     body: rowData => rowData?.invoice?.details.length <= 1 ? rowData?.invoice?.details[0].product.name : "Laboratorio"
   }, {
+    field: "created_at",
+    header: "Fecha",
+    body: rowData => formatDateUtils(rowData.created_at)
+  }, {
     field: "authorization_number",
     header: "Codigo Entidad",
     body: rowData => rowData?.authorization_number
   }, {
     field: "copayment",
     header: "Copago",
-    body: rowData => rowData?.invoice?.type === "entity" ? formatCurrency(rowData?.invoice?.total_amount) : formatCurrency(0)
+    body: rowData => rowData?.invoice?.sub_type === "entity" && rowData?.invoice.status !== "cancelled" ? formatCurrency(rowData?.invoice?.total_amount) : formatCurrency(0)
   }, {
     field: "authorized_amount_user",
     header: "Particular",
-    body: rowData => rowData?.invoice?.type === "public" ? formatCurrency(rowData?.invoice?.total_amount) : formatCurrency(0)
+    body: rowData => rowData?.invoice?.sub_type === "public" && rowData?.invoice.status !== "cancelled" ? formatCurrency(rowData?.invoice?.total_amount) : formatCurrency(0)
   }, {
     field: "entity_authorized_amount",
     header: "Monto autorizado",
-    body: rowData => formatCurrency(rowData?.entity_authorized_amount || 0)
-  }, {
-    field: "created_at",
-    header: "Fecha",
-    body: rowData => formatDateUtils(rowData.created_at)
+    body: rowData => rowData?.invoice.status !== "cancelled" ? formatCurrency(rowData?.entity_authorized_amount || 0) : 0
   }, {
     field: "income",
     header: "Ingresos",
-    body: rowData => formatCurrency(parseInt(rowData?.invoice?.total_amount) + (parseInt(rowData?.entity_authorized_amount) || 0) || 0)
+    body: rowData => formatCurrency(parseInt(rowData?.invoice?.total_amount) || 0)
   }, {
     field: "outflows",
     header: "Salidas",
     body: rowData => rowData?.invoice?.status === "cancelled" ? formatCurrency(rowData?.invoice.notes.reduce((acc, note) => acc + parseInt(note.amount) || 0, 0)) : formatCurrency(0)
   }];
   const footerGroup = reportData => {
-    const fullIncome = reportData.reduce((acc, item) => acc + (parseInt(item?.invoice?.total_amount) + (parseInt(item?.entity_authorized_amount) || 0) || 0), 0);
+    const fullIncome = reportData.reduce((acc, item) => acc + (parseInt(item?.invoice?.total_amount) || 0), 0);
     const fullOutflows = reportData.reduce((acc, item) => acc + (item?.invoice?.status === "cancelled" ? item?.invoice.notes.reduce((acc, note) => acc + parseInt(note.amount) || 0, 0) : 0), 0);
+    const fullCopayments = reportData.reduce((acc, item) => acc + (item?.invoice?.sub_type === "entity" && item?.invoice.status !== "cancelled" ? parseInt(item?.invoice?.total_amount) || 0 : 0), 0);
+    const fullParticular = reportData.reduce((acc, item) => acc + (item?.invoice?.sub_type === "public" && item?.invoice.status !== "cancelled" ? parseInt(item?.invoice?.total_amount) || 0 : 0), 0);
+    const fullAuthorizedAmount = reportData.reduce((acc, item) => acc + (item?.invoice?.status !== "cancelled" ? parseInt(item?.entity_authorized_amount) || 0 : 0), 0);
     return /*#__PURE__*/React.createElement(ColumnGroup, null, /*#__PURE__*/React.createElement(Row, null, /*#__PURE__*/React.createElement(Column, {
       footer: "Totals:",
-      colSpan: 8,
+      colSpan: 5,
       footerStyle: {
         textAlign: "right"
       }
+    }), /*#__PURE__*/React.createElement(Column, {
+      footer: formatCurrency(fullCopayments)
+    }), /*#__PURE__*/React.createElement(Column, {
+      footer: formatCurrency(fullParticular)
+    }), /*#__PURE__*/React.createElement(Column, {
+      footer: formatCurrency(fullAuthorizedAmount)
     }), /*#__PURE__*/React.createElement(Column, {
       footer: formatCurrency(fullIncome)
     }), /*#__PURE__*/React.createElement(Column, {

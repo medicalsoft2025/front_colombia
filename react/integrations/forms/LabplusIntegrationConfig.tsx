@@ -4,25 +4,23 @@ import { IntegrationConfigFormProps } from "../interfaces";
 
 export const LabplusIntegrationConfig = (props: IntegrationConfigFormProps) => {
 
-    const { configs = [] } = props;
+    const { configs = [], onSubmit } = props;
 
     const initialConfigFields = [
         {
-            configKey: "LABPLUS_URL",
-            field: "url",
+            field: "LABPLUS_URL",
             label: "URL",
             type: "text"
         },
         {
-            configKey: "LABPLUS_TOKEN",
-            field: "token",
+            field: "LABPLUS_TOKEN",
             label: "Token",
             type: "text"
         }
     ];
 
     const handleSubmit = (data: any) => {
-        console.log(data);
+        onSubmit?.(data);
     };
 
     return (

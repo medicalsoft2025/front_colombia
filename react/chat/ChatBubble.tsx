@@ -5,156 +5,175 @@ import React, { useState, useRef, useEffect } from "react";
 import { InputText } from "primereact/inputtext";
 import { Button } from "primereact/button";
 import { useChat } from "./hooks/useChat";
+import { ChatBubbleUser } from "./ChatBubbleUser";
 
 interface ChatBubbleProps {
-    token: string;
+  token: string;
 }
 
 export function ChatBubble({ token }: ChatBubbleProps) {
-    const [isOpen, setIsOpen] = useState(false);
-    const [view, setView] = useState<"contacts" | "chat">("contacts");
-    const messagesEndRef = useRef<HTMLDivElement>(null);
+  const [isOpen, setIsOpen] = useState(false);
+  const [view, setView] = useState<"contacts" | "chat">("contacts");
+  const messagesEndRef = useRef<HTMLDivElement>(null);
 
-    // Usar el hook del chat
-    const {
-        username,
-        users,
-        messages,
-        selectedUser,
-        setSelectedUser,
-        inputMessage,
-        setInputMessage,
-        sendMessage,
-        typingMessage,
-    } = useChat({ token });
+  // Usar el hook del chat
+  const {
+    username,
+    users,
+    messages,
+    selectedUser,
+    setSelectedUser,
+    inputMessage,
+    setInputMessage,
+    sendMessage,
+    typingMessage,
+    isAIThinking,
+    isLoadingHistory,
+  } = useChat({ token });
 
-    useEffect(() => {
-        messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-    }, [messages]);
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [messages]);
 
-    const handleKeyPress = (e: React.KeyboardEvent) => {
-        if (e.key === "Enter") {
-            e.preventDefault();
-            sendMessage();
-        }
-    };
-
-    const statusColor = () => "green"; // Todos online en este contexto
-
-    const openChat = (user: string) => {
-        setSelectedUser(user);
-        setView("chat");
-    };
-
-    const backToContacts = () => setView("contacts");
-
-    // Si no hay username (no autenticado), no mostrar el chat
-    if (!username) {
-        return null;
+  const handleKeyPress = (e: React.KeyboardEvent) => {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      sendMessage();
     }
+  };
 
-    return (
-        <>
-            {/* Botón flotante */}
-            <button
-                className="chat-bubble-button"
-                onClick={() => setIsOpen(!isOpen)}
-            >
-                💬
-            </button>
+  const statusColor = () => "green"; // Todos online en este contexto
 
-            {/* Ventana de chat */}
-            <div
-                className={`chat-bubble-window ${
-                    isOpen ? "chat-bubble-open" : ""
-                }`}
-            >
-                {/* Header */}
-                <div className="chat-bubble-header">
-                    <div>
-                        {view === "chat" && (
-                            <button
-                                onClick={backToContacts}
-                                className="chat-bubble-back-button"
-                            >
-                                ←
-                            </button>
-                        )}
-                        <span>
-                            {view === "contacts" ? "Chats" : selectedUser}
-                        </span>
-                    </div>
-                    <button
-                        onClick={() => setIsOpen(false)}
-                        className="chat-bubble-close-button"
-                    >
-                        ✖
-                    </button>
+  const openChat = (user: string) => {
+    setSelectedUser(user);
+    setView("chat");
+  };
+
+  const backToContacts = () => setView("contacts");
+
+  // Si no hay username (no autenticado), no mostrar el chat
+  if (!username) {
+    return null;
+  }
+
+  return (
+    <>
+      {/* Botón flotante */}
+      <button
+        className="chat-bubble-button"
+        onClick={() => setIsOpen(!isOpen)}
+      >
+        💬
+      </button>
+
+      {/* Ventana de chat */}
+      <div
+        className={`chat-bubble-window ${isOpen ? "chat-bubble-open" : ""
+          }`}
+      >
+        {/* Header */}
+        <div className="chat-bubble-header">
+          <div>
+            {view === "chat" && (
+              <button
+                onClick={backToContacts}
+                className="chat-bubble-back-button"
+              >
+                ←
+              </button>
+            )}
+            <span>
+              {view === "contacts" ? "Chats" : selectedUser}
+            </span>
+          </div>
+          <button
+            onClick={() => setIsOpen(false)}
+            className="chat-bubble-close-button"
+          >
+            ✖
+          </button>
+        </div>
+
+        {/* Contenido */}
+        {view === "contacts" ? (
+          <div className="chat-bubble-contacts">
+            {users.map((user, index) => (
+              <div
+                key={index}
+                className="chat-bubble-contact-item"
+                onClick={() => openChat(user)}
+              >
+                <span>{user}</span>
+                <span
+                  className="chat-bubble-status-dot"
+                  style={{
+                    backgroundColor: statusColor(),
+                  }}
+                ></span>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <>
+            <div className="chat-bubble-messages">
+              {messages.map((msg, index) => (
+                <div
+                  key={index}
+                  className={`chat-bubble-message-row ${msg.from === username
+                    ? "chat-bubble-user"
+                    : "chat-bubble-contact"
+                    }`}
+                >
+                  <div
+                    className="chat-bubble-message-bubble"
+                    dangerouslySetInnerHTML={{ __html: msg.text }}
+                  />
+                  <div className="chat-bubble-message-time">
+                    {msg.time}
+                  </div>
                 </div>
-
-                {/* Contenido */}
-                {view === "contacts" ? (
-                    <div className="chat-bubble-contacts">
-                        {users.map((user, index) => (
-                            <div
-                                key={index}
-                                className="chat-bubble-contact-item"
-                                onClick={() => openChat(user)}
-                            >
-                                <span>{user}</span>
-                                <span
-                                    className="chat-bubble-status-dot"
-                                    style={{
-                                        backgroundColor: statusColor(),
-                                    }}
-                                ></span>
-                            </div>
-                        ))}
+              ))}
+              {typingMessage && (
+                <div className="chat-bubble-typing">
+                  {typingMessage}
+                </div>
+              )}
+              {(isAIThinking || isLoadingHistory) && (
+                <div className="chat-bubble-ai-thinking">
+                  <div className="chat-bubble-message-row chat-bubble-contact">
+                    <div className="chat-bubble-message-bubble">
+                      <i className="fa fa-circle-notch fa-spin"></i>
+                      {" "}
+                      {isLoadingHistory ? "Cargando historial..." : "Pensando..."}
                     </div>
-                ) : (
-                    <>
-                        <div className="chat-bubble-messages">
-                            {messages.map((msg, index) => (
-                                <div
-                                    key={index}
-                                    className={`chat-bubble-message-row ${
-                                        msg.from === username
-                                            ? "chat-bubble-user"
-                                            : "chat-bubble-contact"
-                                    }`}
-                                >
-                                    <div className="chat-bubble-message-bubble">
-                                        {msg.text}
-                                    </div>
-                                    <div className="chat-bubble-message-time">
-                                        {msg.time}
-                                    </div>
-                                </div>
-                            ))}
-                            {typingMessage && (
-                                <div className="chat-bubble-typing">
-                                    {typingMessage}
-                                </div>
-                            )}
-                            <div ref={messagesEndRef}></div>
-                        </div>
-
-                        <div className="chat-bubble-input-area">
-                            <InputText
-                                value={inputMessage}
-                                onChange={(e) =>
-                                    setInputMessage(e.target.value)
-                                }
-                                onKeyPress={handleKeyPress}
-                                placeholder="Escribe un mensaje..."
-                                className="chat-bubble-input"
-                            />
-                            <Button onClick={sendMessage}>Enviar</Button>
-                        </div>
-                    </>
-                )}
+                  </div>
+                </div>
+              )}
+              <div ref={messagesEndRef}></div>
             </div>
-            <style>{`
+
+            <div className="chat-bubble-input-area">
+              <InputText
+                value={inputMessage}
+                onChange={(e) =>
+                  setInputMessage(e.target.value)
+                }
+                onKeyPress={handleKeyPress}
+                placeholder="Escribe un mensaje..."
+                className="chat-bubble-input"
+                disabled={isAIThinking || isLoadingHistory}
+              />
+              <Button
+                onClick={sendMessage}
+                disabled={isAIThinking || isLoadingHistory}
+              >
+                Enviar
+              </Button>
+            </div>
+          </>
+        )}
+      </div>
+      <style>{`
               /* Botón flotante */
               .chat-bubble-button {
                 position: fixed;
@@ -266,6 +285,7 @@ export function ChatBubble({ token }: ChatBubbleProps) {
 
               .chat-bubble-message-row {
                 display: flex;
+                flex-direction: column;
                 margin-bottom: 8px;
               }
 
@@ -280,7 +300,7 @@ export function ChatBubble({ token }: ChatBubbleProps) {
               .chat-bubble-message-bubble {
                 padding: 8px 12px;
                 border-radius: 16px;
-                max-width: 75%;
+                max-width: 100%;
                 word-wrap: break-word;
               }
 
@@ -328,6 +348,6 @@ export function ChatBubble({ token }: ChatBubbleProps) {
                 width: 100%;
               }
             `}</style>
-        </>
-    );
+    </>
+  );
 }

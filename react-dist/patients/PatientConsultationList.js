@@ -13,6 +13,7 @@ import { useAppointmentStates } from "../appointments/hooks/useAppointmentStates
 import { SwalManager } from "../../services/alertManagerImported.js";
 import UserManager from "../../services/userManager.js";
 import { useCallPatient } from "./hooks/useCallPatient.js";
+import { usePatient } from "./hooks/usePatient.js";
 export const PatientConsultationList = () => {
   const [patients, setPatients] = useState([]);
   const [filteredPatients, setFilteredPatients] = useState([]);
@@ -62,6 +63,9 @@ export const PatientConsultationList = () => {
   const {
     callPatient
   } = useCallPatient();
+  const {
+    refetchPatientById
+  } = usePatient();
   const appointmentStatesRef = useRef(appointmentStates);
   useEffect(() => {
     appointmentStatesRef.current = appointmentStates;
@@ -288,6 +292,7 @@ export const PatientConsultationList = () => {
     UserManager.onAuthChange(async (isAuthenticated, user) => {
       if (user) {
         await appointmentService.changeStatus(appointmentId, "in_consultation");
+        await refetchPatientById(patientId);
         window.location.href = `consultas-especialidad?patient_id=${patientId}&especialidad=${user.specialty.name}&appointment_id=${appointmentId}`;
       }
     });
