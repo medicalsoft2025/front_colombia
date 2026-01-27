@@ -314,9 +314,9 @@ const QuantityColumnBody = React.memo(
 
         const calculatedQuantity = isLotProduct
             ? (lotInfo || []).reduce(
-                  (sum: number, lot: any) => sum + (Number(lot.quantity) || 0),
-                  0
-              )
+                (sum: number, lot: any) => sum + (Number(lot.quantity) || 0),
+                0
+            )
             : 0;
 
         const displayValue = isLotProduct ? calculatedQuantity : undefined;
@@ -338,13 +338,13 @@ const QuantityColumnBody = React.memo(
                             isLotProduct
                                 ? undefined
                                 : (e: any) => {
-                                      const newValue =
-                                          e.value !== null &&
-                                          e.value !== undefined
-                                              ? Number(e.value)
-                                              : 0;
-                                      field.onChange(newValue);
-                                  }
+                                    const newValue =
+                                        e.value !== null &&
+                                            e.value !== undefined
+                                            ? Number(e.value)
+                                            : 0;
+                                    field.onChange(newValue);
+                                }
                         }
                         disabled={disabled}
                         inputClassName="form-control"
@@ -679,9 +679,9 @@ const ProductAccordion = React.memo(
                 productData.typeProduct
             )
                 ? (productData.lotInfo || []).reduce(
-                      (sum: number, lot: any) => sum + (lot.quantity || 0),
-                      0
-                  )
+                    (sum: number, lot: any) => sum + (lot.quantity || 0),
+                    0
+                )
                 : Number(productData.quantity) || 0;
 
             const price = Number(productData.price) || 0;
@@ -740,9 +740,8 @@ const ProductAccordion = React.memo(
                 >
                     <div className="d-flex align-items-center">
                         <i
-                            className={`fas fa-${
-                                product.isExpanded ? "minus" : "plus"
-                            } me-2`}
+                            className={`fas fa-${product.isExpanded ? "minus" : "plus"
+                                } me-2`}
                         ></i>
                         <span className="fw-bold">
                             {product.description || "Nuevo Producto Asignado"}
@@ -1016,7 +1015,7 @@ const ProductAccordion = React.memo(
                                         isEditing={
                                             !!editingLot &&
                                             editingLot.productIndex ===
-                                                productIndex
+                                            productIndex
                                         }
                                     />
                                 </div>
@@ -1032,7 +1031,7 @@ const ProductAccordion = React.memo(
                                 <FixedAssetsForm
                                     formId={`fixed-asset-form-${productIndex}`}
                                     onSubmit={handleSaveFixedAssetLocal}
-                                    onCancel={() => {}}
+                                    onCancel={() => { }}
                                     initialData={localFixedAssetData}
                                     key={`fixed-asset-form-${productIndex}`}
                                 />
@@ -1047,7 +1046,7 @@ const ProductAccordion = React.memo(
 
 export const PurchaseBilling: React.FC<PurchaseBillingProps> = ({
     purchaseOrder,
-    onClose = () => {},
+    onClose = () => { },
 }) => {
     const [isModalVisible, setIsModalVisible] = React.useState(false);
     const [productForExpiration, setProductForExpiration] = useState<{
@@ -1307,7 +1306,7 @@ export const PurchaseBilling: React.FC<PurchaseBillingProps> = ({
                     let typeProduct = "";
                     if (detail.product?.product_type) {
                         switch (
-                            detail.product.product_type.name.toLowerCase()
+                        detail.product.product_type.name.toLowerCase()
                         ) {
                             case "servicios":
                                 typeProduct = "services";
@@ -1329,9 +1328,9 @@ export const PurchaseBilling: React.FC<PurchaseBillingProps> = ({
                     }
                     const discount = detail.discount
                         ? (Number(detail.discount) /
-                              (Number(detail.price) *
-                                  Number(detail.quantity))) *
-                          100
+                            (Number(detail.price) *
+                                Number(detail.quantity))) *
+                        100
                         : 0;
 
                     const subtotal =
@@ -1391,9 +1390,9 @@ export const PurchaseBilling: React.FC<PurchaseBillingProps> = ({
             product.typeProduct
         )
             ? (product.lotInfo || []).reduce(
-                  (sum: number, lot: any) => sum + (lot.quantity || 0),
-                  0
-              )
+                (sum: number, lot: any) => sum + (lot.quantity || 0),
+                0
+            )
             : Number(product.quantity) || 0;
 
         const price = Number(product.price) || 0;
@@ -1445,9 +1444,9 @@ export const PurchaseBilling: React.FC<PurchaseBillingProps> = ({
                 product.typeProduct
             )
                 ? (product.lotInfo || []).reduce(
-                      (sum: number, lot: any) => sum + (lot.quantity || 0),
-                      0
-                  )
+                    (sum: number, lot: any) => sum + (lot.quantity || 0),
+                    0
+                )
                 : Number(product.quantity) || 0;
             const price = Number(product.price) || 0;
             return total + actualQuantity * price;
@@ -1460,9 +1459,9 @@ export const PurchaseBilling: React.FC<PurchaseBillingProps> = ({
                 product.typeProduct
             )
                 ? (product.lotInfo || []).reduce(
-                      (sum: number, lot: any) => sum + (lot.quantity || 0),
-                      0
-                  )
+                    (sum: number, lot: any) => sum + (lot.quantity || 0),
+                    0
+                )
                 : Number(product.quantity) || 0;
             const price = Number(product.price) || 0;
 
@@ -1483,9 +1482,9 @@ export const PurchaseBilling: React.FC<PurchaseBillingProps> = ({
                 product.typeProduct
             )
                 ? (product.lotInfo || []).reduce(
-                      (sum: number, lot: any) => sum + (lot.quantity || 0),
-                      0
-                  )
+                    (sum: number, lot: any) => sum + (lot.quantity || 0),
+                    0
+                )
                 : Number(product.quantity) || 0;
             const price = Number(product.price) || 0;
 
@@ -1783,9 +1782,9 @@ export const PurchaseBilling: React.FC<PurchaseBillingProps> = ({
             prev.map((payment) =>
                 payment.id === selectedAdvanceMethodId
                     ? {
-                          ...payment,
-                          value: selectedAdvances.amount,
-                      }
+                        ...payment,
+                        value: selectedAdvances.amount,
+                    }
                     : payment
             )
         );
@@ -1797,8 +1796,8 @@ export const PurchaseBilling: React.FC<PurchaseBillingProps> = ({
     const buildInvoiceData = async (formData: any) => {
         const purchaseIdValue = purchaseOrderId
             ? {
-                  purchase_order_id: purchaseOrderId,
-              }
+                purchase_order_id: purchaseOrderId,
+            }
             : {};
 
         const billing = await fetchBillingByType("purchase_invoice");
@@ -1811,6 +1810,8 @@ export const PurchaseBilling: React.FC<PurchaseBillingProps> = ({
                 third_party_id: formData.supplier || null,
                 supplier_id: formData.supplier,
                 billing: billing.data,
+                supplier_invoice_code: formData.fiscalVoucher,
+                resultion_number: formData.invoiceNumber,
                 ...purchaseIdValue,
             },
 
@@ -1833,9 +1834,9 @@ export const PurchaseBilling: React.FC<PurchaseBillingProps> = ({
                     product.typeProduct
                 )
                     ? (product.lotInfo || []).reduce(
-                          (sum: number, lot: any) => sum + (lot.quantity || 0),
-                          0
-                      )
+                        (sum: number, lot: any) => sum + (lot.quantity || 0),
+                        0
+                    )
                     : Number(product.quantity) || 0;
 
                 const subtotal = Number(actualQuantity) * Number(product.price);
@@ -1850,19 +1851,19 @@ export const PurchaseBilling: React.FC<PurchaseBillingProps> = ({
 
                 const formAssets = product?.fixedAssetInfo
                     ? {
-                          description: product.fixedAssetInfo.description || "",
-                          brand: product.fixedAssetInfo.brand || "",
-                          model: product.fixedAssetInfo.model || "",
-                          serial_number:
-                              product.fixedAssetInfo.serialNumber || "",
-                          internal_code:
-                              product.fixedAssetInfo.internalCode || "",
-                          asset_category_id:
-                              Number(
-                                  product.fixedAssetInfo.asset_category_id
-                              ) || null,
-                          accounting_account_id: product.accountingAccount?.id,
-                      }
+                        description: product.fixedAssetInfo.description || "",
+                        brand: product.fixedAssetInfo.brand || "",
+                        model: product.fixedAssetInfo.model || "",
+                        serial_number:
+                            product.fixedAssetInfo.serialNumber || "",
+                        internal_code:
+                            product.fixedAssetInfo.internalCode || "",
+                        asset_category_id:
+                            Number(
+                                product.fixedAssetInfo.asset_category_id
+                            ) || null,
+                        accounting_account_id: product.accountingAccount?.id,
+                    }
                     : {};
 
                 const formLot = infoLot?.length ? infoLot : [];
@@ -1870,7 +1871,7 @@ export const PurchaseBilling: React.FC<PurchaseBillingProps> = ({
                 return {
                     product_id:
                         product.typeProduct === "assets" ||
-                        product.typeProduct === "spent"
+                            product.typeProduct === "spent"
                             ? null
                             : Number(product.product),
                     type_product: product.typeProduct,
@@ -2097,7 +2098,7 @@ export const PurchaseBilling: React.FC<PurchaseBillingProps> = ({
                                                         {...field}
                                                         placeholder="Número de comprobante fiscal"
                                                         className="w-100 input-billing"
-                                                        //disabled={disabledInputs}
+                                                    //disabled={disabledInputs}
                                                     />
                                                 )}
                                             />

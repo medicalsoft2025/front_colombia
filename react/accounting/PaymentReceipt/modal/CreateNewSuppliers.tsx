@@ -1,13 +1,9 @@
 import React, { useState } from 'react';
-import {
-    Dialog,
-    Button,
-    InputText,
-    Dropdown,
-    DropdownChangeEvent,
-    InputTextChangeEvent,
-    Message
-} from 'primereact';
+import { Dialog } from 'primereact/dialog';
+import { Button } from 'primereact/button';
+import { InputText } from 'primereact/inputtext';
+import { Dropdown, DropdownChangeEvent } from 'primereact/dropdown';
+import { Message } from 'primereact/message';
 import { classNames } from 'primereact/utils';
 import 'primereact/resources/themes/saga-blue/theme.css';
 import 'primereact/resources/primereact.min.css';

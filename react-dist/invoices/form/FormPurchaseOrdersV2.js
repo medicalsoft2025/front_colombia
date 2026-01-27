@@ -2,12 +2,12 @@ function _extends() { return _extends = Object.assign ? Object.assign.bind() : f
 import React, { useState, useRef, useEffect } from "react";
 import { useForm, Controller } from "react-hook-form";
 import { Button } from "primereact/button";
-import { Dropdown } from "primereact";
+import { Dropdown } from "primereact/dropdown";
 import { Calendar } from "primereact/calendar";
 import { DataTable } from "primereact/datatable";
 import { Column } from "primereact/column";
 import { Toast } from "primereact/toast";
-import { InputNumber } from "primereact";
+import { InputNumber } from "primereact/inputnumber";
 import { Menu } from "primereact/menu";
 import { classNames } from "primereact/utils";
 import { useThirdParties } from "../../billing/third-parties/hooks/useThirdParties.js";

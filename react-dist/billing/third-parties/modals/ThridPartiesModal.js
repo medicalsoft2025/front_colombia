@@ -1,5 +1,11 @@
 import React, { useEffect, useState } from 'react';
-import { Button, Dropdown, InputText, Calendar, Dialog, InputMask, Message } from 'primereact';
+import { Button } from 'primereact/button';
+import { Dropdown } from 'primereact/dropdown';
+import { InputText } from 'primereact/inputtext';
+import { Calendar } from 'primereact/calendar';
+import { Dialog } from 'primereact/dialog';
+import { InputMask } from 'primereact/inputmask';
+import { Message } from 'primereact/message';
 export const ThirdPartyModal = ({
   visible,
   onHide,

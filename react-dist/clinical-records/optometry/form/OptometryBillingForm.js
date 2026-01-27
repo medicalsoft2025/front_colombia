@@ -1,6 +1,9 @@
 import React, { useEffect, useState, useRef, useMemo } from "react";
 import { useForm, Controller } from "react-hook-form";
-import { Button, Dropdown, InputNumber, Toast } from "primereact";
+import { Button } from "primereact/button";
+import { Dropdown } from "primereact/dropdown";
+import { InputNumber } from "primereact/inputnumber";
+import { Toast } from "primereact/toast";
 import { productService, paymentMethodService, optometryService, thirdPartyService, billingService } from "../../../../services/api/index.js";
 import { getUserLogged } from "../../../../services/utilidades.js";
 import { formatDate } from "../../../../services/utilidades.js";

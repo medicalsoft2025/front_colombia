@@ -6,7 +6,7 @@ import { InputTextarea } from "primereact/inputtextarea";
 import { Dropdown } from "primereact/dropdown";
 import { Divider } from "primereact/divider";
 import { Controller, useForm } from "react-hook-form";
-import { FloatLabel } from "primereact";
+import { FloatLabel } from "primereact/floatlabel";
 import { Button } from "primereact/button";
 import { Dialog } from "primereact/dialog";
 import { InputSwitch } from "primereact/inputswitch";

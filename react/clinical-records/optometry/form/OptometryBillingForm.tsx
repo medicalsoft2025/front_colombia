@@ -1,15 +1,13 @@
 import React, { useEffect, useState, useRef, useMemo } from "react";
 import { useForm, Controller } from "react-hook-form";
-import {
-  Button,
-  InputText,
-  Dropdown,
-  Calendar,
-  DataTable,
-  Column,
-  InputNumber,
-  Toast,
-} from "primereact";
+import { Button } from "primereact/button";
+import { InputText } from "primereact/inputtext";
+import { Dropdown } from "primereact/dropdown";
+import { Calendar } from "primereact/calendar";
+import { DataTable } from "primereact/datatable";
+import { Column } from "primereact/column";
+import { InputNumber } from "primereact/inputnumber";
+import { Toast } from "primereact/toast";
 import { classNames } from "primereact/utils";
 import {
   productService,

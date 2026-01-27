@@ -1,15 +1,13 @@
 import React, { Suspense, useEffect, useRef, useState } from "react";
 import { useForm, Controller } from "react-hook-form";
-import {
-  Button,
-  InputText,
-  Dropdown,
-  Calendar,
-  DataTable,
-  Column,
-  Toast,
-  InputNumber,
-} from "primereact";
+import { Button } from "primereact/button";
+import { InputText } from "primereact/inputtext";
+import { Dropdown } from "primereact/dropdown";
+import { Calendar } from "primereact/calendar";
+import { DataTable } from "primereact/datatable";
+import { Column } from "primereact/column";
+import { Toast } from "primereact/toast";
+import { InputNumber } from "primereact/inputnumber";
 import { useThirdParties } from "../../billing/third-parties/hooks/useThirdParties";
 import { useCentresCosts } from "../../centres-cost/hooks/useCentresCosts";
 import { getUserLogged } from "../../../services/utilidades";
@@ -425,7 +423,7 @@ export const FormDebitCreditNotes: React.FC<any> = ({
                 }, 1000);
               }
             })
-            .catch((error) => {});
+            .catch((error) => { });
           break;
         case "CREDIT":
           invoiceService
@@ -447,7 +445,7 @@ export const FormDebitCreditNotes: React.FC<any> = ({
                 }, 1000);
               }
             })
-            .catch((error) => {});
+            .catch((error) => { });
           break;
       }
     }
@@ -638,11 +636,11 @@ export const FormDebitCreditNotes: React.FC<any> = ({
               noteType
                 ? noteType.id === "DEBIT"
                   ? `Mínimo: ${formatCurrency(
-                      rowData.originalUnitPrice || 0
-                    )} (valor original)`
+                    rowData.originalUnitPrice || 0
+                  )} (valor original)`
                   : `Máximo: ${formatCurrency(
-                      rowData.originalUnitPrice || 0
-                    )} (valor original)`
+                    rowData.originalUnitPrice || 0
+                  )} (valor original)`
                 : "Seleccione tipo de nota"
             }
             inputClassName="form-control"

@@ -1,14 +1,12 @@
 import React, { useState } from "react";
-import {
-  Button,
-  Dropdown,
-  InputText,
-  InputTextarea,
-  Calendar,
-  FileUpload,
-  InputNumber,
-  Dialog,
-} from "primereact";
+import { Button } from "primereact/button";
+import { Dropdown } from "primereact/dropdown";
+import { InputText } from "primereact/inputtext";
+import { InputTextarea } from "primereact/inputtextarea";
+import { Calendar } from "primereact/calendar";
+import { FileUpload } from "primereact/fileupload";
+import { InputNumber } from "primereact/inputnumber";
+import { Dialog } from "primereact/dialog";
 
 interface FormData {
   tipo: string;

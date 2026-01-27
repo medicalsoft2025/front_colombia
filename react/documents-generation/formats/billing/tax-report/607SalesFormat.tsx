@@ -50,460 +50,201 @@ export const Sales607Format: React.FC<PrintInvoiceProps> = ({
     }
   };
 
+  // Estilos base para celdas
+  const cellStyle: React.CSSProperties = {
+    padding: "2px 2px", // Reducido drásticamente
+    border: "1px solid #dee2e6",
+    fontSize: "9px", // Reducido para que quepan 20 columnas
+    whiteSpace: "nowrap",
+    overflow: "hidden",
+    textOverflow: "ellipsis",
+  };
+
+  const headerStyle: React.CSSProperties = {
+    ...cellStyle,
+    textAlign: "center",
+    backgroundColor: "#f8f9fa",
+    fontWeight: "bold",
+    color: "#000",
+    fontSize: "8px", // Un poco más pequeño para los encabezados largos
+    whiteSpace: "normal", // Permitir wrap en encabezados
+    verticalAlign: "bottom",
+  };
+
   return (
     <div
       style={{
-        marginBottom: "2rem",
-        border: "1px solid #ddd",
-        padding: "1rem",
+        marginBottom: "0",
+        border: "none",
+        padding: "0",
+        width: "100%",
       }}
     >
       <style>
         {`
           @media print {
-            body * {
-              visibility: hidden;
+            @page {
+              size: landscape;
+              margin: 5mm; 
             }
-            .print-container, .print-container * {
-              visibility: visible;
-            }
-            .print-container {
-              position: absolute;
-              left: 0;
-              top: 0;
-              width: 100%;
-            }
-            .user-table-container {
-              page-break-inside: avoid;
+            body {
+              -webkit-print-color-adjust: exact;
             }
           }
           
           table { 
             width: 100%; 
             border-collapse: collapse; 
-            margin-top: 25px;
-            font-size: 12px;
-          }
-          th { 
-            color: white; 
-            padding: 10px; 
-            text-align: left;
-            border: 1px solid #dee2e6;
-            font-weight: bold;
-          }
-          td { 
-            padding: 10px 8px; 
-            border: 1px solid #dee2e6;
-          }
-          
-          .summary-table {
-            width: 100%; 
-            border-collapse: collapse; 
-            font-size: 13px;
-            margin-bottom: 20px;
-          }
-          
-          .summary-table td {
-            padding: 8px 0;
-            border-bottom: none;
-          }
-          
-          .currency {
-            text-align: right;
+            margin-top: 10px;
+            font-size: 9px;
+            table-layout: fixed; /* Forzar ancho equitativo o controlado */
           }
           
           .user-header {
             text-align: center; 
-            margin-bottom: 1rem; 
+            margin-bottom: 0.5rem; 
             background-color: #424a51; 
             color: white; 
-            padding: 10px;
+            padding: 5px;
             border-radius: 4px;
-          }
-
-          .invoice-number {
-            font-size: 16px;
-            font-weight: 600;
-            color: #2c3e50;
-            margin-bottom: 15px;
-            padding: 8px 0;
-            border-bottom: 2px solid #e9ecef;
-          }
-
-          .seccion-final {
-            display: flex;
-            justify-content: space-between;
-            margin-top: 30px;
-            align-items: flex-start;
-          }
-
-          .info-qr {
-            width: 40%;
-          }
-
-          .qr-image {
-            width: 120px;
-            height: 120px;
-            background-color: #f0f0f0;
-            border: 1px dashed #ccc;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin-bottom: 10px;
-          }
-
-          .totales-container {
-            background-color: #f8f9fa;
-            padding: 20px;
-            border-radius: 8px;
-            border: 1px solid #e9ecef;
-            width: 55%;
-          }
-
-          .fila-total {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 8px;
-            padding: 4px 0;
-          }
-
-          .etiqueta-total {
-            font-weight: 500;
-            color: #495057;
-          }
-
-          .valor-total {
-            font-weight: 500;
-            text-align: right;
-            min-width: 120px;
-          }
-
-          .total-final {
-            border-top: 2px solid #dee2e6;
-            margin-top: 8px;
-            padding-top: 8px;
-            font-weight: 700;
-            font-size: 14px;
-            color: #2c3e50;
           }
         `}
       </style>
 
       <div className="print-container">
-        {/* Encabezado con estilo similar al primer componente */}
+        {/* Encabezado compacto */}
         <div className="user-header">
-          <h2 style={{ margin: 0 }}>Factura de compra</h2>
+          <h3 style={{ margin: 0, fontSize: "14px" }}>
+            Reporte 606 - Compras de Bienes y Servicios
+          </h3>
         </div>
 
-        {/* Tabla con las nuevas columnas proporcionadas */}
+        {/* Tabla compacta */}
         <table>
           <thead>
             <tr>
-              <th
-                style={{
-                  textAlign: "left",
-                  padding: "10px",
-                  backgroundColor: "#f8f9fa",
-                  border: "1px solid #dee2e6",
-                  fontWeight: "bold",
-                  color: "#000",
-                }}
-              >
-                Id
+              <th style={{ ...headerStyle, width: "25px" }}>Id</th>
+              <th style={{ ...headerStyle, width: "105px" }}>
+                RNC/Cédula
               </th>
-              <th
-                style={{
-                  textAlign: "left",
-                  padding: "10px",
-                  backgroundColor: "#f8f9fa",
-                  border: "1px solid #dee2e6",
-                  fontWeight: "bold",
-                  color: "#000",
-                }}
-              >
-                RNC/Cedula o Pasaporte
+              <th style={{ ...headerStyle, width: "20px" }}>
+                Tipo
               </th>
-              <th
-                style={{
-                  textAlign: "left",
-                  padding: "10px",
-                  backgroundColor: "#f8f9fa",
-                  border: "1px solid #dee2e6",
-                  fontWeight: "bold",
-                  color: "#000",
-                }}
-              >
-                Tipo de identificación
+              <th style={{ ...headerStyle, width: "85px" }}>
+                NCF
               </th>
-              <th
-                style={{
-                  textAlign: "left",
-                  padding: "10px",
-                  backgroundColor: "#f8f9fa",
-                  border: "1px solid #dee2e6",
-                  fontWeight: "bold",
-                  color: "#000",
-                }}
-              >
-                No. Comprobante fiscal
+              <th style={{ ...headerStyle, width: "60px" }}>
+                Tipo Ingreso
               </th>
-              <th
-                style={{
-                  textAlign: "left",
-                  padding: "10px",
-                  backgroundColor: "#f8f9fa",
-                  border: "1px solid #dee2e6",
-                  fontWeight: "bold",
-                  color: "#000",
-                }}
-              >
-                Tipo de ingreso
+              <th style={{ ...headerStyle, width: "55px" }}>
+                Fecha Comp.
               </th>
-              <th
-                style={{
-                  textAlign: "left",
-                  padding: "10px",
-                  backgroundColor: "#f8f9fa",
-                  border: "1px solid #dee2e6",
-                  fontWeight: "bold",
-                  color: "#000",
-                }}
-              >
-                Fecha de comprobante
+              <th style={{ ...headerStyle, width: "55px" }}>
+                Fecha Ret.
               </th>
-              <th
-                style={{
-                  textAlign: "left",
-                  padding: "10px",
-                  backgroundColor: "#f8f9fa",
-                  border: "1px solid #dee2e6",
-                  fontWeight: "bold",
-                  color: "#000",
-                }}
-              >
-                Fecha de retención
+              <th style={{ ...headerStyle }}>
+                Monto Facturado
               </th>
-              <th
-                style={{
-                  textAlign: "left",
-                  padding: "10px",
-                  backgroundColor: "#f8f9fa",
-                  border: "1px solid #dee2e6",
-                  fontWeight: "bold",
-                  color: "#000",
-                }}
-              >
-                Monto facturado
+              <th style={{ ...headerStyle }}>
+                ITBIS Fact.
               </th>
-              <th
-                style={{
-                  textAlign: "left",
-                  padding: "10px",
-                  backgroundColor: "#f8f9fa",
-                  border: "1px solid #dee2e6",
-                  fontWeight: "bold",
-                  color: "#000",
-                }}
-              >
-                ITBIS facturado
+              <th style={{ ...headerStyle }}>
+                ISR Retenido
               </th>
-              <th
-                style={{
-                  textAlign: "left",
-                  padding: "10px",
-                  backgroundColor: "#f8f9fa",
-                  border: "1px solid #dee2e6",
-                  fontWeight: "bold",
-                  color: "#000",
-                }}
-              >
-                ISR percibido
+              <th style={{ ...headerStyle }}>
+                ISC
               </th>
-              <th
-                style={{
-                  textAlign: "left",
-                  padding: "10px",
-                  backgroundColor: "#f8f9fa",
-                  border: "1px solid #dee2e6",
-                  fontWeight: "bold",
-                  color: "#000",
-                }}
-              >
-                Impuesto selectivo al consumo
+              <th style={{ ...headerStyle }}>
+                Otros Imp.
               </th>
-              <th
-                style={{
-                  textAlign: "left",
-                  padding: "10px",
-                  backgroundColor: "#f8f9fa",
-                  border: "1px solid #dee2e6",
-                  fontWeight: "bold",
-                  color: "#000",
-                }}
-              >
-                Otro impuestos
-              </th>
-              <th
-                style={{
-                  textAlign: "left",
-                  padding: "10px",
-                  backgroundColor: "#f8f9fa",
-                  border: "1px solid #dee2e6",
-                  fontWeight: "bold",
-                  color: "#000",
-                }}
-              >
+              <th style={{ ...headerStyle }}>
                 Efectivo
               </th>
-              <th
-                style={{
-                  textAlign: "left",
-                  padding: "10px",
-                  backgroundColor: "#f8f9fa",
-                  border: "1px solid #dee2e6",
-                  fontWeight: "bold",
-                  color: "#000",
-                }}
-              >
-                Cheque/transferencia/depósito
+              <th style={{ ...headerStyle }}>
+                Cheque/ Transf.
               </th>
-              <th
-                style={{
-                  textAlign: "left",
-                  padding: "10px",
-                  backgroundColor: "#f8f9fa",
-                  border: "1px solid #dee2e6",
-                  fontWeight: "bold",
-                  color: "#000",
-                }}
-              >
-                Tarjeta débito/crédito
+              <th style={{ ...headerStyle }}>
+                Tarjeta
               </th>
-              <th
-                style={{
-                  textAlign: "left",
-                  padding: "10px",
-                  backgroundColor: "#f8f9fa",
-                  border: "1px solid #dee2e6",
-                  fontWeight: "bold",
-                  color: "#000",
-                }}
-              >
-                Venta a crédito
+              <th style={{ ...headerStyle }}>
+                Crédito
               </th>
-              <th
-                style={{
-                  textAlign: "left",
-                  padding: "10px",
-                  backgroundColor: "#f8f9fa",
-                  border: "1px solid #dee2e6",
-                  fontWeight: "bold",
-                  color: "#000",
-                }}
-              >
-                Bonos o certificado de regalo
+              <th style={{ ...headerStyle }}>
+                Bonos
               </th>
-              <th
-                style={{
-                  textAlign: "left",
-                  padding: "10px",
-                  backgroundColor: "#f8f9fa",
-                  border: "1px solid #dee2e6",
-                  fontWeight: "bold",
-                  color: "#000",
-                }}
-              >
+              <th style={{ ...headerStyle }}>
                 Permuta
               </th>
-              <th
-                style={{
-                  textAlign: "left",
-                  padding: "10px",
-                  backgroundColor: "#f8f9fa",
-                  border: "1px solid #dee2e6",
-                  fontWeight: "bold",
-                  color: "#000",
-                }}
-              >
-                Otras formas de pago
+              <th style={{ ...headerStyle }}>
+                Otras
               </th>
-              <th
-                style={{
-                  textAlign: "left",
-                  padding: "10px",
-                  backgroundColor: "#f8f9fa",
-                  border: "1px solid #dee2e6",
-                  fontWeight: "bold",
-                  color: "#000",
-                }}
-              >
+              <th style={{ ...headerStyle, width: "60px" }}>
                 Estado
               </th>
             </tr>
           </thead>
           <tbody>
-            {/* Nota: He mantenido invoice.detalles pero necesitarías ajustar esto según tu estructura de datos */}
             {invoices.map((detail: any, index: any) => (
               <tr key={index}>
-                <td style={{ padding: "10px 8px", border: "1px solid #dee2e6", textAlign: "left" }}>
+                <td style={{ ...cellStyle, textAlign: "center" }}>
                   {detail.id || index + 1}
                 </td>
-                <td style={{ padding: "10px 8px", border: "1px solid #dee2e6", textAlign: "left" }}>
+                <td style={{ ...cellStyle, textAlign: "left" }}>
                   {detail.third_party?.document_number || ""}
                 </td>
-                <td style={{ padding: "10px 8px", border: "1px solid #dee2e6", textAlign: "left" }}>
+                <td style={{ ...cellStyle, textAlign: "center" }}>
                   {getDocumentType(detail.third_party?.document_type)}
                 </td>
-                <td style={{ padding: "10px 8px", border: "1px solid #dee2e6", textAlign: "left" }}>
+                <td style={{ ...cellStyle, textAlign: "left" }}>
                   {detail.invoice_code || ""}
                 </td>
-                <td style={{ padding: "10px 8px", border: "1px solid #dee2e6", textAlign: "left" }}>
+                <td style={{ ...cellStyle, textAlign: "center" }}>
                   {detail.income_type || ""}
                 </td>
-                <td style={{ padding: "10px 8px", border: "1px solid #dee2e6", textAlign: "left" }}>
-                  {detail.created_at ? `${formatDate(detail.created_at, true)}` : ""}
+                <td style={{ ...cellStyle, textAlign: "center" }}>
+                  {formatDate(detail.created_at, true)}
                 </td>
-                <td style={{ padding: "10px 8px", border: "1px solid #dee2e6", textAlign: "left" }}>
-                  {detail.retention_date || ""}
+                <td style={{ ...cellStyle, textAlign: "center" }}>
+                  {formatDate(detail.retention_date, true) || ""}
                 </td>
-                <td style={{ padding: "10px 8px", border: "1px solid #dee2e6", textAlign: "right" }}>
+                <td style={{ ...cellStyle, textAlign: "right" }}>
                   {`$${(Number(detail.total_amount) || 0).toFixed(2)}`}
                 </td>
-                <td style={{ padding: "10px 8px", border: "1px solid #dee2e6", textAlign: "right" }}>
+                <td style={{ ...cellStyle, textAlign: "right" }}>
                   {`$${(detail.itbis_factured || 0).toFixed(2)}`}
                 </td>
-                <td style={{ padding: "10px 8px", border: "1px solid #dee2e6", textAlign: "right" }}>
+                <td style={{ ...cellStyle, textAlign: "right" }}>
                   {`$${(detail.tax_isr_received || 0).toFixed(2)}`}
                 </td>
-                <td style={{ padding: "10px 8px", border: "1px solid #dee2e6", textAlign: "right" }}>
+                <td style={{ ...cellStyle, textAlign: "right" }}>
                   {`$${(detail.consumption_tax || 0).toFixed(2)}`}
                 </td>
-                <td style={{ padding: "10px 8px", border: "1px solid #dee2e6", textAlign: "right" }}>
+                <td style={{ ...cellStyle, textAlign: "right" }}>
                   {`$${(Number(detail.iva) || 0).toFixed(2)}`}
                 </td>
-                <td style={{ padding: "10px 8px", border: "1px solid #dee2e6", textAlign: "right" }}>
+                <td style={{ ...cellStyle, textAlign: "right" }}>
                   {`$${(detail.payment_cash || 0).toFixed(2)}`}
                 </td>
-                <td style={{ padding: "10px 8px", border: "1px solid #dee2e6", textAlign: "right" }}>
+                <td style={{ ...cellStyle, textAlign: "right" }}>
                   {`$${(detail.payment_transfer || 0).toFixed(2)}`}
                 </td>
-                <td style={{ padding: "10px 8px", border: "1px solid #dee2e6", textAlign: "right" }}>
+                <td style={{ ...cellStyle, textAlign: "right" }}>
                   {`$${(detail.payment_card || 0).toFixed(2)}`}
                 </td>
-                <td style={{ padding: "10px 8px", border: "1px solid #dee2e6", textAlign: "right" }}>
+                <td style={{ ...cellStyle, textAlign: "right" }}>
                   {`$${(detail.payment_credit || 0).toFixed(2)}`}
                 </td>
-                <td style={{ padding: "10px 8px", border: "1px solid #dee2e6", textAlign: "right" }}>
+                <td style={{ ...cellStyle, textAlign: "right" }}>
                   {`$${(detail.payment_gift_certificate || 0).toFixed(2)}`}
                 </td>
-                <td style={{ padding: "10px 8px", border: "1px solid #dee2e6", textAlign: "right" }}>
+                <td style={{ ...cellStyle, textAlign: "right" }}>
                   {`$${(detail.payment_swap || 0).toFixed(2)}`}
                 </td>
-                <td style={{ padding: "10px 8px", border: "1px solid #dee2e6", textAlign: "right" }}>
+                <td style={{ ...cellStyle, textAlign: "right" }}>
                   {`$${(detail.payment_default || 0).toFixed(2)}`}
                 </td>
-                <td style={{ padding: "10px 8px", border: "1px solid #dee2e6", textAlign: "left" }}>
-                  {statusInvoices[detail.status]}
+                <td style={{ ...cellStyle, textAlign: "center" }}>
+                  {statusInvoices[detail.status]?.slice(0, 10) || ""}
                 </td>
               </tr>
             ))}

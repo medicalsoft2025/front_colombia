@@ -10,10 +10,14 @@ include "../public_header.php";
 </div>
 
 <script type="module">
+    import React from "react";
+    import ReactDOMClient from "react-dom/client";
     import PublicSignature from '../../react-dist/config/asignar-consentimiento/PublicSignature.js';
-    import { renderApp } from "./services/react/app-renderer.js";
 
-    renderApp(PublicSignature, "asignar-consentimiento");
+    const rootElement = document.getElementById('asignar-consentimiento');
+    if (rootElement) {
+        ReactDOMClient.createRoot(rootElement).render(React.createElement(PublicSignature));
+    }
 </script>
 
 <?php

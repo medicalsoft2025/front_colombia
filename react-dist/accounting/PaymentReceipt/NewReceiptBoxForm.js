@@ -1,5 +1,11 @@
 import React, { useState } from "react";
-import { Button, Dropdown, InputTextarea, Calendar, FileUpload, InputNumber, Dialog } from "primereact";
+import { Button } from "primereact/button";
+import { Dropdown } from "primereact/dropdown";
+import { InputTextarea } from "primereact/inputtextarea";
+import { Calendar } from "primereact/calendar";
+import { FileUpload } from "primereact/fileupload";
+import { InputNumber } from "primereact/inputnumber";
+import { Dialog } from "primereact/dialog";
 export const NewReceiptBoxModal = ({
   visible,
   onHide,

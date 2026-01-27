@@ -1257,6 +1257,8 @@ export const PurchaseBilling = ({
         third_party_id: formData.supplier || null,
         supplier_id: formData.supplier,
         billing: billing.data,
+        supplier_invoice_code: formData.fiscalVoucher,
+        resultion_number: formData.invoiceNumber,
         ...purchaseIdValue
       },
       invoice_detail: productsArray.map(product => {

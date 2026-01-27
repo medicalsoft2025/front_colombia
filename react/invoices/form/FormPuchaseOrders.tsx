@@ -1,18 +1,16 @@
 import React, { useState } from "react";
 import { useForm, Controller } from "react-hook-form";
-import {
-    Button,
-    InputText,
-    Dropdown,
-    Calendar,
-    DataTable,
-    Column,
-    Toast,
-    InputNumber,
-    Card,
-    Checkbox,
-    Divider
-} from "primereact";
+import { Button } from "primereact/button";
+import { InputText } from "primereact/inputtext";
+import { Dropdown } from "primereact/dropdown";
+import { Calendar } from "primereact/calendar";
+import { DataTable } from "primereact/datatable";
+import { Column } from "primereact/column";
+import { Toast } from "primereact/toast";
+import { InputNumber } from "primereact/inputnumber";
+import { Card } from "primereact/card";
+import { Checkbox } from "primereact/checkbox";
+import { Divider } from "primereact/divider";
 
 // Definición de tipos
 type TypeOption = {

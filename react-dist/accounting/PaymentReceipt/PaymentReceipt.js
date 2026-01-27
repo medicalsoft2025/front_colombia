@@ -1,5 +1,10 @@
 import React, { useState } from 'react';
-import { Button, Dropdown, InputText, InputTextarea, Calendar, Dialog } from 'primereact';
+import { Button } from 'primereact/button';
+import { Dropdown } from 'primereact/dropdown';
+import { InputText } from 'primereact/inputtext';
+import { InputTextarea } from 'primereact/inputtextarea';
+import { Calendar } from 'primereact/calendar';
+import { Dialog } from 'primereact/dialog';
 import 'primereact/resources/themes/saga-blue/theme.css';
 import 'primereact/resources/primereact.min.css';
 import 'primeicons/primeicons.css';

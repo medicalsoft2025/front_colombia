@@ -2,12 +2,12 @@ import React, { useState, useRef, useEffect, use } from "react";
 import { useForm, Controller, set } from "react-hook-form";
 
 import { Button } from "primereact/button";
-import { Dropdown } from "primereact";
+import { Dropdown } from "primereact/dropdown";
 import { Calendar } from "primereact/calendar";
 import { DataTable } from "primereact/datatable";
 import { Column } from "primereact/column";
 import { Toast } from "primereact/toast";
-import { InputNumber, InputNumberChangeEvent } from "primereact";
+import { InputNumber, InputNumberChangeEvent } from "primereact/inputnumber";
 import { Menu } from "primereact/menu";
 
 import { classNames } from "primereact/utils";
@@ -113,13 +113,13 @@ export const FormPurchaseOrders: React.FC<any> = ({
       prev.map((p) =>
         p.id === id
           ? {
-              ...p,
-              [field]: value,
-              ...(field === "typeProduct" && {
-                product: null,
-                price: 0,
-              }),
-            }
+            ...p,
+            [field]: value,
+            ...(field === "typeProduct" && {
+              product: null,
+              price: 0,
+            }),
+          }
           : p
       )
     );
@@ -131,8 +131,8 @@ export const FormPurchaseOrders: React.FC<any> = ({
         prev.map((p) =>
           p.id === productForExpiration.id
             ? {
-                ...p,
-              }
+              ...p,
+            }
             : p
         )
       );
@@ -209,8 +209,8 @@ export const FormPurchaseOrders: React.FC<any> = ({
         }
         const discount = detail.discount
           ? (Number(detail.discount) /
-              (Number(detail.price) * Number(detail.quantity))) *
-            100
+            (Number(detail.price) * Number(detail.quantity))) *
+          100
           : 0;
 
         const subtotal = Number(detail.subtotal) - Number(detail.discount);
@@ -341,11 +341,11 @@ export const FormPurchaseOrders: React.FC<any> = ({
     }
   };
 
-  const handleSubmitMedication = (data: MedicationFormInputs) => {};
+  const handleSubmitMedication = (data: MedicationFormInputs) => { };
 
-  const handleSubmitSupply = (data: SupplyFormInputs) => {};
+  const handleSubmitSupply = (data: SupplyFormInputs) => { };
 
-  const handleSubmitVaccine = (data: VaccineFormInputs) => {};
+  const handleSubmitVaccine = (data: VaccineFormInputs) => { };
 
   // Función para construir el objeto de datos a enviar al backend
   const buildInvoiceData = (formData: any) => {
@@ -915,10 +915,10 @@ export const FormPurchaseOrders: React.FC<any> = ({
                                 Impuestos (
                                 {calculateTotalTax() > 0
                                   ? (
-                                      (calculateTotalTax() /
-                                        calculateSubtotalAfterDiscount()) *
-                                      100
-                                    ).toFixed(2) + "%"
+                                    (calculateTotalTax() /
+                                      calculateSubtotalAfterDiscount()) *
+                                    100
+                                  ).toFixed(2) + "%"
                                   : "0%"}
                                 ):
                               </td>
