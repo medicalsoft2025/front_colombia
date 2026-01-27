@@ -202,12 +202,10 @@ export const Purchases606FormatFormat: React.FC<PrintInvoiceProps> = ({
                   {detail.income_type || ""}
                 </td>
                 <td style={{ ...cellStyle, textAlign: "center" }}>
-                  {detail.created_at
-                    ? `${formatDate(detail.created_at, true)}`
-                    : ""}
+                  {formatDate(detail.created_at, true)}
                 </td>
                 <td style={{ ...cellStyle, textAlign: "center" }}>
-                  {detail.retention_date || ""}
+                  {formatDate(detail.retention_date, true) || ""}
                 </td>
                 <td style={{ ...cellStyle, textAlign: "right" }}>
                   {`$${(Number(detail.total_amount) || 0).toFixed(2)}`}

@@ -21,9 +21,6 @@ export const useIntegrationForm = props => {
   });
   const [configFields, setConfigFields] = useState([]);
   useEffect(() => {
-    if (configs.length === 0) {
-      return;
-    }
     initialConfigFields.forEach(field => {
       const config = configs.find(config => config.key_ === field.field);
       if (config) {

@@ -225,12 +225,12 @@ export const Purchases606FormatFormat = ({
       ...cellStyle,
       textAlign: "center"
     }
-  }, detail.created_at ? `${formatDate(detail.created_at, true)}` : ""), /*#__PURE__*/React.createElement("td", {
+  }, formatDate(detail.created_at, true)), /*#__PURE__*/React.createElement("td", {
     style: {
       ...cellStyle,
       textAlign: "center"
     }
-  }, detail.retention_date || ""), /*#__PURE__*/React.createElement("td", {
+  }, formatDate(detail.retention_date, true) || ""), /*#__PURE__*/React.createElement("td", {
     style: {
       ...cellStyle,
       textAlign: "right"

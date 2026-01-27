@@ -13,6 +13,9 @@ import { Calendar } from "primereact/calendar";
 import { Button } from "primereact/button";
 import { useThirdParties } from "../../billing/third-parties/hooks/useThirdParties.js";
 import { use607SalesFormatFormat } from "../../documents-generation/hooks/billing/tax-report/use607SalesFormat.js";
+import { exportToExcel } from "../../accounting/utils/ExportToExcelOptions.js";
+import { formatDate } from "../../../services/utilidades.js";
+import { statusInvoices } from "../../../services/commons.js";
 export const Report607Sales = () => {
   const toast = useRef(null);
   const {
@@ -28,7 +31,7 @@ export const Report607Sales = () => {
     generateFormat607SalesFormat
   } = use607SalesFormatFormat();
   const {
-    data: consentsData,
+    data: reportData,
     loading: loadingPaginator,
     first,
     perPage,
@@ -99,47 +102,6 @@ export const Report607Sales = () => {
       refresh();
     }
   }, [filtros]);
-
-  //   const getMenuItems = (rowData: any): MenuItem[] => [
-  //     {
-  //       label: "Ver",
-  //       icon: <i className="fas fa-eye me-2"></i>,
-  //       command: () => handleViewDocument(rowData.id),
-  //     },
-  //     {
-  //       label: "Firmar",
-  //       icon: <i className="fas fa-signature me-2"></i>,
-  //       command: () => handleSignatureDocument(rowData),
-  //       visible: !rowData.status_signature,
-  //     },
-  //     {
-  //       label: "Enviar",
-  //       icon: <i className="fas fa-paper-plane me-2"></i>,
-  //       command: () =>
-  //         generatePublicSignatureUrl(rowData, rowData.title || "Documento"),
-  //       visible: !rowData.status_signature,
-  //     },
-  //     {
-  //       label: "Eliminar",
-  //       icon: <i className="fas fa-trash me-2"></i>,
-  //       command: () => handleDeleteDocument(rowData.id),
-  //     },
-  //   ];
-
-  //   const accionesBodyTemplate = (rowData: any) => {
-  //     return (
-  //       <div
-  //         className="flex align-items-center justify-content-center"
-  //         style={{ minWidth: "120px" }}
-  //       >
-  //         <CustomPRTableMenu
-  //           rowData={rowData}
-  //           menuItems={getMenuItems(rowData)}
-  //         />
-  //       </div>
-  //     );
-  //   };
-
   const estadosFactura = [{
     label: "Pagada",
     value: "paid"
@@ -300,28 +262,76 @@ export const Report607Sales = () => {
       value: getEstadoLabel(rowData.status),
       severity: getEstadoSeverity(rowData.status)
     })
-  }
-  // {
-  //   field: "actions",
-  //   header: "Acciones",
-  //   body: accionesBodyTemplate,
-  //   exportable: false,
-  //   style: { minWidth: "80px", textAlign: "center" },
-  //   width: "80px",
-  // },
-  ];
+  }];
   function exportToPDF() {
-    return generateFormat607SalesFormat(consentsData, "Impresion");
+    return generateFormat607SalesFormat(reportData, "Impresion");
+  }
+  const exportExcel = () => {
+    const dataExport = handleDataExport(reportData);
+    exportToExcel({
+      data: dataExport,
+      fileName: `606_Compras`
+    });
+  };
+  function handleDataExport(dataToExport) {
+    const data = dataToExport.map((item, index) => {
+      return {
+        id: item?.invoice?.id || index + 1,
+        numero_documento: item?.third_party?.document_number || "",
+        tipo_documento: getDocumentType(item?.third_party?.document_type || ""),
+        invoice_code: item?.invoice_code || "",
+        tipo_ingreso: item?.income_type || "",
+        fecha: formatDate(item.created_at, true),
+        fecha_retencion: item?.retention_date || "",
+        monto_total: `$${(Number(item?.total_amount) || 0).toFixed(2)}`,
+        itbis_facturado: `$${(Number(item?.itbis_factured) || 0).toFixed(2)}`,
+        isr_retenido: `$${(Number(item?.tax_isr_received) || 0).toFixed(2)}`,
+        impuesto_consumo: `$${(Number(item?.consumption_tax) || 0).toFixed(2)}`,
+        iva: `$${(Number(item?.iva) || 0).toFixed(2)}`,
+        pago_efectivo: `$${(Number(item?.payment_cash) || 0).toFixed(2)}`,
+        pago_transferencia: `$${(Number(item?.payment_transfer) || 0).toFixed(2)}`,
+        pago_tarjeta: `$${(Number(item?.payment_card) || 0).toFixed(2)}`,
+        pago_credito: `$${(Number(item?.payment_credit) || 0).toFixed(2)}`,
+        pago_certificado: `$${(Number(item?.payment_gift_certificate) || 0).toFixed(2)}`,
+        pago_canje: `$${(Number(item?.payment_swap) || 0).toFixed(2)}`,
+        pago_por_defecto: `$${(Number(item?.payment_default) || 0).toFixed(2)}`,
+        estado: statusInvoices[item?.status]?.slice(0, 10) || "",
+        tercero: `${item?.third_party?.name ?? ""}`.trim()
+      };
+    });
+    return data;
+  }
+  function getDocumentType(documentType) {
+    const documentTypes = {
+      "RNC": "01",
+      "CC": "02"
+    };
+    return documentTypes[documentType] || "03";
   }
   return /*#__PURE__*/React.createElement(PrimeReactProvider, null, /*#__PURE__*/React.createElement(Card, null, /*#__PURE__*/React.createElement("div", {
     className: "d-flex justify-content-between"
-  }, /*#__PURE__*/React.createElement("h4", null, "606 - Compras"), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement(Button, {
-    label: "Exportar a PDF",
+  }, /*#__PURE__*/React.createElement("h4", null, "606 - Compras"), /*#__PURE__*/React.createElement("div", {
+    className: "d-flex gap-2"
+  }, /*#__PURE__*/React.createElement(Button, {
+    tooltip: "Exportar a Excel",
+    tooltipOptions: {
+      position: "top"
+    },
+    onClick: () => exportExcel(),
+    className: "p-button-success",
+    disabled: reportData.length === 0
+  }, /*#__PURE__*/React.createElement("i", {
+    className: "fa-solid fa-file-excel"
+  }, " ")), /*#__PURE__*/React.createElement(Button, {
+    tooltip: "Exportar a PDF",
+    tooltipOptions: {
+      position: "top"
+    },
     onClick: () => exportToPDF(),
     className: "p-button-secondary",
-    disabled: consentsData.length === 0
+    disabled: reportData.length === 0
   }, /*#__PURE__*/React.createElement("i", {
-    className: "fa-solid fa-file-pdf ms-2"
+    className: "fa-solid fa-file-pdf"
   }, " ")))), /*#__PURE__*/React.createElement(Accordion, null, /*#__PURE__*/React.createElement(AccordionTab, {
     header: "Filtros de B\xFAsqueda"
   }, /*#__PURE__*/React.createElement("div", {
@@ -386,7 +396,7 @@ export const Report607Sales = () => {
     loading: loadingPaginator
   }))))), /*#__PURE__*/React.createElement(CustomPRTable, {
     columns: columns,
-    data: consentsData,
+    data: reportData,
     lazy: true,
     first: first,
     rows: perPage,
