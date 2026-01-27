@@ -431,3 +431,5 @@ RewriteRule ^Report606Purchases$ ContabilidadNueva/reportes/taxReports/report606
 RewriteRule ^Report607Sales$ ContabilidadNueva/reportes/taxReports/report607Sales.php
 
 RewriteRule ^Surveys$ Marketing/SurveyPanel/surveyPanel.php
+RewriteRule ^Tickets$ Marketing/Tickets/tickets.php
+

@@ -15,7 +15,7 @@ export const use606PurchasesFormatFormat = () => {
       html: html,
       pdfName: namePDF,
       type: type,
-      dimensions: [842, 595]
+      orientation: "landscape"
     });
   }
   return {

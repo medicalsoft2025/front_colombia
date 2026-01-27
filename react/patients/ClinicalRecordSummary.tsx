@@ -194,12 +194,12 @@ export const ClinicalRecordSummary: React.FC<ClinicalRecordSummaryProps> = ({
                             <div className="h-100 p-3 border rounded shadow-sm bg-white">
                                 <h6 className="fw-bold text-dark border-bottom pb-2 mb-3">
                                     <i className="fa-solid fa-list-check text-warning me-2"></i>
-                                    Seguimiento y Evolución
+                                    Seguimiento
                                 </h6>
-                                {renderList(data.seguimiento_y_evolucion?.notas_evolucion, "fa-circle-check")}
+                                {/* {renderList(data.seguimiento_y_evolucion?.notas_evolucion, "fa-circle-check")} */}
 
                                 {data.seguimiento_y_evolucion?.plan_seguimiento_inferido && (
-                                    <div className="mt-3 pt-2 border-top">
+                                    <div>
                                         <strong className="d-block text-secondary mb-1">Plan Inferido:</strong>
                                         <p className="small text-muted mb-0">{data.seguimiento_y_evolucion.plan_seguimiento_inferido}</p>
                                     </div>

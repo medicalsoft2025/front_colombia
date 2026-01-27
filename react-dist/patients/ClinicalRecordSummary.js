@@ -182,9 +182,7 @@ export const ClinicalRecordSummary = ({
     className: "fw-bold text-dark border-bottom pb-2 mb-3"
   }, /*#__PURE__*/React.createElement("i", {
     className: "fa-solid fa-list-check text-warning me-2"
-  }), "Seguimiento y Evoluci\xF3n"), renderList(data.seguimiento_y_evolucion?.notas_evolucion, "fa-circle-check"), data.seguimiento_y_evolucion?.plan_seguimiento_inferido && /*#__PURE__*/React.createElement("div", {
-    className: "mt-3 pt-2 border-top"
-  }, /*#__PURE__*/React.createElement("strong", {
+  }), "Seguimiento"), data.seguimiento_y_evolucion?.plan_seguimiento_inferido && /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("strong", {
     className: "d-block text-secondary mb-1"
   }, "Plan Inferido:"), /*#__PURE__*/React.createElement("p", {
     className: "small text-muted mb-0"

@@ -180,6 +180,7 @@ export const ControlCashFlow = () => {
       return {
         procedimiento: item?.invoice.details.map(detail => detail.product.name).join(","),
         codigo_entidad: item?.authorization_number,
+        payments: item?.invoice?.payments?.map(payment => `${payment.payment_method.method}: ${formatCurrency(payment.amount)}`).join(", "),
         fecha: formatDateUtils(item?.created_at),
         copago: item?.invoice?.sub_type === "entity" && item?.invoice.status !== "cancelled" ? formatCurrency(item?.invoice?.total_amount) : formatCurrency(0),
         particular: item?.invoice?.sub_type === "public" && item?.invoice.status !== "cancelled" ? formatCurrency(item?.invoice?.total_amount) : formatCurrency(0),
@@ -243,7 +244,8 @@ export const ControlCashFlow = () => {
           <tr>
               <th>Procedimiento</th>
               <th>Codigo Entidad</th>
-                            <th>Fecha</th>
+              <th>Metodos de pago</th>
+              <th>Fecha</th>
               <th>Copago</th>
               <th>Particular</th>
               <th>Monto autorizado</th>
@@ -291,7 +293,8 @@ export const ControlCashFlow = () => {
                 <tr>
                   <td>${rowData?.invoice?.details.length <= 1 ? rowData?.invoice?.details[0]?.product?.name || "" : "Laboratorio"}</td>
                   <td>${rowData?.authorization_number || ""}</td>
-                                    <td>${formatDateUtils(rowData.created_at)}</td>
+                  <td>${rowData?.invoice?.payments?.map(payment => `${payment.payment_method.method}: ${formatCurrency(payment.amount)}`).join(", ") || ""}</td>
+                  <td>${formatDateUtils(rowData.created_at)}</td>                  
                   <td>${rowData?.invoice?.sub_type === "entity" && rowData?.invoice.status !== "cancelled" ? formatCurrency(rowData?.invoice?.total_amount || 0) : formatCurrency(0)}</td>
                   <td>${rowData?.invoice?.sub_type === "public" && rowData?.invoice.status !== "cancelled" ? formatCurrency(rowData?.invoice?.total_amount || 0) : formatCurrency(0)}</td>
                   <td>${rowData?.invoice?.status !== "cancelled" ? formatCurrency(rowData?.entity_authorized_amount || 0) : formatCurrency(0)}</td>
@@ -348,6 +351,12 @@ export const ControlCashFlow = () => {
     field: "authorization_number",
     header: "Codigo Entidad",
     body: rowData => rowData?.authorization_number
+  }, {
+    field: "payments",
+    header: "Metodos de Pago",
+    body: rowData => /*#__PURE__*/React.createElement("ul", null, rowData?.invoice?.payments?.map(payment => /*#__PURE__*/React.createElement("li", {
+      key: payment.id
+    }, payment.payment_method.method + ": " + formatCurrency(payment.amount))))
   }, {
     field: "copayment",
     header: "Copago",

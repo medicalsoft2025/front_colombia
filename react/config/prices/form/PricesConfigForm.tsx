@@ -398,9 +398,8 @@ const PricesConfigForm: React.FC<ProductFormProps> = ({
                                         Nombre del item
                                     </label>
                                     <InputText
-                                        className={`w-100 ${
-                                            fieldState.error ? "p-invalid" : ""
-                                        }`}
+                                        className={`w-100 ${fieldState.error ? "p-invalid" : ""
+                                            }`}
                                         id={field.name}
                                         placeholder="Nombre del item"
                                         {...field}
@@ -425,9 +424,8 @@ const PricesConfigForm: React.FC<ProductFormProps> = ({
                                         Cups
                                     </label>
                                     <InputText
-                                        className={`w-100 ${
-                                            fieldState.error ? "p-invalid" : ""
-                                        }`}
+                                        className={`w-100 ${fieldState.error ? "p-invalid" : ""
+                                            }`}
                                         id={field.name}
                                         placeholder="Código Cups"
                                         {...field}
@@ -452,9 +450,8 @@ const PricesConfigForm: React.FC<ProductFormProps> = ({
                                         Tipo de atención
                                     </label>
                                     <Dropdown
-                                        className={`w-100 ${
-                                            fieldState.error ? "p-invalid" : ""
-                                        }`}
+                                        className={`w-100 ${fieldState.error ? "p-invalid" : ""
+                                            }`}
                                         id={field.name}
                                         value={field.value}
                                         onChange={(e) =>
@@ -518,6 +515,7 @@ const PricesConfigForm: React.FC<ProductFormProps> = ({
                                                     })
                                                 )}
                                                 placeholder="Seleccionar..."
+                                                filter
                                             />
                                         </div>
                                     )}
@@ -980,6 +978,7 @@ const PricesConfigForm: React.FC<ProductFormProps> = ({
                                                     })
                                                 )}
                                                 placeholder="Seleccionar..."
+                                                filter
                                             />
                                         </div>
                                     </div>

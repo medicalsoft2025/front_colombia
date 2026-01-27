@@ -1,29 +1,15 @@
 import { menuService } from "../../../../services/api/index.js";
 import { useQuery } from "@tanstack/react-query";
-const transformBackendMenu = backendItems => {
-  return backendItems.map(item => ({
-    label: item.name,
-    icon: item.icon,
-    url: item.route,
-    items: item.children && item.children.length > 0 ? transformBackendMenu(item.children) : undefined
-  })).filter(item => item.label);
-};
-const removeEmptySections = menu => {
-  return menu.map(item => {
-    if (item.items) {
-      const children = removeEmptySections(item.items);
-      if (children.length > 0) {
-        return {
-          ...item,
-          items: children
-        };
-      }
+const sortMenus = menus => {
+  return menus.sort((a, b) => (a.order || 0) - (b.order || 0)).map(item => {
+    if (item.items && item.items.length > 0) {
+      return {
+        ...item,
+        items: sortMenus(item.items)
+      };
     }
-    if (item.url || item.items && item.items.length > 0) {
-      return item;
-    }
-    return null;
-  }).filter(Boolean);
+    return item;
+  });
 };
 export const useMenuItems = () => {
   const {
@@ -36,10 +22,14 @@ export const useMenuItems = () => {
     queryFn: () => menuService.getAllMenuForRQ(),
     placeholderData: {
       menus: []
+    },
+    select: data => {
+      const menus = data?.menus?.menus || [];
+      return sortMenus(menus);
     }
   });
   return {
-    menuItems: data?.menus.menus || [],
+    menuItems: data || [],
     loading: isLoading || isFetching,
     refetch
   };

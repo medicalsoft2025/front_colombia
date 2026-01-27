@@ -421,14 +421,14 @@ const BillingConfigTab: React.FC<BillingConfigTabProps> = ({
           tipo === "fiscal"
             ? handleFiscal(onSubmitFiscal)
             : tipo === "consumidor"
-            ? handleConsumidor(onSubmitConsumidor)
-            : tipo === "gubernamental"
-            ? handleGubernamental(onSubmitGubernamental)
-            : tipo === "notaCredito"
-            ? handleNotaCredito(onSubmitNotaCredito)
-            : tipo === "notaDebito"
-            ? handleNotaDebito(onSubmitNotaDebito)
-            : handleCompra(onSubmitCompra)
+              ? handleConsumidor(onSubmitConsumidor)
+              : tipo === "gubernamental"
+                ? handleGubernamental(onSubmitGubernamental)
+                : tipo === "notaCredito"
+                  ? handleNotaCredito(onSubmitNotaCredito)
+                  : tipo === "notaDebito"
+                    ? handleNotaDebito(onSubmitNotaDebito)
+                    : handleCompra(onSubmitCompra)
         }
         className="p-fluid"
       >
@@ -508,9 +508,8 @@ const BillingConfigTab: React.FC<BillingConfigTabProps> = ({
                   filterBy="account_name,account_code,label"
                   showClear
                   filterPlaceholder="Buscar cuenta..."
-                  className={`w-full ${
-                    errors?.accounting_account ? "p-invalid" : ""
-                  }`}
+                  className={`w-full ${errors?.accounting_account ? "p-invalid" : ""
+                    }`}
                   loading={loading.cuentas}
                   placeholder="Seleccione una cuenta"
                   appendTo="self"
@@ -547,9 +546,8 @@ const BillingConfigTab: React.FC<BillingConfigTabProps> = ({
                   filterBy="account_name,account_code,label"
                   showClear
                   filterPlaceholder="Buscar cuenta..."
-                  className={`w-full ${
-                    errors?.accounting_account_reverse_id ? "p-invalid" : ""
-                  }`}
+                  className={`w-full ${errors?.accounting_account_reverse_id ? "p-invalid" : ""
+                    }`}
                   loading={loading.cuentas}
                   placeholder="Seleccione una cuenta"
                   appendTo="self"
@@ -574,9 +572,8 @@ const BillingConfigTab: React.FC<BillingConfigTabProps> = ({
                 {...register("resolution_number", {
                   required: true,
                 })}
-                className={`w-full ${
-                  errors?.resolution_number ? "p-invalid" : ""
-                }`}
+                className={`w-full ${errors?.resolution_number ? "p-invalid" : ""
+                  }`}
                 placeholder="Ej: 1234567890"
               />
               {errors?.resolution_number && (
@@ -655,9 +652,8 @@ const BillingConfigTab: React.FC<BillingConfigTabProps> = ({
                 dateFormat="dd/mm/yy"
                 showIcon
                 placeholder="Seleccione la fecha"
-                className={`w-full ${
-                  errors?.resolution_date ? "p-invalid" : ""
-                }`}
+                className={`w-full ${errors?.resolution_date ? "p-invalid" : ""
+                  }`}
                 icon={<i className="fa fa-calendar"></i>}
                 appendTo="self"
               />
@@ -682,9 +678,8 @@ const BillingConfigTab: React.FC<BillingConfigTabProps> = ({
                 dateFormat="dd/mm/yy"
                 showIcon
                 placeholder="Seleccione la fecha"
-                className={`w-full ${
-                  errors?.expiration_date ? "p-invalid" : ""
-                }`}
+                className={`w-full ${errors?.expiration_date ? "p-invalid" : ""
+                  }`}
                 icon={<i className="fa fa-calendar"></i>}
                 appendTo="self"
               />
@@ -745,47 +740,47 @@ const BillingConfigTab: React.FC<BillingConfigTabProps> = ({
                     tipo.id === "fiscal"
                       ? registerFiscal
                       : tipo.id === "consumidor"
-                      ? registerConsumidor
-                      : tipo.id === "gubernamental"
-                      ? registerGubernamental
-                      : tipo.id === "notaCredito"
-                      ? registerNotaCredito
-                      : tipo.id === "notaDebito"
-                      ? registerNotaDebito
-                      : registerCompra,
+                        ? registerConsumidor
+                        : tipo.id === "gubernamental"
+                          ? registerGubernamental
+                          : tipo.id === "notaCredito"
+                            ? registerNotaCredito
+                            : tipo.id === "notaDebito"
+                              ? registerNotaDebito
+                              : registerCompra,
                     tipo.id === "fiscal"
                       ? errorsFiscal
                       : tipo.id === "consumidor"
-                      ? errorsConsumidor
-                      : tipo.id === "gubernamental"
-                      ? errorsGubernamental
-                      : tipo.id === "notaCredito"
-                      ? errorsNotaCredito
-                      : tipo.id === "notaDebito"
-                      ? errorsNotaDebito
-                      : errorsCompra,
+                        ? errorsConsumidor
+                        : tipo.id === "gubernamental"
+                          ? errorsGubernamental
+                          : tipo.id === "notaCredito"
+                            ? errorsNotaCredito
+                            : tipo.id === "notaDebito"
+                              ? errorsNotaDebito
+                              : errorsCompra,
                     tipo.id === "fiscal"
                       ? setValueFiscal
                       : tipo.id === "consumidor"
-                      ? setValueConsumidor
-                      : tipo.id === "gubernamental"
-                      ? setValueGubernamental
-                      : tipo.id === "notaCredito"
-                      ? setValueNotaCredito
-                      : tipo.id === "notaDebito"
-                      ? setValueNotaDebito
-                      : setValueCompra,
+                        ? setValueConsumidor
+                        : tipo.id === "gubernamental"
+                          ? setValueGubernamental
+                          : tipo.id === "notaCredito"
+                            ? setValueNotaCredito
+                            : tipo.id === "notaDebito"
+                              ? setValueNotaDebito
+                              : setValueCompra,
                     tipo.id === "fiscal"
                       ? watchFiscal
                       : tipo.id === "consumidor"
-                      ? watchConsumidor
-                      : tipo.id === "gubernamental"
-                      ? watchGubernamental
-                      : tipo.id === "notaCredito"
-                      ? watchNotaCredito
-                      : tipo.id === "notaDebito"
-                      ? watchNotaDebito
-                      : watchCompra
+                        ? watchConsumidor
+                        : tipo.id === "gubernamental"
+                          ? watchGubernamental
+                          : tipo.id === "notaCredito"
+                            ? watchNotaCredito
+                            : tipo.id === "notaDebito"
+                              ? watchNotaDebito
+                              : watchCompra
                   )}
                 </div>
               </TabPanel>

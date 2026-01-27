@@ -19,7 +19,7 @@ interface SummaryResponse {
 }
 
 export const PatientSummary: React.FC<PatientSummaryProps> = ({ patientId }) => {
-    const { data, isLoading, isError, refetch } = useQuery({
+    const { data, isLoading, isFetching, isError, refetch } = useQuery({
         queryKey: ['patientSummary', patientId],
         queryFn: async () => {
             if (!patientId) throw new Error("Patient ID is required");
@@ -42,7 +42,7 @@ export const PatientSummary: React.FC<PatientSummaryProps> = ({ patientId }) => 
         staleTime: 1000 * 60 * 15, // Cache for 15 minutes
     });
 
-    if (isLoading) {
+    if (isLoading || isFetching) {
         return (
             <div className="card shadow-sm p-4 mb-4">
                 <div className="d-flex align-items-center mb-4">
@@ -107,7 +107,7 @@ export const PatientSummary: React.FC<PatientSummaryProps> = ({ patientId }) => 
         );
     };
 
-    return (
+    return (<>
         <Card className="shadow-sm mb-4 border-0">
             <div className="d-flex justify-content-between align-items-center mb-4 border-bottom pb-3">
                 <div className="d-flex align-items-center">
@@ -122,10 +122,12 @@ export const PatientSummary: React.FC<PatientSummaryProps> = ({ patientId }) => 
                         </small>
                     </div>
                 </div>
-                <div className="badge bg-primary bg-opacity-10 text-primary px-3 py-2 rounded-pill">
-                    <i className="fa-solid fa-sparkles me-2"></i>
-                    IA Assistant
-                </div>
+                <Button
+                    label="Refrescar"
+                    icon={<i className="fa-solid fa-sync me-1"></i>}
+                    size="small"
+                    onClick={() => refetch()}
+                />
             </div>
 
             <div className="row g-4">
@@ -207,5 +209,5 @@ export const PatientSummary: React.FC<PatientSummaryProps> = ({ patientId }) => 
                 </p>
             </div>
         </Card>
-    );
+    </>);
 };

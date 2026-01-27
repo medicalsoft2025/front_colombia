@@ -12,6 +12,7 @@ import { Dropdown } from "primereact/dropdown";
 import { Calendar } from "primereact/calendar";
 import { Button } from "primereact/button";
 import { useThirdParties } from "../../billing/third-parties/hooks/useThirdParties.js";
+import { use607SalesFormatFormat } from "../../documents-generation/hooks/billing/tax-report/use607SalesFormat.js";
 export const Report607Sales = () => {
   const toast = useRef(null);
   const {
@@ -23,6 +24,9 @@ export const Report607Sales = () => {
     fechaRango: null,
     estado: null
   });
+  const {
+    generateFormat607SalesFormat
+  } = use607SalesFormatFormat();
   const {
     data: consentsData,
     loading: loadingPaginator,
@@ -306,9 +310,19 @@ export const Report607Sales = () => {
   //   width: "80px",
   // },
   ];
+  function exportToPDF() {
+    return generateFormat607SalesFormat(consentsData, "Impresion");
+  }
   return /*#__PURE__*/React.createElement(PrimeReactProvider, null, /*#__PURE__*/React.createElement(Card, null, /*#__PURE__*/React.createElement("div", {
     className: "d-flex justify-content-between"
-  }, /*#__PURE__*/React.createElement("h4", null, "606 - Compras")), /*#__PURE__*/React.createElement(Accordion, null, /*#__PURE__*/React.createElement(AccordionTab, {
+  }, /*#__PURE__*/React.createElement("h4", null, "606 - Compras"), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement(Button, {
+    label: "Exportar a PDF",
+    onClick: () => exportToPDF(),
+    className: "p-button-secondary",
+    disabled: consentsData.length === 0
+  }, /*#__PURE__*/React.createElement("i", {
+    className: "fa-solid fa-file-pdf ms-2"
+  }, " ")))), /*#__PURE__*/React.createElement(Accordion, null, /*#__PURE__*/React.createElement(AccordionTab, {
     header: "Filtros de B\xFAsqueda"
   }, /*#__PURE__*/React.createElement("div", {
     className: "row"

@@ -38,448 +38,262 @@ export const Purchases606FormatFormat = ({
         return 3;
     }
   };
+
+  // Estilos base para celdas
+  const cellStyle = {
+    padding: "2px 2px",
+    // Reducido drásticamente
+    border: "1px solid #dee2e6",
+    fontSize: "9px",
+    // Reducido para que quepan 20 columnas
+    whiteSpace: "nowrap",
+    overflow: "hidden",
+    textOverflow: "ellipsis"
+  };
+  const headerStyle = {
+    ...cellStyle,
+    textAlign: "center",
+    backgroundColor: "#f8f9fa",
+    fontWeight: "bold",
+    color: "#000",
+    fontSize: "8px",
+    // Un poco más pequeño para los encabezados largos
+    whiteSpace: "normal",
+    // Permitir wrap en encabezados
+    verticalAlign: "bottom"
+  };
   return /*#__PURE__*/React.createElement("div", {
     style: {
-      marginBottom: "2rem",
-      border: "1px solid #ddd",
-      padding: "1rem"
+      marginBottom: "0",
+      border: "none",
+      padding: "0",
+      width: "100%"
     }
   }, /*#__PURE__*/React.createElement("style", null, `
           @media print {
-            body * {
-              visibility: hidden;
+            @page {
+              size: landscape;
+              margin: 5mm; 
             }
-            .print-container, .print-container * {
-              visibility: visible;
-            }
-            .print-container {
-              position: absolute;
-              left: 0;
-              top: 0;
-              width: 100%;
-            }
-            .user-table-container {
-              page-break-inside: avoid;
+            body {
+              -webkit-print-color-adjust: exact;
             }
           }
           
           table { 
             width: 100%; 
             border-collapse: collapse; 
-            margin-top: 25px;
-            font-size: 12px;
-          }
-          th { 
-            color: white; 
-            padding: 10px; 
-            text-align: left;
-            border: 1px solid #dee2e6;
-            font-weight: bold;
-          }
-          td { 
-            padding: 10px 8px; 
-            border: 1px solid #dee2e6;
-          }
-          
-          .summary-table {
-            width: 100%; 
-            border-collapse: collapse; 
-            font-size: 13px;
-            margin-bottom: 20px;
-          }
-          
-          .summary-table td {
-            padding: 8px 0;
-            border-bottom: none;
-          }
-          
-          .currency {
-            text-align: right;
+            margin-top: 10px;
+            font-size: 9px;
+            table-layout: fixed; /* Forzar ancho equitativo o controlado */
           }
           
           .user-header {
             text-align: center; 
-            margin-bottom: 1rem; 
+            margin-bottom: 0.5rem; 
             background-color: #424a51; 
             color: white; 
-            padding: 10px;
+            padding: 5px;
             border-radius: 4px;
-          }
-
-          .invoice-number {
-            font-size: 16px;
-            font-weight: 600;
-            color: #2c3e50;
-            margin-bottom: 15px;
-            padding: 8px 0;
-            border-bottom: 2px solid #e9ecef;
-          }
-
-          .seccion-final {
-            display: flex;
-            justify-content: space-between;
-            margin-top: 30px;
-            align-items: flex-start;
-          }
-
-          .info-qr {
-            width: 40%;
-          }
-
-          .qr-image {
-            width: 120px;
-            height: 120px;
-            background-color: #f0f0f0;
-            border: 1px dashed #ccc;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin-bottom: 10px;
-          }
-
-          .totales-container {
-            background-color: #f8f9fa;
-            padding: 20px;
-            border-radius: 8px;
-            border: 1px solid #e9ecef;
-            width: 55%;
-          }
-
-          .fila-total {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 8px;
-            padding: 4px 0;
-          }
-
-          .etiqueta-total {
-            font-weight: 500;
-            color: #495057;
-          }
-
-          .valor-total {
-            font-weight: 500;
-            text-align: right;
-            min-width: 120px;
-          }
-
-          .total-final {
-            border-top: 2px solid #dee2e6;
-            margin-top: 8px;
-            padding-top: 8px;
-            font-weight: 700;
-            font-size: 14px;
-            color: #2c3e50;
           }
         `), /*#__PURE__*/React.createElement("div", {
     className: "print-container"
   }, /*#__PURE__*/React.createElement("div", {
     className: "user-header"
-  }, /*#__PURE__*/React.createElement("h2", {
+  }, /*#__PURE__*/React.createElement("h3", {
     style: {
-      margin: 0
+      margin: 0,
+      fontSize: "14px"
     }
-  }, "Factura de compra")), /*#__PURE__*/React.createElement("table", null, /*#__PURE__*/React.createElement("thead", null, /*#__PURE__*/React.createElement("tr", null, /*#__PURE__*/React.createElement("th", {
+  }, "Reporte 606 - Compras de Bienes y Servicios")), /*#__PURE__*/React.createElement("table", null, /*#__PURE__*/React.createElement("thead", null, /*#__PURE__*/React.createElement("tr", null, /*#__PURE__*/React.createElement("th", {
     style: {
-      textAlign: "left",
-      padding: "10px",
-      backgroundColor: "#f8f9fa",
-      border: "1px solid #dee2e6",
-      fontWeight: "bold",
-      color: "#000"
+      ...headerStyle,
+      width: "25px"
     }
   }, "Id"), /*#__PURE__*/React.createElement("th", {
     style: {
-      textAlign: "left",
-      padding: "10px",
-      backgroundColor: "#f8f9fa",
-      border: "1px solid #dee2e6",
-      fontWeight: "bold",
-      color: "#000"
+      ...headerStyle,
+      width: "105px"
     }
-  }, "RNC/Cedula o Pasaporte"), /*#__PURE__*/React.createElement("th", {
+  }, "RNC/C\xE9dula"), /*#__PURE__*/React.createElement("th", {
     style: {
-      textAlign: "left",
-      padding: "10px",
-      backgroundColor: "#f8f9fa",
-      border: "1px solid #dee2e6",
-      fontWeight: "bold",
-      color: "#000"
+      ...headerStyle,
+      width: "20px"
     }
-  }, "Tipo de identificaci\xF3n"), /*#__PURE__*/React.createElement("th", {
+  }, "Tipo"), /*#__PURE__*/React.createElement("th", {
     style: {
-      textAlign: "left",
-      padding: "10px",
-      backgroundColor: "#f8f9fa",
-      border: "1px solid #dee2e6",
-      fontWeight: "bold",
-      color: "#000"
+      ...headerStyle,
+      width: "85px"
     }
-  }, "No. Comprobante fiscal"), /*#__PURE__*/React.createElement("th", {
+  }, "NCF"), /*#__PURE__*/React.createElement("th", {
     style: {
-      textAlign: "left",
-      padding: "10px",
-      backgroundColor: "#f8f9fa",
-      border: "1px solid #dee2e6",
-      fontWeight: "bold",
-      color: "#000"
+      ...headerStyle,
+      width: "60px"
     }
-  }, "Tipo de ingreso"), /*#__PURE__*/React.createElement("th", {
+  }, "Tipo Ingreso"), /*#__PURE__*/React.createElement("th", {
     style: {
-      textAlign: "left",
-      padding: "10px",
-      backgroundColor: "#f8f9fa",
-      border: "1px solid #dee2e6",
-      fontWeight: "bold",
-      color: "#000"
+      ...headerStyle,
+      width: "55px"
     }
-  }, "Fecha de comprobante"), /*#__PURE__*/React.createElement("th", {
+  }, "Fecha Comp."), /*#__PURE__*/React.createElement("th", {
     style: {
-      textAlign: "left",
-      padding: "10px",
-      backgroundColor: "#f8f9fa",
-      border: "1px solid #dee2e6",
-      fontWeight: "bold",
-      color: "#000"
+      ...headerStyle,
+      width: "55px"
     }
-  }, "Fecha de retenci\xF3n"), /*#__PURE__*/React.createElement("th", {
+  }, "Fecha Ret."), /*#__PURE__*/React.createElement("th", {
     style: {
-      textAlign: "left",
-      padding: "10px",
-      backgroundColor: "#f8f9fa",
-      border: "1px solid #dee2e6",
-      fontWeight: "bold",
-      color: "#000"
+      ...headerStyle
     }
-  }, "Monto facturado"), /*#__PURE__*/React.createElement("th", {
+  }, "Monto Facturado"), /*#__PURE__*/React.createElement("th", {
     style: {
-      textAlign: "left",
-      padding: "10px",
-      backgroundColor: "#f8f9fa",
-      border: "1px solid #dee2e6",
-      fontWeight: "bold",
-      color: "#000"
+      ...headerStyle
     }
-  }, "ITBIS facturado"), /*#__PURE__*/React.createElement("th", {
+  }, "ITBIS Fact."), /*#__PURE__*/React.createElement("th", {
     style: {
-      textAlign: "left",
-      padding: "10px",
-      backgroundColor: "#f8f9fa",
-      border: "1px solid #dee2e6",
-      fontWeight: "bold",
-      color: "#000"
+      ...headerStyle
     }
-  }, "ISR percibido"), /*#__PURE__*/React.createElement("th", {
+  }, "ISR Retenido"), /*#__PURE__*/React.createElement("th", {
     style: {
-      textAlign: "left",
-      padding: "10px",
-      backgroundColor: "#f8f9fa",
-      border: "1px solid #dee2e6",
-      fontWeight: "bold",
-      color: "#000"
+      ...headerStyle
     }
-  }, "Impuesto selectivo al consumo"), /*#__PURE__*/React.createElement("th", {
+  }, "ISC"), /*#__PURE__*/React.createElement("th", {
     style: {
-      textAlign: "left",
-      padding: "10px",
-      backgroundColor: "#f8f9fa",
-      border: "1px solid #dee2e6",
-      fontWeight: "bold",
-      color: "#000"
+      ...headerStyle
     }
-  }, "Otro impuestos"), /*#__PURE__*/React.createElement("th", {
+  }, "Otros Imp."), /*#__PURE__*/React.createElement("th", {
     style: {
-      textAlign: "left",
-      padding: "10px",
-      backgroundColor: "#f8f9fa",
-      border: "1px solid #dee2e6",
-      fontWeight: "bold",
-      color: "#000"
+      ...headerStyle
     }
   }, "Efectivo"), /*#__PURE__*/React.createElement("th", {
     style: {
-      textAlign: "left",
-      padding: "10px",
-      backgroundColor: "#f8f9fa",
-      border: "1px solid #dee2e6",
-      fontWeight: "bold",
-      color: "#000"
+      ...headerStyle
     }
-  }, "Cheque/transferencia/dep\xF3sito"), /*#__PURE__*/React.createElement("th", {
+  }, "Cheque/ Transf."), /*#__PURE__*/React.createElement("th", {
     style: {
-      textAlign: "left",
-      padding: "10px",
-      backgroundColor: "#f8f9fa",
-      border: "1px solid #dee2e6",
-      fontWeight: "bold",
-      color: "#000"
+      ...headerStyle
     }
-  }, "Tarjeta d\xE9bito/cr\xE9dito"), /*#__PURE__*/React.createElement("th", {
+  }, "Tarjeta"), /*#__PURE__*/React.createElement("th", {
     style: {
-      textAlign: "left",
-      padding: "10px",
-      backgroundColor: "#f8f9fa",
-      border: "1px solid #dee2e6",
-      fontWeight: "bold",
-      color: "#000"
+      ...headerStyle
     }
-  }, "Venta a cr\xE9dito"), /*#__PURE__*/React.createElement("th", {
+  }, "Cr\xE9dito"), /*#__PURE__*/React.createElement("th", {
     style: {
-      textAlign: "left",
-      padding: "10px",
-      backgroundColor: "#f8f9fa",
-      border: "1px solid #dee2e6",
-      fontWeight: "bold",
-      color: "#000"
+      ...headerStyle
     }
-  }, "Bonos o certificado de regalo"), /*#__PURE__*/React.createElement("th", {
+  }, "Bonos"), /*#__PURE__*/React.createElement("th", {
     style: {
-      textAlign: "left",
-      padding: "10px",
-      backgroundColor: "#f8f9fa",
-      border: "1px solid #dee2e6",
-      fontWeight: "bold",
-      color: "#000"
+      ...headerStyle
     }
   }, "Permuta"), /*#__PURE__*/React.createElement("th", {
     style: {
-      textAlign: "left",
-      padding: "10px",
-      backgroundColor: "#f8f9fa",
-      border: "1px solid #dee2e6",
-      fontWeight: "bold",
-      color: "#000"
+      ...headerStyle
     }
-  }, "Otras formas de pago"), /*#__PURE__*/React.createElement("th", {
+  }, "Otras"), /*#__PURE__*/React.createElement("th", {
     style: {
-      textAlign: "left",
-      padding: "10px",
-      backgroundColor: "#f8f9fa",
-      border: "1px solid #dee2e6",
-      fontWeight: "bold",
-      color: "#000"
+      ...headerStyle,
+      width: "60px"
     }
   }, "Estado"))), /*#__PURE__*/React.createElement("tbody", null, invoices.map((detail, index) => /*#__PURE__*/React.createElement("tr", {
     key: index
   }, /*#__PURE__*/React.createElement("td", {
     style: {
-      padding: "10px 8px",
-      border: "1px solid #dee2e6",
-      textAlign: "left"
+      ...cellStyle,
+      textAlign: "center"
     }
   }, detail.id || index + 1), /*#__PURE__*/React.createElement("td", {
     style: {
-      padding: "10px 8px",
-      border: "1px solid #dee2e6",
+      ...cellStyle,
       textAlign: "left"
     }
   }, detail.third_party?.document_number || ""), /*#__PURE__*/React.createElement("td", {
     style: {
-      padding: "10px 8px",
-      border: "1px solid #dee2e6",
-      textAlign: "left"
+      ...cellStyle,
+      textAlign: "center"
     }
   }, getDocumentType(detail.third_party?.document_type)), /*#__PURE__*/React.createElement("td", {
     style: {
-      padding: "10px 8px",
-      border: "1px solid #dee2e6",
+      ...cellStyle,
       textAlign: "left"
     }
   }, detail.invoice_code || ""), /*#__PURE__*/React.createElement("td", {
     style: {
-      padding: "10px 8px",
-      border: "1px solid #dee2e6",
-      textAlign: "left"
+      ...cellStyle,
+      textAlign: "center"
     }
   }, detail.income_type || ""), /*#__PURE__*/React.createElement("td", {
     style: {
-      padding: "10px 8px",
-      border: "1px solid #dee2e6",
-      textAlign: "left"
+      ...cellStyle,
+      textAlign: "center"
     }
   }, detail.created_at ? `${formatDate(detail.created_at, true)}` : ""), /*#__PURE__*/React.createElement("td", {
     style: {
-      padding: "10px 8px",
-      border: "1px solid #dee2e6",
-      textAlign: "left"
+      ...cellStyle,
+      textAlign: "center"
     }
   }, detail.retention_date || ""), /*#__PURE__*/React.createElement("td", {
     style: {
-      padding: "10px 8px",
-      border: "1px solid #dee2e6",
+      ...cellStyle,
       textAlign: "right"
     }
   }, `$${(Number(detail.total_amount) || 0).toFixed(2)}`), /*#__PURE__*/React.createElement("td", {
     style: {
-      padding: "10px 8px",
-      border: "1px solid #dee2e6",
+      ...cellStyle,
       textAlign: "right"
     }
   }, `$${(detail.itbis_factured || 0).toFixed(2)}`), /*#__PURE__*/React.createElement("td", {
     style: {
-      padding: "10px 8px",
-      border: "1px solid #dee2e6",
+      ...cellStyle,
       textAlign: "right"
     }
   }, `$${(detail.tax_isr_received || 0).toFixed(2)}`), /*#__PURE__*/React.createElement("td", {
     style: {
-      padding: "10px 8px",
-      border: "1px solid #dee2e6",
+      ...cellStyle,
       textAlign: "right"
     }
   }, `$${(detail.consumption_tax || 0).toFixed(2)}`), /*#__PURE__*/React.createElement("td", {
     style: {
-      padding: "10px 8px",
-      border: "1px solid #dee2e6",
+      ...cellStyle,
       textAlign: "right"
     }
   }, `$${(Number(detail.iva) || 0).toFixed(2)}`), /*#__PURE__*/React.createElement("td", {
     style: {
-      padding: "10px 8px",
-      border: "1px solid #dee2e6",
+      ...cellStyle,
       textAlign: "right"
     }
   }, `$${(detail.payment_cash || 0).toFixed(2)}`), /*#__PURE__*/React.createElement("td", {
     style: {
-      padding: "10px 8px",
-      border: "1px solid #dee2e6",
+      ...cellStyle,
       textAlign: "right"
     }
   }, `$${(detail.payment_transfer || 0).toFixed(2)}`), /*#__PURE__*/React.createElement("td", {
     style: {
-      padding: "10px 8px",
-      border: "1px solid #dee2e6",
+      ...cellStyle,
       textAlign: "right"
     }
   }, `$${(detail.payment_card || 0).toFixed(2)}`), /*#__PURE__*/React.createElement("td", {
     style: {
-      padding: "10px 8px",
-      border: "1px solid #dee2e6",
+      ...cellStyle,
       textAlign: "right"
     }
   }, `$${(detail.payment_credit || 0).toFixed(2)}`), /*#__PURE__*/React.createElement("td", {
     style: {
-      padding: "10px 8px",
-      border: "1px solid #dee2e6",
+      ...cellStyle,
       textAlign: "right"
     }
   }, `$${(detail.payment_gift_certificate || 0).toFixed(2)}`), /*#__PURE__*/React.createElement("td", {
     style: {
-      padding: "10px 8px",
-      border: "1px solid #dee2e6",
+      ...cellStyle,
       textAlign: "right"
     }
   }, `$${(detail.payment_swap || 0).toFixed(2)}`), /*#__PURE__*/React.createElement("td", {
     style: {
-      padding: "10px 8px",
-      border: "1px solid #dee2e6",
+      ...cellStyle,
       textAlign: "right"
     }
   }, `$${(detail.payment_default || 0).toFixed(2)}`), /*#__PURE__*/React.createElement("td", {
     style: {
-      padding: "10px 8px",
-      border: "1px solid #dee2e6",
-      textAlign: "left"
+      ...cellStyle,
+      textAlign: "center"
     }
-  }, statusInvoices[detail.status])))))));
+  }, statusInvoices[detail.status]?.slice(0, 10) || "")))))));
 };

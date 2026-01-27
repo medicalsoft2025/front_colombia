@@ -209,6 +209,12 @@ export const ControlCashFlow = () => {
           .map((detail: any) => detail.product.name)
           .join(","),
         codigo_entidad: item?.authorization_number,
+        payments: item?.invoice?.payments
+          ?.map(
+            (payment: any) =>
+              `${payment.payment_method.method}: ${formatCurrency(payment.amount)}`,
+          )
+          .join(", "),
         fecha: formatDateUtils(item?.created_at),
         copago:
           item?.invoice?.sub_type === "entity" &&
@@ -220,13 +226,12 @@ export const ControlCashFlow = () => {
           item?.invoice.status !== "cancelled"
             ? formatCurrency(item?.invoice?.total_amount)
             : formatCurrency(0),
-        monto_autorizado: item?.invoice?.sub_type === "entity" &&
+        monto_autorizado:
+          item?.invoice?.sub_type === "entity" &&
           item?.invoice?.status !== "cancelled"
             ? formatCurrency(item?.entity_authorized_amount)
             : formatCurrency(0),
-        ingresos: formatCurrency(
-          parseInt(item?.invoice?.total_amount) || 0,
-        ),
+        ingresos: formatCurrency(parseInt(item?.invoice?.total_amount) || 0),
         salidas:
           item?.invoice?.status === "cancelled"
             ? formatCurrency(
@@ -284,9 +289,7 @@ export const ControlCashFlow = () => {
       setExporting({ ...exporting, pdf: true });
       const dataExport = reportData;
       const fullIncome = reportData.reduce(
-        (acc: number, item: any) =>
-          acc +
-          (parseInt(item?.invoice?.total_amount)),
+        (acc: number, item: any) => acc + parseInt(item?.invoice?.total_amount),
         0,
       );
       const fullOutflows = reportData.reduce(
@@ -334,7 +337,8 @@ export const ControlCashFlow = () => {
           <tr>
               <th>Procedimiento</th>
               <th>Codigo Entidad</th>
-                            <th>Fecha</th>
+              <th>Metodos de pago</th>
+              <th>Fecha</th>
               <th>Copago</th>
               <th>Particular</th>
               <th>Monto autorizado</th>
@@ -390,7 +394,15 @@ export const ControlCashFlow = () => {
                       : "Laboratorio"
                   }</td>
                   <td>${rowData?.authorization_number || ""}</td>
-                                    <td>${formatDateUtils(rowData.created_at)}</td>
+                  <td>${
+                    rowData?.invoice?.payments
+                      ?.map(
+                        (payment: any) =>
+                          `${payment.payment_method.method}: ${formatCurrency(payment.amount)}`,
+                      )
+                      .join(", ") || ""
+                  }</td>
+                  <td>${formatDateUtils(rowData.created_at)}</td>                  
                   <td>${
                     rowData?.invoice?.sub_type === "entity" &&
                     rowData?.invoice.status !== "cancelled"
@@ -409,7 +421,7 @@ export const ControlCashFlow = () => {
                       : formatCurrency(0)
                   }</td>
                   <td class="right">${formatCurrency(
-                    (parseInt(rowData?.invoice?.total_amount) || 0),
+                    parseInt(rowData?.invoice?.total_amount) || 0,
                   )}</td>
                   <td class="right">${
                     rowData?.invoice?.status === "cancelled"
@@ -483,6 +495,21 @@ export const ControlCashFlow = () => {
       body: (rowData: any) => rowData?.authorization_number,
     },
     {
+      field: "payments",
+      header: "Metodos de Pago",
+      body: (rowData: any) => (
+        <ul>
+          {rowData?.invoice?.payments?.map((payment: any) => (
+            <li key={payment.id}>
+              {payment.payment_method.method +
+                ": " +
+                formatCurrency(payment.amount)}
+            </li>
+          ))}
+        </ul>
+      ),
+    },
+    {
       field: "copayment",
       header: "Copago",
       body: (rowData: any) =>
@@ -512,9 +539,7 @@ export const ControlCashFlow = () => {
       field: "income",
       header: "Ingresos",
       body: (rowData: any) =>
-        formatCurrency(
-          parseInt(rowData?.invoice?.total_amount) || 0,
-        ),
+        formatCurrency(parseInt(rowData?.invoice?.total_amount) || 0),
     },
     {
       field: "outflows",
@@ -534,8 +559,7 @@ export const ControlCashFlow = () => {
   const footerGroup = (reportData: any) => {
     const fullIncome = reportData.reduce(
       (acc: number, item: any) =>
-        acc +
-        (parseInt(item?.invoice?.total_amount) || 0),
+        acc + (parseInt(item?.invoice?.total_amount) || 0),
       0,
     );
     const fullOutflows = reportData.reduce(

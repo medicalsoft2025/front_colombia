@@ -7,6 +7,7 @@ import { MenuForm } from "./MenuForm.js";
 import { generateUUID } from "../../../services/utilidades.js";
 import { useMenuSave } from "../hooks/useMenuSave.js";
 import { Toast } from 'primereact/toast';
+import { useMenuItems } from "../../layout/menu/hooks/useMenuItems.js";
 export const MenusApp = () => {
   const [nodes, setNodes] = useState([]);
   const [selectedNode, setSelectedNode] = useState(null);
@@ -22,12 +23,16 @@ export const MenusApp = () => {
     saveMenus,
     toast
   } = useMenuSave();
+  const {
+    refetch: refetchLoggedUserMenus
+  } = useMenuItems();
   const cm = useRef(null);
   const reconstructMenuTree = nodesToProcess => {
-    return nodesToProcess.map(node => {
+    return nodesToProcess.map((node, index) => {
       const menuData = {
         ...node.data,
         label: node.label.replace(/\(Sistema\)/g, '').trim(),
+        order: index,
         items: node.children ? reconstructMenuTree(node.children) : []
       };
       return menuData;
@@ -37,6 +42,7 @@ export const MenusApp = () => {
     const reconstructed = reconstructMenuTree(nodes);
     await saveMenus(reconstructed);
     refetch();
+    refetchLoggedUserMenus();
   };
   const handleAdd = () => {
     setFormMode('create');
@@ -208,7 +214,18 @@ export const MenusApp = () => {
   }), /*#__PURE__*/React.createElement(Tree, {
     value: nodes,
     dragdropScope: "demo",
-    onDragDrop: e => setNodes(e.value),
+    onDragDrop: e => {
+      if (e.dragNode.data.system_menu) {
+        toast.current?.show({
+          severity: 'error',
+          summary: 'Error',
+          detail: 'No se puede ordenar un menú del sistema',
+          life: 3000
+        });
+        return;
+      }
+      setNodes(e.value);
+    },
     selectionMode: "single",
     selectionKeys: selectedNodeKey,
     onSelectionChange: e => setSelectedNodeKey(e.value),

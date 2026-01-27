@@ -103,6 +103,9 @@ export const AccountingAccountFormModal: React.FC<AccountingAccountFormModalProp
           { label: "Vacunas", value: "vaccines" },
           { label: "Inventariables", value: "inventariables" },
           { label: "Insumos", value: "supplies" },
+          { label: "ITBIS facturado", value: "itbis_billed" },
+          { label: "ISR Percibido", value: "isr_received" },
+          { label: "Impuesto Selectivo al Consumo", value: "consumption_tax" },
         ]);
       } else if (selectedAccount.account_code.startsWith("4")) {
         setShowInputs(true);
@@ -147,8 +150,8 @@ export const AccountingAccountFormModal: React.FC<AccountingAccountFormModalProp
           { label: "Adquisiciones de activos", value: "asset_acquisitions" },
           { label: "Gastos de seguros", value: "insurance_expenses" },
         ]);
-      }else{
-        setShowInputs(false);
+      } else {
+        setShowInputs(true);
         setCategories([
           { label: "ITBIS facturado", value: "itbis_billed" },
           { label: "ISR Percibido", value: "isr_received" },
@@ -175,17 +178,17 @@ export const AccountingAccountFormModal: React.FC<AccountingAccountFormModalProp
         auxiliary:
           selectedAccount?.auxiliary ||
           (subAccountCode &&
-          selectedAccount?.account &&
-          selectedAccount?.sub_account
+            selectedAccount?.account &&
+            selectedAccount?.sub_account
             ? subAccountCode
             : null) ||
           null,
         sub_auxiliary:
           selectedAccount?.sub_auxiliary ||
           (subAccountCode &&
-          selectedAccount?.account &&
-          selectedAccount?.sub_account &&
-          selectedAccount?.auxiliary
+            selectedAccount?.account &&
+            selectedAccount?.sub_account &&
+            selectedAccount?.auxiliary
             ? subAccountCode
             : null) ||
           null,

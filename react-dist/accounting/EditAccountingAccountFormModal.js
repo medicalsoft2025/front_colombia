@@ -72,6 +72,15 @@ export const EditAccountingAccountFormModal = /*#__PURE__*/forwardRef((props, re
       }, {
         label: "Insumos",
         value: "supplies"
+      }, {
+        label: "ITBIS facturado",
+        value: "itbis_billed"
+      }, {
+        label: "ISR Percibido",
+        value: "isr_received"
+      }, {
+        label: "Impuesto Selectivo al Consumo",
+        value: "consumption_tax"
       }]);
     } else if (selectedAccount.account_code.startsWith("4")) {
       setShowInputs(true);
@@ -131,8 +140,8 @@ export const EditAccountingAccountFormModal = /*#__PURE__*/forwardRef((props, re
         value: "insurance_expenses"
       }]);
     } else {
-      setShowInputs(false);
-      setCategories([[{
+      setShowInputs(true);
+      setCategories([{
         label: "ITBIS facturado",
         value: "itbis_billed"
       }, {
@@ -141,7 +150,7 @@ export const EditAccountingAccountFormModal = /*#__PURE__*/forwardRef((props, re
       }, {
         label: "Impuesto Selectivo al Consumo",
         value: "consumption_tax"
-      }]]);
+      }]);
     }
   }
   useEffect(() => {

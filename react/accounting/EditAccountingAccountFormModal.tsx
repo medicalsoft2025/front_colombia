@@ -103,6 +103,9 @@ export const EditAccountingAccountFormModal: React.FC<EditAccountingAccountFormM
           { label: "Vacunas", value: "vaccines" },
           { label: "Inventariables", value: "inventariables" },
           { label: "Insumos", value: "supplies" },
+          { label: "ITBIS facturado", value: "itbis_billed" },
+          { label: "ISR Percibido", value: "isr_received" },
+          { label: "Impuesto Selectivo al Consumo", value: "consumption_tax" },
         ]);
       } else if (selectedAccount.account_code.startsWith("4")) {
         setShowInputs(true);
@@ -148,16 +151,14 @@ export const EditAccountingAccountFormModal: React.FC<EditAccountingAccountFormM
           { label: "Gastos de seguros", value: "insurance_expenses" },
         ]);
       } else {
-        setShowInputs(false);
+        setShowInputs(true);
         setCategories([
-          [
-            { label: "ITBIS facturado", value: "itbis_billed" },
-            { label: "ISR Percibido", value: "isr_received" },
-            {
-              label: "Impuesto Selectivo al Consumo",
-              value: "consumption_tax",
-            },
-          ],
+          { label: "ITBIS facturado", value: "itbis_billed" },
+          { label: "ISR Percibido", value: "isr_received" },
+          {
+            label: "Impuesto Selectivo al Consumo",
+            value: "consumption_tax",
+          },
         ]);
       }
     }

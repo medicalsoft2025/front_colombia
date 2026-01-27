@@ -14,6 +14,10 @@ import { Calendar } from "primereact/calendar";
 import { Button } from "primereact/button";
 import { useThirdParties } from "../../billing/third-parties/hooks/useThirdParties";
 import { use606PurchasesFormatFormat } from "../../documents-generation/hooks/billing/tax-report/use606PurchasesFormat";
+import { exportToExcel } from "../../accounting/utils/ExportToExcelOptions";
+import { formatDate } from "../../../services/utilidades";
+import { statusInvoices } from "../../../services/commons";
+
 export const Report606Purchases: React.FC<any> = () => {
   const toast = useRef<Toast>(null);
   const { thirdParties } = useThirdParties();
@@ -25,7 +29,7 @@ export const Report606Purchases: React.FC<any> = () => {
   });
   const { generateFormat606PurchasesFormat } = use606PurchasesFormatFormat();
   const {
-    data: consentsData,
+    data: reportData,
     loading: loadingPaginator,
     first,
     perPage,
@@ -112,8 +116,56 @@ export const Report606Purchases: React.FC<any> = () => {
     }
   }, [filtros]);
 
-  function exportToProceduresPDF(tab = "") {
-    return generateFormat606PurchasesFormat(consentsData, "Impresion");
+  function exportToPDF() {
+    return generateFormat606PurchasesFormat(reportData, "Impresion");
+  }
+
+  const exportExcel = () => {
+    const dataExport = handleDataExport(reportData);
+
+    exportToExcel({
+      data: dataExport,
+      fileName: `606_Compras`,
+    });
+  };
+
+  function handleDataExport(dataToExport: any) {
+    const data = dataToExport.map((item: any, index: any) => {
+      return {
+        id: item?.invoice?.id || index + 1,
+        numero_documento: item?.third_party?.document_number || "",
+        tipo_documento: getDocumentType(item?.third_party?.document_type || ""),
+        invoice_code: item?.invoice_code || "",
+        tipo_ingreso: item?.income_type || "",
+        fecha: formatDate(item.created_at, true),
+        fecha_retencion: item?.retention_date || "",
+        monto_total: `$${(Number(item?.total_amount) || 0).toFixed(2)}`,
+        itbis_facturado: `$${(Number(item?.itbis_factured) || 0).toFixed(2)}`,
+        isr_retenido: `$${(Number(item?.tax_isr_received) || 0).toFixed(2)}`,
+        impuesto_consumo: `$${(Number(item?.consumption_tax) || 0).toFixed(2)}`,
+        iva: `$${(Number(item?.iva) || 0).toFixed(2)}`,
+        pago_efectivo: `$${(Number(item?.payment_cash) || 0).toFixed(2)}`,
+        pago_transferencia: `$${(Number(item?.payment_transfer) || 0).toFixed(2)}`,
+        pago_tarjeta: `$${(Number(item?.payment_card) || 0).toFixed(2)}`,
+        pago_credito: `$${(Number(item?.payment_credit) || 0).toFixed(2)}`,
+        pago_certificado: `$${(Number(item?.payment_gift_certificate) || 0).toFixed(2)}`,
+        pago_canje: `$${(Number(item?.payment_swap) || 0).toFixed(2)}`,
+        pago_por_defecto: `$${(Number(item?.payment_default) || 0).toFixed(2)}`,
+        estado: statusInvoices[item?.status]?.slice(0, 10) || "",
+        tercero: `${item?.third_party?.name ?? ""}`.trim(),
+      };
+    });
+
+    return data;
+  }
+
+  function getDocumentType(documentType: string) {
+    const documentTypes: any = {
+      "RNC": "01",
+      "CC": "02",
+    };
+
+    return documentTypes[documentType] || "03";
   }
 
   const estadosFactura = [
@@ -308,12 +360,22 @@ export const Report606Purchases: React.FC<any> = () => {
       <Card>
         <div className="d-flex justify-content-between">
           <h4>606 - Compras</h4>
-          <div>
+          <div className="d-flex gap-2">
             <Button
-              label="Exportar a PDF"
-              onClick={() => exportToProceduresPDF()}
-              className="p-button-secondary mr-3"
-              disabled={consentsData.length === 0}
+              tooltip="Exportar a Excel"
+              tooltipOptions={{ position: "top" }}
+              onClick={() => exportExcel()}
+              className="p-button-success"
+              disabled={reportData.length === 0}
+            >
+              <i className="fa-solid fa-file-excel"> </i>
+            </Button>
+            <Button
+              tooltip="Exportar a PDF"
+              tooltipOptions={{ position: "top" }}
+              onClick={() => exportToPDF()}
+              className="p-button-secondary"
+              disabled={reportData.length === 0}
             >
               <i className="fa-solid fa-file-pdf"> </i>
             </Button>
@@ -395,7 +457,7 @@ export const Report606Purchases: React.FC<any> = () => {
         </Accordion>
         <CustomPRTable
           columns={columns}
-          data={consentsData}
+          data={reportData}
           lazy
           first={first}
           rows={perPage}

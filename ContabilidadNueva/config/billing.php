@@ -48,19 +48,19 @@ include "../../header.php";
         <div class="main-content">
 
             <div class="component-container">
-                <div id="BilingConfigTab"></div>
+                <div id="BillingConfigTab"></div>
             </div>
         </div>
     </div>
 </div>
-<script type="module">
-    import {
-        BilingConfigTab
-    } from './react-dist/config-accounting/billing/BilingConfigTab.js';
-    import { renderApp } from "./services/react/app-renderer.js";
-
-    renderApp(BilingConfigTab, "BilingConfigTab");
-</script>
 <?php
 include "../../footer.php";
 ?>
+<script type="module">
+    import
+    BillingConfigTab
+        from './react-dist/config-accounting/billing/BilingConfigTab.js';
+    import { renderApp } from "./services/react/app-renderer.js";
+
+    renderApp(BillingConfigTab, "BillingConfigTab");
+</script>

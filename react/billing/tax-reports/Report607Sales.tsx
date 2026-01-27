@@ -13,6 +13,8 @@ import { Dropdown } from "primereact/dropdown";
 import { Calendar } from "primereact/calendar";
 import { Button } from "primereact/button";
 import { useThirdParties } from "../../billing/third-parties/hooks/useThirdParties";
+import { use607SalesFormatFormat } from "../../documents-generation/hooks/billing/tax-report/use607SalesFormat";
+
 export const Report607Sales: React.FC<any> = () => {
   const toast = useRef<Toast>(null);
   const { thirdParties } = useThirdParties();
@@ -22,6 +24,7 @@ export const Report607Sales: React.FC<any> = () => {
     fechaRango: null,
     estado: null,
   });
+  const { generateFormat607SalesFormat } = use607SalesFormatFormat();
   const {
     data: consentsData,
     loading: loadingPaginator,
@@ -278,7 +281,7 @@ export const Report607Sales: React.FC<any> = () => {
       field: "payment_cash",
       header: "Efectivo",
       sortable: true,
-        body: (rowData: any) => `$${rowData.payment_cash.toFixed(2)}`,
+      body: (rowData: any) => `$${rowData.payment_cash.toFixed(2)}`,
     },
     {
       field: "payment_transfer",
@@ -337,11 +340,25 @@ export const Report607Sales: React.FC<any> = () => {
     // },
   ];
 
+  function exportToPDF() {
+    return generateFormat607SalesFormat(consentsData, "Impresion");
+  }
+
   return (
     <PrimeReactProvider>
       <Card>
         <div className="d-flex justify-content-between">
           <h4>606 - Compras</h4>
+          <div>
+            <Button
+              label="Exportar a PDF"
+              onClick={() => exportToPDF()}
+              className="p-button-secondary"
+              disabled={consentsData.length === 0}
+            >
+              <i className="fa-solid fa-file-pdf ms-2"> </i>
+            </Button>
+          </div>
         </div>
         <Accordion>
           <AccordionTab header="Filtros de Búsqueda">

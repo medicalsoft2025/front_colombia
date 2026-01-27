@@ -1,5 +1,6 @@
 function _extends() { return _extends = Object.assign ? Object.assign.bind() : function (n) { for (var e = 1; e < arguments.length; e++) { var t = arguments[e]; for (var r in t) ({}).hasOwnProperty.call(t, r) && (n[r] = t[r]); } return n; }, _extends.apply(null, arguments); }
 import React, { useCallback, useEffect, useState } from "react";
+import { AIFormGenerator } from "./AIFormGenerator.js";
 import { DynamicForm } from "../../dynamic-form/components/DynamicForm.js";
 import { Divider } from "primereact/divider";
 import { Tree } from "primereact/tree";
@@ -61,6 +62,7 @@ export const FormBuilder = props => {
   const [importErrors, setImportErrors] = useState([]);
   const [isChangeInProgress, setIsChangeInProgress] = useState(false);
   const historyTimeoutRef = React.useRef(null);
+  const [aiGeneratorVisible, setAiGeneratorVisible] = useState(false);
   const setConfig = (newConfig, pushToHistory = true) => {
     if (pushToHistory) {
       // Reset debounced history
@@ -231,6 +233,41 @@ export const FormBuilder = props => {
       setImportErrors([`JSON inválido: ${e.message}`]);
     }
   };
+  const handleAIImport = (generatedConfig, targetNodeKey) => {
+    // Reset debounced history
+    if (historyTimeoutRef.current) clearTimeout(historyTimeoutRef.current);
+    setIsChangeInProgress(false);
+    const newConfig = JSON.parse(JSON.stringify(config));
+    const targetData = JsonHelpers.findDataByKey(newConfig, targetNodeKey);
+    if (targetData) {
+      // Save state to history
+      setPast([...past, JSON.parse(JSON.stringify(config))]);
+      setFuture([]);
+
+      // Ensure children array exists
+      if (!targetData.children) {
+        targetData.children = [];
+      }
+
+      // RECURSIVE UNIQUIFICATION
+      const existingNames = JsonHelpers.collectAllNames(newConfig);
+      JsonHelpers.uniquifyConfigRecursive(generatedConfig, existingNames);
+
+      // Add as child
+      targetData.children.push(generatedConfig);
+      setConfigState(newConfig);
+      showNotification({
+        type: "success",
+        message: "Formulario generado importado con éxito"
+      });
+      setAiGeneratorVisible(false);
+    } else {
+      showNotification({
+        type: "error",
+        message: "No se encontró el nodo destino seleccionado"
+      });
+    }
+  };
   useEffect(() => {
     const intervalId = setInterval(() => saveConfig({
       message: "Guardando..."
@@ -313,7 +350,16 @@ export const FormBuilder = props => {
     }) => /*#__PURE__*/React.createElement(InputText, _extends({}, field, {
       className: "w-100"
     }))
-  }), getFormErrorMessage("configName")), /*#__PURE__*/React.createElement(SplitButton, {
+  }), getFormErrorMessage("configName")), /*#__PURE__*/React.createElement("div", {
+    className: "d-flex gap-2"
+  }, /*#__PURE__*/React.createElement(Button, {
+    label: "Generar con IA",
+    icon: /*#__PURE__*/React.createElement("i", {
+      className: "fa fa-bolt me-1"
+    }),
+    size: "small",
+    onClick: () => setAiGeneratorVisible(true)
+  }), /*#__PURE__*/React.createElement(SplitButton, {
     label: "Guardar",
     icon: /*#__PURE__*/React.createElement("i", {
       className: "fa fa-save me-1"
@@ -335,7 +381,7 @@ export const FormBuilder = props => {
       command: handleSubmit,
       disabled: !isValid
     }]
-  })), /*#__PURE__*/React.createElement("div", {
+  }))), /*#__PURE__*/React.createElement("div", {
     className: "d-flex gap-2",
     style: {
       zoom: 0.75
@@ -546,5 +592,10 @@ export const FormBuilder = props => {
     className: "mb-0 ps-3 text-danger small"
   }, importErrors.map((err, idx) => /*#__PURE__*/React.createElement("li", {
     key: idx
-  }, err)))))));
+  }, err)))))), /*#__PURE__*/React.createElement(AIFormGenerator, {
+    visible: aiGeneratorVisible,
+    onHide: () => setAiGeneratorVisible(false),
+    onImport: handleAIImport,
+    treeOptions: elementsTree
+  }));
 };

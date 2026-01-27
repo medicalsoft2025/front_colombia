@@ -1,5 +1,6 @@
 import React, { useCallback, useEffect, useState } from "react";
 import { DynamicFieldConfig, DynamicFormContainerConfig, DynamicFormElementConfig } from "../../dynamic-form/interfaces/models";
+import { AIFormGenerator } from "./AIFormGenerator";
 import { DynamicForm } from "../../dynamic-form/components/DynamicForm";
 import { Divider } from "primereact/divider";
 import { Tree, TreeCheckboxSelectionKeys, TreeEventNodeEvent, TreeMultipleSelectionKeys, TreeSelectionEvent } from "primereact/tree";
@@ -69,6 +70,8 @@ export const FormBuilder = (props: FormBuilderProps) => {
 
     const [isChangeInProgress, setIsChangeInProgress] = useState(false);
     const historyTimeoutRef = React.useRef<number | null>(null);
+
+    const [aiGeneratorVisible, setAiGeneratorVisible] = useState(false);
 
     const setConfig = (newConfig: DynamicFormElementConfig, pushToHistory = true) => {
         if (pushToHistory) {
@@ -246,6 +249,40 @@ export const FormBuilder = (props: FormBuilderProps) => {
         }
     };
 
+    const handleAIImport = (generatedConfig: DynamicFormElementConfig, targetNodeKey: string) => {
+        // Reset debounced history
+        if (historyTimeoutRef.current) clearTimeout(historyTimeoutRef.current);
+        setIsChangeInProgress(false);
+
+        const newConfig = JSON.parse(JSON.stringify(config));
+        const targetData = JsonHelpers.findDataByKey(newConfig, targetNodeKey);
+
+        if (targetData) {
+            // Save state to history
+            setPast([...past, JSON.parse(JSON.stringify(config))]);
+            setFuture([]);
+
+            // Ensure children array exists
+            if (!targetData.children) {
+                targetData.children = [];
+            }
+
+            // RECURSIVE UNIQUIFICATION
+            const existingNames = JsonHelpers.collectAllNames(newConfig);
+            JsonHelpers.uniquifyConfigRecursive(generatedConfig, existingNames);
+
+            // Add as child
+            targetData.children.push(generatedConfig);
+
+            setConfigState(newConfig);
+
+            showNotification({ type: "success", message: "Formulario generado importado con éxito" });
+            setAiGeneratorVisible(false);
+        } else {
+            showNotification({ type: "error", message: "No se encontró el nodo destino seleccionado" });
+        }
+    };
+
     useEffect(() => {
         const intervalId = setInterval(() => saveConfig({ message: "Guardando..." }), 100000);
         return () => clearInterval(intervalId);
@@ -337,27 +374,35 @@ export const FormBuilder = (props: FormBuilderProps) => {
                 />
                 {getFormErrorMessage("configName")}
             </div>
-            <SplitButton
-                label="Guardar"
-                icon={<i className="fa fa-save me-1"></i>}
-                size="small"
-                onClick={handleSubmit}
-                disabled={!isValid || loading}
-                model={[
-                    {
-                        label: 'Copiar',
-                        icon: <i className="fa fa-copy me-1"></i>,
-                        command: copyConfig
+            <div className="d-flex gap-2">
+                <Button
+                    label="Generar con IA"
+                    icon={<i className="fa fa-bolt me-1"></i>}
+                    size="small"
+                    onClick={() => setAiGeneratorVisible(true)}
+                />
+                <SplitButton
+                    label="Guardar"
+                    icon={<i className="fa fa-save me-1"></i>}
+                    size="small"
+                    onClick={handleSubmit}
+                    disabled={!isValid || loading}
+                    model={[
+                        {
+                            label: 'Copiar',
+                            icon: <i className="fa fa-copy me-1"></i>,
+                            command: copyConfig
 
-                    },
-                    {
-                        label: 'Guardar',
-                        icon: <i className="fa fa-save me-1"></i>,
-                        command: handleSubmit,
-                        disabled: !isValid
-                    }
-                ]}
-            />
+                        },
+                        {
+                            label: 'Guardar',
+                            icon: <i className="fa fa-save me-1"></i>,
+                            command: handleSubmit,
+                            disabled: !isValid
+                        }
+                    ]}
+                />
+            </div>
         </div>
         <div className="d-flex gap-2" style={{ zoom: 0.75 }}>
             <div className="d-flex flex-column" style={{ minWidth: '400px', maxWidth: '400px' }}>
@@ -546,5 +591,12 @@ export const FormBuilder = (props: FormBuilderProps) => {
                 )}
             </div>
         </Dialog>
+
+        <AIFormGenerator
+            visible={aiGeneratorVisible}
+            onHide={() => setAiGeneratorVisible(false)}
+            onImport={handleAIImport}
+            treeOptions={elementsTree}
+        />
     </>);
 };

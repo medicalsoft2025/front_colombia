@@ -11,7 +11,18 @@ export const useMenus = () => {
     queryKey: ["menus"],
     queryFn: async () => {
       const response = await menuService.withSubmenus();
-      return response.menus;
+      const sortMenus = items => {
+        return items.sort((a, b) => (a.order || 0) - (b.order || 0)).map(item => {
+          if (item.items && item.items.length > 0) {
+            return {
+              ...item,
+              items: sortMenus(item.items)
+            };
+          }
+          return item;
+        });
+      };
+      return sortMenus(response.menus);
     }
   });
   return {

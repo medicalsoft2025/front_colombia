@@ -403,7 +403,8 @@ const PricesConfigForm = ({
         label: exam.name,
         value: exam.id
       })),
-      placeholder: "Seleccionar..."
+      placeholder: "Seleccionar...",
+      filter: true
     }))
   }), /*#__PURE__*/React.createElement("div", {
     className: "pt-4"
@@ -742,7 +743,8 @@ const PricesConfigForm = ({
       label: entity.name,
       value: entity.id
     })),
-    placeholder: "Seleccionar..."
+    placeholder: "Seleccionar...",
+    filter: true
   }))), /*#__PURE__*/React.createElement("div", {
     className: "col-md-6"
   }, /*#__PURE__*/React.createElement("div", {

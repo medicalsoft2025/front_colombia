@@ -8,6 +8,7 @@ import { MenuForm, MenuFormData } from './MenuForm';
 import { generateUUID } from '../../../services/utilidades';
 import { useMenuSave } from '../hooks/useMenuSave';
 import { Toast } from 'primereact/toast';
+import { useMenuItems } from '../../layout/menu/hooks/useMenuItems';
 
 export const MenusApp = () => {
 
@@ -20,14 +21,16 @@ export const MenusApp = () => {
 
     const { menus, refetch } = useMenus();
     const { saveMenus, toast } = useMenuSave();
+    const { refetch: refetchLoggedUserMenus } = useMenuItems();
 
     const cm = useRef<ContextMenu>(null);
 
     const reconstructMenuTree = (nodesToProcess: TreeNode[]): any[] => {
-        return nodesToProcess.map((node) => {
+        return nodesToProcess.map((node, index) => {
             const menuData: any = {
                 ...node.data,
                 label: node.label.replace(/\(Sistema\)/g, '').trim(),
+                order: index,
                 items: node.children ? reconstructMenuTree(node.children) : []
             };
             return menuData;
@@ -38,6 +41,7 @@ export const MenusApp = () => {
         const reconstructed = reconstructMenuTree(nodes);
         await saveMenus(reconstructed);
         refetch();
+        refetchLoggedUserMenus();
     };
 
     const handleAdd = () => {
@@ -209,7 +213,18 @@ export const MenusApp = () => {
             <Tree
                 value={nodes}
                 dragdropScope="demo"
-                onDragDrop={(e) => setNodes(e.value)}
+                onDragDrop={(e: any) => {
+                    if (e.dragNode.data.system_menu) {
+                        toast.current?.show({
+                            severity: 'error',
+                            summary: 'Error',
+                            detail: 'No se puede ordenar un menú del sistema',
+                            life: 3000
+                        });
+                        return;
+                    }
+                    setNodes(e.value);
+                }}
                 selectionMode="single"
                 selectionKeys={selectedNodeKey}
                 onSelectionChange={(e) => setSelectedNodeKey(e.value as string)}

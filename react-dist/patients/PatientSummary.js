@@ -10,6 +10,7 @@ export const PatientSummary = ({
   const {
     data,
     isLoading,
+    isFetching,
     isError,
     refetch
   } = useQuery({
@@ -36,7 +37,7 @@ export const PatientSummary = ({
     // Don't retry automatically to show error UI and allow manual retry
     staleTime: 1000 * 60 * 15 // Cache for 15 minutes
   });
-  if (isLoading) {
+  if (isLoading || isFetching) {
     return /*#__PURE__*/React.createElement("div", {
       className: "card shadow-sm p-4 mb-4"
     }, /*#__PURE__*/React.createElement("div", {
@@ -121,7 +122,7 @@ export const PatientSummary = ({
       className: "fa-solid fa-check text-primary me-2 flex-shrink-0"
     }), item)));
   };
-  return /*#__PURE__*/React.createElement(Card, {
+  return /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement(Card, {
     className: "shadow-sm mb-4 border-0"
   }, /*#__PURE__*/React.createElement("div", {
     className: "d-flex justify-content-between align-items-center mb-4 border-bottom pb-3"
@@ -137,11 +138,14 @@ export const PatientSummary = ({
     className: "text-muted d-flex align-items-center mt-1"
   }, /*#__PURE__*/React.createElement("i", {
     className: "fa-solid fa-robot me-1"
-  }), "Generado por IA \u2022 ", new Date().toLocaleDateString()))), /*#__PURE__*/React.createElement("div", {
-    className: "badge bg-primary bg-opacity-10 text-primary px-3 py-2 rounded-pill"
-  }, /*#__PURE__*/React.createElement("i", {
-    className: "fa-solid fa-sparkles me-2"
-  }), "IA Assistant")), /*#__PURE__*/React.createElement("div", {
+  }), "Generado por IA \u2022 ", new Date().toLocaleDateString()))), /*#__PURE__*/React.createElement(Button, {
+    label: "Refrescar",
+    icon: /*#__PURE__*/React.createElement("i", {
+      className: "fa-solid fa-sync me-1"
+    }),
+    size: "small",
+    onClick: () => refetch()
+  })), /*#__PURE__*/React.createElement("div", {
     className: "row g-4"
   }, /*#__PURE__*/React.createElement("div", {
     className: "col-12"
@@ -206,5 +210,5 @@ export const PatientSummary = ({
     className: "mb-0"
   }, /*#__PURE__*/React.createElement("i", {
     className: "fa-solid fa-circle-info me-2"
-  }), "Este reporte ha sido generado autom\xE1ticamente por inteligencia artificial. Por favor verifique la informaci\xF3n con los registros cl\xEDnicos oficiales.")));
+  }), "Este reporte ha sido generado autom\xE1ticamente por inteligencia artificial. Por favor verifique la informaci\xF3n con los registros cl\xEDnicos oficiales."))));
 };

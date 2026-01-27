@@ -8,5 +8,7 @@ export interface Menu {
     icon: string
     url?: string
     parent_id?: number
+    order?: number
+    system_menu?: boolean
     items?: Menu[]
 }

@@ -43,5 +43,12 @@ export class AIService extends BaseApiService {
   groqModels() {
     return this.httpClient.get(`medical/groq/models`);
   }
+  generateDynamicForm({
+    prompt
+  }) {
+    return this.httpClient.post(`medical/groq/generate-dynamic-form`, {
+      prompt
+    });
+  }
 }
 export const aiService = new AIService();
