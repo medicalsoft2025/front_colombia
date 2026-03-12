@@ -1,3 +1,4 @@
+
 <IfModule mod_mime.c>
     AddType application/javascript .js
 </IfModule>
@@ -12,13 +13,13 @@
 </IfModule>
 <IfModule mod_rewrite.c>
 RewriteEngine On
-#RewriteBase /ventasPetbackup/
+RewriteBase /front_colombia/
 RewriteCond %{REQUEST_FILENAME} !-f
 RewriteCond %{REQUEST_FILENAME}\.js -f
 RewriteRule ^(.+)$ $1.js [L]
 RewriteCond %{REQUEST_FILENAME} !-f
 RewriteCond %{REQUEST_FILENAME} !-d
-Options -Indexes
+
 
 # RewriteCond %{ENV:REDIRECT_MW_PASSED} !^1$
 # RewriteRule ^(.*)$ middleware.php [E=MW_PASSED:1,L]
@@ -433,3 +434,8 @@ RewriteRule ^Report607Sales$ ContabilidadNueva/reportes/taxReports/report607Sale
 RewriteRule ^Surveys$ Marketing/SurveyPanel/surveyPanel.php
 RewriteRule ^Tickets$ Marketing/Tickets/tickets.php
 
+RewriteRule ^registrosAmbientales$ r-test/environmentalTest.php
+RewriteRule ^clinicalRecordSections$ ClinicalRecordSections/clinicalRecordSections.php
+RewriteRule ^esterilizacion$ Esterilizacion/esterilizacionReact.php
+RewriteRule ^verAlergias$ Alergias/verAlergias.php
+RewriteRule ^verAntecedentesFamiliares$ FamilyMemberHistory/verAntecedentesFamiliares.php

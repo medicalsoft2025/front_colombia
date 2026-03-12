@@ -1,0 +1,80 @@
+# Instrucciones para el Agente Backend (Antigravity AI)
+
+Se ha completado el desarrollo del Front-end (React) para el módulo de Esterilización. A continuación se detallan los requerimientos técnicos y el contrato de datos pactado, para que puedas implementar la API REST en Laravel.
+
+## Entorno Backend
+- **Framework**: Laravel
+- **Arquitectura**: Multi-tenant utilizando el paquete `stancl/tenancy`. Modelos Eloquent, Migraciones.
+- **Patrones de Diseño**: Todo el código debe estar agrupado dentro de un módulo (ej. `app/Sterilization`), separando responsabilidades en capas de Controladores (Controllers), Servicios (Services) y Repositorios (Repositories). También agregar aquí los modelos y demás elementos del modulo que no requieran estar en sitios específicos. (Las migraciones sí van en database/migrations/tenant).
+
+## Modelos / Entidades Requeridas (En Base de Datos)
+1. **Package** (Paquetes)
+   - `id` (PK)
+   - `name` (string, requerido)
+   - `prefix` (string, requerido)
+   - `content` (string, text, requerido)
+   - Timestamps básicos.
+   - SoftDeletes
+
+2. **Load** (Cargas de Esterilización)
+   - `id` (PK)
+   - `process_type_id` (FK a tipo de proceso catalogado, entero)
+   - `reason_id` (FK a motivo catalogado, entero)
+   - `sterilization_date` (date, requerido, ej. 'YYYY-MM-DD')
+   - `start_time` (time, requerido)
+   - `duration_minutes` (integer, requerido)
+   - `end_time` (time, requerido, calculado)
+   - `temperature` (decimal o float, requerido)
+   - `pressure` (decimal o float, requerido)
+   - `validity_days` (integer, requerido)
+   - `expiration_date` (date, calculado)
+   - `responsible_id` (FK a responsable/usuario catalogado, entero)
+   - `chemical_control` (boolean, default false)
+   - `biological_control` (boolean, default false)
+   - `observations` (text, nullable)
+   - `status` (string: 'En proceso', 'Esterilizada', 'Desechada', por defecto 'En proceso'). Lo harémos string para mantener flexibilidad.
+   - Timestamps básicos.
+   - SoftDeletes
+
+3. **LoadPackage** (Tabla pivote para M:N)
+   - `load_id` (FK a Loads)
+   - `package_id` (FK a Packages)
+   - Timestamps básicos.
+
+4. **LoadHistory** (Historial de cambio de estados)
+   - `id` (PK)
+   - `load_id` (FK)
+   - `previous_status` (string)
+   - `new_status` (string)
+   - `changed_by` (FK a User, o string del nombre del usuario de la sesión, manejado por tenancy)
+   - `changed_at` (datetime)
+   - Timestamps básicos.
+
+## Endpoints Esperados
+
+Todos los endpoints deben estar protegidos por autenticación y el middleware de Tenancy aplicable. Para esto agregarlos en el archivo de rutas de tenancy (routes/tenant.php) siguiendo los patrones de los otros modulos. Sugerencia de prefijo de ruta: `/sterilizations`.
+
+### Packages
+- `GET /packages`: Devuelve el listado de paquetes (`[{ id, name, prefix, content }]`). (Soporta paginación si se requieren muchos a futuro, en el front no se paginó explícitamente pero es buena práctica devolver data plana).
+- `POST /packages`: Crea un nuevo paquete. Recibe: `name, prefix, content`.
+- `PUT /packages/{id}`: Actualiza un paquete.
+- `DELETE /packages/{id}`: Elimina un paquete.
+
+### Loads
+- `GET /loads`: Obtiene cargas filtradas y paginadas.
+   - **Parámetros Query Soportados**: `page`, `perPage` (alias de per_page), `search` (búsqueda global en observaciones o nombres relacionales de catalogos), `status` (ej. 'En proceso'), `sterilizationDate` (ej. '2026-03-01').
+   - **Formato Retorno**: Laravel Paginator standard (debe proveer `data` array y `total` property que el front ya mapea).
+   - **Eager Loading**: Cada objeto Load devuelto **debe incorporar sus catálogos relacionales y su array de packages pivotados**, ej:
+     ```{
+        id: 1, process_type_name: 'Vapor', ..., status: 'Esterilizada',
+        packages: [ {id: 1, name: 'Paquete', prefix: 'P1', content: '...'} ]
+     }```
+- `POST /loads`: Crea una nueva carga de esterilización.
+   - Recibe payload con toda la data de la entidad `Load` referenciada y un arreglo `packages: [{ id, ... }]`.
+   - **Comportamiento Backend**: Guardar el Load, atachar los paquetes a la pivote, e inicializar el LoadHistory como creador con el estado 'En proceso'.
+- `PUT /loads/{id}/status`: Actualiza exclusivamente el estado.
+   - Recibe: `{ status: 'Esterilizada' | 'Desechada' }`
+   - **Comportamiento Backend**: Guardar nuevo estado en `loads`, y crear un registro del cambio en la tabla `load_histories` indicando estado anterior, el nuevo y el usuario responsable.
+- `GET /loads/{id}/history`: Devuelve todo el historial del registro `load_histories` correspondiente en orden descendente.
+
+Por favor, revisa la validación de Requests en la capa de controladores utilizando FormRequests e implementa transacciones DB (`DB::transaction`) al crear `Loads` con sus `Packages` pivotales.

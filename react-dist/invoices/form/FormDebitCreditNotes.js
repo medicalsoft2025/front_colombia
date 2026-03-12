@@ -77,7 +77,6 @@ export const FormDebitCreditNotes = ({
   const noteType = watch("noteType");
   useEffect(() => {
     if (invoices.length && initialData) {
-      console.log("initialData", initialData);
       loadPaymentMethods();
       const invoice = invoices.filter(invoice => invoice.id === Number(initialData.id))[0];
       if (invoice) {
@@ -189,8 +188,85 @@ export const FormDebitCreditNotes = ({
     }, 0);
 
     // La diferencia es el total actual menos el total original
-    const difference = currentTotal - originalTotal;
+    const difference = currentTotal - originalTotal - calculateRetentionAdjustment();
     return parseFloat(difference.toFixed(2));
+  };
+  const calculateRetentionAdjustment = () => {
+    if (!initialData?.invoice_retentions?.length) {
+      return 0;
+    }
+
+    // Check if any item has been modified from its original state
+    const isModified = billingItems.some(item => {
+      const quantity = Number(item.quantity) || 0;
+      const originalQuantity = Number(item.originalQuantity) || 0;
+      const unitPrice = Number(item.unitPrice) || 0;
+      const originalUnitPrice = Number(item.originalUnitPrice) || 0;
+      return quantity !== originalQuantity || unitPrice !== originalUnitPrice;
+    });
+    let totalRetentionAdjustment = 0;
+    initialData.invoice_retentions.forEach(retention => {
+      let baseAmount = 0;
+      if (retention?.withholding_tax?.tax_id) {
+        // Case: Retention on Tax (e.g. ITBIS withholding)
+        baseAmount = billingItems.reduce((total, item) => {
+          if (Number(item.taxId) === Number(retention?.withholding_tax?.tax_id)) {
+            const taxRate = item.tax.percentage || 0;
+            const discountRate = Number(item.discount) || 0;
+
+            // Current Values
+            const currentQuantity = Number(item.quantity) || 0;
+            const currentUnitPrice = Number(item.unitPrice) || 0;
+            const currentSubtotal = currentQuantity * currentUnitPrice;
+            const currentDiscountAmount = currentSubtotal * (discountRate / 100);
+            const currentBase = currentSubtotal - currentDiscountAmount;
+            const currentTaxAmount = currentBase * (taxRate / 100);
+            if (!isModified) {
+              return total + currentTaxAmount;
+            }
+
+            // Original Values
+            const originalQuantity = Number(item.originalQuantity) || 0;
+            const originalUnitPrice = Number(item.originalUnitPrice) || 0;
+            const originalSubtotal = originalQuantity * originalUnitPrice;
+            const originalDiscountAmount = originalSubtotal * (discountRate / 100);
+            const originalBase = originalSubtotal - originalDiscountAmount;
+            const originalTaxAmount = originalBase * (taxRate / 100);
+            return total + (currentTaxAmount - originalTaxAmount);
+          }
+          return total;
+        }, 0);
+      } else {
+        // Case: Normal Retention on Base (e.g. ISR)
+        baseAmount = billingItems.reduce((total, item) => {
+          const discountRate = Number(item.discount) || 0;
+
+          // Current Values
+          const currentQuantity = Number(item.quantity) || 0;
+          const currentUnitPrice = Number(item.unitPrice) || 0;
+          const currentSubtotal = currentQuantity * currentUnitPrice;
+          const currentDiscountAmount = currentSubtotal * (discountRate / 100);
+          const currentBase = currentSubtotal - currentDiscountAmount;
+          if (!isModified) {
+            return total + currentBase;
+          }
+
+          // Original Values
+          const originalQuantity = Number(item.originalQuantity) || 0;
+          const originalUnitPrice = Number(item.originalUnitPrice) || 0;
+          const originalSubtotal = originalQuantity * originalUnitPrice;
+          const originalDiscountAmount = originalSubtotal * (discountRate / 100);
+          const originalBase = originalSubtotal - originalDiscountAmount;
+          return total + (currentBase - originalBase);
+        }, 0);
+      }
+      totalRetentionAdjustment += baseAmount * (retention?.withholding_tax?.percentage / 100);
+    });
+    return parseFloat(totalRetentionAdjustment.toFixed(2));
+  };
+  const calculateTotalRetention = () => {
+    const retentionAdjustment = calculateRetentionAdjustment();
+    return parseFloat(retentionAdjustment.toFixed(2));
   };
 
   // Funciones para manejar items de facturación
@@ -262,6 +338,7 @@ export const FormDebitCreditNotes = ({
       invoice_id: selectedInvoice?.id,
       amount: Math.abs(calculateAdjustmentDifference()),
       reason: "Ajuste por error en la facturación",
+      invoice_retentions: selectedInvoice?.invoice_retentions,
       details: billingItems.map(item => {
         const priceAdjustment = item.unitPrice - Number(item.originalUnitPrice);
         return {
@@ -355,7 +432,9 @@ export const FormDebitCreditNotes = ({
         unitPrice: product.unit_price,
         originalUnitPrice: product.unit_price,
         discount: rateDiscunt,
+        discountAmount: product.discount,
         taxId: product?.tax_charge_id || 0,
+        tax: product?.tax_product || 0,
         totalValue: 0,
         fromInvoice: true
       };
@@ -363,9 +442,9 @@ export const FormDebitCreditNotes = ({
     setBillingItems(productsMapped);
   }
   const formatCurrency = value => {
-    return new Intl.NumberFormat("es-DO", {
+    return new Intl.NumberFormat("es-CO", {
       style: "currency",
-      currency: "DOP"
+      currency: "COP"
     }).format(value || 0);
   };
   const [tableKey, setTableKey] = useState(0);
@@ -432,8 +511,8 @@ export const FormDebitCreditNotes = ({
       placeholder: "Precio",
       className: "w-100 price-input",
       mode: "currency",
-      currency: "DOP",
-      locale: "es-DO",
+      currency: "COP",
+      locale: "es-CO",
       min: noteType?.id === "DEBIT" ? rowData.originalUnitPrice : undefined,
       max: noteType?.id === "CREDIT" ? rowData.originalUnitPrice : undefined,
       disabled: !noteType,
@@ -498,8 +577,8 @@ export const FormDebitCreditNotes = ({
       value: calculateLineTotal(rowData),
       className: "w-100",
       mode: "currency",
-      currency: "DOP",
-      locale: "es-DO",
+      currency: "COP",
+      locale: "es-CO",
       readOnly: true,
       inputClassName: "form-control bg-light"
     }),
@@ -777,7 +856,7 @@ export const FormDebitCreditNotes = ({
     className: "h5 mb-0"
   }, /*#__PURE__*/React.createElement("i", {
     className: "pi pi-calculator me-2 text-primary"
-  }), "Totales (DOP)")), /*#__PURE__*/React.createElement("div", {
+  }), "Totales (COP)")), /*#__PURE__*/React.createElement("div", {
     className: "card-body p-3"
   }, /*#__PURE__*/React.createElement("div", {
     className: "row g-3"
@@ -791,8 +870,8 @@ export const FormDebitCreditNotes = ({
     value: calculateSubtotal(),
     className: "w-100",
     mode: "currency",
-    currency: "DOP",
-    locale: "es-DO",
+    currency: "COP",
+    locale: "es-CO",
     readOnly: true,
     inputClassName: "form-control bg-light"
   }))), /*#__PURE__*/React.createElement("div", {
@@ -805,8 +884,8 @@ export const FormDebitCreditNotes = ({
     value: calculateTotalDiscount(),
     className: "w-100",
     mode: "currency",
-    currency: "DOP",
-    locale: "es-DO",
+    currency: "COP",
+    locale: "es-CO",
     readOnly: true,
     inputClassName: "form-control bg-light"
   }))), /*#__PURE__*/React.createElement("div", {
@@ -819,8 +898,8 @@ export const FormDebitCreditNotes = ({
     value: calculateSubtotalAfterDiscount(),
     className: "w-100",
     mode: "currency",
-    currency: "DOP",
-    locale: "es-DO",
+    currency: "COP",
+    locale: "es-CO",
     readOnly: true,
     inputClassName: "form-control bg-light"
   }))), /*#__PURE__*/React.createElement("div", {
@@ -833,8 +912,8 @@ export const FormDebitCreditNotes = ({
     value: calculateTotalTax(),
     className: "w-100",
     mode: "currency",
-    currency: "DOP",
-    locale: "es-DO",
+    currency: "COP",
+    locale: "es-CO",
     readOnly: true,
     inputClassName: "form-control bg-light"
   }))), /*#__PURE__*/React.createElement("div", {
@@ -847,10 +926,24 @@ export const FormDebitCreditNotes = ({
     value: calculateTotal(),
     className: "w-100 font-weight-bold",
     mode: "currency",
-    currency: "DOP",
-    locale: "es-DO",
+    currency: "COP",
+    locale: "es-CO",
     readOnly: true,
     inputClassName: "form-control bg-light fw-bold"
+  }))), /*#__PURE__*/React.createElement("div", {
+    className: "col-6 col-md-3 col-lg-2"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "form-group"
+  }, /*#__PURE__*/React.createElement("label", {
+    className: "form-label"
+  }, "Retenciones"), /*#__PURE__*/React.createElement(InputNumber, {
+    value: Math.abs(calculateTotalRetention()),
+    className: "w-100",
+    mode: "currency",
+    currency: "COP",
+    locale: "es-CO",
+    readOnly: true,
+    inputClassName: "form-control bg-light"
   }))), /*#__PURE__*/React.createElement("div", {
     className: "col-6 col-md-3 col-lg-2"
   }, /*#__PURE__*/React.createElement("div", {
@@ -861,8 +954,8 @@ export const FormDebitCreditNotes = ({
     value: calculateAdjustmentDifference(),
     className: "w-100 font-weight-bold",
     mode: "currency",
-    currency: "DOP",
-    locale: "es-DO",
+    currency: "COP",
+    locale: "es-CO",
     readOnly: true,
     inputClassName: "form-control bg-light fw-bold"
   })))))), /*#__PURE__*/React.createElement(PaymentMethodsSection, {

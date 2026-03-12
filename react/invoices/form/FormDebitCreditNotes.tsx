@@ -138,7 +138,6 @@ export const FormDebitCreditNotes: React.FC<any> = ({
 
   useEffect(() => {
     if (invoices.length && initialData) {
-      console.log("initialData", initialData);
       loadPaymentMethods();
       const invoice = invoices.filter(
         (invoice: any) => invoice.id === Number(initialData.id)
@@ -288,9 +287,99 @@ export const FormDebitCreditNotes: React.FC<any> = ({
     }, 0);
 
     // La diferencia es el total actual menos el total original
-    const difference = currentTotal - originalTotal;
+    const difference = currentTotal - originalTotal - calculateRetentionAdjustment();
 
     return parseFloat(difference.toFixed(2));
+  };
+
+  const calculateRetentionAdjustment = (): number => {
+    if (!initialData?.invoice_retentions?.length) {
+      return 0;
+    }
+
+    // Check if any item has been modified from its original state
+    const isModified = billingItems.some((item) => {
+      const quantity = Number(item.quantity) || 0;
+      const originalQuantity = Number(item.originalQuantity) || 0;
+      const unitPrice = Number(item.unitPrice) || 0;
+      const originalUnitPrice = Number(item.originalUnitPrice) || 0;
+
+      return quantity !== originalQuantity || unitPrice !== originalUnitPrice;
+    });
+
+    let totalRetentionAdjustment = 0;
+
+    initialData.invoice_retentions.forEach((retention: any) => {
+      let baseAmount = 0;
+
+      if (retention?.withholding_tax?.tax_id) {
+        // Case: Retention on Tax (e.g. ITBIS withholding)
+        baseAmount = billingItems.reduce((total, item: any) => {
+          if (Number(item.taxId) === Number(retention?.withholding_tax?.tax_id)) {
+            const taxRate = item.tax.percentage || 0;
+            const discountRate = Number(item.discount) || 0;
+
+            // Current Values
+            const currentQuantity = Number(item.quantity) || 0;
+            const currentUnitPrice = Number(item.unitPrice) || 0;
+            const currentSubtotal = currentQuantity * currentUnitPrice;
+            const currentDiscountAmount = currentSubtotal * (discountRate / 100);
+            const currentBase = currentSubtotal - currentDiscountAmount;
+            const currentTaxAmount = currentBase * (taxRate / 100);
+
+            if (!isModified) {
+              return total + currentTaxAmount;
+            }
+
+            // Original Values
+            const originalQuantity = Number(item.originalQuantity) || 0;
+            const originalUnitPrice = Number(item.originalUnitPrice) || 0;
+            const originalSubtotal = originalQuantity * originalUnitPrice;
+            const originalDiscountAmount = originalSubtotal * (discountRate / 100);
+            const originalBase = originalSubtotal - originalDiscountAmount;
+            const originalTaxAmount = originalBase * (taxRate / 100);
+
+            return total + (currentTaxAmount - originalTaxAmount);
+          }
+          return total;
+        }, 0);
+
+      } else {
+        // Case: Normal Retention on Base (e.g. ISR)
+        baseAmount = billingItems.reduce((total, item: any) => {
+          const discountRate = Number(item.discount) || 0;
+
+          // Current Values
+          const currentQuantity = Number(item.quantity) || 0;
+          const currentUnitPrice = Number(item.unitPrice) || 0;
+          const currentSubtotal = currentQuantity * currentUnitPrice;
+          const currentDiscountAmount = currentSubtotal * (discountRate / 100);
+          const currentBase = currentSubtotal - currentDiscountAmount;
+
+          if (!isModified) {
+            return total + currentBase;
+          }
+
+          // Original Values
+          const originalQuantity = Number(item.originalQuantity) || 0;
+          const originalUnitPrice = Number(item.originalUnitPrice) || 0;
+          const originalSubtotal = originalQuantity * originalUnitPrice;
+          const originalDiscountAmount = originalSubtotal * (discountRate / 100);
+          const originalBase = originalSubtotal - originalDiscountAmount;
+
+          return total + (currentBase - originalBase);
+        }, 0);
+      }
+
+      totalRetentionAdjustment += baseAmount * (retention?.withholding_tax?.percentage / 100);
+    });
+
+    return parseFloat(totalRetentionAdjustment.toFixed(2));
+  };
+
+  const calculateTotalRetention = (): number => {
+    const retentionAdjustment = calculateRetentionAdjustment();
+    return parseFloat((retentionAdjustment).toFixed(2));
   };
 
   // Funciones para manejar items de facturación
@@ -384,6 +473,7 @@ export const FormDebitCreditNotes: React.FC<any> = ({
       invoice_id: selectedInvoice?.id,
       amount: Math.abs(calculateAdjustmentDifference()),
       reason: "Ajuste por error en la facturación",
+      invoice_retentions: selectedInvoice?.invoice_retentions,
       details: billingItems.map((item: any) => {
         const priceAdjustment = item.unitPrice - Number(item.originalUnitPrice);
         return {
@@ -488,7 +578,9 @@ export const FormDebitCreditNotes: React.FC<any> = ({
         unitPrice: product.unit_price,
         originalUnitPrice: product.unit_price,
         discount: rateDiscunt,
+        discountAmount: product.discount,
         taxId: product?.tax_charge_id || 0,
+        tax: product?.tax_product || 0,
         totalValue: 0,
         fromInvoice: true,
       };
@@ -497,9 +589,9 @@ export const FormDebitCreditNotes: React.FC<any> = ({
   }
 
   const formatCurrency = (value) => {
-    return new Intl.NumberFormat("es-DO", {
+    return new Intl.NumberFormat("es-CO", {
       style: "currency",
-      currency: "DOP",
+      currency: "COP",
     }).format(value || 0);
   };
 
@@ -593,8 +685,8 @@ export const FormDebitCreditNotes: React.FC<any> = ({
             placeholder="Precio"
             className="w-100 price-input"
             mode="currency"
-            currency="DOP"
-            locale="es-DO"
+            currency="COP"
+            locale="es-CO"
             min={
               noteType?.id === "DEBIT" ? rowData.originalUnitPrice : undefined
             }
@@ -688,8 +780,8 @@ export const FormDebitCreditNotes: React.FC<any> = ({
             value={calculateLineTotal(rowData)}
             className="w-100"
             mode="currency"
-            currency="DOP"
-            locale="es-DO"
+            currency="COP"
+            locale="es-CO"
             readOnly
             inputClassName="form-control bg-light"
           />
@@ -1002,7 +1094,7 @@ export const FormDebitCreditNotes: React.FC<any> = ({
               <div className="card-header bg-light p-3">
                 <h2 className="h5 mb-0">
                   <i className="pi pi-calculator me-2 text-primary"></i>
-                  Totales (DOP)
+                  Totales (COP)
                 </h2>
               </div>
               <div className="card-body p-3">
@@ -1014,8 +1106,8 @@ export const FormDebitCreditNotes: React.FC<any> = ({
                         value={calculateSubtotal()}
                         className="w-100"
                         mode="currency"
-                        currency="DOP"
-                        locale="es-DO"
+                        currency="COP"
+                        locale="es-CO"
                         readOnly
                         inputClassName="form-control bg-light"
                       />
@@ -1028,8 +1120,8 @@ export const FormDebitCreditNotes: React.FC<any> = ({
                         value={calculateTotalDiscount()}
                         className="w-100"
                         mode="currency"
-                        currency="DOP"
-                        locale="es-DO"
+                        currency="COP"
+                        locale="es-CO"
                         readOnly
                         inputClassName="form-control bg-light"
                       />
@@ -1044,8 +1136,8 @@ export const FormDebitCreditNotes: React.FC<any> = ({
                         value={calculateSubtotalAfterDiscount()}
                         className="w-100"
                         mode="currency"
-                        currency="DOP"
-                        locale="es-DO"
+                        currency="COP"
+                        locale="es-CO"
                         readOnly
                         inputClassName="form-control bg-light"
                       />
@@ -1058,8 +1150,8 @@ export const FormDebitCreditNotes: React.FC<any> = ({
                         value={calculateTotalTax()}
                         className="w-100"
                         mode="currency"
-                        currency="DOP"
-                        locale="es-DO"
+                        currency="COP"
+                        locale="es-CO"
                         readOnly
                         inputClassName="form-control bg-light"
                       />
@@ -1072,10 +1164,24 @@ export const FormDebitCreditNotes: React.FC<any> = ({
                         value={calculateTotal()}
                         className="w-100 font-weight-bold"
                         mode="currency"
-                        currency="DOP"
-                        locale="es-DO"
+                        currency="COP"
+                        locale="es-CO"
                         readOnly
                         inputClassName="form-control bg-light fw-bold"
+                      />
+                    </div>
+                  </div>
+                  <div className="col-6 col-md-3 col-lg-2">
+                    <div className="form-group">
+                      <label className="form-label">Retenciones</label>
+                      <InputNumber
+                        value={Math.abs(calculateTotalRetention())}
+                        className="w-100"
+                        mode="currency"
+                        currency="COP"
+                        locale="es-CO"
+                        readOnly
+                        inputClassName="form-control bg-light"
                       />
                     </div>
                   </div>
@@ -1090,8 +1196,8 @@ export const FormDebitCreditNotes: React.FC<any> = ({
                         value={calculateAdjustmentDifference()}
                         className="w-100 font-weight-bold"
                         mode="currency"
-                        currency="DOP"
-                        locale="es-DO"
+                        currency="COP"
+                        locale="es-CO"
                         readOnly
                         inputClassName="form-control bg-light fw-bold"
                       />

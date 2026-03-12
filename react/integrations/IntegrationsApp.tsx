@@ -6,15 +6,16 @@ import { IntegrationConfig } from "./forms/IntegrationConfig";
 import { useSystemConfigs } from "../system-configs/hooks/useSystemConfigs";
 import { useSystemConfigCreate } from "../system-configs/hooks/useSystemConfigCreate";
 import { Toast } from "primereact/toast";
+import { IframeIntegration } from "./forms/IframeIntegration";
 
-export const IntegrationsApp = () => {
+export const IntegrationsApp: React.FC<any> = ({ companyId = null }) => {
 
-    const { systemConfigs: configs, refetch } = useSystemConfigs();
+    const { systemConfigs: configs, refetch } = useSystemConfigs(Number(companyId));
     const { createSystemConfig, toast } = useSystemConfigCreate();
 
     const handleSubmit = async (data: any) => {
         const systemConfigs = SystemConfigHelper.formatDataToSystemConfigArray(data);
-        await createSystemConfig(systemConfigs);
+        await createSystemConfig(systemConfigs, Number(companyId));
         refetch();
     }
 
@@ -48,6 +49,12 @@ export const IntegrationsApp = () => {
             label: "AI",
             icon: "fa-solid fa-brain",
             content: <IntegrationConfig configs={configs} configFields={aiConfigFields} onSubmit={handleSubmit} />
+        },
+        {
+            id: "iframe-tab",
+            label: "Iframe",
+            icon: "fa-solid fa-code",
+            content: <IframeIntegration />
         }
     ];
 

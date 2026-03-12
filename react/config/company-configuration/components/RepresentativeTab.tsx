@@ -32,7 +32,7 @@ const RepresentativeTab: React.FC<RepresentativeTabProps> = ({ companyId, onVali
         mode: 'onChange'
     });
 
-    const { representative, loading, error, isSubmitting, saveRepresentative } = useCompanyRepresentative();
+    const { representative, loading, error, isSubmitting, saveRepresentative } = useCompanyRepresentative(companyId);
 
     const documentTypes = [
         { label: 'RNC', value: 'RNC' },
@@ -71,11 +71,7 @@ const RepresentativeTab: React.FC<RepresentativeTabProps> = ({ companyId, onVali
     const onSubmit = async (data: Representative) => {
         try {
             if (!companyId) {
-                Message.show({
-                    severity: 'error',
-                    summary: 'Error',
-                    detail: 'companyId es requerido'
-                });
+                SwalManager.error('companyId es requerido');
                 return;
             }
 

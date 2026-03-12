@@ -1,180 +1,93 @@
-import { useState, useEffect, useRef, useMemo } from "react";
-import { useFormContext as useRHFFormContext, useWatch } from "react-hook-form";
-import { getValueByPath } from "../../../services/utilidades.js";
-import { useFormContext as useCustomFormContext } from "../context/FormContext.js";
+import { useState, useEffect, useRef } from "react";
+import { useFormContext, useWatch } from "react-hook-form";
 export const useAsyncOptions = ({
   config,
   fieldName
 }) => {
   const {
     control,
-    setValue,
-    getValues
-  } = useRHFFormContext();
-  const {
-    sources
-  } = useCustomFormContext();
+    setValue
+  } = useFormContext();
   const [options, setOptions] = useState([]);
   const [loading, setLoading] = useState(false);
-  const resolveWildcardPath = (genericPath, specificFieldPath) => {
-    if (!genericPath.includes("*")) return genericPath;
-    const genericParts = genericPath.split(".");
-    const specificParts = specificFieldPath.split(".");
+  console.log("config", config);
+  console.log("fieldName", fieldName);
 
-    // If wildcard structure doesn't match roughly, try best effort or return generic
-    // Assuming genericPath and specificFieldPath align in hierarchy
-    // OR, simply replace '*' with corresponding index from specificFieldPath if available
-
-    return genericParts.map((part, index) => {
-      if (part === "*" && specificParts[index]) {
-        // If the specific part is a number (index), use it
-        if (/^\d+$/.test(specificParts[index])) {
-          return specificParts[index];
-        }
-      }
-      return part;
-    }).join(".");
-  };
-  const rawDependencies = useMemo(() => {
-    const deps = config?.params?.filter(p => p.source === "field").map(p => p.value) || [];
-    if (config?.dependsOn && !deps.includes(config.dependsOn)) {
-      deps.push(config.dependsOn);
-    }
-    return deps;
-  }, [config]);
-  const fieldDependencies = useMemo(() => {
-    return rawDependencies.map(dep => resolveWildcardPath(dep, fieldName));
-  }, [rawDependencies, fieldName]);
-  const watchedValues = useWatch({
+  // Dependency watching
+  const dependencyValue = useWatch({
     control,
-    name: fieldDependencies
+    name: config?.dependsOn || "",
+    disabled: !config?.dependsOn
   });
-  const currentDependencyValues = {};
-  if (fieldDependencies.length > 0) {
-    fieldDependencies.forEach((depName, index) => {
-      currentDependencyValues[depName] = Array.isArray(watchedValues) ? watchedValues[index] : watchedValues;
-    });
-  }
+
+  // Ref to track if we have fetched for current dependency to avoid double fetch
+  // or to handle "initial load" logic.
   const hasFetched = useRef(false);
   useEffect(() => {
+    console.log("dependencyValue", dependencyValue);
+    console.log("config", config);
     if (!config) return;
-    if (config.dependsOn && !currentDependencyValues[resolveWildcardPath(config.dependsOn, fieldName)]) {
+
+    // If dependsOn is set but no value, clear options and return
+    if (config.dependsOn && (dependencyValue === undefined || dependencyValue === null || dependencyValue === "")) {
       setOptions([]);
       return;
     }
-    if (config.dependsOn && !currentDependencyValues[resolveWildcardPath(config.dependsOn, fieldName)]) {
-      setOptions([]);
-      return;
-    }
-    const resolveParamValue = param => {
-      if (param.source === "static") return param.value;
-      if (param.source === "url") {
-        const searchParams = new URLSearchParams(window.location.search);
-        return searchParams.get(param.value);
-      }
-      if (param.source === "field") {
-        // Resolve the generic path (e.g. phones.*.country) to specific (phones.0.country)
-        const resolvedKey = resolveWildcardPath(param.value, fieldName);
-        return currentDependencyValues[resolvedKey];
-      }
-      return null;
-    };
     const fetchOptions = async () => {
       setLoading(true);
       try {
-        // NEW: Check if sourceKey is defined and a corresponding source exists
-        if (config.sourceKey && sources && sources[config.sourceKey]) {
-          const fetcher = sources[config.sourceKey];
+        // Construct URL
+        let url = config.endpoint;
+        // If there's a paramKey and dependency value, append logic
+        // This is a simple implementation: ?paramKey=value or /value if paramKey is absent?
+        // Let's assume ?paramKey=value for now as per common patterns.
+        // Or maybe the user puts placeholder in endpoint string? 
 
-          // Build params object for the custom fetcher
-          const fetcherParams = {};
-          if (config.params) {
-            config.params.forEach(param => {
-              const val = resolveParamValue(param);
-              if (val !== null && val !== undefined && val !== "") {
-                fetcherParams[param.key] = val;
-              }
-            });
-          }
-          if (config.dependsOn && config.paramKey) {
-            const val = currentDependencyValues[resolveWildcardPath(config.dependsOn, fieldName)];
-            if (val) fetcherParams[config.paramKey] = val;
-          }
-
-          // Call the custom fetcher
-          const data = await fetcher(fetcherParams);
-          const items = Array.isArray(data) ? data : [];
-          setOptions(items.map(item => ({
-            label: getValueByPath(item, config.labelKey) || item[config.labelKey],
-            value: getValueByPath(item, config.valueKey) || item[config.valueKey]
-          })));
-        } else if (config.endpoint) {
-          // EXISTING: Fetch from endpoint
-          let url = config.endpoint;
-          let queryParams = new URLSearchParams();
-          let bodyParams = {};
-          if (config.params) {
-            config.params.forEach(param => {
-              const val = resolveParamValue(param);
-              if (val === null || val === undefined || val === "") return;
-              const location = param.location || (config.method === "POST" ? "body" : "query");
-              if (location === "path") {
-                const placeholder = `:${param.key}`;
-                if (url.includes(placeholder)) {
-                  url = url.replace(placeholder, String(val));
-                } else {
-                  url = url.replace(/\/+$/, "");
-                  url = `${url}/${val}`;
-                }
-              } else if (location === "body") {
-                bodyParams[param.key] = val;
-              } else {
-                queryParams.append(param.key, String(val));
-              }
-            });
-          }
-          if (config.dependsOn && config.paramKey) {
-            const val = currentDependencyValues[resolveWildcardPath(config.dependsOn, fieldName)];
-            if (val) queryParams.append(config.paramKey, String(val));
-          }
-          const qs = queryParams.toString();
-          if (qs) {
-            url += (url.includes("?") ? "&" : "?") + qs;
-          }
-          const fetchOptions = {
-            method: config.method || "GET",
-            headers: {
-              "Content-Type": "application/json",
-              ...(config.headers || {})
-            }
-          };
-          if (config.method === "POST" || config.method === "PUT") {
-            fetchOptions.body = JSON.stringify(bodyParams);
-          }
-          const response = await fetch(url, fetchOptions);
-          if (!response.ok) throw new Error("Error fetching options");
-          const data = await response.json();
-          const items = Array.isArray(data) ? data : [];
-          setOptions(items.map(item => ({
-            label: getValueByPath(item, config.labelKey) || item[config.labelKey],
-            value: getValueByPath(item, config.valueKey) || item[config.valueKey]
-          })));
+        // Let's support query param style for now:
+        if (config.dependsOn && config.paramKey) {
+          const separator = url.includes("?") ? "&" : "?";
+          url = `${url}${separator}${config.paramKey}=${encodeURIComponent(dependencyValue)}`;
         }
+        const response = await fetch(url, {
+          method: config.method || "GET",
+          headers: {
+            "Content-Type": "application/json",
+            ...(config.headers || {})
+          }
+        });
+        if (!response.ok) {
+          throw new Error("Failed to fetch options");
+        }
+        const data = await response.json();
+
+        // Transform data based on labelKey and valueKey
+        // Assuming data is an array. If it's inside a property (e.g. data.results), we might need more config.
+        // For now assuming data is Record<string, any>[]
+
+        // Safety check if data is array
+        const items = Array.isArray(data) ? data : [];
+        const transformed = items.map(item => ({
+          label: item[config.labelKey],
+          value: item[config.valueKey]
+        }));
+        setOptions(transformed);
       } catch (error) {
-        console.error(error);
+        console.error("Error fetching async options:", error);
         setOptions([]);
       } finally {
         setLoading(false);
       }
     };
-    if (hasFetched.current) {
-      if (fieldDependencies.length > 0) {
-        setValue(fieldName, null);
-      }
+
+    // If it depends on something, we reset the current field value because options changed
+    // UNLESS it's the very first mount and we might have a pre-filled value? 
+    // For cascading, usually you want to reset child if parent changes.
+    if (config.dependsOn && hasFetched.current) {
+      setValue(fieldName, null); // Reset value
     }
     fetchOptions();
     hasFetched.current = true;
-  }, [config?.endpoint, config?.sourceKey, JSON.stringify(currentDependencyValues), JSON.stringify(config?.params)]);
+  }, [config?.endpoint, dependencyValue, config]);
   return {
     options,
     loading

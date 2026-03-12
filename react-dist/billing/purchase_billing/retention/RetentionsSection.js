@@ -27,24 +27,36 @@ export const RetentionsSection = ({
   };
   const calculateRetentionValue = retention => {
     const base = calculateBaseAmount();
-    let productsFiltered = productsArray?.filter(item => item?.tax?.id == retention?.percentage?.tax?.id) || [];
-    if (productsFiltered.length && retention?.percentage?.tax_id !== null) {
-      productsFiltered = productsFiltered.reduce((total, product) => {
-        const actualQuantity = ["medications", "vaccines"].includes(product.typeProduct) && product?.lotInfo ? (product.lotInfo || []).reduce((sum, lot) => sum + (lot.quantity || 0), 0) : Number(product.quantity) || 0;
-        const subtotal = actualQuantity * (Number(product?.price) || 0);
+    const isFromHandler = retention?.percentage?.id !== undefined;
+    const retentionData = isFromHandler ? retention.percentage : retention;
+    let productsFiltered = productsArray?.filter(item => item?.taxChargeId == retentionData?.tax?.id) || [];
+    if (productsFiltered.length > 0 && retentionData?.tax_id != null) {
+      const totalTaxBaseForRetention = productsFiltered.reduce((total, product) => {
+        let actualQuantity = 0;
+        if (["medications", "vaccines"].includes(product?.typeProduct)) {
+          const lotInfo = product?.lotInfo || [];
+          actualQuantity = Array.isArray(lotInfo) ? lotInfo.reduce((sum, lot) => sum + (Number(lot?.quantity) || 0), 0) : Number(product?.quantity) || 0;
+        } else {
+          actualQuantity = Number(product?.quantity) || 0;
+        }
+        const productSubtotal = actualQuantity * (Number(product?.price) || 0);
         let discount = 0;
         if (product?.discountType === "percentage") {
-          discount = subtotal * ((Number(product?.discount) || 0) / 100);
+          discount = productSubtotal * ((Number(product?.discount) || 0) / 100);
         } else {
           discount = Number(product?.discount) || 0;
         }
-        const subtotalAfterDiscount = subtotal - discount;
-        const taxValue = subtotalAfterDiscount * ((Number(product?.tax?.percentage) || Number(product?.iva) || 0) / 100);
+        const subtotalAfterDiscount = productSubtotal - discount;
+        const taxValue = subtotalAfterDiscount * ((Number(product?.tax) || Number(product?.iva) || 0) / 100);
         return total + taxValue;
       }, 0);
-      return productsFiltered * (Number(retention?.percentage?.percentage) || 0) / 100;
+      const percentage = Number(retentionData?.percentage) || 0;
+      const result = totalTaxBaseForRetention * percentage / 100;
+      return result;
     } else {
-      return base * (Number(retention?.percentage?.percentage) || 0) / 100;
+      const percentage = Number(retentionData?.percentage) || 0;
+      const result = base * percentage / 100;
+      return result;
     }
   };
   const handleAddRetention = () => {
@@ -91,7 +103,7 @@ export const RetentionsSection = ({
     className: "h5 mb-0"
   }, /*#__PURE__*/React.createElement("i", {
     className: "pi pi-percentage me-2 text-primary"
-  }), "Retenciones (DOP)"), /*#__PURE__*/React.createElement(Button, {
+  }), "Retenciones (COP)"), /*#__PURE__*/React.createElement(Button, {
     type: "button",
     label: "Agregar retenci\xF3n",
     className: "p-button-primary",
@@ -110,8 +122,8 @@ export const RetentionsSection = ({
   }, /*#__PURE__*/React.createElement("strong", null, "Base para retenciones:"), " ", /*#__PURE__*/React.createElement(InputNumber, {
     value: calculateBaseAmount(),
     mode: "currency",
-    currency: "DOP",
-    locale: "es-DO",
+    currency: "COP",
+    locale: "es-CO",
     readOnly: true,
     className: "ml-2"
   }), /*#__PURE__*/React.createElement("small", {
@@ -143,8 +155,8 @@ export const RetentionsSection = ({
   }, "Valor"), /*#__PURE__*/React.createElement(InputNumber, {
     value: retention.value || 0,
     mode: "currency",
-    currency: "DOP",
-    locale: "es-DO",
+    currency: "COP",
+    locale: "es-CO",
     className: "w-100",
     readOnly: true
   })), /*#__PURE__*/React.createElement("div", {
@@ -165,8 +177,8 @@ export const RetentionsSection = ({
   }, "Total retenciones:"), /*#__PURE__*/React.createElement(InputNumber, {
     value: retentions.reduce((sum, r) => sum + (r.value || 0), 0),
     mode: "currency",
-    currency: "DOP",
-    locale: "es-DO",
+    currency: "COP",
+    locale: "es-CO",
     className: "font-weight-bold",
     readOnly: true
   }))))));

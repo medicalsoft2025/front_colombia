@@ -164,7 +164,8 @@ const BillingConfigTab = ({
           ...billing,
           resolution_date: resolutionDate,
           expiration_date: expirationDate,
-          accounting_account: +billing.accounting_account
+          accounting_account: +billing.accounting_account,
+          accounting_account_discount: +billing.accounting_account_discount
         };
 
         // Marcar como guardado
@@ -248,7 +249,8 @@ const BillingConfigTab = ({
         resolution_date: formatDate(data.resolution_date),
         expiration_date: formatDate(data.expiration_date),
         type: tipoApi,
-        accounting_account_reverse_id: data.accounting_account_reverse_id
+        accounting_account_reverse_id: data.accounting_account_reverse_id,
+        accounting_account_discount: data.accounting_account_discount?.toString()
       };
       if (data?.id) {
         await billingService.updateBillingConfiguration(payload, data.id);
@@ -314,8 +316,10 @@ const BillingConfigTab = ({
     const cuentasFiltradas = filtrarCuentas();
     const accountingAccount = watch("accounting_account");
     const accountingAccountReverse = watch("accounting_account_reverse_id");
+    const accountingAccountDiscount = watch("accounting_account_discount");
     const showReverseAccount = ["fiscal", "consumidor", "gubernamental"].includes(tipo);
     const showAccountingAccount = ["fiscal", "consumidor", "gubernamental"].includes(tipo);
+    const showAccountingAccountDiscount = ["fiscal", "consumidor", "compra"].includes(tipo);
     const tipoConfig = tiposFacturacion.find(t => t.id === tipo);
     const isSaved = tipoConfig && savedConfigs.has(tipoConfig.apiType);
     return /*#__PURE__*/React.createElement("form", {
@@ -395,7 +399,34 @@ const BillingConfigTab = ({
       appendTo: "self"
     }), errors?.accounting_account_reverse_id && /*#__PURE__*/React.createElement("small", {
       className: "p-error"
-    }, "Favor seleccione una cuenta contable reversa.")), /*#__PURE__*/React.createElement("div", {
+    }, "Favor seleccione una cuenta contable reversa.")), showAccountingAccountDiscount && /*#__PURE__*/React.createElement("div", {
+      className: "field mb-4"
+    }, /*#__PURE__*/React.createElement("label", {
+      htmlFor: `accounting_account_discount_${tipo}`,
+      className: "font-medium block mb-2"
+    }, "Cuenta Contable Descuento ", /*#__PURE__*/React.createElement("span", {
+      className: "text-danger"
+    }, "*")), /*#__PURE__*/React.createElement(Dropdown, {
+      id: `accounting_account_discount_${tipo}`,
+      options: cuentasFiltradas.map(cuenta => ({
+        label: `${cuenta.account_code} - ${cuenta.account_name}`,
+        value: cuenta.id,
+        account_code: cuenta.account_code,
+        account_name: cuenta.account_name
+      })),
+      value: accountingAccountDiscount,
+      onChange: e => setValue("accounting_account_discount", e.value),
+      filter: true,
+      filterBy: "account_name,account_code,label",
+      showClear: true,
+      filterPlaceholder: "Buscar cuenta...",
+      className: `w-full ${errors?.accounting_account_discount ? "p-invalid" : ""}`,
+      loading: loading.cuentas,
+      placeholder: "Seleccione una cuenta",
+      appendTo: "self"
+    }), errors?.accounting_account_discount && /*#__PURE__*/React.createElement("small", {
+      className: "p-error"
+    }, "Favor seleccione una cuenta contable de descuento.")), /*#__PURE__*/React.createElement("div", {
       className: "field mb-4"
     }, /*#__PURE__*/React.createElement("label", {
       htmlFor: `resolution_number_${tipo}`,

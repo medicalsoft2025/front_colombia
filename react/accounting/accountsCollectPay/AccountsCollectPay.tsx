@@ -68,13 +68,14 @@ export const AccountsCollectPay = () => {
     suppliers: selectedSupplierIds.length ? selectedSupplierIds : undefined,
     createdAt: formatDateRange(selectedDateRange),
     dueDate: formatDateRange(selectedDueDateRange),
-    days_to_pay: selectedDaysToPay ?? undefined,
+    daysToPay: selectedDaysToPay ?? undefined,
   };
 
   const {
     invoices: accountsReceivable,
     loading: loadingReceivable,
     totalRecords: totalReceivable,
+    fetchInvoices: fetchInvoicesReceivable
   } = useAccountsCollectPay({
     ...commonFilters,
     type: "sale,entity",
@@ -85,6 +86,7 @@ export const AccountsCollectPay = () => {
     invoices: accountsPayable,
     loading: loadingPayable,
     totalRecords: totalPayable,
+    fetchInvoices: fetchInvoicesPayable
   } = useAccountsCollectPay({
     ...commonFilters,
     type: "purchase",
@@ -117,7 +119,7 @@ export const AccountsCollectPay = () => {
       typeof cantidad === "string" ? parseFloat(cantidad) : cantidad;
     return new Intl.NumberFormat("es-ES", {
       style: "currency",
-      currency: "DOP",
+      currency: "COP",
       minimumFractionDigits: 2,
       maximumFractionDigits: 2,
     }).format(amount);
@@ -187,6 +189,7 @@ export const AccountsCollectPay = () => {
   function handleGenerarRecibo() {
     setShowReceiptModal(false);
     setInvoiceToReceipt(null);
+    window.location.reload();
   }
 
   function downloadPdf(item: any) {
@@ -417,7 +420,7 @@ export const AccountsCollectPay = () => {
               <span
                 className={status === "overdue" ? "text-danger fw-bold" : ""}
               >
-                {obtenerFechaFormateada(item.due_date)}
+                {(item.due_date)}
               </span>
             </div>
 
@@ -739,6 +742,8 @@ export const AccountsCollectPay = () => {
         onHide={() => {
           setShowReceiptModal(false);
           setInvoiceToReceipt(null);
+          fetchInvoicesPayable();
+          fetchInvoicesReceivable();
         }}
         onSubmit={handleGenerarRecibo}
         onSaveAndDownload={handleGenerarRecibo}

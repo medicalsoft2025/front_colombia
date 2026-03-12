@@ -45,7 +45,7 @@ export const CashRegisterPaymentMethodsForm = /*#__PURE__*/forwardRef((props, re
     control,
     name: "payments",
     rules: {
-      required: "Debe agregar al menos un método de pago",
+      required: "Este campo es requerido",
       minLength: {
         value: 1,
         message: "Debe agregar al menos un método de pago"
@@ -103,7 +103,7 @@ export const CashRegisterPaymentMethodsForm = /*#__PURE__*/forwardRef((props, re
   const getFormErrorMessage = name => {
     return errors[name] && /*#__PURE__*/React.createElement("small", {
       className: "p-error"
-    }, errors[name].message || errors[name].root?.message);
+    }, errors[name].root?.message);
   };
   const handleAddPayment = () => {
     setValue("currentPayment", {

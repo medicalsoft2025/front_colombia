@@ -7,10 +7,7 @@ export const useFiltrosNotas = notas => {
   const notasFiltradas = useMemo(() => {
     if (!notas || !Array.isArray(notas)) return [];
     return notas.filter(nota => {
-      // Filtro por enfermera
       const coincideEnfermera = !filtros.enfermera || nota.user_id && nota.user_id.toString() === filtros.enfermera;
-
-      // Filtro por fecha
       let coincideFecha = true;
       if (filtros.fecha) {
         const fechaNota = formatDateForFilter(nota.created_at);

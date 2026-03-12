@@ -8,6 +8,7 @@ export const BranchesTab = ({
   return /*#__PURE__*/React.createElement("div", {
     className: "container-fluid"
   }, /*#__PURE__*/React.createElement(BranchApp, {
+    companyId: companyId,
     onValidationChange: onValidationChange
   }));
 };

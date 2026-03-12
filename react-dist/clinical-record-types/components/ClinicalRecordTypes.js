@@ -39,6 +39,9 @@ export const ClinicalRecordTypes = () => {
   const onDelete = data => {
     remove(data);
   };
+  const onManageSections = data => {
+    window.location.href = `/clinicalRecordSections?clinicalRecordTypeId=${data.id}`;
+  };
   const onHide = () => {
     setShowFormDialog(false);
     setSelectedItem(null);
@@ -48,6 +51,7 @@ export const ClinicalRecordTypes = () => {
       setInitialData(ClinicalRecordTypeDtoMapper.toFormBuilderData(clinicalRecordType));
     }
   }, [clinicalRecordType]);
+  console.log(clinicalRecordTypes);
   return /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement(Toast, {
     ref: toastCreate
   }), /*#__PURE__*/React.createElement(Toast, {
@@ -67,7 +71,8 @@ export const ClinicalRecordTypes = () => {
     onEdit: onEdit,
     onDelete: onDelete,
     loading: isLoadingClinicalRecordTypes,
-    onReload: fetchClinicalRecordTypes
+    onReload: fetchClinicalRecordTypes,
+    onManageSections: onManageSections
   }), /*#__PURE__*/React.createElement(ClinicalRecordTypesFormDialog, {
     visible: showFormDialog,
     onHide: onHide,

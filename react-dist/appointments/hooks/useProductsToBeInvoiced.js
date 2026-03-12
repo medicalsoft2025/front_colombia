@@ -1,52 +1,28 @@
 import { useState, useEffect } from 'react';
-import { handleError } from "../../../services/utilidades";
-import AppointmentService from "../../../services/api/classes/appointmentService";
-
-export const useProductsToBeInvoiced = (appointmentId) => {
-  const [state, setState] = useState({
-    products: [],
-    loading: true,
-    error: null
-  });
-
+import { handleError } from "../../../services/utilidades.js";
+import AppointmentService from "../../../services/api/classes/appointmentService.js";
+export const useProductsToBeInvoiced = appointmentId => {
+  const [products, setProducts] = useState([]);
+  const [loading, setLoading] = useState(false);
   useEffect(() => {
-    const controller = new AbortController();
-    const { signal } = controller;
-
     const fetchProducts = async () => {
-      if (!appointmentId) {
-        setState(prev => ({ ...prev, loading: false, products: [] }));
-        return;
-      }
+      if (!appointmentId) return;
       try {
-        setState(prev => ({ ...prev, loading: true, error: null }));
-
-        const service = new AppointmentService();
-        const response = await service.getProductsToBeInvoiced(appointmentId, { signal });
-
-        if (!signal.aborted) {
-          setState({
-            products: response || [],
-            loading: false,
-            error: null
-          });
-        }
+        setLoading(true);
+        const appointmentService = new AppointmentService();
+        const response = await appointmentService.getProductsToBeInvoiced(appointmentId);
+        setProducts(response || []);
       } catch (error) {
-        if (!signal.aborted) {
-          handleError(error);
-          setState({
-            products: [],
-            loading: false,
-            error: error.message
-          });
-        }
+        handleError(error);
+        console.error('Error fetching products to be invoiced:', error);
+      } finally {
+        setLoading(false);
       }
     };
-
     fetchProducts();
-
-    return () => controller.abort();
-  }, [appointmentId]);
-
-  return state;
+  }, [appointmentId, handleError]);
+  return {
+    products,
+    loading
+  };
 };

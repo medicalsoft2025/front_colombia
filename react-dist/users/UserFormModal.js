@@ -12,12 +12,12 @@ const UserFormModal = ({
 }) => {
   const formId = 'createDoctor';
   const footer = /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("div", {
-    className: "d-flex gap-2 justify-content-end align-items-center"
+    className: "d-flex gap-2 align-items-center"
   }, /*#__PURE__*/React.createElement(Button, {
     className: "p-button-secondary",
     "aria-label": "Close",
     icon: /*#__PURE__*/React.createElement("i", {
-      className: "fas fa-times me-2"
+      className: "fas fa-times"
     }),
     label: "Cerrar",
     onClick: onHide
@@ -26,7 +26,7 @@ const UserFormModal = ({
     form: formId,
     className: "p-button-primary",
     icon: /*#__PURE__*/React.createElement("i", {
-      className: "fas fa-save me-2"
+      className: "fas fa-save"
     }),
     label: "Guardar"
   })));

@@ -2,11 +2,11 @@ import React, { useState } from "react";
 import { useThirdPartyCreate } from "./useThirdPartyCreate";
 import { TerceroFormData, ThirdPartyModal } from "../modals/ThridPartiesModal";
 
+// useThirdPartyModal.ts
 export const useThirdPartyModal = (options?: {
     onSuccess?: (data: any) => void;
 }) => {
     const [open, setOpen] = useState(false);
-
     const { createThirdParty } = useThirdPartyCreate();
 
     const openModal = () => setOpen(true);
@@ -28,7 +28,7 @@ export const useThirdPartyModal = (options?: {
                 second_last_name: formData.contact.second_last_name,
                 date_of_birth: formData.contact.date_of_birth,
             });
-            // Ejecutar callback de éxito si existe
+            
             if (options?.onSuccess) {
                 options.onSuccess(res);
             }
@@ -38,21 +38,16 @@ export const useThirdPartyModal = (options?: {
         }
     };
 
-    const ModalComponent = React.memo(() => (
-        <ThirdPartyModal
-            visible={open}
-            onHide={() => {
-                closeModal();
-            }}
-            onSubmit={handleSaveTercero}
-            loading={false}
-            error={null}
-        />
-    ));
+    const modalProps = {
+        visible: open,
+        onHide: closeModal,
+        onSubmit: handleSaveTercero,
+        loading: false,
+        error: null
+    };
 
     return {
-        ThirdPartyModal: ModalComponent,
-        open,
+        modalProps,
         openModal,
         closeModal
     };

@@ -51,16 +51,7 @@
     data-move-target="#navbarVerticalNav">
     <div class="w-100 d-flex gap-2 align-items-center">
 
-        <div class="d-flex">
-            <a class="navbar-brand me-1 me-sm-3" href="/Dashboard">
-                <div class="d-flex align-items-center">
-                    <div class="d-flex align-items-center" id=""><img src="assets/img/logos/FullColor.svg" alt="phoenix"
-                            width="95" />
-
-                    </div>
-                </div>
-            </a>
-        </div>
+        <div id="logoReact" class="d-flex"></div>
 
         <div className="d-flex flex-grow-1 mb-4" style="width: 100%;">
             <div id="NavbarHeader"></div>
@@ -188,9 +179,11 @@
 
 <script type="module">
     import NavbarHeader from './react-dist/layout/menu/NavbarHeader.js';
+    import { Logo } from './react-dist/components/Logo.js';
     import { renderApp } from './services/react/app-renderer.js';
 
     renderApp(NavbarHeader, 'NavbarHeader');
+    renderApp(Logo, 'logoReact');
 
     import {
         userService

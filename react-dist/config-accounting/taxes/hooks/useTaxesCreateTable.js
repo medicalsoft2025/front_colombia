@@ -5,7 +5,6 @@ import { taxesService } from "../../../../services/api/index.js";
 export const useTaxesCreateTable = () => {
   const [loading, setLoading] = useState(false);
   const createTax = async data => {
-    // Acepta CreateTaxDTO directamente
     setLoading(true);
     try {
       const response = await taxesService.storeTax(data);

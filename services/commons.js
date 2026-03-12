@@ -254,3 +254,8 @@ export const statusInvoices = {
     cancelled: 'Anulada',
     pending: 'Pendiente',
 }
+
+export const countryUrlPrefix = {
+    'colombia': 'front_colombia',
+    'peru': 'front_peru',
+}

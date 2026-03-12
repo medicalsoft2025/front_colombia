@@ -9,7 +9,6 @@ export const useAllTableUsers = () => {
       setLoading(true);
       setError(null);
       const usersData = await userService.getAll();
-      console.log('🔄 Datos recibidos:', usersData);
       setUsers(usersData.map(user => ({
         id: user.id,
         fullName: `${user.first_name || ''} ${user.middle_name || ''} ${user.last_name || ''} ${user.second_last_name || ''}`.trim(),
@@ -34,7 +33,6 @@ export const useAllTableUsers = () => {
   }, [fetchUsers]);
   useEffect(() => {
     fetchUsers();
-    refreshUsers();
   }, []);
   return {
     users,

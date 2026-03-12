@@ -3,8 +3,8 @@ import { useClinicalRecordsPendingCancellation } from "./hooks/useClinicalRecord
 import { CustomPRTable } from "../components/CustomPRTable.js";
 import { ResolveRequestForm } from "../general-request/components/ResolveRequestForm.js";
 import { SwalManager } from "../../services/alertManagerImported.js";
-import { CustomModal } from "../components/CustomModal.js";
 import { formatDate } from "../../services/utilidades.js";
+import { Dialog } from "primereact/dialog";
 export const ClinicalRecordsPendingCancellation = () => {
   const {
     clinicalRecords,
@@ -140,10 +140,10 @@ export const ClinicalRecordsPendingCancellation = () => {
     onPage: handlePageChange,
     onSearch: handleSearchChange,
     onReload: refresh
-  }))), /*#__PURE__*/React.createElement(CustomModal, {
-    show: showResolveRequestModal,
+  }))), /*#__PURE__*/React.createElement(Dialog, {
+    visible: showResolveRequestModal,
     onHide: () => setShowResolveRequestModal(false),
-    title: "Resolver solicitud"
+    header: "Resolver solicitud"
   }, /*#__PURE__*/React.createElement(ResolveRequestForm, {
     requestId: selectedRequestId,
     onSave: handleSave

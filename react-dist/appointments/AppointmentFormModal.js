@@ -33,6 +33,7 @@ import { TabView, TabPanel } from 'primereact/tabview';
 import { AvailabilitySlotsDialog } from "./components/AvailabilitySlotsDialog.js";
 import { SpecialtyAvailabilityForm } from "./components/SpecialtyAvailabilityForm.js";
 import { AISchedulingForm } from "./components/AISchedulingForm.js";
+import { useQueryClient } from '@tanstack/react-query';
 export const AppointmentFormModal = ({
   isOpen,
   onClose,
@@ -65,6 +66,7 @@ export const AppointmentFormModal = ({
   const [availabilityDialogVisible, setAvailabilityDialogVisible] = useState(false);
   const [foundAvailabilities, setFoundAvailabilities] = useState([]);
   const [aiFilters, setAiFilters] = useState(null);
+  const queryClient = useQueryClient();
 
   // Ref for preserving edit values during async fetches
   const pendingEditRef = useRef(null);
@@ -155,6 +157,7 @@ export const AppointmentFormModal = ({
     // So `newAppointments` don't need patient info inside if `isGroup` is false.
 
     setAppointments(prev => [...prev, ...newAppointments]);
+    clearAppointmentForm();
     showSuccessToast({
       message: newAppointments.length + " citas agregadas correctamente"
     });
@@ -354,6 +357,9 @@ export const AppointmentFormModal = ({
       if (onAppointmentCreated) {
         onAppointmentCreated();
       }
+      queryClient.invalidateQueries({
+        queryKey: ['appointments']
+      });
       setAppointments([]); // Clear appointments list
       clearAppointmentForm(); // Clear inputs
       clearPatientForm(); // Clear patient inputs
@@ -794,6 +800,18 @@ export const AppointmentFormModal = ({
     if (dateString === todayDate) {
       uniqueOptions = uniqueOptions.filter(option => option.value >= currentTime);
     }
+
+    // Filtrar horas ya seleccionadas para este profesional en esta fecha
+    uniqueOptions = uniqueOptions.filter(option => {
+      const isAlreadySelected = appointments.some(app => {
+        // Si estamos editando, no filtrar la cita actual
+        if (editingId && app.uuid === editingId) return false;
+        const appDate = app.appointment_date?.toLocaleDateString('en-CA');
+        const appProfessionalId = app.assigned_user_assistant_availability_id || app.assigned_user_availability?.id;
+        return appDate === dateString && appProfessionalId === availabilityId && app.appointment_time === option.value;
+      });
+      return !isAlreadySelected;
+    });
     setAppointmentTimeOptions(uniqueOptions);
 
     // Select pending time if available, or first, or null
@@ -1540,7 +1558,9 @@ export const AppointmentFormModal = ({
     consultationTypes: consultationTypes,
     externalCauses: externalCauses,
     onFetchAvailability: handleRefetchAvailability,
-    specialties: allSpecialties || []
+    specialties: allSpecialties || [],
+    existingAppointments: appointments,
+    editingId: editingId
   })));
 };
 const AppointmentErrorIndicator = ({

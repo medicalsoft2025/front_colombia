@@ -92,6 +92,18 @@ export class CompanyConfigurationService extends BaseApiService {
             throw error;
         }
     }
+
+    async getCompany(companyId) {
+        try {
+            const response = await this.httpClient.get(
+                `${this.microservice}/companies/${companyId}?include=billings,representative,communication`
+            );
+            return response;
+        } catch (error) {
+            console.error('Error getting company:', error);
+            throw error;
+        }
+    }
 }
 
 export default CompanyConfigurationService;

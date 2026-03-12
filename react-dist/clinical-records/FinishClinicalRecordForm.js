@@ -1,3 +1,4 @@
+function _extends() { return _extends = Object.assign ? Object.assign.bind() : function (n) { for (var e = 1; e < arguments.length; e++) { var t = arguments[e]; for (var r in t) ({}).hasOwnProperty.call(t, r) && (n[r] = t[r]); } return n; }, _extends.apply(null, arguments); }
 import React, { useState, useRef, useEffect, forwardRef, useImperativeHandle } from "react";
 import { Button } from "primereact/button";
 import { ExamForm } from "../exams/components/ExamForm.js";
@@ -24,16 +25,17 @@ import { useLastPatientPrescription } from "../prescriptions/hooks/useLastPatien
 import { OptometryPrescriptionForm } from "../prescriptions/components/OptometryPrescriptionForm.js";
 import { Dropdown } from "primereact/dropdown";
 import { useClinicalRecord } from "./hooks/useClinicalRecord.js";
-import { appointmentService, clinicalRecordTypeService, userService } from "../../services/api/index.js";
+import { appointmentService, clinicalRecordTypeService, userService, resourcesMedicalService } from "../../services/api/index.js";
+import { Checkbox } from "primereact/checkbox";
 const diagnosisTypeOptions = [{
-  value: 'definitivo',
-  label: 'Definitivo'
+  value: "definitivo",
+  label: "Definitivo"
 }, {
-  value: 'presuntivo',
-  label: 'Presuntivo'
+  value: "presuntivo",
+  label: "Presuntivo"
 }, {
-  value: 'diferencial',
-  label: 'Diferencial'
+  value: "diferencial",
+  label: "Diferencial"
 }];
 export const FinishClinicalRecordForm = /*#__PURE__*/forwardRef((props, ref) => {
   const toast = useRef(null);
@@ -51,7 +53,8 @@ export const FinishClinicalRecordForm = /*#__PURE__*/forwardRef((props, ref) => 
   const {
     control,
     setValue,
-    getValues
+    getValues,
+    watch
   } = useForm({
     defaultValues: {
       diagnosis: null,
@@ -109,6 +112,12 @@ export const FinishClinicalRecordForm = /*#__PURE__*/forwardRef((props, ref) => 
   const vaccineFormRef = useRef(null);
   const remissionFormRef = useRef(null);
   const appointmentFormRef = useRef(null);
+  const [attentionTypesRips, setAttentionTypesRips] = useState([]);
+  const [careModesRips, setCareModesRips] = useState([]);
+  const [serviceGroupsRips, setServiceGroupsRips] = useState([]);
+  const [serviceCodesRips, setServiceCodesRips] = useState([]);
+  const [consultationPurposesRips, setConsultationPurposesRips] = useState([]);
+  const [externalCausesRips, setExternalCausesRips] = useState([]);
   const showSuccessToast = ({
     title,
     message
@@ -181,7 +190,9 @@ export const FinishClinicalRecordForm = /*#__PURE__*/forwardRef((props, ref) => 
         appointment: appointmentFormRef.current?.mapAppointmentToServer(),
         specialtyName: finalSpecialtyName,
         patientId: finalPatientId,
-        appointmentId: finalAppointmentId
+        appointmentId: finalAppointmentId,
+        is_rips_active: getValues("is_rips_active"),
+        data_rips: getValues("data_rips")
       };
     }
   }));
@@ -264,9 +275,8 @@ export const FinishClinicalRecordForm = /*#__PURE__*/forwardRef((props, ref) => 
       setFinalSpecialtyName(clinicalRecordForUpdate.created_by_user.specialty.name);
       setFinalPatientId(clinicalRecordForUpdate.patient_id);
       setFinalAppointmentId(clinicalRecordForUpdate.appointment_id);
-      console.log("clinicalRecordForUpdate", clinicalRecordForUpdate);
-      setValue('treatment_plan', clinicalRecordForUpdate.description);
-      setValue('diagnoses', clinicalRecordForUpdate.clinical_record_diagnoses.map(diagnosis => {
+      setValue("treatment_plan", clinicalRecordForUpdate.description);
+      setValue("diagnoses", clinicalRecordForUpdate.clinical_record_diagnoses.map(diagnosis => {
         return {
           codigo: diagnosis.diagnosis_code,
           diagnosis_type: diagnosis.diagnosis_type,
@@ -327,6 +337,23 @@ export const FinishClinicalRecordForm = /*#__PURE__*/forwardRef((props, ref) => 
       }
     }
   }, [clinicalRecordForUpdate]);
+  useEffect(() => {
+    loadResourcesToRips();
+  }, []);
+  async function loadResourcesToRips() {
+    const attentionTypes = await resourcesMedicalService.getConsultationTypesRips();
+    const careModes = await resourcesMedicalService.getCareModesRips();
+    const serviceGroups = await resourcesMedicalService.getServiceGroupsRips();
+    const serviceCodes = await resourcesMedicalService.getServiceCodesRips();
+    const consultationPurposes = await resourcesMedicalService.getConsultationPurposesRips();
+    const externalCauses = await resourcesMedicalService.getExternalCausesRips();
+    setAttentionTypesRips(attentionTypes);
+    setCareModesRips(careModes);
+    setServiceGroupsRips(serviceGroups);
+    setServiceCodesRips(serviceCodes);
+    setConsultationPurposesRips(consultationPurposes);
+    setExternalCausesRips(externalCauses);
+  }
   const handleLoadLastPrescriptionChange = async e => {
     setLoadLastPrescriptionCheck(e);
     if (e && selectedPackage) {
@@ -488,7 +515,6 @@ export const FinishClinicalRecordForm = /*#__PURE__*/forwardRef((props, ref) => 
     }),
     disabled: !cie11Code || !cie11Code.label,
     onClick: () => {
-      console.log("cie11Code", cie11Code);
       if (cie11Code && cie11Code.label) {
         appendDiagnosis(cie11Code);
         setCie11Code(null);
@@ -571,7 +597,180 @@ export const FinishClinicalRecordForm = /*#__PURE__*/forwardRef((props, ref) => 
         "p-invalid": fieldState.error
       })
     }))
-  }))), /*#__PURE__*/React.createElement(Divider, null), /*#__PURE__*/React.createElement("div", {
+  })), /*#__PURE__*/React.createElement("div", {
+    className: "mb-3 d-flex align-items-center gap-3"
+  }, /*#__PURE__*/React.createElement(Controller, {
+    name: "is_rips_active",
+    control: control,
+    render: ({
+      field,
+      fieldState
+    }) => /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("label", {
+      htmlFor: "treatment-plan",
+      className: "form-label"
+    }, "\xBFIncluir rips?"), /*#__PURE__*/React.createElement(Checkbox, {
+      id: "is_rips_active",
+      checked: field.value || false,
+      onChange: e => field.onChange(e.checked)
+    }))
+  })), watch("is_rips_active") && /*#__PURE__*/React.createElement("div", {
+    className: "row p-fluid"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "col-6"
+  }, /*#__PURE__*/React.createElement(Controller, {
+    name: "data_rips.consultation_code",
+    control: control,
+    render: ({
+      field,
+      fieldState
+    }) => /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("label", {
+      htmlFor: "data_rips.consultation_code",
+      className: "form-label"
+    }, "Seleccione la consulta"), /*#__PURE__*/React.createElement(Dropdown, _extends({
+      id: field.name
+    }, field, {
+      optionLabel: "name",
+      optionValue: "code",
+      options: attentionTypesRips,
+      placeholder: "Seleccione la consulta",
+      virtualScrollerOptions: {
+        itemSize: 38
+      },
+      filter: true
+    })))
+  })), /*#__PURE__*/React.createElement("div", {
+    className: "col-6"
+  }, /*#__PURE__*/React.createElement(Controller, {
+    name: "data_rips.attention_code",
+    control: control,
+    render: ({
+      field,
+      fieldState
+    }) => /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("label", {
+      htmlFor: "data_rips.attention_code",
+      className: "form-label"
+    }, "Seleccione la atenci\xF3n"), /*#__PURE__*/React.createElement(Dropdown, _extends({
+      id: field.name
+    }, field, {
+      optionLabel: "name",
+      optionValue: "code",
+      options: careModesRips,
+      placeholder: "Seleccione la atenci\xF3n",
+      filter: true
+    })))
+  })), /*#__PURE__*/React.createElement("div", {
+    className: "col-6"
+  }, /*#__PURE__*/React.createElement(Controller, {
+    name: "data_rips.service_code",
+    control: control,
+    render: ({
+      field,
+      fieldState
+    }) => /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("label", {
+      htmlFor: "data_rips.service_code",
+      className: "form-label"
+    }, "Seleccione el codigo de servicio"), /*#__PURE__*/React.createElement(Dropdown, _extends({
+      id: field.name
+    }, field, {
+      optionLabel: "name",
+      optionValue: "code",
+      options: serviceCodesRips,
+      placeholder: "Seleccione el codigo de servicio",
+      virtualScrollerOptions: {
+        itemSize: 38
+      },
+      filter: true
+    })))
+  })), /*#__PURE__*/React.createElement("div", {
+    className: "col-6"
+  }, /*#__PURE__*/React.createElement(Controller, {
+    name: "data_rips.service_group_code",
+    control: control,
+    render: ({
+      field,
+      fieldState
+    }) => /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("label", {
+      htmlFor: "data_rips.service_group_code",
+      className: "form-label"
+    }, "Seleccione el grupo de servicio"), /*#__PURE__*/React.createElement(Dropdown, _extends({
+      id: field.name
+    }, field, {
+      optionLabel: "name",
+      optionValue: "code",
+      options: serviceGroupsRips,
+      placeholder: "Seleccione el grupo de servicio",
+      filter: true
+    })))
+  })), /*#__PURE__*/React.createElement("div", {
+    className: "col-6"
+  }, /*#__PURE__*/React.createElement(Controller, {
+    name: "data_rips.purpose_consultation_code",
+    control: control,
+    render: ({
+      field,
+      fieldState
+    }) => /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("label", {
+      htmlFor: "data_rips.purpose_consultation_code",
+      className: "form-label"
+    }, "Finalidad de consulta"), /*#__PURE__*/React.createElement(Dropdown, _extends({
+      id: field.name
+    }, field, {
+      optionLabel: "name",
+      optionValue: "code",
+      options: consultationPurposesRips,
+      placeholder: "Seleccione la finalidad de consulta",
+      filter: true
+    })))
+  })), /*#__PURE__*/React.createElement("div", {
+    className: "col-6"
+  }, /*#__PURE__*/React.createElement(Controller, {
+    name: "data_rips.external_cause_code",
+    control: control,
+    render: ({
+      field,
+      fieldState
+    }) => /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("label", {
+      htmlFor: "data_rips.external_cause_code",
+      className: "form-label"
+    }, "Causa externa"), /*#__PURE__*/React.createElement(Dropdown, _extends({
+      id: field.name
+    }, field, {
+      optionLabel: "name",
+      optionValue: "code",
+      options: externalCausesRips,
+      placeholder: "Seleccione la causa externa",
+      filter: true
+    })))
+  })), /*#__PURE__*/React.createElement("div", {
+    className: "col-6"
+  }, /*#__PURE__*/React.createElement(Controller, {
+    name: "data_rips.main_diagnosis_code",
+    control: control,
+    render: ({
+      field,
+      fieldState
+    }) => /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("label", {
+      htmlFor: "data_rips.main_diagnosis_code",
+      className: "form-label"
+    }, "Tipo de diagnostico principal"), /*#__PURE__*/React.createElement(Dropdown, _extends({
+      id: field.name
+    }, field, {
+      optionLabel: "name",
+      optionValue: "code",
+      options: [{
+        name: "Imppresion diagnóstica",
+        code: "1"
+      }, {
+        name: "Confirmado nuevo",
+        code: "2"
+      }, {
+        name: "Confirmado repetido",
+        code: "3"
+      }],
+      placeholder: "Seleccione el tipo de diagn\xF3stico principal",
+      filter: true
+    })))
+  })))), /*#__PURE__*/React.createElement(Divider, null), /*#__PURE__*/React.createElement("div", {
     className: "d-flex"
   }, /*#__PURE__*/React.createElement("div", {
     className: "p-3 border-right d-flex flex-column gap-2",

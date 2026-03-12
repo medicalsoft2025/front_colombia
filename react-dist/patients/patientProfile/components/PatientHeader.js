@@ -1,5 +1,5 @@
 import React from 'react';
-import { bloodTypeMap } from "../utils/utilsPatient.js";
+import { bloodTypeMap, getAvatarUrl } from "../utils/utilsPatient.js";
 const PatientHeader = ({
   patient
 }) => {
@@ -10,7 +10,7 @@ const PatientHeader = ({
     className: "avatar-section"
   }, /*#__PURE__*/React.createElement("img", {
     className: "patient-avatar",
-    src: getUrlImage(patient.minio_url),
+    src: getAvatarUrl(patient.minio_url),
     alt: `Avatar de ${patient.full_name}`,
     onError: e => {
       e.target.src = "../assets/img/profile/profile_default.jpg";

@@ -6,7 +6,6 @@ import { Button } from "primereact/button";
 import { Card } from "primereact/card";
 import { Dropdown } from "primereact/dropdown";
 import { Toast } from "primereact/toast";
-import { Dialog } from "primereact/dialog";
 import { classNames } from "primereact/utils";
 export const EntitiesConfiTable = ({
   onEditItem,
@@ -15,7 +14,6 @@ export const EntitiesConfiTable = ({
   onDeleteItem
 }) => {
   const toast = useRef(null);
-  const [deleteDialogVisible, setDeleteDialogVisible] = useState(false);
   const [entityToDelete, setEntityToDelete] = useState(null);
   const [filteredEntities, setFilteredEntities] = useState([]);
   const [filtros, setFiltros] = useState({
@@ -87,45 +85,18 @@ export const EntitiesConfiTable = ({
         className: "fa-solid fa-trash"
       }),
       className: "p-button-rounded p-button-text p-button-sm p-button-danger",
-      onClick: () => confirmDelete(rowData)
+      onClick: () => deleteEntity(rowData.id.toString())
     }));
   };
   const documentTypeBodyTemplate = rowData => {
     const type = documentTypes.find(doc => doc.value === rowData.document_type);
     return type ? type.label : rowData.document_type;
   };
-  const confirmDelete = entity => {
-    setEntityToDelete(entity);
-    setDeleteDialogVisible(true);
-  };
-  const deleteEntity = () => {
-    if (entityToDelete && onDeleteItem) {
-      onDeleteItem(entityToDelete.id.toString());
-      showToast("success", "Éxito", `Entidad ${entityToDelete.name} eliminada`);
+  const deleteEntity = id => {
+    if (onDeleteItem) {
+      onDeleteItem(id);
     }
-    setDeleteDialogVisible(false);
   };
-  const showToast = (severity, summary, detail) => {
-    toast.current?.show({
-      severity,
-      summary,
-      detail,
-      life: 3000
-    });
-  };
-  const deleteDialogFooter = /*#__PURE__*/React.createElement("div", {
-    className: "flex justify-content-end gap-2"
-  }, /*#__PURE__*/React.createElement(Button, {
-    label: "Cancelar",
-    icon: "pi pi-times",
-    className: "p-button-text",
-    onClick: () => setDeleteDialogVisible(false)
-  }), /*#__PURE__*/React.createElement(Button, {
-    label: "Eliminar",
-    icon: "pi pi-check",
-    className: "p-button-danger",
-    onClick: deleteEntity
-  }));
   const styles = {
     card: {
       marginBottom: "20px",
@@ -159,24 +130,7 @@ export const EntitiesConfiTable = ({
     }
   }, /*#__PURE__*/React.createElement(Toast, {
     ref: toast
-  }), /*#__PURE__*/React.createElement(Dialog, {
-    visible: deleteDialogVisible,
-    style: {
-      width: "450px"
-    },
-    header: "Confirmar",
-    modal: true,
-    footer: deleteDialogFooter,
-    onHide: () => setDeleteDialogVisible(false)
-  }, /*#__PURE__*/React.createElement("div", {
-    className: "flex align-items-center justify-content-center"
-  }, /*#__PURE__*/React.createElement("i", {
-    className: "pi pi-exclamation-triangle mr-3",
-    style: {
-      fontSize: "2rem",
-      color: "#f8bb86"
-    }
-  }), entityToDelete && /*#__PURE__*/React.createElement("span", null, "\xBFEst\xE1s seguro que deseas eliminar la entidad ", /*#__PURE__*/React.createElement("b", null, entityToDelete.name), "? Esta acci\xF3n no se puede deshacer."))), /*#__PURE__*/React.createElement(Card, {
+  }), /*#__PURE__*/React.createElement(Card, {
     title: "Filtros de B\xFAsqueda",
     style: styles.card
   }, /*#__PURE__*/React.createElement("div", {

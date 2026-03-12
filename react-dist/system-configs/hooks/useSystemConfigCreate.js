@@ -9,15 +9,20 @@ export const useSystemConfigCreate = () => {
     showServerErrorsToast,
     toast
   } = usePRToast();
-  const createSystemConfig = async data => {
+  const createSystemConfig = async (data, companyId = null) => {
     try {
       setLoading(true);
+      console.log("System Configs:", {
+        configs: data,
+        company_id: companyId
+      });
       const response = await systemConfigService.storeSystemConfig({
-        configs: data
+        configs: data,
+        company_id: companyId
       });
       showSuccessToast({
-        title: 'Configuración guardada',
-        message: 'La configuración se ha guardado correctamente'
+        title: "Configuración guardada",
+        message: "La configuración se ha guardado correctamente"
       });
       return response;
     } catch (error) {

@@ -6,7 +6,7 @@ import { Divider } from "primereact/divider";
 import { Tag } from "primereact/tag";
 import { Panel } from "primereact/panel";
 import { Badge } from "primereact/badge";
-import { calculateTotal, calculatePaid, calculateChange } from "../utils/helpers.js";
+import { calculatePaid, calculateChange, calculateCopayment } from "../utils/helpers.js";
 import { paymentMethodOptions } from "../utils/constants.js";
 const PreviewDoneStep = ({
   formData,
@@ -23,10 +23,18 @@ const PreviewDoneStep = ({
   const [isDone, setIsDone] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const isMounted = useRef(true);
-  const total = calculateTotal(formData.products, formData.billing.facturacionEntidad);
+
+  //   const total = calculateTotal(
+  //     formData.products,
+  //     formData.billing.facturacionEntidad,
+  //   );
+  const {
+    copayment,
+    isCopayment
+  } = calculateCopayment(formData.products, formData.copaymentRules, formData.billing.facturacionEntidad);
   const paid = calculatePaid(formData.payments);
-  const change = calculateChange(total, paid);
-  const balance = total - paid;
+  const change = calculateChange(copayment, paid);
+  const balance = copayment - paid;
   useEffect(() => {
     isMounted.current = true;
     return () => {
@@ -43,7 +51,7 @@ const PreviewDoneStep = ({
     try {
       await onSubmit();
     } catch (error) {
-      console.error('Error finishing invoice:', error);
+      console.error("Error finishing invoice:", error);
       if (isMounted.current) {
         setIsSubmitting(false);
       }
@@ -56,9 +64,9 @@ const PreviewDoneStep = ({
     onHide();
   };
   const formatCurrency = value => {
-    return new Intl.NumberFormat('es-DO', {
-      style: 'currency',
-      currency: 'DOP',
+    return new Intl.NumberFormat("es-DO", {
+      style: "currency",
+      currency: "DOP",
       minimumFractionDigits: 2
     }).format(value);
   };
@@ -67,7 +75,7 @@ const PreviewDoneStep = ({
     return /*#__PURE__*/React.createElement("div", {
       className: "d-flex align-items-center"
     }, /*#__PURE__*/React.createElement("i", {
-      className: `pi ${rowData.method === 'CASH' ? 'pi-money-bill' : 'pi-credit-card'} mr-2`
+      className: `pi ${rowData.method === "CASH" ? "pi-money-bill" : "pi-credit-card"} mr-2`
     }), /*#__PURE__*/React.createElement("span", null, methodLabel));
   };
   const priceBodyTemplate = rowData => {
@@ -102,8 +110,8 @@ const PreviewDoneStep = ({
     return /*#__PURE__*/React.createElement("div", {
       className: "text-center py-6 px-4 bg-light rounded-3 shadow-sm",
       style: {
-        maxWidth: '600px',
-        margin: '0 auto'
+        maxWidth: "600px",
+        margin: "0 auto"
       }
     }, /*#__PURE__*/React.createElement("i", {
       className: "pi pi-check-circle text-6xl text-success mb-4"
@@ -196,25 +204,25 @@ const PreviewDoneStep = ({
     stripedRows: true,
     size: "small",
     tableStyle: {
-      minWidth: '50rem'
+      minWidth: "50rem"
     }
   }, /*#__PURE__*/React.createElement(Column, {
     field: "id",
     header: "#",
     headerStyle: {
-      width: '50px'
+      width: "50px"
     }
   }), /*#__PURE__*/React.createElement(Column, {
     field: "description",
     header: "Descripci\xF3n",
     headerStyle: {
-      minWidth: '200px'
+      minWidth: "200px"
     }
   }), /*#__PURE__*/React.createElement(Column, {
     field: "quantity",
     header: "Cantidad",
     headerStyle: {
-      width: '100px'
+      width: "100px"
     },
     body: rowData => /*#__PURE__*/React.createElement(Badge, {
       value: rowData.quantity,
@@ -269,13 +277,13 @@ const PreviewDoneStep = ({
     className: "text-muted"
   }, "Subtotal:"), /*#__PURE__*/React.createElement("span", {
     className: "fw-bold"
-  }, formatCurrency(total))), /*#__PURE__*/React.createElement("div", {
+  }, formatCurrency(copayment))), /*#__PURE__*/React.createElement("div", {
     className: "d-flex justify-content-between align-items-center mb-3"
   }, /*#__PURE__*/React.createElement("span", {
     className: "text-muted"
   }, "Total a Pagar:"), /*#__PURE__*/React.createElement("span", {
     className: "fw-bold"
-  }, formatCurrency(total))), /*#__PURE__*/React.createElement("div", {
+  }, formatCurrency(copayment))), /*#__PURE__*/React.createElement("div", {
     className: "d-flex justify-content-between align-items-center mb-3"
   }, /*#__PURE__*/React.createElement("span", {
     className: "text-muted"
@@ -285,15 +293,15 @@ const PreviewDoneStep = ({
     className: "d-flex justify-content-between align-items-center mb-3"
   }, /*#__PURE__*/React.createElement("span", {
     className: "text-muted"
-  }, balance > 0 ? 'Saldo Pendiente:' : 'Cambio a Devolver:'), /*#__PURE__*/React.createElement("span", {
-    className: `fw-bold ${balance > 0 ? 'text-danger' : 'text-success'}`
+  }, balance > 0 ? "Saldo Pendiente:" : "Cambio a Devolver:"), /*#__PURE__*/React.createElement("span", {
+    className: `fw-bold ${balance > 0 ? "text-danger" : "text-success"}`
   }, formatCurrency(Math.abs(balance)))), /*#__PURE__*/React.createElement(Divider, null), /*#__PURE__*/React.createElement("div", {
     className: "d-flex justify-content-between align-items-center pt-2"
   }, /*#__PURE__*/React.createElement("span", {
     className: "h5 mb-0"
   }, "Total Factura:"), /*#__PURE__*/React.createElement("span", {
     className: "h4 mb-0 text-primary"
-  }, formatCurrency(total)))))))), /*#__PURE__*/React.createElement("div", {
+  }, formatCurrency(copayment)))))))), /*#__PURE__*/React.createElement("div", {
     className: "col-12"
   }, /*#__PURE__*/React.createElement("div", {
     className: "d-flex justify-content-between pt-4"

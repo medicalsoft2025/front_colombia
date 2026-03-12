@@ -14,6 +14,6 @@ export const documentTypes = [{
   label: "Tarjeta de Identidad",
   value: "TI"
 }, {
-  label: "RNC",
+  label: "Registro Nacional de Contratistas",
   value: "RNC"
 }];

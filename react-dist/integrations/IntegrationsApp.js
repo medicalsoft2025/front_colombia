@@ -6,18 +6,21 @@ import { IntegrationConfig } from "./forms/IntegrationConfig.js";
 import { useSystemConfigs } from "../system-configs/hooks/useSystemConfigs.js";
 import { useSystemConfigCreate } from "../system-configs/hooks/useSystemConfigCreate.js";
 import { Toast } from "primereact/toast";
-export const IntegrationsApp = () => {
+import { IframeIntegration } from "./forms/IframeIntegration.js";
+export const IntegrationsApp = ({
+  companyId = null
+}) => {
   const {
     systemConfigs: configs,
     refetch
-  } = useSystemConfigs();
+  } = useSystemConfigs(Number(companyId));
   const {
     createSystemConfig,
     toast
   } = useSystemConfigCreate();
   const handleSubmit = async data => {
     const systemConfigs = SystemConfigHelper.formatDataToSystemConfigArray(data);
-    await createSystemConfig(systemConfigs);
+    await createSystemConfig(systemConfigs, Number(companyId));
     refetch();
   };
   const tabs = [{
@@ -65,6 +68,11 @@ export const IntegrationsApp = () => {
       configFields: aiConfigFields,
       onSubmit: handleSubmit
     })
+  }, {
+    id: "iframe-tab",
+    label: "Iframe",
+    icon: "fa-solid fa-code",
+    content: /*#__PURE__*/React.createElement(IframeIntegration, null)
   }];
   return /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement(Toast, {
     ref: toast

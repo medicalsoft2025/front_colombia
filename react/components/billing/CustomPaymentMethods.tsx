@@ -93,7 +93,7 @@ export const PaymentMethodsSection: React.FC<PaymentMethodsSectionProps> = ({
       window["toast"]?.show({
         severity: "success",
         summary: "Éxito",
-        detail: `Valor ${amountToSet.toFixed(2)} DOP copiado al método de pago`,
+        detail: `Valor ${amountToSet.toFixed(2)} COP copiado al método de pago`,
         life: 3000,
       });
     } else {
@@ -118,7 +118,7 @@ export const PaymentMethodsSection: React.FC<PaymentMethodsSectionProps> = ({
       <div className="card-header bg-light d-flex justify-content-between align-items-center p-3">
         <h2 className="h5 mb-0">
           <i className="pi pi-credit-card me-2 text-primary"></i>
-          Métodos de Pago (DOP)
+          Métodos de Pago (COP)
         </h2>
         <Button
           icon="pi pi-plus"
@@ -156,11 +156,11 @@ export const PaymentMethodsSection: React.FC<PaymentMethodsSectionProps> = ({
                 <div className="d-flex gap-2 align-items-center flex-nowrap">
                   <InputNumber
                     value={payment.value === "" ? null : payment.value}
-                    placeholder="RD$ 0.00"
+                    placeholder="$ 0.00"
                     className="flex-grow-1"
                     mode="currency"
-                    currency="DOP"
-                    locale="es-DO"
+                    currency="COP"
+                    locale="es-CO"
                     min={0}
                     onValueChange={(e) =>
                       handlePaymentChange(
@@ -217,8 +217,8 @@ export const PaymentMethodsSection: React.FC<PaymentMethodsSectionProps> = ({
                     value={totalInvoice}
                     className="me-3"
                     mode="currency"
-                    currency="DOP"
-                    locale="es-DO"
+                    currency="COP"
+                    locale="es-CO"
                     minFractionDigits={2}
                     maxFractionDigits={3}
                     readOnly
@@ -232,8 +232,8 @@ export const PaymentMethodsSection: React.FC<PaymentMethodsSectionProps> = ({
                     value={totalPayments}
                     className="me-3"
                     mode="currency"
-                    currency="DOP"
-                    locale="es-DO"
+                    currency="COP"
+                    locale="es-CO"
                     minFractionDigits={2}
                     maxFractionDigits={3}
                     readOnly
@@ -245,7 +245,7 @@ export const PaymentMethodsSection: React.FC<PaymentMethodsSectionProps> = ({
                   {!coverageStatus ? (
                     <span className="text-danger">
                       <i className="pi pi-exclamation-triangle me-1"></i>
-                      Faltan {(totalInvoice - totalPayments).toFixed(2)} DOP
+                      Faltan {(totalInvoice - totalPayments).toFixed(2)} COP
                     </span>
                   ) : (
                     <span className="text-success">

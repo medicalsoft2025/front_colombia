@@ -88,7 +88,7 @@ export const BanksAccounting: React.FC = () => {
         return {
             debitos: totalDebitos,
             creditos: totalCreditos,
-            neto: totalCreditos - totalDebitos,
+            neto: totalDebitos - totalCreditos,
         };
     };
 
@@ -311,7 +311,7 @@ export const BanksAccounting: React.FC = () => {
                             const totales = calcularTotalCuenta(rowData);
                             return formatCurrency(totales.neto);
                         }}
-                        style={{ textAlign: "right" }}
+                        style={{ textAlign: "right", width: "160px" }}
                         sortable
                     />
                     <Column

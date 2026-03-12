@@ -48,6 +48,7 @@ import { AvailabilitySlotsDialog } from './components/AvailabilitySlotsDialog';
 import { SpecialtyAvailabilityForm } from './components/SpecialtyAvailabilityForm';
 import { AISchedulingForm } from './components/AISchedulingForm';
 import { AvailabilityData, SelectedSlot, AppointmentConfig } from './components/types';
+import { useQueryClient } from '@tanstack/react-query';
 
 export interface AppointmentFormInputs {
     uuid: string;
@@ -125,6 +126,8 @@ export const AppointmentFormModal = ({
     const [availabilityDialogVisible, setAvailabilityDialogVisible] = useState(false);
     const [foundAvailabilities, setFoundAvailabilities] = useState<AvailabilityData[]>([]);
     const [aiFilters, setAiFilters] = useState<any>(null);
+
+    const queryClient = useQueryClient();
 
     // Ref for preserving edit values during async fetches
     const pendingEditRef = useRef<{ doctorId?: string; date?: Date; time?: string; doctorObject?: any } | null>(null);
@@ -209,6 +212,7 @@ export const AppointmentFormModal = ({
         // So `newAppointments` don't need patient info inside if `isGroup` is false.
 
         setAppointments(prev => [...prev, ...newAppointments]);
+        clearAppointmentForm();
         showSuccessToast({ message: newAppointments.length + " citas agregadas correctamente" });
     };
 
@@ -427,6 +431,10 @@ export const AppointmentFormModal = ({
             if (onAppointmentCreated) {
                 onAppointmentCreated();
             }
+
+            queryClient.invalidateQueries({
+                queryKey: ['appointments']
+            });
 
             setAppointments([]); // Clear appointments list
             clearAppointmentForm(); // Clear inputs
@@ -1017,6 +1025,25 @@ export const AppointmentFormModal = ({
                 (option) => option.value >= currentTime
             );
         }
+
+        // Filtrar horas ya seleccionadas para este profesional en esta fecha
+        uniqueOptions = uniqueOptions.filter((option) => {
+            const isAlreadySelected = appointments.some((app) => {
+                // Si estamos editando, no filtrar la cita actual
+                if (editingId && app.uuid === editingId) return false;
+
+                const appDate = app.appointment_date?.toLocaleDateString('en-CA');
+                const appProfessionalId = app.assigned_user_assistant_availability_id || app.assigned_user_availability?.id;
+
+                return (
+                    appDate === dateString &&
+                    appProfessionalId === availabilityId &&
+                    app.appointment_time === option.value
+                );
+            });
+
+            return !isAlreadySelected;
+        });
 
         setAppointmentTimeOptions(uniqueOptions);
 
@@ -2338,6 +2365,8 @@ export const AppointmentFormModal = ({
                     externalCauses={externalCauses}
                     onFetchAvailability={handleRefetchAvailability}
                     specialties={allSpecialties || []}
+                    existingAppointments={appointments}
+                    editingId={editingId}
                 />
             </Dialog >
         </>

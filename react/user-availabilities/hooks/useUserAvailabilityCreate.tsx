@@ -1,12 +1,12 @@
 import { useState } from 'react'
-import { ErrorHandler } from '../../../services/errorHandler'
-import { SwalManager } from '../../../services/alertManagerImported'
 import { UserAvailabilityFormInputs } from '../components/UserAvailabilityForm'
 import { userAvailabilityService } from '../../../services/api'
 import { convertDateToHHMM } from '../../../services/utilidades'
+import { usePRToast } from '../../hooks/usePRToast'
 
 export const useUserAvailabilityCreate = () => {
     const [loading, setLoading] = useState<boolean>(false)
+    const { toast, showSuccessToast, showServerErrorsToast } = usePRToast();
 
     const createUserAvailability = async (userAvailabilityData: Omit<UserAvailabilityFormInputs, 'id'>) => {
         setLoading(true)
@@ -22,14 +22,14 @@ export const useUserAvailabilityCreate = () => {
                 }))
             }
             await userAvailabilityService.createForParent(userAvailabilityData.user_id, data)
-            SwalManager.success()
+            showSuccessToast({ message: "Se creó la disponibilidad exitosamente" })
         } catch (error) {
-            ErrorHandler.generic(error)
+            showServerErrorsToast(error)
             throw error
         } finally {
             setLoading(false)
         }
     }
 
-    return { loading, createUserAvailability }
+    return { loading, createUserAvailability, toast }
 }

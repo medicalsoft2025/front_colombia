@@ -1,7 +1,7 @@
 import { useState } from "react";
-import { taxesService } from "../../../../services/api/index.js";
 import { SwalManager } from "../../../../services/alertManagerImported.js";
 import { ErrorHandler } from "../../../../services/errorHandler.js";
+import { taxesService } from "../../../../services/api/index.js";
 export const useTaxesDeleteTable = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);

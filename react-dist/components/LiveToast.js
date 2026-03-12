@@ -1,6 +1,7 @@
 import React from 'react';
 const Toast = ({
-  show
+  show,
+  message
 }) => {
   return /*#__PURE__*/React.createElement("div", {
     className: "position-fixed bottom-0 end-0 p-3",
@@ -27,6 +28,6 @@ const Toast = ({
     className: "uil uil-times fs-7"
   }))), /*#__PURE__*/React.createElement("div", {
     className: "toast-body"
-  }, "Hello, world! This is a toast message.")));
+  }, message)));
 };
 export default Toast;

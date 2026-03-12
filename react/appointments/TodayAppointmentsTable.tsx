@@ -14,11 +14,14 @@ import { GenerateTicket } from "../tickets/GenerateTicket";
 import { AppointmentFormModal } from "./AppointmentFormModal";
 import { Menu } from "primereact/menu";
 import { getLocalTodayISODate } from "../../services/utilidades";
-import { appointmentService } from "../../services/api";
+import { appointmentService, copaymentRulesService } from "../../services/api";
 import { SwalManager } from "../../services/alertManagerImported";
 import { RescheduleAppointmentModalV2 } from "./RescheduleAppointmentModalV2";
 import { usePRToast } from "../hooks/usePRToast";
 import { Toast } from "primereact/toast";
+import { Accordion, AccordionTab } from "primereact/accordion";
+import { Dropdown } from "primereact/dropdown";
+import { useCompanies } from "../companies/hooks/useCompanies";
 
 interface TodayAppointmentsTableProps {
   onPrintItem?: (id: string, title: string) => void;
@@ -36,8 +39,12 @@ export const TodayAppointmentsTable: React.FC<
   const [showRescheduleModal, setShowRescheduleModal] = useState(false);
   const [selectedAppointment, setSelectedAppointment] =
     useState<AppointmentTableItem | null>(null);
-  const [selectedAppointmentId, setSelectedAppointmentId] = useState<string | null>(null);
+  const [selectedAppointmentId, setSelectedAppointmentId] = useState<
+    string | null
+  >(null);
   const { toast, showSuccessToast } = usePRToast();
+
+  const { companies } = useCompanies();
 
   const customFilters = () => {
     return {
@@ -56,16 +63,22 @@ export const TodayAppointmentsTable: React.FC<
     first,
     loading,
     perPage,
+    companyId,
+    setCompanyId,
   } = useFetchAppointments(customFilters);
 
   // useEffect(() => {
   //   console.log("appointments", appointments);
   // }, [appointments]);
 
-  const handleFacturarAdmision = (appointment: AppointmentTableItem) => {
+  const handleFacturarAdmision = async (appointment: AppointmentTableItem) => {
+    const copaymentRules = await copaymentRulesService.getRuleByAppointment(
+      Number(appointment.id),
+    );
     setSelectedAppointment({
       ...appointment,
-      patient: appointment.patient
+      patient: appointment.patient,
+      copaymentRules: copaymentRules || null,
     });
     setShowBillingDialog(true);
   };
@@ -85,7 +98,10 @@ export const TodayAppointmentsTable: React.FC<
   const handleCancelAppointment = async (appointment: AppointmentTableItem) => {
     SwalManager.confirmCancel(async () => {
       try {
-        await appointmentService.changeStatus(Number(appointment.id), "cancelled");
+        await appointmentService.changeStatus(
+          Number(appointment.id),
+          "cancelled",
+        );
         SwalManager.success({ text: "Cita cancelada exitosamente" });
         refresh();
       } catch (error) {
@@ -95,16 +111,14 @@ export const TodayAppointmentsTable: React.FC<
     });
   };
 
-
   const handleAppointmentCreated = () => {
     refresh();
     showSuccessToast({
       title: "Cita creada",
-      message: "La cita se ha creado exitosamente y se ha actualizado la tabla"
+      message: "La cita se ha creado exitosamente y se ha actualizado la tabla",
     });
     setShowAppointmentForm(false);
   };
-
 
   // Función para abrir modal de reagendar
   const openRescheduleAppointmentModal = (appointmentId: string) => {
@@ -131,6 +145,7 @@ export const TodayAppointmentsTable: React.FC<
       ),
     },
     { field: "patientDNI", header: "Número de documento" },
+    { field: "companyName", header: "Empresa" },
     { field: "date", header: "Fecha Consulta" },
     { field: "time", header: "Hora Consulta" },
     { field: "doctorName", header: "Profesional asignado" },
@@ -145,7 +160,9 @@ export const TodayAppointmentsTable: React.FC<
             <TableMenu
               onFacturarAdmision={() => handleFacturarAdmision(rowData)}
               onCancelAppointment={() => handleCancelAppointment(rowData)}
-              onRescheduleAppointment={() => openRescheduleAppointmentModal(rowData.id)}
+              onRescheduleAppointment={() =>
+                openRescheduleAppointmentModal(rowData.id)
+              }
               rowData={rowData}
             />
           </div>
@@ -161,8 +178,33 @@ export const TodayAppointmentsTable: React.FC<
         className="card text-body-emphasis rounded-3 p-3 w-100 w-md-100 w-lg-100 mx-auto"
         style={{ minHeight: "400px", marginTop: "-20px" }}
       >
+        <Accordion activeIndex={null}>
+          <AccordionTab header="Filtros">
+            <div className="row">
+              <div className="col-md-6 mb-2">
+                <label htmlFor="company" className="form-label">
+                  Empresa
+                </label>
+                <Dropdown
+                  id="company"
+                  value={companyId}
+                  options={companies}
+                  onChange={(e) => {
+                    setCompanyId(e.value);
+                  }}
+                  optionLabel="attributes.legal_name"
+                  optionValue="id"
+                  placeholder="Seleccione una empresa"
+                  filter
+                  showClear
+                  className="w-100 md:w-14rem"
+                />
+              </div>
+            </div>
+          </AccordionTab>
+        </Accordion>
         <div className="card-body h-100 w-100 d-flex flex-column">
-          <div className="d-flex justify-content-end gap-3 mb-2 botones-responsive" style={{ marginTop: "-30px" }}>
+          <div className="d-flex justify-content-end gap-3 mb-2">
             <Button
               label="Control de turnos"
               icon={<i className="fa-solid fa-clock me-2">‌</i>}
@@ -252,46 +294,52 @@ export const TodayAppointmentsTable: React.FC<
 };
 
 const TableMenu: React.FC<{
-  rowData: AppointmentTableItem,
-  onFacturarAdmision: () => void,
-  onCancelAppointment: () => void,
-  onRescheduleAppointment: () => void
-}> = ({ rowData, onFacturarAdmision, onCancelAppointment, onRescheduleAppointment }) => {
-
+  rowData: AppointmentTableItem;
+  onFacturarAdmision: () => void;
+  onCancelAppointment: () => void;
+  onRescheduleAppointment: () => void;
+}> = ({
+  rowData,
+  onFacturarAdmision,
+  onCancelAppointment,
+  onRescheduleAppointment,
+}) => {
   const menu = useRef<Menu>(null);
 
-  return <>
-    <Button
-      className="p-button-primaryflex items-center gap-2"
-      onClick={(e) => menu.current?.toggle(e)}
-      aria-controls={`popup_menu_${rowData.id}`}
-      aria-haspopup
-    >
-      Acciones
-      <i className="fa fa-cog ml-2"></i>
-    </Button>
-    <Menu
-      model={[
-        {
-          label: "Facturar admisión",
-          icon: <i className="fa-solid fa-receipt me-2"></i>,
-          command: () => onFacturarAdmision(),
-        },
-        {
-          label: "Cancelar",
-          icon: <i className="fa fa-times me-2"></i>,
-          command: () => onCancelAppointment(),
-        },
-        {
-          label: "Reagendar",
-          icon: <i className="fa fa-calendar me-2"></i>,
-          command: () => onRescheduleAppointment(),
-        }
-      ]}
-      popup
-      ref={menu}
-      id={`popup_menu_${rowData.id}`}
-      style={{ zIndex: 9999 }}
-    />
-  </>
+  return (
+    <>
+      <Button
+        className="p-button-primaryflex items-center gap-2"
+        onClick={(e) => menu.current?.toggle(e)}
+        aria-controls={`popup_menu_${rowData.id}`}
+        aria-haspopup
+      >
+        Acciones
+        <i className="fa fa-cog ml-2"></i>
+      </Button>
+      <Menu
+        model={[
+          {
+            label: "Facturar admisión",
+            icon: <i className="fa-solid fa-receipt me-2"></i>,
+            command: () => onFacturarAdmision(),
+          },
+          {
+            label: "Cancelar",
+            icon: <i className="fa fa-times me-2"></i>,
+            command: () => onCancelAppointment(),
+          },
+          {
+            label: "Reagendar",
+            icon: <i className="fa fa-calendar me-2"></i>,
+            command: () => onRescheduleAppointment(),
+          },
+        ]}
+        popup
+        ref={menu}
+        id={`popup_menu_${rowData.id}`}
+        style={{ zIndex: 9999 }}
+      />
+    </>
+  );
 };

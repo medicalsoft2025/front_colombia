@@ -17,7 +17,7 @@ export const SpecialtyAvailabilityForm = ({
   const {
     data: specialties
   } = useQuery({
-    queryKey: ['specialties'],
+    queryKey: ['user-specialties'],
     queryFn: () => userSpecialtyService.getAll().then(res => res.data || res),
     staleTime: 1000 * 60 * 60
   });

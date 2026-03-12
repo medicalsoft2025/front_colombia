@@ -7,7 +7,7 @@ import { Toast } from "primereact/toast";
 import PatientStep from "./steps/PatientStep.js";
 import ProductsPaymentStep from "./steps/ProductsPaymentStep.js";
 import PreviewDoneStep from "./steps/PreviewDoneStep.js";
-import { calculateTotal, validatePatientStep, validatePaymentStep, validateProductsStep } from "./utils/helpers.js";
+import { validatePatientStep, validatePaymentStep, validateProductsStep, calculateCopayment } from "./utils/helpers.js";
 import { useProductsToBeInvoiced } from "../../appointments/hooks/useProductsToBeInvoiced.js";
 import { formatDate, formatWhatsAppMessage, getIndicativeByCountry } from "../../../services/utilidades.js";
 import { useAdmissionCreate } from "../hooks/useAdmissionCreate.js";
@@ -164,7 +164,6 @@ const AdmissionBilling = ({
           minio_id: dataToFile?.id,
           webhook_url: "https://example.com/webhook"
         };
-        console.log("dataMessage", dataMessage);
         await sendMessage.current(dataMessage);
       } catch (error) {
         console.error("Error enviando mensaje por WhatsApp:", error);
@@ -276,7 +275,8 @@ const AdmissionBilling = ({
             ...initialFormState.billing,
             entity: patient.social_security?.entity?.name || ""
           },
-          products: initialProducts
+          products: initialProducts,
+          copaymentRules: appointmentData?.copaymentRules || null
         });
       }
     } else {
@@ -325,7 +325,11 @@ const AdmissionBilling = ({
       case 0:
         return validatePatientStep(formData.billing, toast);
       case 1:
-        return validateProductsStep(formData.products, toast) && validatePaymentStep(formData.payments, calculateTotal(formData.products, formData.billing.facturacionEntidad), toast);
+        const {
+          copayment,
+          isCopayment
+        } = calculateCopayment(formData.products, formData.copaymentRules, formData.billing.facturacionEntidad);
+        return validateProductsStep(formData.products, toast) && validatePaymentStep(formData.payments, copayment, toast);
       default:
         return true;
     }

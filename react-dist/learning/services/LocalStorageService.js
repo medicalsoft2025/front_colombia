@@ -7,10 +7,11 @@ export class LocalStorageService {
     return new Promise(resolve => {
       setTimeout(() => {
         const items = JSON.parse(localStorage.getItem(this.localStorageKey) || '[]');
-        items.push({
+        const newItem = {
           id: generateUUID(),
           ...data
-        });
+        };
+        items.push(newItem);
         localStorage.setItem(this.localStorageKey, JSON.stringify(items));
         resolve(items);
       }, 1000);

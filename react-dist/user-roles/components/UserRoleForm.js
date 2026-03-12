@@ -7,6 +7,9 @@ import { menuService, permissionService } from "../../../services/api/index.js";
 import { PrimeReactProvider } from "primereact/api";
 import { ButtonGroup } from "primereact/buttongroup";
 import { Button } from "primereact/button";
+import { useBranchesForSelect } from "../../branches/hooks/useBranchesForSelect.js";
+import { useCompanies } from "../../companies/hooks/useCompanies.js";
+import { MultiSelect } from "primereact/multiselect";
 const roleGroupOptions = [{
   label: "Médico",
   value: "DOCTOR"
@@ -151,6 +154,12 @@ export const UserRoleForm = ({
       errors
     }
   } = useForm();
+  const {
+    branches
+  } = useBranchesForSelect();
+  const {
+    companies
+  } = useCompanies();
   const onSubmit = data => {
     const submissionData = {
       ...data,
@@ -210,7 +219,9 @@ export const UserRoleForm = ({
         if (initialData) {
           reset({
             name: initialData.name,
-            group: initialData.group
+            group: initialData.group,
+            branches: initialData.branches,
+            companies: initialData.companies
           });
           setSelectedPermissions(initialData.permissions || []);
         } else {
@@ -272,7 +283,6 @@ export const UserRoleForm = ({
   }
   return /*#__PURE__*/React.createElement(PrimeReactProvider, {
     value: {
-      appendTo: "self",
       zIndex: {
         overlay: 100000
       }
@@ -317,6 +327,44 @@ export const UserRoleForm = ({
   }, errors.group.message)), isEditMode ? /*#__PURE__*/React.createElement("div", {
     className: "row"
   }, /*#__PURE__*/React.createElement("div", {
+    className: "form-group mb-3"
+  }, /*#__PURE__*/React.createElement("label", {
+    className: "form-label",
+    htmlFor: "company"
+  }, "Empresas"), /*#__PURE__*/React.createElement(Controller, {
+    name: "companies",
+    control: control,
+    render: ({
+      field
+    }) => /*#__PURE__*/React.createElement(MultiSelect, _extends({}, field, {
+      options: companies,
+      placeholder: "Seleccione una o m\xE1s empresas",
+      optionLabel: "attributes.legal_name",
+      optionValue: "id",
+      className: `w-100 ${errors.companies ? "is-invalid" : ""}`
+    }))
+  }), errors.companies && /*#__PURE__*/React.createElement("div", {
+    className: "invalid-feedback"
+  }, errors.companies.message)), /*#__PURE__*/React.createElement("div", {
+    className: "form-group mb-3"
+  }, /*#__PURE__*/React.createElement("label", {
+    className: "form-label",
+    htmlFor: "branch"
+  }, "Sucursales"), /*#__PURE__*/React.createElement(Controller, {
+    name: "branches",
+    control: control,
+    render: ({
+      field
+    }) => /*#__PURE__*/React.createElement(MultiSelect, _extends({}, field, {
+      options: branches,
+      placeholder: "Seleccione una o m\xE1s sucursales",
+      optionLabel: "label",
+      optionValue: "value",
+      className: `w-100 ${errors.branches ? "is-invalid" : ""}`
+    }))
+  }), errors.branches && /*#__PURE__*/React.createElement("div", {
+    className: "invalid-feedback"
+  }, errors.branches.message)), /*#__PURE__*/React.createElement("div", {
     className: "col-6"
   }, /*#__PURE__*/React.createElement("div", {
     className: "card"

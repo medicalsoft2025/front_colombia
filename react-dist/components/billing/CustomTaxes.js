@@ -81,7 +81,7 @@ export const CustomTaxes = ({
     className: "h5 mb-0"
   }, /*#__PURE__*/React.createElement("i", {
     className: "pi pi-chart-line me-2 text-primary"
-  }), "Impuestos Adicionales (DOP)"), /*#__PURE__*/React.createElement(Button, {
+  }), "Impuestos Adicionales (COP)"), /*#__PURE__*/React.createElement(Button, {
     type: "button",
     label: "Agregar impuesto",
     className: "p-btn-primary",
@@ -100,8 +100,8 @@ export const CustomTaxes = ({
   }, /*#__PURE__*/React.createElement("strong", null, "Base para impuestos:"), " ", /*#__PURE__*/React.createElement(InputNumber, {
     value: calculateBaseAmount(),
     mode: "currency",
-    currency: "DOP",
-    locale: "es-DO",
+    currency: "COP",
+    locale: "es-CO",
     readOnly: true,
     className: "ml-2"
   }), /*#__PURE__*/React.createElement("small", {
@@ -134,7 +134,7 @@ export const CustomTaxes = ({
     min: 0,
     max: 100,
     suffix: "%",
-    locale: "es-DO",
+    locale: "es-CO",
     className: "w-100",
     onValueChange: e => handleTaxChange(taxItem.id, "percentage", e.value),
     readOnly: true
@@ -145,8 +145,8 @@ export const CustomTaxes = ({
   }, "Valor"), /*#__PURE__*/React.createElement(InputNumber, {
     value: taxItem.value,
     mode: "currency",
-    currency: "DOP",
-    locale: "es-DO",
+    currency: "COP",
+    locale: "es-CO",
     className: "w-100",
     readOnly: true
   })), /*#__PURE__*/React.createElement("div", {
@@ -167,8 +167,8 @@ export const CustomTaxes = ({
   }, "Total impuestos adicionales:"), /*#__PURE__*/React.createElement(InputNumber, {
     value: taxes.reduce((sum, t) => sum + t.value, 0),
     mode: "currency",
-    currency: "DOP",
-    locale: "es-DO",
+    currency: "COP",
+    locale: "es-CO",
     className: "font-weight-bold",
     readOnly: true
   }))))));

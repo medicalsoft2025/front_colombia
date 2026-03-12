@@ -1,23 +1,20 @@
-export function filterMenusByRole(user, allMenus) {
-  const bypassRoles = [9, 13, 14];
-  if (bypassRoles.includes(user?.role?.id)) {
-    return allMenus;
-  }
-  const allowedKeys = user?.role?.menus?.map(m => m.key) || [];
-  return allMenus.filter(menu => allowedKeys.includes(menu.key_));
-}
-export function mapMenusToMenubar(menus) {
-  return menus.map(menu => {
-    const parts = menu.name.split('|').map(s => s.trim());
-    const label = parts[parts.length - 1];
-    const item = {
-      label,
-      url: menu.route,
-      icon: 'fa-solid fa-folder'
-    };
-    if (menu.children && menu.children.length > 0) {
-      item.items = mapMenusToMenubar(menu.children);
+export function filterMenuItems(items, allowedKeys, bypass = false) {
+  return items.filter(item => {
+    if (bypass) return true;
+    if (item.url) {
+      return allowedKeys.includes(item.url);
     }
-    return item;
-  });
+    return true;
+  }).map(item => {
+    const newItem = {
+      ...item
+    };
+    if (item.items) {
+      newItem.items = filterMenuItems(item.items, allowedKeys, bypass);
+      if (newItem.items.length === 0 && !item.url) {
+        return null;
+      }
+    }
+    return newItem;
+  }).filter(Boolean);
 }

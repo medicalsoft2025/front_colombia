@@ -1,5 +1,6 @@
 function _extends() { return _extends = Object.assign ? Object.assign.bind() : function (n) { for (var e = 1; e < arguments.length; e++) { var t = arguments[e]; for (var r in t) ({}).hasOwnProperty.call(t, r) && (n[r] = t[r]); } return n; }, _extends.apply(null, arguments); }
 import React, { useState, useRef, useEffect } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import { Button } from "primereact/button";
 import { Stepper } from "primereact/stepper";
 import { Dialog } from "primereact/dialog";
@@ -12,19 +13,21 @@ import { Column } from "primereact/column";
 import { InputSwitch } from "primereact/inputswitch";
 import { Controller, useForm } from "react-hook-form";
 import { classNames } from "primereact/utils";
-import { countryService, departmentService, cityService, entityService, patientService } from "../../../../services/api/index.js";
+import { countryService, departmentService, cityService, entityService, patientService, resourcesAdminService } from "../../../../services/api/index.js";
 import { ErrorHandler } from "../../../../services/errorHandler.js";
 import { dataURItoBlob, obtenerUltimaParteUrl } from "../../../../services/utilidades.js";
 import { SwalManager } from "../../../../services/alertManagerImported.js";
 import { StepperPanel } from "primereact/stepperpanel";
 import CompanionModal from "./CompanionFormModal.js";
 import { Toast } from "primereact/toast";
+import { disabilityClassificationOptions, ethnicityOptions } from "../../consts/index.js";
 const PatientFormModal = ({
   visible,
   onHide,
   onSuccess,
   patientData
 }) => {
+  const queryClient = useQueryClient();
   const stepperRef = useRef(null);
   const [hasCompanion, setHasCompanion] = useState(false);
   const [companions, setCompanions] = useState([]);
@@ -44,6 +47,8 @@ const PatientFormModal = ({
   const [isLoading, setIsLoading] = useState(false);
   const videoRef = useRef(null);
   const fileInputRef = useRef(null);
+  const [documentTypes, setDocumentTypes] = useState([]);
+  const [userTypes, setUserTypes] = useState([]);
   const {
     control,
     handleSubmit,
@@ -73,33 +78,24 @@ const PatientFormModal = ({
         department_id: "",
         city_id: "",
         address: "",
-        nationality: ""
+        nationality: "",
+        residence_zone: "",
+        disability_classification: ""
       },
       social_security: {
         entity_id: "",
-        affiliate_type: ""
+        affiliate_type: "",
+        category: "",
+        level: ""
       }
     }
   });
-  const documentTypeOptions = [{
-    label: "CI - Cédula de Identidad",
-    value: "CI"
-  }, {
-    label: "CR - Carnet de Residencia",
-    value: "CR"
-  }, {
-    label: "CM - Carnet de Menor de Edad",
-    value: "CM"
-  }, {
-    label: "AN - Acta de Nacimiento",
-    value: "AN"
-  }, {
-    label: "LC - Licencia de Conducción",
-    value: "LC"
-  }, {
-    label: "Otros",
-    value: "OT"
-  }];
+  async function loadResources() {
+    const documentTypesData = await resourcesAdminService.getHealthDocumentTypes();
+    const userTypesData = await resourcesAdminService.getHealthUserTypes();
+    setDocumentTypes(documentTypesData);
+    setUserTypes(userTypesData);
+  }
   const genderOptions = [{
     label: "Masculino",
     value: "MALE"
@@ -125,22 +121,6 @@ const PatientFormModal = ({
   }, {
     label: "Viudo",
     value: "WIDOWED"
-  }];
-  const ethnicityOptions = [{
-    label: "Afrodesendiente",
-    value: "Afrodesendiente"
-  }, {
-    label: "Indigena",
-    value: "Indigena"
-  }, {
-    label: "Caucásica",
-    value: "Caucásica"
-  }, {
-    label: "Asiática",
-    value: "Asiática"
-  }, {
-    label: "Mestiza",
-    value: "Mestiza"
   }];
   const bloodTypeOptions = [{
     label: "No Refiere",
@@ -170,18 +150,22 @@ const PatientFormModal = ({
     label: "AB Negativo",
     value: "AB_NEGATIVE"
   }];
-  const regimeOptions = [{
-    label: "Subsidiado",
-    value: "subsidiado"
+  const categoryOptions = [{
+    label: "A",
+    value: "A"
   }, {
-    label: "Contributivo",
-    value: "contributivo"
+    label: "B",
+    value: "B"
   }, {
-    label: "Pensionado",
-    value: "pensionado"
+    label: "C",
+    value: "C"
+  }];
+  const levelsOptions = [{
+    label: "1",
+    value: "1"
   }, {
-    label: "Privado",
-    value: "privado"
+    label: "2",
+    value: "2"
   }];
   const stepValidations = {
     0: ["patient.document_type", "patient.document_number", "patient.first_name", "patient.last_name", "patient.gender", "patient.date_of_birth", "patient.whatsapp", "patient.email", "patient.blood_type"],
@@ -191,6 +175,7 @@ const PatientFormModal = ({
   const toast = useRef(null);
   useEffect(() => {
     loadCountries();
+    loadResources();
     if (patientData) {
       setValue("patient.document_type", patientData.document_type);
       setValue("patient.document_number", patientData.document_number);
@@ -539,12 +524,17 @@ const PatientFormModal = ({
           department_id: "",
           city_id: "",
           address: "",
-          nationality: ""
+          nationality: "",
+          country_code: "",
+          residence_zone: "",
+          disability_classification: ""
         },
         social_security: {
           entity_id: "",
           arl: "",
-          afp: ""
+          afp: "",
+          category: "",
+          level: ""
         },
         companions: []
       };
@@ -568,6 +558,13 @@ const PatientFormModal = ({
           formData.social_security[`${key}`] = String(value);
         }
       });
+      if (formData.social_security.affiliate_type === "1" || formData.social_security.affiliate_type === "2" || formData.social_security.affiliate_type === "3") {
+        formData.social_security.level = "";
+      }
+      if (formData.social_security.affiliate_type === "4") {
+        formData.social_security.category = "";
+      }
+      formData.patient.country_code = "CO";
       companions.forEach(companion => {
         const newCompanion = {
           first_name: companion.first_name?.toUpperCase() || "",
@@ -620,6 +617,9 @@ const PatientFormModal = ({
           window.location.reload();
         }, 2000);
       }
+      queryClient.invalidateQueries({
+        queryKey: ["patients"]
+      });
       onHide();
       if (onSuccess) onSuccess();
     } catch (error) {
@@ -704,9 +704,9 @@ const PatientFormModal = ({
         className: "form-label"
       }, "Tipo de documento *"), /*#__PURE__*/React.createElement(Dropdown, {
         appendTo: "self",
-        options: documentTypeOptions,
-        optionLabel: "label",
-        optionValue: "value",
+        options: documentTypes,
+        optionLabel: "name",
+        optionValue: "id",
         placeholder: "Seleccione",
         className: classNames("w-100", {
           "is-invalid": fieldState.error
@@ -860,6 +860,22 @@ const PatientFormModal = ({
       className: "form-label"
     }, "Etnia"), /*#__PURE__*/React.createElement(Dropdown, {
       options: ethnicityOptions,
+      placeholder: "Seleccione",
+      className: "w-100 h-50",
+      value: field.value,
+      onChange: e => field.onChange(e.value),
+      appendTo: "self",
+      scrollHeight: "140px"
+    }))
+  }), /*#__PURE__*/React.createElement(Controller, {
+    name: "patient.disability_classification",
+    control: control,
+    render: ({
+      field
+    }) => /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("label", {
+      className: "form-label"
+    }, "Clasificaci\xF3n de Discapacidad"), /*#__PURE__*/React.createElement(Dropdown, {
+      options: disabilityClassificationOptions,
       placeholder: "Seleccione",
       className: "w-100 h-50",
       value: field.value,
@@ -1168,7 +1184,43 @@ const PatientFormModal = ({
       filterPlaceholder: "Buscar aseguradora..."
     }), getFormErrorMessage(field.name))
   })), /*#__PURE__*/React.createElement("div", {
-    className: "col-md-12"
+    className: "col-md-6"
+  }, /*#__PURE__*/React.createElement(Controller, {
+    name: "patient.residence_zone",
+    control: control,
+    rules: {
+      required: "La zona residencial es requerida"
+    },
+    render: ({
+      field,
+      fieldState
+    }) => /*#__PURE__*/React.createElement("div", {
+      className: "mb-3"
+    }, /*#__PURE__*/React.createElement("label", {
+      className: "form-label"
+    }, "Zona residencial *"), /*#__PURE__*/React.createElement(Dropdown, {
+      appendTo: "self",
+      options: [{
+        label: "Urbana",
+        value: "01"
+      }, {
+        label: "Rural",
+        value: "02"
+      }],
+      placeholder: "Seleccione",
+      className: classNames("w-100", {
+        "is-invalid": fieldState.error
+      }),
+      value: field.value,
+      onChange: e => field.onChange(e.value),
+      filter: true,
+      filterBy: "label",
+      showClear: true,
+      resetFilterOnHide: true,
+      filterPlaceholder: "Buscar aseguradora..."
+    }), getFormErrorMessage(field.name))
+  })), /*#__PURE__*/React.createElement("div", {
+    className: "col-md-6"
   }, /*#__PURE__*/React.createElement(Controller, {
     name: "patient.address",
     control: control,
@@ -1332,7 +1384,63 @@ const PatientFormModal = ({
       className: "form-label"
     }, "ARS Y TIPO DE REGIMEN *"), /*#__PURE__*/React.createElement(Dropdown, {
       appendTo: "self",
-      options: regimeOptions,
+      options: userTypes,
+      optionLabel: "name",
+      optionValue: "id",
+      placeholder: "Seleccione",
+      className: classNames("w-100", {
+        "is-invalid": fieldState.error
+      }),
+      value: field.value,
+      onChange: e => field.onChange(e.value)
+    }), getFormErrorMessage(field.name))
+  })), (watch("social_security.affiliate_type") == "1" || watch("social_security.affiliate_type") == "2" || watch("social_security.affiliate_type") == "3") && /*#__PURE__*/React.createElement("div", {
+    className: "col-md-12"
+  }, /*#__PURE__*/React.createElement(Controller, {
+    name: "social_security.category",
+    control: control,
+    rules: {
+      required: watch("social_security.affiliate_type") == "1" || watch("social_security.affiliate_type") == "2" || watch("social_security.affiliate_type") == "3" ? "Categoria es requerida" : ""
+    },
+    render: ({
+      field,
+      fieldState
+    }) => /*#__PURE__*/React.createElement("div", {
+      className: "mb-3"
+    }, /*#__PURE__*/React.createElement("label", {
+      className: "form-label"
+    }, "Categoria *"), /*#__PURE__*/React.createElement(Dropdown, {
+      appendTo: "self",
+      options: categoryOptions,
+      optionLabel: "label",
+      optionValue: "value",
+      placeholder: "Seleccione",
+      className: classNames("w-100", {
+        "is-invalid": fieldState.error
+      }),
+      value: field.value,
+      onChange: e => field.onChange(e.value)
+    }), getFormErrorMessage(field.name))
+  })), watch("social_security.affiliate_type") == "4" && /*#__PURE__*/React.createElement("div", {
+    className: "col-md-12"
+  }, /*#__PURE__*/React.createElement(Controller, {
+    name: "social_security.level",
+    control: control,
+    rules: {
+      required: watch("social_security.affiliate_type") == "4" ? "Nivel es requerido" : ""
+    },
+    render: ({
+      field,
+      fieldState
+    }) => /*#__PURE__*/React.createElement("div", {
+      className: "mb-3"
+    }, /*#__PURE__*/React.createElement("label", {
+      className: "form-label"
+    }, "Nivel *"), /*#__PURE__*/React.createElement(Dropdown, {
+      appendTo: "self",
+      options: levelsOptions,
+      optionLabel: "label",
+      optionValue: "value",
       placeholder: "Seleccione",
       className: classNames("w-100", {
         "is-invalid": fieldState.error

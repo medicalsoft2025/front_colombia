@@ -58,7 +58,11 @@ export const FormAdvanceCopy = ({
     className: "d-flex justify-content-between"
   }, /*#__PURE__*/React.createElement("div", null, "Total de la factura:"), /*#__PURE__*/React.createElement("div", null, invoiceTotal)), /*#__PURE__*/React.createElement("div", {
     className: "d-flex justify-content-between"
-  }, /*#__PURE__*/React.createElement("div", null, "Anticipo disponible:"), /*#__PURE__*/React.createElement("div", null, advances?.original?.advance_balance))), /*#__PURE__*/React.createElement(Button, {
+  }, /*#__PURE__*/React.createElement("div", null, "Anticipo disponible:"), /*#__PURE__*/React.createElement("div", null, new Intl.NumberFormat('es-DO', {
+    style: 'currency',
+    currency: 'DOP',
+    minimumFractionDigits: 2
+  }).format(advances?.original?.advance_balance)))), /*#__PURE__*/React.createElement(Button, {
     type: "button",
     label: "Aplicar",
     className: "mt-2",

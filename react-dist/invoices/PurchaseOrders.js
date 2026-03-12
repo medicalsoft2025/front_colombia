@@ -233,9 +233,9 @@ export const PurchaseOrders = ({
 
   // Formatear número para montos en pesos dominicanos (DOP)
   const formatCurrency = value => {
-    return value?.toLocaleString("es-DO", {
+    return value?.toLocaleString("es-CO", {
       style: "currency",
-      currency: "DOP",
+      currency: "COP",
       minimumFractionDigits: 2,
       maximumFractionDigits: 2
     }) || "$0.00";

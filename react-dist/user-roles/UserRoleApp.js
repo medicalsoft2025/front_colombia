@@ -56,6 +56,8 @@ export const UserRoleApp = ({
         await updateUserRole(userRole.id, data);
         const payload = {
           "group": data.group,
+          "branches": data.branches,
+          "companies": data.companies,
           "is_active": true
         };
         await userRolesService.updateGroupRole(userRole.id, payload);
@@ -64,6 +66,8 @@ export const UserRoleApp = ({
         const createPayload = {
           "name": data.name,
           "group": data.group,
+          "branches": data.branches,
+          "companies": data.companies,
           "is_active": true
         };
         await userRolesService.createRoleUserMenu(createPayload);
@@ -104,7 +108,9 @@ export const UserRoleApp = ({
           is_active: item.is_active,
           pivot: item.pivot
         })) || [],
-        menuIds: userRole.menus?.map(menu => menu.id) || []
+        menuIds: userRole.menus?.map(menu => menu.id) || [],
+        branches: userRole.allowed_branches?.map(branch => branch.id.toString()) || [],
+        companies: userRole.allowed_companies?.map(company => company.id) || []
       });
     } else {
       setInitialData(undefined);

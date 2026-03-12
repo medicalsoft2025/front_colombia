@@ -7,7 +7,9 @@ import { Button } from 'primereact/button';
 import { Card } from 'primereact/card';
 import { Toast } from 'primereact/toast';
 import { useCompanyCommunication } from "../hooks/useCompanyCommunication.js";
-const SmtpConfigForm = () => {
+const SmtpConfigForm = ({
+  companyId
+}) => {
   const toast = useRef(null);
   const {
     control,
@@ -33,7 +35,7 @@ const SmtpConfigForm = () => {
     isSubmitting,
     submitError,
     saveCommunication
-  } = useCompanyCommunication();
+  } = useCompanyCommunication(companyId);
   const securityOptions = [{
     label: 'TLS',
     value: 'tls'
@@ -207,6 +209,7 @@ const SmtpConfigForm = () => {
       type: "number",
       className: `form-control ${errors.port ? 'is-invalid' : ''}`,
       placeholder: getDefaultPort(selectedSecurity).toString(),
+      value: String(field.value),
       onChange: e => field.onChange(parseInt(e.target.value) || 0)
     }))
   }), errors.port && /*#__PURE__*/React.createElement("div", {

@@ -8,9 +8,10 @@ import { ProductInventoryForm } from "./ProductInventoryForm.js";
 import { useProductUpdate } from "../products/hooks/useProductUpdate.js";
 import { Button } from "primereact/button";
 import { Badge } from "primereact/badge";
+import TableActionsWrapper from "../components/table-actions/TableActionsWrapper.js";
+import { EditTableAction } from "../components/table-actions/EditTableAction.js";
 import { useProductInventoryOnlyDeposits } from "./hooks/useProductInventoryOnlyDeposits.js";
 import { useProductInventoryFormat } from "../documents-generation/hooks/useProductInventoryFormat.js";
-import { CustomPRTableMenu } from "../components/CustomPRTableMenu.js";
 export const ProductInventoryApp = ({
   type
 }) => {
@@ -86,27 +87,23 @@ export const ProductInventoryApp = ({
       body: rowData => `${rowData.minimum_stock || "--"} / ${rowData.maximum_stock || "--"}`
     }), /*#__PURE__*/React.createElement(Column, {
       header: "Acciones",
-      body: rowData => /*#__PURE__*/React.createElement("div", {
-        className: "d-flex justify-content-center"
-      }, /*#__PURE__*/React.createElement(CustomPRTableMenu, {
-        menuItems: [{
-          icon: /*#__PURE__*/React.createElement("i", {
-            className: "fas fa-pencil-alt me-2"
-          }),
-          label: "Editar",
-          command: () => openFormModal(rowData)
-        }, {
-          icon: /*#__PURE__*/React.createElement("i", {
-            className: "fa-solid fa-eye me-2"
-          }),
-          label: "Ver más",
-          command: () => {
-            setSelectedProduct(rowData);
-            setShowDetailModal(true);
-          }
-        }],
-        rowData: rowData
-      }))
+      body: rowData => /*#__PURE__*/React.createElement(TableActionsWrapper, null, /*#__PURE__*/React.createElement(EditTableAction, {
+        onTrigger: () => openFormModal(rowData)
+      }), /*#__PURE__*/React.createElement("li", null, /*#__PURE__*/React.createElement("a", {
+        className: "dropdown-item",
+        href: "#",
+        onClick: () => {
+          setSelectedProduct(rowData);
+          setShowDetailModal(true);
+        }
+      }, /*#__PURE__*/React.createElement("div", {
+        className: "d-flex gap-2 align-items-center"
+      }, /*#__PURE__*/React.createElement("i", {
+        className: "fa-solid fa-eye",
+        style: {
+          width: "20px"
+        }
+      }), /*#__PURE__*/React.createElement("span", null, "Ver m\xE1s")))))
     })));
   };
 
@@ -151,8 +148,7 @@ export const ProductInventoryApp = ({
     icon: /*#__PURE__*/React.createElement("i", {
       className: "fa-solid fa-file-pdf"
     }),
-    onClick: () => exportToPDF(),
-    className: "mb-3"
+    onClick: () => exportToPDF()
   })), /*#__PURE__*/React.createElement("div", {
     className: "col-12 col-md-12"
   }, /*#__PURE__*/React.createElement(DataTable, {

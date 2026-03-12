@@ -55,12 +55,13 @@ export const AccountsCollectPay = () => {
     suppliers: selectedSupplierIds.length ? selectedSupplierIds : undefined,
     createdAt: formatDateRange(selectedDateRange),
     dueDate: formatDateRange(selectedDueDateRange),
-    days_to_pay: selectedDaysToPay ?? undefined
+    daysToPay: selectedDaysToPay ?? undefined
   };
   const {
     invoices: accountsReceivable,
     loading: loadingReceivable,
-    totalRecords: totalReceivable
+    totalRecords: totalReceivable,
+    fetchInvoices: fetchInvoicesReceivable
   } = useAccountsCollectPay({
     ...commonFilters,
     type: "sale,entity",
@@ -69,7 +70,8 @@ export const AccountsCollectPay = () => {
   const {
     invoices: accountsPayable,
     loading: loadingPayable,
-    totalRecords: totalPayable
+    totalRecords: totalPayable,
+    fetchInvoices: fetchInvoicesPayable
   } = useAccountsCollectPay({
     ...commonFilters,
     type: "purchase",
@@ -112,7 +114,7 @@ export const AccountsCollectPay = () => {
     const amount = typeof cantidad === "string" ? parseFloat(cantidad) : cantidad;
     return new Intl.NumberFormat("es-ES", {
       style: "currency",
-      currency: "DOP",
+      currency: "COP",
       minimumFractionDigits: 2,
       maximumFractionDigits: 2
     }).format(amount);
@@ -178,6 +180,7 @@ export const AccountsCollectPay = () => {
   function handleGenerarRecibo() {
     setShowReceiptModal(false);
     setInvoiceToReceipt(null);
+    window.location.reload();
   }
   function downloadPdf(item) {
     const today = new Date();
@@ -371,7 +374,7 @@ export const AccountsCollectPay = () => {
       className: "text-muted d-block"
     }, "Fecha Vencimiento"), /*#__PURE__*/React.createElement("span", {
       className: status === "overdue" ? "text-danger fw-bold" : ""
-    }, obtenerFechaFormateada(item.due_date))), /*#__PURE__*/React.createElement("div", {
+    }, item.due_date)), /*#__PURE__*/React.createElement("div", {
       className: "text-end"
     }, /*#__PURE__*/React.createElement("small", {
       className: "text-muted d-block"
@@ -641,6 +644,8 @@ export const AccountsCollectPay = () => {
     onHide: () => {
       setShowReceiptModal(false);
       setInvoiceToReceipt(null);
+      fetchInvoicesPayable();
+      fetchInvoicesReceivable();
     },
     onSubmit: handleGenerarRecibo,
     onSaveAndDownload: handleGenerarRecibo,

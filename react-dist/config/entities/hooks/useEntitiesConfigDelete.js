@@ -8,15 +8,17 @@ export const useEntitiesConfigDelete = () => {
   const deleteEntity = async id => {
     setLoading(true);
     setError(null);
+    let confirmed = false;
     try {
-      await entitiesService.deleteEntity(id);
-      SwalManager.success("Impuesto eliminado correctamente");
-      return true;
-    } catch (error) {
-      console.error("Error deleting tax:", error);
-      ErrorHandler.getErrorMessage(error);
-      SwalManager.error("Error al eliminar el impuesto");
-      throw error;
+      await SwalManager.confirmDelete(async () => {
+        setLoading(true);
+        await entitiesService.deleteEntity(id);
+        confirmed = true;
+      });
+      return confirmed;
+    } catch (err) {
+      ErrorHandler.generic(err);
+      return false;
     } finally {
       setLoading(false);
     }

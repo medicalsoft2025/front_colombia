@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import Swal from "sweetalert2";
 import { authService, userService } from "../../../services/api/index.js";
 import { useConfigurationProgress } from "../../config/general-configuration/hooks/useConfigurationProgress.js";
-import { encryptAES, getJWTPayloadByToken } from "../../../services/utilidades.js";
+import { encryptAES, getJWTPayloadByToken, getUserCountryUrlPrefix } from "../../../services/utilidades.js";
 export const useAuth = () => {
   const [loading, setLoading] = useState(false);
   const [otpStep, setOtpStep] = useState(false);
@@ -24,11 +24,14 @@ export const useAuth = () => {
     loadProgress();
   }, []);
   const redirectToDashboard = () => {
-    console.log("currentConfig", currentConfig);
+    const countryPrefix = getUserCountryUrlPrefix();
+    const dasboardUrl = `${countryPrefix}/Dashboard`;
+    const configUrl = `${countryPrefix}/configuracionesGenerales`;
     if (currentConfig?.config_tenants?.finished_configuration) {
-      window.location.href = "/Dashboard";
+      window.location.href = dasboardUrl;
     } else {
-      window.location.href = "/configuracionesGenerales";
+      // window.location.href = configUrl;
+      window.location.href = dasboardUrl;
     }
   };
   const saveUserData = userInfo => {

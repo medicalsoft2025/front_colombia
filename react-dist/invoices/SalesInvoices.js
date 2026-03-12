@@ -142,6 +142,7 @@ export const SalesInvoices = () => {
       discount: parseFloat(response.discount),
       tax: parseFloat(response.iva),
       withholding_tax: parseFloat(response.withholdings),
+      invoice_retentions: response?.invoice_retentions || [],
       adjustedType: response?.notes && response.notes.length ? response.notes.map(note => {
         note.name = "";
         note.type == "debit" ? note.name = "Débito" : note.name = "Crédito";
@@ -167,9 +168,9 @@ export const SalesInvoices = () => {
 
   // Formatear número para montos en pesos dominicanos (DOP)
   const formatCurrency = value => {
-    return value.toLocaleString("es-DO", {
+    return value.toLocaleString("es-CO", {
       style: "currency",
-      currency: "DOP",
+      currency: "COP",
       minimumFractionDigits: 2,
       maximumFractionDigits: 2
     });
@@ -177,7 +178,7 @@ export const SalesInvoices = () => {
 
   // Formatear fecha
   const formatDate = value => {
-    return value.toLocaleDateString("es-DO", {
+    return value.toLocaleDateString("es-CO", {
       day: "2-digit",
       month: "2-digit",
       year: "numeric"

@@ -44,20 +44,26 @@ export const civilStatusOptions = [{
   value: "WIDOWED"
 }];
 export const ethnicityOptions = [{
-  label: "Afrodesendiente",
-  value: "Afrodesendiente"
-}, {
   label: "Indigena",
-  value: "Indigena"
+  value: 1
 }, {
-  label: "Caucásica",
-  value: "Caucásica"
+  label: "ROM (Gitano)",
+  value: 2
 }, {
-  label: "Asiática",
-  value: "Asiática"
+  label: "Raizal (Archipielago San Andrés y Providencia)",
+  value: 3
 }, {
-  label: "Mestiza",
-  value: "Mestiza"
+  label: "Palenquero de San Basilio",
+  value: 4
+}, {
+  label: "Negro(a) o mulato(a) o afrocolombiano(a) o afrodescendiente",
+  value: 5
+}, {
+  label: "Otras etnias",
+  value: 6
+}, {
+  label: "Ninguna de las anteriores",
+  value: 99
 }];
 export const bloodTypeOptions = [{
   label: "No Refiere",
@@ -86,4 +92,29 @@ export const bloodTypeOptions = [{
 }, {
   label: "AB Negativo",
   value: "AB_NEGATIVE"
+}];
+export const disabilityClassificationOptions = [{
+  label: "Discapacidad física",
+  value: "01"
+}, {
+  label: "Discapacidad visual",
+  value: "02"
+}, {
+  label: "Discapacidad auditiva",
+  value: "03"
+}, {
+  label: "Discapacidad intelectual",
+  value: "04"
+}, {
+  label: "Discapacidad sicosocial",
+  value: "05"
+}, {
+  label: "Sordoceguera",
+  value: "06"
+}, {
+  label: "Discapacidad múltiple",
+  value: "07"
+}, {
+  label: "Sin discapacidad",
+  value: "08"
 }];

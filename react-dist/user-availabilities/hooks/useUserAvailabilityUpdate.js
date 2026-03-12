@@ -1,13 +1,14 @@
 import { useState } from 'react';
+import { ErrorHandler } from "../../../services/errorHandler.js";
 import { userAvailabilityService } from "../../../services/api/index.js";
 import { convertDateToHHMM } from "../../../services/utilidades.js";
 import { usePRToast } from "../../hooks/usePRToast.js";
 export const useUserAvailabilityUpdate = () => {
   const [loading, setLoading] = useState(true);
   const {
+    toast,
     showSuccessToast,
-    showServerErrorsToast,
-    toast
+    showServerErrorsToast
   } = usePRToast();
   const updateUserAvailability = async (id, data) => {
     setLoading(true);
@@ -24,11 +25,10 @@ export const useUserAvailabilityUpdate = () => {
       };
       await userAvailabilityService.update(id, newData);
       showSuccessToast({
-        title: "Horario actualizado",
-        message: "El horario de atención se ha actualizado correctamente"
+        message: "Se editó la disponibilidad exitosamente"
       });
     } catch (error) {
-      showServerErrorsToast(error);
+      ErrorHandler.generic(error);
       throw error;
     } finally {
       setLoading(false);

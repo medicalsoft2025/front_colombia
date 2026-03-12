@@ -216,9 +216,9 @@ export const PurchaseInvoices = () => {
 
     // Formatear número para montos en pesos dominicanos (DOP)
     const formatCurrency = (value: number) => {
-        return value?.toLocaleString("es-DO", {
+        return value?.toLocaleString("es-CO", {
             style: "currency",
-            currency: "DOP",
+            currency: "COP",
             minimumFractionDigits: 2,
             maximumFractionDigits: 2,
         });
@@ -226,7 +226,7 @@ export const PurchaseInvoices = () => {
 
     // Formatear fecha
     const formatDate = (value: Date) => {
-        return value?.toLocaleDateString("es-DO", {
+        return value?.toLocaleDateString("es-CO", {
             day: "2-digit",
             month: "2-digit",
             year: "numeric",
@@ -235,7 +235,6 @@ export const PurchaseInvoices = () => {
 
     // Funciones para las acciones
     const generateReceipt = (invoice: Factura) => {
-        console.log("invoice", invoice);
 
         setFacturaParaRecibo(invoice);
         setShowReciboModal(true);
@@ -276,12 +275,14 @@ export const PurchaseInvoices = () => {
 
     function generateDebitNote(invoice: any) {
         invoice.noteType = { id: "DEBIT", name: "Débito" };
+        invoice.invoice_retentions = invoice.original?.invoice_retentions || [];
         setInvoiceToNote(invoice);
         setShowNoteModal(true);
     }
 
     function generateCreditNote(invoice: any) {
         invoice.noteType = { id: "CREDIT", name: "Crédito" };
+        invoice.invoice_retentions = invoice.original?.invoice_retentions || [];
         setInvoiceToNote(invoice);
         setShowNoteModal(true);
     }
@@ -441,7 +442,7 @@ export const PurchaseInvoices = () => {
     };
 
     // Mapear los datos para la tabla
-    const tableItems = facturas.map((factura) => ({
+    const tableItems = facturas.map((factura: any) => ({
         id: factura.id,
         numeroFactura: factura.numeroFactura,
         fecha: factura.fecha,
@@ -453,6 +454,7 @@ export const PurchaseInvoices = () => {
         adjustedType: factura.adjustedType,
         estado: factura.estado,
         actions: factura,
+        invoice_retentions: factura.invoice_retentions,
     }));
 
     const columns: CustomPRTableColumnProps[] = [
@@ -558,8 +560,8 @@ export const PurchaseInvoices = () => {
                             <Button
                                 className="p-button-primary"
                                 onClick={() =>
-                                    (window.location.href =
-                                        "Facturacion_Compras")
+                                (window.location.href =
+                                    "Facturacion_Compras")
                                 }
                             >
                                 <i className="fas fa-file-edit me-2"></i>

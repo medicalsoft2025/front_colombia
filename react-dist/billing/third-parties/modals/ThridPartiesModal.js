@@ -1,11 +1,12 @@
-import React, { useEffect, useState } from 'react';
-import { Button } from 'primereact/button';
-import { Dropdown } from 'primereact/dropdown';
-import { InputText } from 'primereact/inputtext';
-import { Calendar } from 'primereact/calendar';
-import { Dialog } from 'primereact/dialog';
-import { InputMask } from 'primereact/inputmask';
-import { Message } from 'primereact/message';
+import React, { useEffect, useState } from "react";
+import { Button } from "primereact/button";
+import { Dropdown } from "primereact/dropdown";
+import { InputText } from "primereact/inputtext";
+import { Calendar } from "primereact/calendar";
+import { Dialog } from "primereact/dialog";
+import { InputMask } from "primereact/inputmask";
+import { Message } from "primereact/message";
+import { resourcesAdminService } from "../../../../services/api/index.js";
 export const ThirdPartyModal = ({
   visible,
   onHide,
@@ -16,39 +17,54 @@ export const ThirdPartyModal = ({
   error = null
 }) => {
   const [formData, setFormData] = useState({
-    type: 'client',
+    type: "client",
+    organization_type: "",
+    municipality_id: "",
+    liability_type: "",
+    regime_type: "",
     contact: {
-      name: '',
-      document_type: 'CC',
-      document_number: '',
-      email: '',
-      phone: '',
-      address: '',
-      first_name: '',
-      middle_name: '',
-      last_name: '',
-      second_last_name: '',
+      name: "",
+      document_type: "CC",
+      document_number: "",
+      dv: "",
+      email: "",
+      phone: "",
+      address: "",
+      first_name: "",
+      middle_name: "",
+      last_name: "",
+      second_last_name: "",
       date_of_birth: null
     }
   });
   const [dateOfBirth, setDateOfBirth] = useState(null);
+  const [organizationTypes, setOrganizationTypes] = useState([]);
+  const [municipalities, setMunicipalities] = useState([]);
+  const [liabilityTypes, setLiabilityTypes] = useState([]);
+  const [regimeTypes, setRegimeTypes] = useState([]);
 
   // Cargar datos iniciales si estamos editando
   useEffect(() => {
     if (visible && initialData) {
       setFormData({
         type: initialData.type,
+        organization_type: Number(initialData.organization_type) || "",
+        // Handle potential missing data for old records
+        municipality_id: Number(initialData.municipality_id) || "",
+        liability_type: Number(initialData.liability_type) || "",
+        regime_type: Number(initialData.regime_type) || "",
         contact: {
           name: initialData.contact.name,
           document_type: initialData.contact.document_type,
           document_number: initialData.contact.document_number,
+          dv: initialData.contact.dv,
           email: initialData.contact.email,
           phone: initialData.contact.phone,
           address: initialData.contact.address,
           first_name: initialData.contact.first_name,
-          middle_name: initialData.contact.middle_name || '',
+          middle_name: initialData.contact.middle_name || "",
           last_name: initialData.contact.last_name,
-          second_last_name: initialData.contact.second_last_name || '',
+          second_last_name: initialData.contact.second_last_name || "",
           date_of_birth: initialData.contact.date_of_birth
         }
       });
@@ -62,57 +78,75 @@ export const ThirdPartyModal = ({
     } else if (visible) {
       // Resetear formulario cuando se abre para crear nuevo
       setFormData({
-        type: 'client',
+        type: "client",
+        organization_type: "",
+        municipality_id: "",
+        liability_type: "",
+        regime_type: "",
         contact: {
-          name: '',
-          document_type: 'CC',
-          document_number: '',
-          email: '',
-          phone: '',
-          address: '',
-          first_name: '',
-          middle_name: '',
-          last_name: '',
-          second_last_name: '',
+          name: "",
+          document_type: "CC",
+          document_number: "",
+          dv: "",
+          email: "",
+          phone: "",
+          address: "",
+          first_name: "",
+          middle_name: "",
+          last_name: "",
+          second_last_name: "",
           date_of_birth: null
         }
       });
       setDateOfBirth(null);
     }
   }, [visible, initialData]);
+  useEffect(() => {
+    loadResources();
+  }, []);
+  async function loadResources() {
+    const organizationTypes = await resourcesAdminService.getOrganizationTypes();
+    const municipalities = await resourcesAdminService.getMunicipalities();
+    const liabilityTypes = await resourcesAdminService.getLiabilityTypes();
+    const regimeTypes = await resourcesAdminService.getRegimeTypes();
+    setOrganizationTypes(organizationTypes);
+    setMunicipalities(municipalities);
+    setLiabilityTypes(liabilityTypes);
+    setRegimeTypes(regimeTypes);
+  }
   const tipoTerceroOptions = [{
-    label: 'Cliente',
-    value: 'client'
+    label: "Cliente",
+    value: "client"
   }, {
-    label: 'Proveedor',
-    value: 'provider'
+    label: "Proveedor",
+    value: "provider"
   }, {
-    label: 'Entidad',
-    value: 'entity'
+    label: "Entidad",
+    value: "entity"
   }];
   const tipoDocumentoOptions = [{
-    label: 'Cédula',
-    value: 'CC'
+    label: "Cédula",
+    value: "CC"
   }, {
-    label: 'NIT',
-    value: 'NIT'
+    label: "NIT",
+    value: "NIT"
   }, {
-    label: 'Pasaporte',
-    value: 'PA'
+    label: "Pasaporte",
+    value: "PA"
   }, {
-    label: 'Extranjería',
-    value: 'CE'
+    label: "Extranjería",
+    value: "CE"
   }, {
-    label: 'RNC',
-    value: 'RNC'
+    label: "RNC",
+    value: "RNC"
   }];
   const handleInputChange = e => {
     const {
       name,
       value
     } = e.target;
-    if (name.startsWith('contact.')) {
-      const contactField = name.split('.')[1];
+    if (name.startsWith("contact.")) {
+      const contactField = name.split(".")[1];
       setFormData(prev => ({
         ...prev,
         contact: {
@@ -128,8 +162,8 @@ export const ThirdPartyModal = ({
     }
   };
   const handleDropdownChange = (e, field) => {
-    if (field.startsWith('contact.')) {
-      const contactField = field.split('.')[1];
+    if (field.startsWith("contact.")) {
+      const contactField = field.split(".")[1];
       setFormData(prev => ({
         ...prev,
         contact: {
@@ -150,7 +184,7 @@ export const ThirdPartyModal = ({
       setDateOfBirth(selectedDate);
 
       // Formatear fecha a string ISO (YYYY-MM-DD)
-      const formattedDate = selectedDate.toISOString().split('T')[0];
+      const formattedDate = selectedDate.toISOString().split("T")[0];
       setFormData(prev => ({
         ...prev,
         contact: {
@@ -183,13 +217,13 @@ export const ThirdPartyModal = ({
     }
   };
   const getFormattedTitle = () => {
-    return initialData ? `Editar Tercero - ${initialData.contact.first_name}` : 'Nuevo Tercero';
+    return initialData ? `Editar Tercero - ${initialData.contact.first_name}` : "Nuevo Tercero";
   };
   return /*#__PURE__*/React.createElement(Dialog, {
     header: getFormattedTitle(),
     visible: visible,
     style: {
-      width: '70vw'
+      width: "70vw"
     },
     onHide: onHide,
     maximizable: true,
@@ -214,7 +248,7 @@ export const ThirdPartyModal = ({
     id: "type",
     value: formData.type,
     options: tipoTerceroOptions,
-    onChange: e => handleDropdownChange(e, 'type'),
+    onChange: e => handleDropdownChange(e, "type"),
     placeholder: "Seleccione tipo",
     className: "w-100",
     disabled: !!initialData
@@ -227,12 +261,14 @@ export const ThirdPartyModal = ({
     id: "contact.document_type",
     value: formData.contact.document_type,
     options: tipoDocumentoOptions,
-    onChange: e => handleDropdownChange(e, 'contact.document_type'),
+    onChange: e => handleDropdownChange(e, "contact.document_type"),
     placeholder: "Seleccione tipo",
     className: "w-100",
     disabled: !!initialData
   })), /*#__PURE__*/React.createElement("div", {
-    className: "mb-3"
+    className: "row"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: formData.contact.document_type === "NIT" ? "col-8 mb-3" : "col-12 mb-3"
   }, /*#__PURE__*/React.createElement("label", {
     htmlFor: "contact.document_number",
     className: "form-label"
@@ -245,7 +281,21 @@ export const ThirdPartyModal = ({
     placeholder: "Ingrese el n\xFAmero de documento",
     disabled: !!initialData,
     required: true
-  })), /*#__PURE__*/React.createElement("div", {
+  })), formData.contact.document_type === "NIT" && /*#__PURE__*/React.createElement("div", {
+    className: formData.contact.document_type === "NIT" ? "col-4 mb-3" : "d-none"
+  }, /*#__PURE__*/React.createElement("label", {
+    htmlFor: "contact.dv",
+    className: "form-label"
+  }, "DV *"), /*#__PURE__*/React.createElement(InputText, {
+    id: "contact.dv",
+    name: "contact.dv",
+    value: formData.contact.dv,
+    onChange: handleInputChange,
+    className: "w-100",
+    placeholder: "Ingrese el DV",
+    disabled: !!initialData,
+    required: true
+  }))), /*#__PURE__*/React.createElement("div", {
     className: "mb-3"
   }, /*#__PURE__*/React.createElement("label", {
     htmlFor: "contact.email",
@@ -361,6 +411,84 @@ export const ThirdPartyModal = ({
     placeholder: "Seleccione fecha",
     maxDate: new Date(),
     yearRange: "1900:2030"
+  })))), /*#__PURE__*/React.createElement("hr", {
+    className: "my-4"
+  }), /*#__PURE__*/React.createElement("h5", {
+    className: "mb-3"
+  }, "Informaci\xF3n Facturaci\xF3n Electr\xF3nica"), /*#__PURE__*/React.createElement("div", {
+    className: "row mb-4"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "col-md-4"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "mb-3"
+  }, /*#__PURE__*/React.createElement("label", {
+    htmlFor: "organization_type",
+    className: "form-label"
+  }, "Tipo de Organizaci\xF3n"), /*#__PURE__*/React.createElement(Dropdown, {
+    id: "organization_type",
+    value: formData.organization_type,
+    options: organizationTypes,
+    onChange: e => handleDropdownChange(e, "organization_type"),
+    placeholder: "Seleccione tipo",
+    className: "w-100",
+    optionLabel: "name",
+    optionValue: "id",
+    required: true
+  }))), /*#__PURE__*/React.createElement("div", {
+    className: "col-md-4"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "mb-3"
+  }, /*#__PURE__*/React.createElement("label", {
+    htmlFor: "liability_type",
+    className: "form-label"
+  }, "Agente retenedor"), /*#__PURE__*/React.createElement(Dropdown, {
+    id: "liability_type",
+    value: formData.liability_type,
+    options: liabilityTypes,
+    onChange: e => handleDropdownChange(e, "liability_type"),
+    placeholder: "Seleccione tipo",
+    className: "w-100",
+    optionLabel: "name",
+    optionValue: "id",
+    required: true
+  }))), /*#__PURE__*/React.createElement("div", {
+    className: "col-md-4"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "mb-3"
+  }, /*#__PURE__*/React.createElement("label", {
+    htmlFor: "regime_type",
+    className: "form-label"
+  }, "Tipo de R\xE9gimen"), /*#__PURE__*/React.createElement(Dropdown, {
+    id: "regime_type",
+    value: formData.regime_type,
+    options: regimeTypes,
+    onChange: e => handleDropdownChange(e, "regime_type"),
+    placeholder: "Seleccione tipo",
+    className: "w-100",
+    optionLabel: "name",
+    optionValue: "id",
+    required: true
+  }))), /*#__PURE__*/React.createElement("div", {
+    className: "col-md-4"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "mb-3"
+  }, /*#__PURE__*/React.createElement("label", {
+    htmlFor: "municipality_id",
+    className: "form-label"
+  }, "Municipio/Ciudad"), /*#__PURE__*/React.createElement(Dropdown, {
+    id: "municipality_id",
+    value: formData.municipality_id,
+    options: municipalities,
+    onChange: e => handleDropdownChange(e, "municipality_id"),
+    placeholder: "Seleccione tipo",
+    className: "w-100",
+    virtualScrollerOptions: {
+      itemSize: 38
+    },
+    filter: true,
+    optionLabel: "name",
+    optionValue: "id",
+    required: true
   })))), /*#__PURE__*/React.createElement("div", {
     className: "d-flex justify-content-center mt-4"
   }, /*#__PURE__*/React.createElement(Button, {
@@ -371,7 +499,7 @@ export const ThirdPartyModal = ({
     },
     onClick: onHide,
     disabled: loading
-  }, "              ", /*#__PURE__*/React.createElement("i", {
+  }, " ", /*#__PURE__*/React.createElement("i", {
     className: "fas fa-times me-2"
   })), /*#__PURE__*/React.createElement(Button, {
     label: initialData ? "Actualizar" : "Guardar",
@@ -381,7 +509,7 @@ export const ThirdPartyModal = ({
       minWidth: "80px"
     },
     loading: loading
-  }, "    ", /*#__PURE__*/React.createElement("i", {
+  }, " ", /*#__PURE__*/React.createElement("i", {
     className: "fas fa-check me-2"
   })))));
 };

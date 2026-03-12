@@ -15,8 +15,8 @@ $tabs = [
     ['icono' => 'receipt', 'titulo' => 'Cierres Contables', 'texto' => 'Consulta los saldos y cierres de períodos contables.', 'url' => 'CierresContables'],
     ['icono' => 'check-double', 'titulo' => 'Auditoría Contable', 'texto' => 'Consulta el historial de movimientos y cambios del sistema.', 'url' => 'FE_ContabilidadNueva'],
     ['icono' => 'users', 'titulo' => 'Gestión de Terceros', 'texto' => 'Administra clientes, proveedores y otros terceros.', 'url' => 'GestionarTerceros'],
-    ['icono' => 'toolbox', 'titulo' => 'Configuración Contable', 'texto' => 'Configura métodos de pago, impuestos y centros de costo.', 'url' => 'configContabilidad'],
-    ['icono' => 'warehouse', 'titulo' => 'Gestión de Activos', 'texto' => 'Administra el inventario de activos fijos y depreciaciones.', 'url' => 'ActivosFijos'],
+    // ['icono' => 'toolbox', 'titulo' => 'Configuración Contable', 'texto' => 'Configura métodos de pago, impuestos y centros de costo.', 'url' => 'configContabilidad'],
+    // ['icono' => 'warehouse', 'titulo' => 'Gestión de Activos', 'texto' => 'Administra el inventario de activos fijos y depreciaciones.', 'url' => 'ActivosFijos'],
 ];
 ?>
 <link rel="stylesheet" href="./assets/css/styles.css">

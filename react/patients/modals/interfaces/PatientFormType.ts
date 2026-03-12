@@ -31,6 +31,7 @@ export type PatientFormFields =
   | "patient.city_id"
   | "patient.address"
   | "patient.nationality"
+  | "patient.residential_area"
   | "social_security.entity_id"
   | "social_security.arl"
   | "social_security.afp";

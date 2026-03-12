@@ -110,7 +110,7 @@ export const CustomTaxes: React.FC<TaxesSectionProps> = ({
       <div className="card-header bg-light d-flex justify-content-between align-items-center">
         <h2 className="h5 mb-0">
           <i className="pi pi-chart-line me-2 text-primary"></i>
-          Impuestos Adicionales (DOP)
+          Impuestos Adicionales (COP)
         </h2>
         <Button
           type="button"
@@ -129,8 +129,8 @@ export const CustomTaxes: React.FC<TaxesSectionProps> = ({
             <InputNumber
               value={calculateBaseAmount()}
               mode="currency"
-              currency="DOP"
-              locale="es-DO"
+              currency="COP"
+              locale="es-CO"
               readOnly
               className="ml-2"
             />
@@ -169,7 +169,7 @@ export const CustomTaxes: React.FC<TaxesSectionProps> = ({
                     min={0}
                     max={100}
                     suffix="%"
-                    locale="es-DO"
+                    locale="es-CO"
                     className="w-100"
                     onValueChange={(e) =>
                       handleTaxChange(taxItem.id, "percentage", e.value)
@@ -183,8 +183,8 @@ export const CustomTaxes: React.FC<TaxesSectionProps> = ({
                   <InputNumber
                     value={taxItem.value}
                     mode="currency"
-                    currency="DOP"
-                    locale="es-DO"
+                    currency="COP"
+                    locale="es-CO"
                     className="w-100"
                     readOnly
                   />
@@ -210,8 +210,8 @@ export const CustomTaxes: React.FC<TaxesSectionProps> = ({
               <InputNumber
                 value={taxes.reduce((sum, t) => sum + t.value, 0)}
                 mode="currency"
-                currency="DOP"
-                locale="es-DO"
+                currency="COP"
+                locale="es-CO"
                 className="font-weight-bold"
                 readOnly
               />

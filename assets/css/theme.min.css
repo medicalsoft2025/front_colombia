@@ -26950,9 +26950,9 @@ textarea.form-control.is-invalid {
     color: #fff
 }
 
-[id] {
+/* [id] {
     scroll-margin-top: calc(var(--phoenix-navbar-top-height) + var(--phoenix-scroll-margin-top))
-}
+} */
 
 body {
     -webkit-font-smoothing: antialiased;

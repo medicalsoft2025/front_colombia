@@ -257,23 +257,19 @@ export const ProductDeliveryDetail = ({
     className: "text-muted small"
   }, deliveryManager?.requestedBy?.name || "--", " ", "-", " ", formatDateDMY(delivery?.created_at)))), /*#__PURE__*/React.createElement("div", {
     className: "d-flex"
-  }, /*#__PURE__*/React.createElement(Button, {
+  }, /*#__PURE__*/React.createElement("button", {
     type: "button",
-    className: "p-button-primary me-2",
-    onClick: () => setDialogVisible(true),
-    icon: /*#__PURE__*/React.createElement("i", {
-      className: "fas fa-eye me-1"
-    }),
-    label: "Ver solicitud"
-  }), /*#__PURE__*/React.createElement(Button, {
+    className: "btn btn-sm btn-outline-primary me-2",
+    onClick: () => setDialogVisible(true)
+  }, /*#__PURE__*/React.createElement("i", {
+    className: "fas fa-eye me-1"
+  }), " ", "Ver solicitud"), /*#__PURE__*/React.createElement("button", {
     type: "button",
-    className: "p-button-secondary",
-    onClick: handlePrint,
-    icon: /*#__PURE__*/React.createElement("i", {
-      className: "fas fa-print me-1"
-    }),
-    label: "Imprimir"
-  }))), delivered() && /*#__PURE__*/React.createElement("div", {
+    className: "btn btn-sm btn-outline-secondary",
+    onClick: handlePrint
+  }, /*#__PURE__*/React.createElement("i", {
+    className: "fas fa-print me-1"
+  }), " ", "Imprimir"))), delivered() && /*#__PURE__*/React.createElement("div", {
     className: "d-flex flex-grow-1"
   }, /*#__PURE__*/React.createElement("div", {
     className: "d-flex flex-column"
@@ -474,7 +470,7 @@ const DeliveryDetailsTable = ({
     }, /*#__PURE__*/React.createElement("div", {
       className: "text-center"
     }, /*#__PURE__*/React.createElement("div", {
-      className: "fw-bold text-primary"
+      className: "fw-bold"
     }, deliveries.length), /*#__PURE__*/React.createElement("small", {
       className: "text-muted"
     }, "Entregas")), /*#__PURE__*/React.createElement("div", {

@@ -75,8 +75,12 @@ import { SpecialtiesService } from "./classes/specialtiesService.js";
 import { GenericFilterServices } from "./classes/genericFilterServices.js";
 import { LandingAvailabilities } from "./classes/landingAvailabilities.js";
 import { GoogleCalendarService } from "./classes/googlecalendarservice.js";
-import {MassMessageMedicalService} from "./classes/massMessageMedicalService.js";
+import { MassMessageMedicalService } from "./classes/massMessageMedicalService.js";
 import { SurveyService } from "./classes/surveyService.js";
+import { EntitiesUserService } from "./classes/entitiesUserService.js";
+import { CopaymentRulesService } from "./classes/copaymentRulesService.js";
+import BranchService from "./classes/branchService.js";
+import { ResourcesMedicalService } from "./classes/resourcesMedicalService.js";
 
 
 export const authService = new AuthService("api/auth");
@@ -122,7 +126,7 @@ export const appointmentTypeService = new BaseApiService(
   "medical",
   "appointment-types"
 );
-export const branchService = new BaseApiService("medical", "branches");
+export const branchService = new BranchService("medical", "branches");
 
 export const clinicalRecordService = new ClinicalRecordService(
   "medical",
@@ -373,3 +377,6 @@ export const landingAvailabilities = new LandingAvailabilities();
 export const googleCalendarService = new GoogleCalendarService();
 export const massMessageMedicalService = new MassMessageMedicalService("medical", "massMessage");
 export const surveyService = new SurveyService("medical", "surveys");
+export const entitiesUserService = new EntitiesUserService("medical", "entities-user");
+export const copaymentRulesService = new CopaymentRulesService("medical", "copayment-rules");
+export const resourcesMedicalService = new ResourcesMedicalService("medical");

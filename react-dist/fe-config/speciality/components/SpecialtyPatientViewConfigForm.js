@@ -78,8 +78,14 @@ export const SpecialtyPatientViewConfigForm = props => {
     value: 'incapacidades',
     label: "Incapacidades clínicas"
   }, {
+    value: 'alergias',
+    label: "Alergias"
+  }, {
     value: 'antecedentes',
     label: "Antecedentes personales"
+  }, {
+    value: 'historial-familiar',
+    label: "Antecedentes familiares"
   }, {
     value: 'consentimientos',
     label: "Consentimientos"

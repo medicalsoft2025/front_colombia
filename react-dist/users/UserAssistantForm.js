@@ -72,9 +72,13 @@ export const UserAssistantForm = ({
       maxSelectedLabels: 2,
       className: classNames('w-100', {
         'p-invalid': errors.assistants
-      }),
+      })
+    }, field, {
+      virtualScrollerOptions: {
+        itemSize: 43
+      },
       appendTo: document.body
-    }, field)))
+    })))
   }), getFormErrorMessage('assistants'))), /*#__PURE__*/React.createElement("hr", null), /*#__PURE__*/React.createElement("div", {
     className: "row g-2"
   }, selectedUserIds.map(userId => {

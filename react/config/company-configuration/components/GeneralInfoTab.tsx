@@ -65,13 +65,13 @@ const GeneralInfoTab: React.FC<GeneralInfoTabProps> = ({
   useEffect(() => {
     const hasRequiredFields = Boolean(
       formValues.legal_name &&
-        formValues.document_type &&
-        formValues.document_number &&
-        formValues.phone &&
-        formValues.email &&
-        formValues.address &&
-        formValues.country &&
-        formValues.city
+      formValues.document_type &&
+      formValues.document_number &&
+      formValues.phone &&
+      formValues.email &&
+      formValues.address &&
+      formValues.country &&
+      formValues.city
     );
     onValidationChange?.(hasRequiredFields);
   }, [formValues, onValidationChange]);
@@ -248,18 +248,6 @@ const GeneralInfoTab: React.FC<GeneralInfoTabProps> = ({
         />
       )}
 
-      <div className="row mb-3">
-        <div className="col-12">
-          <div className="alert alert-info">
-            <small>
-              <i className="pi pi-info-circle mr-2"></i>
-              <strong>Nota:</strong> Complete todos los campos obligatorios para
-              habilitar el siguiente módulo.
-            </small>
-          </div>
-        </div>
-      </div>
-
       <form onSubmit={handleSubmit(onSubmit)}>
         <div className="row mb-4">
           <div className="col-12">
@@ -280,9 +268,8 @@ const GeneralInfoTab: React.FC<GeneralInfoTabProps> = ({
                 <InputText
                   {...field}
                   id="legal_name"
-                  className={`form-control ${
-                    errors.legal_name ? "is-invalid" : ""
-                  }`}
+                  className={`form-control ${errors.legal_name ? "is-invalid" : ""
+                    }`}
                   placeholder="Nombre Consultorio"
                 />
               )}
@@ -306,9 +293,8 @@ const GeneralInfoTab: React.FC<GeneralInfoTabProps> = ({
                 <InputText
                   {...field}
                   id="address"
-                  className={`form-control ${
-                    errors.address ? "is-invalid" : ""
-                  }`}
+                  className={`form-control ${errors.address ? "is-invalid" : ""
+                    }`}
                   placeholder="Ej: Calle 123 #45-67, Bogotá"
                 />
               )}
@@ -334,9 +320,8 @@ const GeneralInfoTab: React.FC<GeneralInfoTabProps> = ({
                   id="document_type"
                   options={documentTypes}
                   placeholder="Seleccione un tipo de documento"
-                  className={`w-100 ${
-                    errors.document_type ? "is-invalid" : ""
-                  }`}
+                  className={`w-100 ${errors.document_type ? "is-invalid" : ""
+                    }`}
                 />
               )}
             />
@@ -359,9 +344,8 @@ const GeneralInfoTab: React.FC<GeneralInfoTabProps> = ({
                 <InputText
                   {...field}
                   id="document_number"
-                  className={`form-control ${
-                    errors.document_number ? "is-invalid" : ""
-                  }`}
+                  className={`form-control ${errors.document_number ? "is-invalid" : ""
+                    }`}
                   placeholder="123456789"
                 />
               )}

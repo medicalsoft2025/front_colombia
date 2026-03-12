@@ -60,7 +60,12 @@ export const ThridPartiesTable = () => {
           middle_name: formData.contact.middle_name,
           last_name: formData.contact.last_name,
           second_last_name: formData.contact.second_last_name,
-          date_of_birth: formData.contact.date_of_birth
+          date_of_birth: formData.contact.date_of_birth,
+          type_organization_id: formData.organization_type.toString(),
+          municipality_id: formData.municipality_id.toString(),
+          type_liability_id: formData.liability_type.toString(),
+          type_regime_id: formData.regime_type.toString(),
+          dv: formData.contact.dv.toString()
         });
       } else {
         await createThirdParty({
@@ -75,7 +80,12 @@ export const ThridPartiesTable = () => {
           middle_name: formData.contact.middle_name,
           last_name: formData.contact.last_name,
           second_last_name: formData.contact.second_last_name,
-          date_of_birth: formData.contact.date_of_birth
+          date_of_birth: formData.contact.date_of_birth,
+          type_organization_id: formData.organization_type.toString(),
+          municipality_id: formData.municipality_id.toString(),
+          type_liability_id: formData.liability_type.toString(),
+          type_regime_id: formData.regime_type.toString(),
+          dv: formData.contact.dv.toString()
         });
       }
       fetchThirdParties();
@@ -93,6 +103,10 @@ export const ThridPartiesTable = () => {
   const handleEditTercero = tercero => {
     setInitialData({
       type: tercero?.type || '',
+      organization_type: tercero?.type_organization_id || '',
+      municipality_id: tercero?.municipality_id || '',
+      liability_type: tercero?.type_liability_id || '',
+      regime_type: tercero?.type_regime_id || '',
       contact: {
         name: tercero?.name || '',
         document_type: tercero?.document_type || '',
@@ -104,7 +118,8 @@ export const ThridPartiesTable = () => {
         middle_name: tercero?.middle_name || '',
         last_name: tercero?.last_name || '',
         second_last_name: tercero?.second_last_name || '',
-        date_of_birth: tercero?.date_of_birth || ''
+        date_of_birth: tercero?.date_of_birth || '',
+        dv: tercero?.dv || ''
       }
     });
     setSelectedTercero(tercero);
@@ -131,7 +146,6 @@ export const ThridPartiesTable = () => {
     try {
       setError(null);
       // Aquí puedes implementar la lógica de filtrado si es necesario
-      console.log('Aplicando filtros:', filtros);
     } catch (err) {
       setError('Ocurrió un error al aplicar los filtros');
     }

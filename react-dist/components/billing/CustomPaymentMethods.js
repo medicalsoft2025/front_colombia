@@ -58,7 +58,7 @@ export const PaymentMethodsSection = ({
       window["toast"]?.show({
         severity: "success",
         summary: "Éxito",
-        detail: `Valor ${amountToSet.toFixed(2)} DOP copiado al método de pago`,
+        detail: `Valor ${amountToSet.toFixed(2)} COP copiado al método de pago`,
         life: 3000
       });
     } else {
@@ -83,7 +83,7 @@ export const PaymentMethodsSection = ({
     className: "h5 mb-0"
   }, /*#__PURE__*/React.createElement("i", {
     className: "pi pi-credit-card me-2 text-primary"
-  }), "M\xE9todos de Pago (DOP)"), /*#__PURE__*/React.createElement(Button, {
+  }), "M\xE9todos de Pago (COP)"), /*#__PURE__*/React.createElement(Button, {
     icon: "pi pi-plus",
     label: "Agregar M\xE9todo",
     className: "btn btn-primary",
@@ -122,11 +122,11 @@ export const PaymentMethodsSection = ({
     className: "d-flex gap-2 align-items-center flex-nowrap"
   }, /*#__PURE__*/React.createElement(InputNumber, {
     value: payment.value === "" ? null : payment.value,
-    placeholder: "RD$ 0.00",
+    placeholder: "$ 0.00",
     className: "flex-grow-1",
     mode: "currency",
-    currency: "DOP",
-    locale: "es-DO",
+    currency: "COP",
+    locale: "es-CO",
     min: 0,
     onValueChange: e => handlePaymentChange(payment.id, "value", e.value === null ? "" : e.value),
     inputClassName: "form-control"
@@ -174,8 +174,8 @@ export const PaymentMethodsSection = ({
     value: totalInvoice,
     className: "me-3",
     mode: "currency",
-    currency: "DOP",
-    locale: "es-DO",
+    currency: "COP",
+    locale: "es-CO",
     minFractionDigits: 2,
     maxFractionDigits: 3,
     readOnly: true,
@@ -191,8 +191,8 @@ export const PaymentMethodsSection = ({
     value: totalPayments,
     className: "me-3",
     mode: "currency",
-    currency: "DOP",
-    locale: "es-DO",
+    currency: "COP",
+    locale: "es-CO",
     minFractionDigits: 2,
     maxFractionDigits: 3,
     readOnly: true,
@@ -206,7 +206,7 @@ export const PaymentMethodsSection = ({
     className: "text-danger"
   }, /*#__PURE__*/React.createElement("i", {
     className: "pi pi-exclamation-triangle me-1"
-  }), "Faltan ", (totalInvoice - totalPayments).toFixed(2), " DOP") : /*#__PURE__*/React.createElement("span", {
+  }), "Faltan ", (totalInvoice - totalPayments).toFixed(2), " COP") : /*#__PURE__*/React.createElement("span", {
     className: "text-success"
   }, /*#__PURE__*/React.createElement("i", {
     className: "pi pi-check-circle me-1"

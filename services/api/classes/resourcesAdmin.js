@@ -21,6 +21,48 @@ export class ResourcesAdminService extends BaseApiService {
       `${this.microservice}/third-party/${thirdPartyId}/advance/${type}`
     );
   }
+
+  //resources to api dian
+
+  async getDocumentTypes() {
+    return await this.httpClient.get(`api/v1/admin/resources-co/type-document`);
+  }
+
+  async getOrganizationTypes() {
+    return await this.httpClient.get(`api/v1/admin/resources-co/organizations`);
+  }
+
+  async getMunicipalities() {
+    return await this.httpClient.get(`api/v1/admin/resources-co/municipalities`);
+  }
+
+  async getLiabilityTypes() {
+    return await this.httpClient.get(`api/v1/admin/resources-co/type-liabilities`);
+  }
+
+  async getRegimeTypes() {
+    return await this.httpClient.get(`api/v1/admin/resources-co/type-regimes`);
+  }
+
+  async getHealthTypeOperations() {
+    return await this.httpClient.get(`api/v1/admin/resources-co/health-type-operations`);
+  }
+
+  async getHealthCoverages() {
+    return await this.httpClient.get(`api/v1/admin/resources-co/health-coverages`);
+  }
+
+  async getHealthPaymentMethods() {
+    return await this.httpClient.get(`api/v1/admin/resources-co/health-payment-methods`);
+  }
+
+  async getHealthDocumentTypes() {
+    return await this.httpClient.get(`api/v1/admin/resources-co/health-document-types`);
+  }
+
+  async getHealthUserTypes() {
+    return await this.httpClient.get(`api/v1/admin/resources-co/health-user-types`);
+  }
 }
 
 export default ResourcesAdminService;

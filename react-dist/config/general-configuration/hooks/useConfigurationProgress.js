@@ -32,7 +32,6 @@ export const useConfigurationProgress = ({
       }
       setCurrentConfig(parsedConfig);
       hasLoadedRef.current = true;
-      console.log('✅ Progreso cargado exitosamente:', parsedConfig);
       onProgressLoaded?.(parsedConfig);
     } catch (error) {
       if (error.message.includes('404') || error.message.includes('Not Found')) {

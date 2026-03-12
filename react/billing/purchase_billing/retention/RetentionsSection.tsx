@@ -54,14 +54,18 @@ export const RetentionsSection: React.FC<RetentionsSectionProps> = ({
   };
 
   const calculateRetentionValue = (retention: any) => {
+
     const base = calculateBaseAmount();
 
+    const isFromHandler = retention?.percentage?.id !== undefined;
+    const retentionData = isFromHandler ? retention.percentage : retention;
+
     let productsFiltered: any = productsArray?.filter(
-      (item: any) => item?.taxChargeId == retention?.tax?.id
+      (item: any) => item?.taxChargeId == retentionData?.tax?.id
     ) || [];
 
-    if (productsFiltered.length && retention?.tax_id !== null) {
-      productsFiltered = productsFiltered.reduce((total: any, product: any) => {
+    if (productsFiltered.length > 0 && retentionData?.tax_id != null) {
+      const totalTaxBaseForRetention = productsFiltered.reduce((total: any, product: any) => {
         let actualQuantity = 0;
 
         if (["medications", "vaccines"].includes(product?.typeProduct)) {
@@ -73,26 +77,29 @@ export const RetentionsSection: React.FC<RetentionsSectionProps> = ({
           actualQuantity = Number(product?.quantity) || 0;
         }
 
-        const subtotal = actualQuantity * (Number(product?.price) || 0);
+        const productSubtotal = actualQuantity * (Number(product?.price) || 0);
 
         let discount = 0;
 
         if (product?.discountType === "percentage") {
-          discount = subtotal * ((Number(product?.discount) || 0) / 100);
+          discount = productSubtotal * ((Number(product?.discount) || 0) / 100);
         } else {
           discount = Number(product?.discount) || 0;
         }
 
-        const subtotalAfterDiscount = subtotal - discount;
+        const subtotalAfterDiscount = productSubtotal - discount;
 
         const taxValue = subtotalAfterDiscount * ((Number(product?.tax) || Number(product?.iva) || 0) / 100);
-
         return total + taxValue;
       }, 0);
 
-      return (productsFiltered * (Number(retention?.percentage) || 0)) / 100;
+      const percentage = Number(retentionData?.percentage) || 0;
+      const result = (totalTaxBaseForRetention * percentage) / 100;
+      return result;
     } else {
-      return (base * (Number(retention?.percentage) || 0)) / 100;
+      const percentage = Number(retentionData?.percentage) || 0;
+      const result = (base * percentage) / 100;
+      return result;
     }
   };
 
@@ -120,7 +127,6 @@ export const RetentionsSection: React.FC<RetentionsSectionProps> = ({
         if (field === "percentage") {
           updatedRetention.value = calculateRetentionValue({ percentage: value });
         }
-
         return updatedRetention;
       }
       return retention;
@@ -142,7 +148,7 @@ export const RetentionsSection: React.FC<RetentionsSectionProps> = ({
       <div className="card-header bg-light d-flex justify-content-between align-items-center">
         <h2 className="h5 mb-0">
           <i className="pi pi-percentage me-2 text-primary"></i>
-          Retenciones (DOP)
+          Retenciones (COP)
         </h2>
         <Button
           type="button"
@@ -160,8 +166,8 @@ export const RetentionsSection: React.FC<RetentionsSectionProps> = ({
             <InputNumber
               value={calculateBaseAmount()}
               mode="currency"
-              currency="DOP"
-              locale="es-DO"
+              currency="COP"
+              locale="es-CO"
               readOnly
               className="ml-2"
             />
@@ -200,8 +206,8 @@ export const RetentionsSection: React.FC<RetentionsSectionProps> = ({
                   <InputNumber
                     value={retention.value || 0}
                     mode="currency"
-                    currency="DOP"
-                    locale="es-DO"
+                    currency="COP"
+                    locale="es-CO"
                     className="w-100"
                     readOnly
                   />
@@ -227,8 +233,8 @@ export const RetentionsSection: React.FC<RetentionsSectionProps> = ({
               <InputNumber
                 value={retentions.reduce((sum, r) => sum + (r.value || 0), 0)}
                 mode="currency"
-                currency="DOP"
-                locale="es-DO"
+                currency="COP"
+                locale="es-CO"
                 className="font-weight-bold"
                 readOnly
               />

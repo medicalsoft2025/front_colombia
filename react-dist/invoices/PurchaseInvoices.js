@@ -171,9 +171,9 @@ export const PurchaseInvoices = () => {
 
   // Formatear número para montos en pesos dominicanos (DOP)
   const formatCurrency = value => {
-    return value?.toLocaleString("es-DO", {
+    return value?.toLocaleString("es-CO", {
       style: "currency",
-      currency: "DOP",
+      currency: "COP",
       minimumFractionDigits: 2,
       maximumFractionDigits: 2
     });
@@ -181,7 +181,7 @@ export const PurchaseInvoices = () => {
 
   // Formatear fecha
   const formatDate = value => {
-    return value?.toLocaleDateString("es-DO", {
+    return value?.toLocaleDateString("es-CO", {
       day: "2-digit",
       month: "2-digit",
       year: "numeric"
@@ -190,7 +190,6 @@ export const PurchaseInvoices = () => {
 
   // Funciones para las acciones
   const generateReceipt = invoice => {
-    console.log("invoice", invoice);
     setFacturaParaRecibo(invoice);
     setShowReciboModal(true);
   };
@@ -214,6 +213,7 @@ export const PurchaseInvoices = () => {
       id: "DEBIT",
       name: "Débito"
     };
+    invoice.invoice_retentions = invoice.original?.invoice_retentions || [];
     setInvoiceToNote(invoice);
     setShowNoteModal(true);
   }
@@ -222,6 +222,7 @@ export const PurchaseInvoices = () => {
       id: "CREDIT",
       name: "Crédito"
     };
+    invoice.invoice_retentions = invoice.original?.invoice_retentions || [];
     setInvoiceToNote(invoice);
     setShowNoteModal(true);
   }
@@ -386,7 +387,8 @@ export const PurchaseInvoices = () => {
     monto: factura.monto,
     adjustedType: factura.adjustedType,
     estado: factura.estado,
-    actions: factura
+    actions: factura,
+    invoice_retentions: factura.invoice_retentions
   }));
   const columns = [{
     field: "numeroFactura",

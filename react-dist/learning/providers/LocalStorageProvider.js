@@ -1,27 +1,27 @@
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { LocalStorageContext } from "../context/LocalStorageContext.js";
 import { useLocalItems } from "../hooks/useLocalItems.js";
+import { useLocalItem } from "../hooks/useLocalItem.js";
 import { useLocalCreate } from "../hooks/useLocalCreate.js";
 import { useLocalUpdate } from "../hooks/useLocalUpdate.js";
 import { useLocalRemove } from "../hooks/useLocalRemove.js";
-import { useLocalItem } from "../hooks/useLocalItem.js";
-import { usePRToast } from "../../hooks/usePRToast.js";
 export const LocalStorageProvider = props => {
   const {
     children,
     localStorageKey
   } = props;
-  const [dialogVisible, setDialogVisible] = useState(false);
+
+  // Use Hooks (Composition Root)
   const {
     items,
-    getItems,
-    loading: loadingItems
+    loading: loadingItems,
+    getItems
   } = useLocalItems(localStorageKey);
   const {
     item: selectedItem,
-    getItem,
-    setItem,
-    loading: loadingItem
+    setItem: setSelectedItem,
+    loading: loadingItem,
+    getItem
   } = useLocalItem(localStorageKey);
   const {
     create
@@ -32,65 +32,41 @@ export const LocalStorageProvider = props => {
   const {
     remove
   } = useLocalRemove(localStorageKey);
-  const {
-    toast,
-    showSuccessToast,
-    showServerErrorsToast
-  } = usePRToast();
-  const saveItem = useCallback(data => {
+
+  // Consolidated Actions
+  const saveItem = useCallback(async data => {
     try {
-      if (!selectedItem) {
-        create(data);
+      if ('id' in data && data.id) {
+        await update(data.id, data);
       } else {
-        update(selectedItem.id, data);
+        await create(data);
       }
-      getItems();
-      showSuccessToast({
-        title: 'Éxito',
-        message: 'Item guardado exitosamente'
-      });
+      await getItems(); // Refresh items list after save
     } catch (error) {
-      showServerErrorsToast(error);
+      console.error("Error saving item", error);
+      throw error;
     }
-  }, [selectedItem]);
-  const removeItem = useCallback(id => {
+  }, [create, update, getItems]);
+  const removeItem = useCallback(async id => {
     try {
-      remove(id);
-      getItems();
-      showSuccessToast({
-        title: 'Éxito',
-        message: 'Item eliminado exitosamente'
-      });
+      await remove(id);
+      await getItems(); // Refresh items list after delete
     } catch (error) {
-      showServerErrorsToast(error);
+      console.error("Error removing item", error);
+      throw error;
     }
-  }, []);
-  const openDialogCreate = useCallback(() => {
-    setDialogVisible(true);
-    setItem(null);
-  }, []);
-  const openDialogEdit = useCallback(item => {
-    getItem(item.id);
-    setDialogVisible(true);
-  }, []);
-  const closeDialog = useCallback(() => {
-    setDialogVisible(false);
-    setItem(null);
-  }, []);
-  const contextValue = {
-    selectedItem,
-    dialogVisible,
+  }, [remove, getItems]);
+  const contextValue = useMemo(() => ({
     items,
+    selectedItem,
     loadingItems,
     loadingItem,
-    toast,
     saveItem,
     removeItem,
+    getItem,
     getItems,
-    openDialogCreate,
-    openDialogEdit,
-    closeDialog
-  };
+    setSelectedItem
+  }), [items, selectedItem, loadingItems, loadingItem, saveItem, removeItem, getItem, getItems, setSelectedItem]);
   return /*#__PURE__*/React.createElement(LocalStorageContext.Provider, {
     value: contextValue
   }, children);

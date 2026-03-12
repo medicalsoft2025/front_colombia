@@ -18,6 +18,11 @@ export const useIntegrationForm = (props: UseIntegrationFormProps) => {
     const [configFields, setConfigFields] = useState<any[]>([]);
 
     useEffect(() => {
+        if (!initialConfigFields || initialConfigFields.length === 0) return;
+
+        console.log("Configs:", configs);
+        console.log("Initial Config Fields:", initialConfigFields);
+
         initialConfigFields.forEach((field) => {
             const config = configs.find((config: any) => config.key_ === field.field);
             if (config) {

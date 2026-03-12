@@ -8,7 +8,11 @@ import { Toast } from 'primereact/toast';
 import { SmtpConfig } from '../types/consultorio';
 import { useCompanyCommunication } from '../hooks/useCompanyCommunication';
 
-const SmtpConfigForm: React.FC = () => {
+interface SmtpConfigFormProps {
+    companyId?: string | number;
+}
+
+const SmtpConfigForm: React.FC<SmtpConfigFormProps> = ({ companyId }) => {
     const toast = useRef<Toast>(null);
 
     const {
@@ -27,7 +31,7 @@ const SmtpConfigForm: React.FC = () => {
         }
     });
 
-    const { communication, loading, error, isSubmitting, submitError, saveCommunication } = useCompanyCommunication();
+    const { communication, loading, error, isSubmitting, submitError, saveCommunication } = useCompanyCommunication(companyId);
 
     const securityOptions = [
         { label: 'TLS', value: 'tls' },
@@ -192,6 +196,7 @@ const SmtpConfigForm: React.FC = () => {
                                                 type="number"
                                                 className={`form-control ${errors.port ? 'is-invalid' : ''}`}
                                                 placeholder={getDefaultPort(selectedSecurity).toString()}
+                                                value={String(field.value)}
                                                 onChange={(e) => field.onChange(parseInt(e.target.value) || 0)}
                                             />
                                         )}

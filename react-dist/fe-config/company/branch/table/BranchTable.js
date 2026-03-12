@@ -4,7 +4,6 @@ import { Column } from "primereact/column";
 import { InputText } from "primereact/inputtext";
 import { Button } from "primereact/button";
 import { Card } from "primereact/card";
-import { Dropdown } from "primereact/dropdown";
 import { Toast } from "primereact/toast";
 import { Dialog } from "primereact/dialog";
 import { Menu } from "primereact/menu";
@@ -24,44 +23,6 @@ export const BranchTable = ({
     city: "",
     country: ""
   });
-  const countries = [{
-    label: "Argentina",
-    value: "Argentina"
-  }, {
-    label: "Chile",
-    value: "Chile"
-  }, {
-    label: "Uruguay",
-    value: "Uruguay"
-  }, {
-    label: "Paraguay",
-    value: "Paraguay"
-  }, {
-    label: "Bolivia",
-    value: "Bolivia"
-  }, {
-    label: "Brasil",
-    value: "Brasil"
-  }];
-  const cities = [{
-    label: "Buenos Aires",
-    value: "Buenos Aires"
-  }, {
-    label: "Córdoba",
-    value: "Córdoba"
-  }, {
-    label: "Rosario",
-    value: "Rosario"
-  }, {
-    label: "Mendoza",
-    value: "Mendoza"
-  }, {
-    label: "Santiago",
-    value: "Santiago"
-  }, {
-    label: "Montevideo",
-    value: "Montevideo"
-  }];
   useEffect(() => {
     setFilteredBranches(branches);
   }, [branches]);
@@ -269,30 +230,6 @@ export const BranchTable = ({
     onChange: e => handleFilterChange("name", e.target.value),
     placeholder: "Buscar por nombre",
     className: classNames("w-100")
-  })), /*#__PURE__*/React.createElement("div", {
-    className: "col-md-6 col-lg-4"
-  }, /*#__PURE__*/React.createElement("label", {
-    style: styles.formLabel
-  }, "Ciudad"), /*#__PURE__*/React.createElement(Dropdown, {
-    value: filtros.city,
-    options: cities,
-    onChange: e => handleFilterChange("city", e.value),
-    optionLabel: "label",
-    placeholder: "Seleccione ciudad",
-    className: classNames("w-100"),
-    showClear: true
-  })), /*#__PURE__*/React.createElement("div", {
-    className: "col-md-6 col-lg-4"
-  }, /*#__PURE__*/React.createElement("label", {
-    style: styles.formLabel
-  }, "Pa\xEDs"), /*#__PURE__*/React.createElement(Dropdown, {
-    value: filtros.country,
-    options: countries,
-    onChange: e => handleFilterChange("country", e.value),
-    optionLabel: "label",
-    placeholder: "Seleccione pa\xEDs",
-    className: classNames("w-100"),
-    showClear: true
   })), /*#__PURE__*/React.createElement("div", {
     className: "col-12 d-flex justify-content-end gap-2"
   }, /*#__PURE__*/React.createElement(Button, {

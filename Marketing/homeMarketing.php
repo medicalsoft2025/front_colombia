@@ -7,6 +7,7 @@ $tabs = [
     ['icono' => 'comments', 'titulo' => 'Mensajeria masiva', 'texto' => 'Ver opciones de mensajeria masiva', 'url' => 'MassMessage'],
     ['icono' => 'save', 'titulo' => 'Plantillas de mensajes', 'texto' => 'Ver y configurar plantillas de mensajes', 'url' => 'plantillasMensajes'],
     ['icono' => 'chart-bar', 'titulo' => 'Encuestas', 'texto' => 'Visualizar panel de encuestas', 'url' => 'panel-encuesta'],
+    ['icono' => 'ticket', 'titulo' => 'Tickets', 'texto' => 'Revisar y crear tickets de Soporte', 'url' => 'Tickets'],
 ];
 ?>
 

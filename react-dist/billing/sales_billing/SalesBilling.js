@@ -27,6 +27,7 @@ import { useAdvancePayments } from "../hooks/useAdvancePayments.js";
 import { useBillingByType } from "../hooks/useBillingByType.js";
 import { useThirdPartyModal } from "../third-parties/hooks/useThirdPartyModal.js";
 import { CustomTaxes } from "../../components/billing/CustomTaxes.js";
+import { ThirdPartyModal } from "../third-parties/modals/ThridPartiesModal.js";
 export const SalesBilling = ({
   selectedInvoice,
   successSale
@@ -112,6 +113,9 @@ export const SalesBilling = ({
     }
     fetchAdvancePayments(selectedInvoice.third_id || customerId, "client");
   }, [selectedInvoice, customerId]);
+  useEffect(() => {
+    fetchAdvancePayments(customerId, "client");
+  }, [customerId]);
   function generateId() {
     return Math.random().toString(36).substr(2, 9);
   }
@@ -342,7 +346,7 @@ export const SalesBilling = ({
       window["toast"].show({
         severity: "success",
         summary: "Éxito",
-        detail: `Valor ${amountToSet.toFixed(2)} DOP copiado al método de pago`,
+        detail: `Valor ${amountToSet.toFixed(2)} COP copiado al método de pago`,
         life: 3000
       });
     } else {
@@ -453,8 +457,8 @@ export const SalesBilling = ({
       body: rowData => /*#__PURE__*/React.createElement(InputNumber, {
         value: calculateLineTotal(rowData),
         mode: "currency",
-        currency: "DOP",
-        locale: "es-DO",
+        currency: "COP",
+        locale: "es-CO",
         readOnly: true,
         inputClassName: "form-control bg-light",
         style: {
@@ -504,7 +508,7 @@ export const SalesBilling = ({
       window["toast"].show({
         severity: "error",
         summary: "Error",
-        detail: `Los métodos de pago (${calculateTotalPayments().toFixed(2)} DOP) no cubren el total de la factura (${calculateTotal().toFixed(2)} DOP)`,
+        detail: `Los métodos de pago (${calculateTotalPayments().toFixed(2)} COP) no cubren el total de la factura (${calculateTotal().toFixed(2)} COP)`,
         life: 5000
       });
       return;
@@ -534,6 +538,7 @@ export const SalesBilling = ({
     });
   };
   function formatInvoiceForBackend(frontendData) {
+    console.log("productsArray:", productsArray);
     const purchaseIdValue = purchaseOrderId ? {
       purchase_order_id: purchaseOrderId
     } : {};
@@ -569,7 +574,8 @@ export const SalesBilling = ({
           discount: discountAmount,
           tax_product: product.taxAmount || product.iva || 0,
           tax_accounting_account_id: product.taxAccountingAccountId || null,
-          tax_charge_id: product.taxChargeId || null
+          tax_charge_id: product.taxChargeId || null,
+          accounting_account_id: product?.accountingAccountId?.id || null
         };
       }),
       payments: paymentMethodsArray.map(payment => {
@@ -585,8 +591,8 @@ export const SalesBilling = ({
     };
   }
   const {
-    openModal: openThirdPartyModal,
-    ThirdPartyModal
+    openModal,
+    modalProps
   } = useThirdPartyModal({
     onSuccess: data => {
       fetchThirdParties();
@@ -594,7 +600,13 @@ export const SalesBilling = ({
   });
   return /*#__PURE__*/React.createElement("div", {
     className: "container-fluid p-3 p-md-4"
-  }, /*#__PURE__*/React.createElement(ThirdPartyModal, null), /*#__PURE__*/React.createElement("div", {
+  }, modalProps.visible && /*#__PURE__*/React.createElement(ThirdPartyModal, {
+    visible: modalProps.visible,
+    onHide: modalProps.onHide,
+    onSubmit: modalProps.onSubmit,
+    loading: modalProps.loading,
+    error: modalProps.error
+  }), /*#__PURE__*/React.createElement("div", {
     className: "row mb-4"
   }, /*#__PURE__*/React.createElement("div", {
     className: "col-12"
@@ -722,7 +734,7 @@ export const SalesBilling = ({
       showClear: true
     })), /*#__PURE__*/React.createElement(Button, {
       type: "button",
-      onClick: openThirdPartyModal,
+      onClick: () => openModal(),
       icon: /*#__PURE__*/React.createElement("i", {
         className: "fa-solid fa-plus"
       }),
@@ -845,7 +857,7 @@ export const SalesBilling = ({
     className: "h5 mb-0"
   }, /*#__PURE__*/React.createElement("i", {
     className: "pi pi-credit-card me-2 text-primary"
-  }), "M\xE9todos de Pago (DOP)"), /*#__PURE__*/React.createElement(Button, {
+  }), "M\xE9todos de Pago (COP)"), /*#__PURE__*/React.createElement(Button, {
     label: "Agregar M\xE9todo",
     className: "p-button-primary",
     onClick: e => {
@@ -892,11 +904,11 @@ export const SalesBilling = ({
     className: "d-flex gap-2 align-items-center flex-nowrap"
   }, /*#__PURE__*/React.createElement(InputNumber, {
     value: payment.value === "" ? null : payment.value,
-    placeholder: "RD$ 0.00",
+    placeholder: "$ 0.00",
     className: "flex-grow-1",
     mode: "currency",
-    currency: "DOP",
-    locale: "es-DO",
+    currency: "COP",
+    locale: "es-CO",
     min: 0,
     onValueChange: e => handlePaymentChange(payment.id, "value", e.value === null ? "" : e.value),
     inputClassName: "form-control"
@@ -944,8 +956,8 @@ export const SalesBilling = ({
     value: calculateTotal(),
     className: "me-3",
     mode: "currency",
-    currency: "DOP",
-    locale: "es-DO",
+    currency: "COP",
+    locale: "es-CO",
     minFractionDigits: 2,
     maxFractionDigits: 3,
     readOnly: true,
@@ -961,8 +973,8 @@ export const SalesBilling = ({
     value: calculateTotalPayments(),
     className: "me-3",
     mode: "currency",
-    currency: "DOP",
-    locale: "es-DO",
+    currency: "COP",
+    locale: "es-CO",
     minFractionDigits: 2,
     maxFractionDigits: 3,
     readOnly: true,
@@ -976,7 +988,7 @@ export const SalesBilling = ({
     className: "text-danger"
   }, /*#__PURE__*/React.createElement("i", {
     className: "pi pi-exclamation-triangle me-1"
-  }), "Faltan", " ", (calculateTotal() - calculateTotalPayments()).toFixed(2), " ", "DOP") : /*#__PURE__*/React.createElement("span", {
+  }), "Faltan", " ", (calculateTotal() - calculateTotalPayments()).toFixed(2), " ", "COP") : /*#__PURE__*/React.createElement("span", {
     className: "text-success"
   }, /*#__PURE__*/React.createElement("i", {
     className: "pi pi-check-circle me-1"
@@ -1002,7 +1014,7 @@ export const SalesBilling = ({
     className: "h5 mb-0"
   }, /*#__PURE__*/React.createElement("i", {
     className: "pi pi-calculator me-2 text-primary"
-  }), "Totales (DOP)")), /*#__PURE__*/React.createElement("div", {
+  }), "Totales (COP)")), /*#__PURE__*/React.createElement("div", {
     className: "card-body p-3"
   }, /*#__PURE__*/React.createElement("div", {
     className: "row g-3"
@@ -1016,8 +1028,8 @@ export const SalesBilling = ({
     value: calculateSubtotal(),
     className: "w-100",
     mode: "currency",
-    currency: "DOP",
-    locale: "es-DO",
+    currency: "COP",
+    locale: "es-CO",
     readOnly: true,
     inputClassName: "form-control bg-light"
   }))), /*#__PURE__*/React.createElement("div", {
@@ -1030,8 +1042,8 @@ export const SalesBilling = ({
     value: calculateTotalDiscount(),
     className: "w-100",
     mode: "currency",
-    currency: "DOP",
-    locale: "es-DO",
+    currency: "COP",
+    locale: "es-CO",
     readOnly: true,
     inputClassName: "form-control bg-light"
   }))), /*#__PURE__*/React.createElement("div", {
@@ -1044,8 +1056,8 @@ export const SalesBilling = ({
     value: calculateSubtotalAfterDiscount(),
     className: "w-100",
     mode: "currency",
-    currency: "DOP",
-    locale: "es-DO",
+    currency: "COP",
+    locale: "es-CO",
     readOnly: true,
     inputClassName: "form-control bg-light"
   }))), /*#__PURE__*/React.createElement("div", {
@@ -1058,8 +1070,8 @@ export const SalesBilling = ({
     value: calculateTotalTax(),
     className: "w-100",
     mode: "currency",
-    currency: "DOP",
-    locale: "es-DO",
+    currency: "COP",
+    locale: "es-CO",
     readOnly: true,
     inputClassName: "form-control bg-light"
   }))), /*#__PURE__*/React.createElement("div", {
@@ -1072,8 +1084,8 @@ export const SalesBilling = ({
     value: calculateTotalWithholdingTax(),
     className: "w-100",
     mode: "currency",
-    currency: "DOP",
-    locale: "es-DO",
+    currency: "COP",
+    locale: "es-CO",
     readOnly: true,
     inputClassName: "form-control bg-light"
   }))), /*#__PURE__*/React.createElement("div", {
@@ -1086,8 +1098,8 @@ export const SalesBilling = ({
     value: calculateTotal(),
     className: "w-100 font-weight-bold",
     mode: "currency",
-    currency: "DOP",
-    locale: "es-DO",
+    currency: "COP",
+    locale: "es-CO",
     readOnly: true,
     inputClassName: "form-control bg-light fw-bold"
   })))))), /*#__PURE__*/React.createElement("div", {
@@ -1248,11 +1260,11 @@ const TypeColumnBody = ({
     id: "vaccines",
     name: "Vacunas"
   }, {
-    id: "services",
+    id: "spent",
     name: "Servicios"
   }, {
-    id: "assetsFixed",
-    name: "Activos y fijos"
+    id: "assets",
+    name: "Activos fijos"
   }];
   return /*#__PURE__*/React.createElement("div", {
     style: {
@@ -1288,6 +1300,9 @@ const ProductColumnBody = ({
   const {
     accounts: propertyAccounts
   } = useAccountingAccountsByCategory("sub_account", "15");
+  const {
+    accounts: accountingAccountByCategory
+  } = useAccountingAccountsByCategory("category", type);
   const [options, setOptions] = useState([]);
   useEffect(() => {
     if (!type) return;
@@ -1323,7 +1338,9 @@ const ProductColumnBody = ({
         e.originalEvent?.stopPropagation();
         const selectedProduct = options.find(opt => opt.id === e.value);
         onChange(e.value);
-        handleProductChange(rowData.id, "description", selectedProduct?.label || "");
+        handleProductChange(rowData.id, "accountingAccountId",
+        // Necesitas añadir esta propiedad al tipo InvoiceProduct
+        accountingAccountByCategory?.[0] || "");
       },
       onClick: e => e.stopPropagation(),
       loading: !options.length,
@@ -1345,6 +1362,7 @@ const ProductColumnBody = ({
       const selectedProduct = options.find(p => p.id === e.value);
       if (selectedProduct) {
         handleProductChange(rowData.id, "description", selectedProduct.label);
+        handleProductChange(rowData.id, "accountingAccountId", accountingAccountByCategory?.[0] || "");
       }
     },
     virtualScrollerOptions: {
@@ -1392,8 +1410,8 @@ const PriceColumnBody = ({
       minWidth: "150px"
     },
     mode: "currency",
-    currency: "DOP",
-    locale: "es-DO",
+    currency: "COP",
+    locale: "es-CO",
     min: 0,
     onValueChange: e => {
       onChange(e.value);
@@ -1456,8 +1474,8 @@ const DiscountColumnBody = ({
     suffix: discountType === "percentage" ? "%" : "",
     prefix: discountType === "fixed" ? "$ " : "",
     mode: localDiscountType === "fixed" ? "currency" : "decimal",
-    currency: localDiscountType === "fixed" ? "DOP" : undefined,
-    locale: "es-DO",
+    currency: localDiscountType === "fixed" ? "COP" : undefined,
+    locale: "es-CO",
     min: 0,
     max: discountType === "percentage" ? 100 : undefined,
     onValueChange: e => {

@@ -4,7 +4,6 @@ import { useForm, Controller } from 'react-hook-form';
 import { InputText } from 'primereact/inputtext';
 import { Dropdown } from 'primereact/dropdown';
 import { Button } from 'primereact/button';
-import { Message } from 'primereact/message';
 import { Card } from 'primereact/card';
 import { useCompanyRepresentative } from "../hooks/useCompanyRepresentative.js";
 import { SwalManager } from "../../../../services/alertManagerImported.js";
@@ -38,7 +37,7 @@ const RepresentativeTab = ({
     error,
     isSubmitting,
     saveRepresentative
-  } = useCompanyRepresentative();
+  } = useCompanyRepresentative(companyId);
   const documentTypes = [{
     label: 'RNC',
     value: 'RNC'
@@ -77,11 +76,7 @@ const RepresentativeTab = ({
   const onSubmit = async data => {
     try {
       if (!companyId) {
-        Message.show({
-          severity: 'error',
-          summary: 'Error',
-          detail: 'companyId es requerido'
-        });
+        SwalManager.error('companyId es requerido');
         return;
       }
       const savedRepresentative = await saveRepresentative(companyId, data);

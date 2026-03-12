@@ -7,7 +7,7 @@ import { Column } from "primereact/column";
 import { InputNumber } from "primereact/inputnumber";
 import { Tag } from "primereact/tag";
 import { Divider } from "primereact/divider";
-import { calculateTotal, calculatePaid, calculateChange, validateProductsStep, validatePaymentStep } from "../utils/helpers.js";
+import { calculateTotal, calculatePaid, calculateChange, validateProductsStep, validatePaymentStep, calculateCopayment } from "../utils/helpers.js";
 import { useAppointmentProceduresV2 } from "../../../appointments/hooks/useAppointmentsProcedureV2.js";
 import { usePaymentMethods } from "../../../payment-methods/hooks/usePaymentMethods.js";
 const ProductsPaymentStep = ({
@@ -28,9 +28,13 @@ const ProductsPaymentStep = ({
   const [selectedProcedure, setSelectedProcedure] = useState(null);
   const [filteredPaymentMethods, setFilteredPaymentMethods] = useState([]);
   const total = calculateTotal(formData.products, formData.billing.facturacionEntidad);
+  const {
+    copayment,
+    isCopayment
+  } = calculateCopayment(formData.products, formData.copaymentRules, formData.billing.facturacionEntidad);
   const paid = calculatePaid(formData.payments);
-  const change = calculateChange(total, paid);
-  const remaining = Math.max(0, total - paid);
+  const change = calculateChange(copayment, paid);
+  const remaining = Math.max(0, copayment - paid);
   const {
     procedureOptions,
     loadProcedures
@@ -70,6 +74,10 @@ const ProductsPaymentStep = ({
       return;
     }
     const price = formData.billing.facturacionEntidad ? procedure.copayment : procedure.sale_price;
+    const {
+      copayment,
+      isCopayment
+    } = calculateCopaymentLocal(procedure.sale_price, procedure.entities, formData.copaymentRules, formData.billing.facturacionEntidad);
     const newProduct = {
       uuid: `${Math.random().toString(36).slice(2, 8)}${Math.random().toString(36).slice(2, 8)}`,
       id: procedure.id,
@@ -78,11 +86,13 @@ const ProductsPaymentStep = ({
       description: procedure.description || procedure.name || "Procedimiento médico",
       price: procedure.sale_price,
       copayment: procedure.copayment,
+      calculateCopaymentAdmission: copayment,
       currentPrice: price,
       quantity: 1,
       tax: procedure.tax_charge?.percentage || 0,
       discount: 0,
-      total: (price || 0) * (1 + (procedure.tax_charge?.percentage || 0) / 100)
+      total: (price || 0) * (1 + (procedure.tax_charge?.percentage || 0) / 100),
+      entities: procedure.entities || []
     };
     formData.products = [...formData.products, newProduct];
     setSelectedProcedure(null);
@@ -91,9 +101,75 @@ const ProductsPaymentStep = ({
     setModalAmount(remaining);
     setModalChange(0);
   }, [formData.products, formData.billing.facturacionEntidad]);
+  const calculateCopaymentLocal = (price = 0, entities = [], copaymentRules, facturacionEntidad) => {
+    let copayment = 0;
+    let isCopaymentVar = false;
+    if (!facturacionEntidad) {
+      if (!copaymentRules.level && copaymentRules.value_type === "percentage" && copaymentRules.affiliate_type === "2") {
+        const percentage = Number(copaymentRules.value).toFixed(2) || 0;
+        copayment = price * (percentage / 100);
+        return {
+          copayment: copayment,
+          isCopayment: !isCopaymentVar
+        };
+      } else if (!copaymentRules.level && copaymentRules.value_type === "fixed") {
+        copayment = Number(copaymentRules.value) || 0;
+        return {
+          copayment: copayment,
+          isCopayment: isCopaymentVar
+        };
+      } else if (copaymentRules.level == "2" && copaymentRules.attention_type === "procedure") {
+        copayment = price * (10 / 100);
+        return {
+          copayment: copayment,
+          isCopayment: !isCopaymentVar
+        };
+      }
+      return {
+        copayment: 0,
+        isCopayment: isCopaymentVar
+      };
+    } else {
+      if (!copaymentRules.level && copaymentRules.value_type === "percentage" && copaymentRules.affiliate_type === "2") {
+        const percentage = Number(copaymentRules.value).toFixed(2) || 0;
+        const valueByEntity = entities?.filter(entity => entity?.category === copaymentRules.category);
+        copayment = valueByEntity.reduce((sum, product) => {
+          return Number(sum) + Number(price) * (percentage / 100);
+        }, 0);
+        return {
+          copayment: copayment,
+          isCopayment: !isCopaymentVar
+        };
+      } else if (!copaymentRules.level && copaymentRules.value_type === "fixed") {
+        const valueByEntity = entities?.filter(entity => entity?.category === copaymentRules.category);
+        copayment = valueByEntity.reduce((sum, product) => {
+          return Number(sum) + Number(price);
+        }, 0);
+        return {
+          copayment: copayment,
+          isCopayment: isCopaymentVar
+        };
+      } else if (copaymentRules.level == "2" && copaymentRules.attention_type === "procedure") {
+        const valueByEntity = entities?.filter(entity => entity?.category === copaymentRules.category);
+        copayment = valueByEntity.reduce((sum, product) => {
+          return Number(sum) + Number(price) * (10 / 100);
+        }, 0);
+        return {
+          copayment: copayment,
+          isCopayment: !isCopaymentVar
+        };
+      }
+      return {
+        copayment: 0,
+        isCopayment: isCopaymentVar
+      };
+    }
+  };
   const handleRemoveProduct = uuid => {
     const updatedProducts = formData.products.filter(product => product.uuid !== uuid);
     updateFormData("products", updatedProducts);
+    updateFormData("copayment", copayment);
+    updateFormData("isCopayment", isCopayment);
     toast.current?.show({
       severity: "success",
       summary: "Producto eliminado",
@@ -193,8 +269,15 @@ const ProductsPaymentStep = ({
       });
       return;
     }
-    const total = calculateTotal(validProducts, formData.billing.facturacionEntidad);
-    if (validateProductsStep(validProducts, toast) && validatePaymentStep(formData.payments, total, toast)) {
+
+    // const total = calculateTotal(
+    //   validProducts,
+    //   formData.billing.facturacionEntidad,
+    // );
+
+    if (validateProductsStep(validProducts, toast) && validatePaymentStep(formData.payments, copayment, toast)) {
+      formData.copayment = copayment;
+      formData.isCopayment = isCopayment;
       nextStep();
     }
   };
@@ -263,21 +346,28 @@ const ProductsPaymentStep = ({
   };
   useEffect(() => {
     if (productsToInvoice.length > 0 && formData.products.length === 0) {
-      const initialProducts = productsToInvoice.map(product => ({
-        uuid: product.uuid,
-        id: product.id,
-        productId: product.id,
-        code: product.barcode || `PROD-${product.id}`,
-        name: product.name || product.description || `Producto ${product.id}`,
-        description: product.description || product.name || `Producto ${product.id}`,
-        price: product.sale_price || 0,
-        copayment: product.copayment || 0,
-        currentPrice: (formData.billing.facturacionEntidad ? product.copayment : product.sale_price) || 0,
-        quantity: 1,
-        tax: product.tax_charge?.percentage || 0,
-        discount: 0,
-        total: (product.sale_price || 0) * (1 + (product.tax_charge?.percentage || 0) / 100)
-      }));
+      const initialProducts = productsToInvoice.map(product => {
+        const {
+          copayment,
+          isCopayment
+        } = calculateCopaymentLocal(product.sale_price, product.entities, formData.copaymentRules, formData.billing.facturacionEntidad);
+        return {
+          uuid: product.uuid,
+          id: product.id,
+          productId: product.id,
+          code: product.barcode || `PROD-${product.id}`,
+          name: product.name || product.description || `Producto ${product.id}`,
+          description: product.description || product.name || `Producto ${product.id}`,
+          price: product.sale_price || 0,
+          copayment: product.copayment || 0,
+          calculateCopaymentAdmission: copayment,
+          currentPrice: (formData.billing.facturacionEntidad ? product.copayment : product.sale_price) || 0,
+          quantity: 1,
+          tax: product.tax_charge?.percentage || 0,
+          discount: 0,
+          total: (product.sale_price || 0) * (1 + (product.tax_charge?.percentage || 0) / 100)
+        };
+      });
       updateFormData("products", initialProducts);
       setModalAmount(remaining);
     }
@@ -368,11 +458,11 @@ const ProductsPaymentStep = ({
     }
   }))), /*#__PURE__*/React.createElement(Divider, null), /*#__PURE__*/React.createElement("div", {
     className: "flex justify-content-end align-items-center gap-3 mt-3"
-  }, /*#__PURE__*/React.createElement("span", {
+  }, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("span", {
     className: "text-lg"
-  }, "Total General:"), /*#__PURE__*/React.createElement("span", {
+  }, "Total Copago: "), /*#__PURE__*/React.createElement("span", {
     className: "text-xl font-bold text-primary"
-  }, formatCurrency(total))))), /*#__PURE__*/React.createElement("div", {
+  }, formatCurrency(copayment)))))), /*#__PURE__*/React.createElement("div", {
     className: "col-12 md:col-4"
   }, /*#__PURE__*/React.createElement(Card, {
     title: /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("i", {
@@ -579,7 +669,7 @@ const ProductsPaymentStep = ({
     }),
     className: "p-button-primary",
     onClick: handleNext,
-    disabled: formData.payments.length === 0 && total > 0 || formData.products.length === 0
+    disabled: formData.payments.length === 0 && copayment > 0 || formData.products.length === 0
   }))), /*#__PURE__*/React.createElement("style", null, `   
       .admission-billing-card .p-card-body
       {

@@ -199,6 +199,7 @@ const BillingConfigTab: React.FC<BillingConfigTabProps> = ({
           resolution_date: resolutionDate,
           expiration_date: expirationDate,
           accounting_account: +billing.accounting_account,
+          accounting_account_discount: +billing.accounting_account_discount,
         };
 
         // Marcar como guardado
@@ -294,6 +295,7 @@ const BillingConfigTab: React.FC<BillingConfigTabProps> = ({
         expiration_date: formatDate(data.expiration_date),
         type: tipoApi,
         accounting_account_reverse_id: data.accounting_account_reverse_id,
+        accounting_account_discount: data.accounting_account_discount?.toString(),
       };
 
       if (data?.id) {
@@ -401,6 +403,7 @@ const BillingConfigTab: React.FC<BillingConfigTabProps> = ({
     const cuentasFiltradas = filtrarCuentas();
     const accountingAccount = watch("accounting_account");
     const accountingAccountReverse = watch("accounting_account_reverse_id");
+    const accountingAccountDiscount = watch("accounting_account_discount");
     const showReverseAccount = [
       "fiscal",
       "consumidor",
@@ -410,6 +413,11 @@ const BillingConfigTab: React.FC<BillingConfigTabProps> = ({
       "fiscal",
       "consumidor",
       "gubernamental",
+    ].includes(tipo);
+    const showAccountingAccountDiscount = [
+      "fiscal",
+      "consumidor",
+      "compra",
     ].includes(tipo);
 
     const tipoConfig = tiposFacturacion.find((t) => t.id === tipo);
@@ -555,6 +563,44 @@ const BillingConfigTab: React.FC<BillingConfigTabProps> = ({
                 {errors?.accounting_account_reverse_id && (
                   <small className="p-error">
                     Favor seleccione una cuenta contable reversa.
+                  </small>
+                )}
+              </div>
+            )}
+
+            {showAccountingAccountDiscount && (
+              <div className="field mb-4">
+                <label
+                  htmlFor={`accounting_account_discount_${tipo}`}
+                  className="font-medium block mb-2"
+                >
+                  Cuenta Contable Descuento <span className="text-danger">*</span>
+                </label>
+                <Dropdown
+                  id={`accounting_account_discount_${tipo}`}
+                  options={cuentasFiltradas.map((cuenta: CuentaContable) => ({
+                    label: `${cuenta.account_code} - ${cuenta.account_name}`,
+                    value: cuenta.id,
+                    account_code: cuenta.account_code,
+                    account_name: cuenta.account_name,
+                  }))}
+                  value={accountingAccountDiscount}
+                  onChange={(e) =>
+                    setValue("accounting_account_discount", e.value)
+                  }
+                  filter
+                  filterBy="account_name,account_code,label"
+                  showClear
+                  filterPlaceholder="Buscar cuenta..."
+                  className={`w-full ${errors?.accounting_account_discount ? "p-invalid" : ""
+                    }`}
+                  loading={loading.cuentas}
+                  placeholder="Seleccione una cuenta"
+                  appendTo="self"
+                />
+                {errors?.accounting_account_discount && (
+                  <small className="p-error">
+                    Favor seleccione una cuenta contable de descuento.
                   </small>
                 )}
               </div>

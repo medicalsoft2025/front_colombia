@@ -65,20 +65,20 @@ export class BillingReportService extends BaseApiService {
         return await this.httpClient.get(`api/v1/admin/reports/advances?${params.toString()}`);
     }
     
-    async getAdvancesReportByType({type}) {
+    async getAdvancesReportByType(params, {type}) {
         if (type == "client") {
-            return await this.getClientAdvancesReport()
+            return await this.getClientAdvancesReport(params)
         } else {
-            return await this.getProviderAdvancesReport()
+            return await this.getProviderAdvancesReport(params)
         }
     }
 
-    async getClientAdvancesReport() {
-        return await this.httpClient.get(`api/v1/admin/client-advances`);
+    async getClientAdvancesReport(params) {
+        return await this.httpClient.get(`api/v1/admin/client-advances`, params);
     }
 
-    async getProviderAdvancesReport() {
-        return await this.httpClient.get('api/v1/admin/provider-advances');
+    async getProviderAdvancesReport(params) {
+        return await this.httpClient.get('api/v1/admin/provider-advances', params);
     }
 
     async getBalanceAccountingAccount({ from, to, account_from, account_to }) {

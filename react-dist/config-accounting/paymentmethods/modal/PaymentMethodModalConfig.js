@@ -9,8 +9,7 @@ const PaymentMethodModalConfig = ({
   initialData,
   onClose,
   closable = true,
-  accounts,
-  loading
+  loading = false
 }) => {
   const [showConfirm, setShowConfirm] = useState(false);
   const [formHasChanges, setFormHasChanges] = useState(false);
@@ -31,7 +30,10 @@ const PaymentMethodModalConfig = ({
     try {
       await onSave(data);
       onClose();
-    } catch (error) {}
+    } catch (error) {
+      // Manejar error si es necesario
+      console.error("Error saving payment method:", error);
+    }
   };
 
   // Determinar el título basado en si hay initialData (edición) o no (nuevo)
@@ -46,7 +48,7 @@ const PaymentMethodModalConfig = ({
     initialData: initialData,
     onCancel: handleCloseAttempt,
     loading: loading,
-    accounts: accounts
+    onFormChange: setFormHasChanges
   })), /*#__PURE__*/React.createElement(Dialog, {
     visible: showConfirm,
     onHide: () => setShowConfirm(false),

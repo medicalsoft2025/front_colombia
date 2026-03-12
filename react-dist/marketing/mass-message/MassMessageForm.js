@@ -254,10 +254,8 @@ export const MassMessageForm = ({
     fetchMassMessages();
   }, []);
   useEffect(() => {
-    console.log("initialData changed: ", initialData);
     if (initialData) {
       const transformedData = transformBackendToForm(initialData);
-      console.log("Transformed Data: ", transformedData);
       reset(transformedData);
     }
   }, [initialData, reset, countries]);
@@ -284,7 +282,6 @@ export const MassMessageForm = ({
     };
   };
   function handleFiltersChange(filters) {
-    console.log("handleFiltersChange called with filters: ", filters);
     let transformed = {};
     // Filtros simples
     if (filters.age) transformed.age = filters.age;

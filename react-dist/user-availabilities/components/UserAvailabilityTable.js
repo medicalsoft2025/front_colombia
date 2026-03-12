@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
 import { Toast } from "primereact/toast";
-import { Dialog } from "primereact/dialog";
 import { Menu } from "primereact/menu";
 import { Accordion, AccordionTab } from "primereact/accordion";
 import { Dropdown } from "primereact/dropdown";
@@ -13,8 +12,6 @@ export const UserAvailabilityTable = ({
   loading = false,
   onReload
 }) => {
-  const [deleteDialogVisible, setDeleteDialogVisible] = useState(false);
-  const [availabilityToDelete, setAvailabilityToDelete] = useState(null);
   const [filteredAvailabilities, setFilteredAvailabilities] = useState([]);
   const [filtros, setFiltros] = useState({
     doctorName: "",
@@ -104,44 +101,11 @@ export const UserAvailabilityTable = ({
       await onReload();
     }
   };
-  const showToast = (severity, summary, detail) => {
-    toast.current?.show({
-      severity,
-      summary,
-      detail,
-      life: 3000
-    });
-  };
-  const confirmDelete = availability => {
-    setAvailabilityToDelete(availability);
-    setDeleteDialogVisible(true);
-  };
-  const deleteAvailability = async () => {
-    if (availabilityToDelete && onDeleteItem) {
-      await onDeleteItem(availabilityToDelete.id);
-      showToast("success", "Éxito", `Disponibilidad eliminada correctamente`);
-
-      // Refrescar después de eliminar
-      if (onReload) {
-        await onReload();
-      }
+  const deleteAvailability = async id => {
+    if (onDeleteItem) {
+      await onDeleteItem(id);
     }
-    setDeleteDialogVisible(false);
-    setAvailabilityToDelete(null);
   };
-  const deleteDialogFooter = /*#__PURE__*/React.createElement("div", {
-    className: "flex justify-content-end gap-2"
-  }, /*#__PURE__*/React.createElement(Button, {
-    label: "Cancelar",
-    icon: "pi pi-times",
-    className: "p-button-text",
-    onClick: () => setDeleteDialogVisible(false)
-  }), /*#__PURE__*/React.createElement(Button, {
-    label: "Eliminar",
-    icon: "pi pi-check",
-    className: "p-button-danger",
-    onClick: deleteAvailability
-  }));
   const TableMenu = ({
     rowData,
     onEdit,
@@ -154,7 +118,7 @@ export const UserAvailabilityTable = ({
     };
     const handleDelete = () => {
       console.log("Solicitando eliminar disponibilidad con ID:", rowData.id);
-      onDelete(rowData);
+      onDelete(rowData.id);
     };
     return /*#__PURE__*/React.createElement("div", {
       style: {
@@ -200,7 +164,7 @@ export const UserAvailabilityTable = ({
     }, /*#__PURE__*/React.createElement(TableMenu, {
       rowData: rowData,
       onEdit: onEditItem ? onEditItem : () => {},
-      onDelete: confirmDelete
+      onDelete: deleteAvailability
     }));
   };
 
@@ -248,31 +212,13 @@ export const UserAvailabilityTable = ({
   }, {
     field: 'actions',
     header: 'Acciones',
-    body: rowData => actionBodyTemplate(rowData.actions),
-    exportable: false
+    body: rowData => actionBodyTemplate(rowData.actions)
   }];
   return /*#__PURE__*/React.createElement("div", {
     className: "w-100"
   }, /*#__PURE__*/React.createElement(Toast, {
     ref: toast
-  }), /*#__PURE__*/React.createElement(Dialog, {
-    visible: deleteDialogVisible,
-    style: {
-      width: "450px"
-    },
-    header: "Confirmar",
-    modal: true,
-    footer: deleteDialogFooter,
-    onHide: () => setDeleteDialogVisible(false)
-  }, /*#__PURE__*/React.createElement("div", {
-    className: "flex align-items-center justify-content-center"
-  }, /*#__PURE__*/React.createElement("i", {
-    className: "fas fa-exclamation-triangle mr-3",
-    style: {
-      fontSize: "2rem",
-      color: "#F8BB86"
-    }
-  }), availabilityToDelete && /*#__PURE__*/React.createElement("span", null, "\xBFEst\xE1s seguro que deseas eliminar la disponibilidad de ", /*#__PURE__*/React.createElement("b", null, availabilityToDelete.doctorName), "?"))), /*#__PURE__*/React.createElement("div", {
+  }), /*#__PURE__*/React.createElement("div", {
     className: "card mb-3"
   }, /*#__PURE__*/React.createElement("div", {
     className: "card-body"

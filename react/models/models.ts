@@ -37,6 +37,7 @@ export interface Patient {
   label: string;
   whatsapp_notifications?: boolean;
   email_notifications?: boolean;
+  residential_area?: boolean;
 }
 
 export interface Clinicalrecord {

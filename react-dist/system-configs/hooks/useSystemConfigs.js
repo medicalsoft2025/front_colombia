@@ -4,7 +4,7 @@ import { useMemo } from 'react';
 
 // Tipos para mayor seguridad
 
-export const useSystemConfigs = () => {
+export const useSystemConfigs = companyId => {
   const systemConfigService = useMemo(() => new SystemConfigService(), []);
   const {
     data,
@@ -13,8 +13,8 @@ export const useSystemConfigs = () => {
     refetch,
     error
   } = useQuery({
-    queryKey: ['system-configs'],
-    queryFn: () => systemConfigService.getAllSystemConfigs(),
+    queryKey: ['system-configs', companyId],
+    queryFn: () => systemConfigService.getSystemConfigByCompany(companyId),
     staleTime: 60 * 60 * 1000,
     gcTime: 60 * 60 * 1000,
     refetchOnWindowFocus: false,

@@ -16,6 +16,7 @@ import {
     CustomPRTableColumnProps,
 } from "../components/CustomPRTable.js";
 import { GoogleCalendarModal } from "./components/GoogleCalendarModal.js";
+import { VinculateEntitiesToUsers } from "./components/VinculateEntitiesToUsers.js";
 
 interface UserTableProps {
     users: UserTableItem[];
@@ -55,6 +56,7 @@ export const UserTable: React.FC<UserTableProps> = ({
     });
 
     const [showAssistantsModal, setShowAssistantsModal] = useState(false);
+    const [showVinculateEntitiesModal, setShowVinculateEntitiesModal] = useState(false);
     const [assistantsFormInitialData, setAssistantsFormInitialData] = useState<
         UserAssistantFormInputs | undefined
     >();
@@ -234,6 +236,19 @@ export const UserTable: React.FC<UserTableProps> = ({
         });
     };
 
+    const openVinculateEntitiesModal = async (row: any) => {
+        setCurrentUserId(row.id);
+        setShowVinculateEntitiesModal(true);
+    };
+
+    const handleVinculateEntitiesSubmit = async () => {
+        showToast(
+            "success",
+            "Éxito",
+            `Entidades vinculadas correctamente`
+        );
+    };
+
     const handleAssistantsSubmit = async (data: UserAssistantFormInputs) => {
         await createUserAssistantBulk(currentUserId!, data.assistants).then(
             () => {
@@ -286,6 +301,10 @@ export const UserTable: React.FC<UserTableProps> = ({
             openAssistantsModal(rowData.id);
         };
 
+        const vinculateEntities = () => {
+            openVinculateEntitiesModal(rowData);
+        };
+
         const menuItems = [
             {
                 label: "Editar",
@@ -297,6 +316,11 @@ export const UserTable: React.FC<UserTableProps> = ({
                 icon: <i className="fas fa-trash me-2"></i>,
                 command: handleDelete,
             },
+            // {
+            //     label: "Vincular entidades",
+            //     icon: <i className="fas fa-link me-2"></i>,
+            //     command: vinculateEntities,
+            // },
         ];
 
         // Agregar items específicos para DOCTOR
@@ -360,7 +384,7 @@ export const UserTable: React.FC<UserTableProps> = ({
             >
                 <TableMenu
                     rowData={rowData}
-                    onEdit={onEditItem ? onEditItem : () => {}}
+                    onEdit={onEditItem ? onEditItem : () => { }}
                     onDelete={confirmDelete}
                 />
             </div>
@@ -528,7 +552,7 @@ export const UserTable: React.FC<UserTableProps> = ({
                                             onClick={() => {
                                                 if (
                                                     actionType ===
-                                                        "signature" &&
+                                                    "signature" &&
                                                     onDeleteSignature
                                                 ) {
                                                     onDeleteSignature(
@@ -547,19 +571,19 @@ export const UserTable: React.FC<UserTableProps> = ({
                                             }}
                                         >
                                             {actionType === "signature" &&
-                                            users.find(
-                                                (user) =>
-                                                    user.id === currentUserId
-                                            )?.signatureMinioUrl
+                                                users.find(
+                                                    (user) =>
+                                                        user.id === currentUserId
+                                                )?.signatureMinioUrl
                                                 ? "Eliminar firma"
                                                 : actionType === "stamp" &&
-                                                  users.find(
-                                                      (user) =>
-                                                          user.id ===
-                                                          currentUserId
-                                                  )?.imageMinioUrl
-                                                ? "Eliminar sello"
-                                                : "Eliminar"}
+                                                    users.find(
+                                                        (user) =>
+                                                            user.id ===
+                                                            currentUserId
+                                                    )?.imageMinioUrl
+                                                    ? "Eliminar sello"
+                                                    : "Eliminar"}
                                         </button>
                                     )}
                                     {/* Botón de Confirmar/Actualizar */}
@@ -569,17 +593,17 @@ export const UserTable: React.FC<UserTableProps> = ({
                                         onClick={handleConfirm}
                                     >
                                         {actionType === "signature" &&
-                                        users.find(
-                                            (user) => user.id === currentUserId
-                                        )?.signatureMinioUrl
+                                            users.find(
+                                                (user) => user.id === currentUserId
+                                            )?.signatureMinioUrl
                                             ? "Actualizar firma"
                                             : actionType === "stamp" &&
-                                              users.find(
-                                                  (user) =>
-                                                      user.id === currentUserId
-                                              )?.imageMinioUrl
-                                            ? "Actualizar sello"
-                                            : "Confirmar"}
+                                                users.find(
+                                                    (user) =>
+                                                        user.id === currentUserId
+                                                )?.imageMinioUrl
+                                                ? "Actualizar sello"
+                                                : "Confirmar"}
                                     </button>
                                 </div>
                             </div>
@@ -610,6 +634,27 @@ export const UserTable: React.FC<UserTableProps> = ({
                     }}
                     toast={toast.current}
                 />
+
+                <Dialog
+                    visible={showVinculateEntitiesModal}
+                    style={{ width: "70vw", height: "70vh" }}
+                    header="Vincular entidades"
+                    modal
+                    onHide={() => setShowVinculateEntitiesModal(false)}
+                >
+
+                    <VinculateEntitiesToUsers
+                        userId={currentUserId || ""}
+                        onSuccess={() => {
+                            setShowVinculateEntitiesModal(false);
+                            onReload && onReload();
+                            handleVinculateEntitiesSubmit();
+                        }}
+                        toast={toast.current}
+                    />
+
+                </Dialog>
+
             </div>
         </>
     );

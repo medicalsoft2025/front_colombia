@@ -3,7 +3,7 @@ import { Company, SmtpConfig } from '../types/consultorio';
 import { companyService } from '../../../../services/api';
 import { SwalManager } from '../../../../services/alertManagerImported';
 
-export const useCompanyCommunication = () => {
+export const useCompanyCommunication = (companyId?: string | number) => {
     const [company, setCompany] = useState<Company | null>(null);
     const [communication, setCommunication] = useState<SmtpConfig | null>(null);
     const [loading, setLoading] = useState(true);
@@ -16,16 +16,41 @@ export const useCompanyCommunication = () => {
             setLoading(true);
             setError(null);
 
-            const response = await companyService.getAllCompanies();
+            let response;
+            let companyData;
 
-            if (response.status === 200 && response.data && response.data.length > 0) {
-                const companyData = response.data[0];
+            if (companyId) {
+                response = await companyService.getCompany(companyId);
+                // response.data usually contains the object directly for getCompany?
+                // Based on service: return response; (axios response)
+                // getCompany url: .../companies/${companyId}?include=...
+                // Usually returns single object.
+                // But check service implementation:
+                // async getCompany(companyId) { ... return response; }
 
+                // Let's assume standard behavior: response.data.data or response.data is the item.
+                // But generally in this codebase it seems response.data is the payload.
+                if (response.status === 200 && response.data) {
+                    // Check if response.data is array or object. 
+                    // Usually find(id) returns object.
+                    companyData = Array.isArray(response.data) ? response.data[0] : response.data;
+                    // Sometimes it might be response.data.data
+                    if (response.data.data && !Array.isArray(response.data)) companyData = response.data.data;
+                }
+            } else {
+                response = await companyService.getAllCompanies();
+                if (response.status === 200 && response.data && response.data.length > 0) {
+                    companyData = response.data[0];
+                }
+            }
+
+            if (companyData) {
                 setCompany(companyData);
 
-                if (companyData.includes && companyData.includes.communication) {
-                    const commData = companyData.includes.communication;
+                // Handle nested structure which might vary
+                const commData = companyData.communication || (companyData.includes && companyData.includes.communication);
 
+                if (commData) {
                     const mappedCommunication: SmtpConfig = {
                         id: commData.id,
                         company_id: commData.company_id,
@@ -45,7 +70,9 @@ export const useCompanyCommunication = () => {
                     setCommunication(null);
                 }
             } else {
-                setError('No se encontraron datos de la compañía');
+                // Only error if specific ID was requested and failed
+                if (companyId) setError('No se encontraron datos de la compañía');
+                // If no ID and no companies, also maybe error or just empty
             }
         } catch (err) {
             console.error('Error fetching communication data:', err);
@@ -113,7 +140,7 @@ export const useCompanyCommunication = () => {
 
     useEffect(() => {
         fetchCommunicationData();
-    }, []);
+    }, [companyId]);
 
     const refetch = () => {
         fetchCommunicationData();

@@ -1,5 +1,5 @@
-import React, { useEffect, useRef } from 'react';
-import Choices from 'choices.js';
+import React, { useEffect, useRef } from "react";
+import Choices from "choices.js";
 export const CustomSelect = ({
   selectId,
   options,
@@ -8,7 +8,7 @@ export const CustomSelect = ({
   multiple,
   required = false,
   showLabel = true,
-  label = '',
+  label = "",
   name
 }) => {
   const selectRef = useRef(null);
@@ -21,11 +21,11 @@ export const CustomSelect = ({
         shouldSort: false,
         duplicateItemsAllowed: false
       });
-      selectRef.current.addEventListener('change', handleChange);
+      selectRef.current.addEventListener("change", handleChange);
     }
     return () => {
       if (choicesInstance.current) {
-        selectRef.current?.removeEventListener('change', handleChange);
+        selectRef.current?.removeEventListener("change", handleChange);
         choicesInstance.current.destroy();
       }
     };
@@ -37,7 +37,7 @@ export const CustomSelect = ({
   }, [value]);
   useEffect(() => {
     if (choicesInstance.current) {
-      choicesInstance.current.setChoices(options, 'value', 'label', true);
+      choicesInstance.current.setChoices(options, "value", "label", true);
     }
   }, [options]);
   const handleChange = () => {
@@ -52,20 +52,19 @@ export const CustomSelect = ({
   return /*#__PURE__*/React.createElement(React.Fragment, null, showLabel && /*#__PURE__*/React.createElement("label", {
     htmlFor: selectId,
     className: "form-label"
-  }, label, " ", required && '*'), /*#__PURE__*/React.createElement("select", {
+  }, label, " ", required && "*"), /*#__PURE__*/React.createElement("select", {
     id: selectId,
     ref: selectRef,
     multiple: multiple,
     className: "form-select",
     style: {
-      display: 'none'
+      display: "none"
     },
     required: required
   }, options.map(option => /*#__PURE__*/React.createElement("option", {
     key: option.value,
     value: option.value,
-    disabled: option.disabled,
-    "data-data": option.data
+    disabled: option.disabled
   }, option.label))), /*#__PURE__*/React.createElement("input", {
     type: "hidden",
     name: name,

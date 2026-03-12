@@ -24,8 +24,6 @@ export const UserAvailabilityTable: React.FC<UserAvailabilityTableProps> = ({
     loading = false,
     onReload
 }) => {
-    const [deleteDialogVisible, setDeleteDialogVisible] = useState(false);
-    const [availabilityToDelete, setAvailabilityToDelete] = useState<UserAvailabilityTableItem | null>(null);
     const [filteredAvailabilities, setFilteredAvailabilities] = useState<UserAvailabilityTableItem[]>([]);
     const [filtros, setFiltros] = useState({
         doctorName: "",
@@ -115,50 +113,16 @@ export const UserAvailabilityTable: React.FC<UserAvailabilityTableProps> = ({
         }
     };
 
-    const showToast = (severity: any, summary: string, detail: string) => {
-        toast.current?.show({ severity, summary, detail, life: 3000 });
-    };
-
-    const confirmDelete = (availability: UserAvailabilityTableItem) => {
-        setAvailabilityToDelete(availability);
-        setDeleteDialogVisible(true);
-    };
-
-    const deleteAvailability = async () => {
-        if (availabilityToDelete && onDeleteItem) {
-            await onDeleteItem(availabilityToDelete.id);
-            showToast("success", "Éxito", `Disponibilidad eliminada correctamente`);
-
-            // Refrescar después de eliminar
-            if (onReload) {
-                await onReload();
-            }
+    const deleteAvailability = async (id: string) => {
+        if (onDeleteItem) {
+            await onDeleteItem(id);
         }
-        setDeleteDialogVisible(false);
-        setAvailabilityToDelete(null);
     };
-
-    const deleteDialogFooter = (
-        <div className="flex justify-content-end gap-2">
-            <Button
-                label="Cancelar"
-                icon="pi pi-times"
-                className="p-button-text"
-                onClick={() => setDeleteDialogVisible(false)}
-            />
-            <Button
-                label="Eliminar"
-                icon="pi pi-check"
-                className="p-button-danger"
-                onClick={deleteAvailability}
-            />
-        </div>
-    );
 
     const TableMenu: React.FC<{
         rowData: UserAvailabilityTableItem,
         onEdit: (id: string) => void,
-        onDelete: (availability: UserAvailabilityTableItem) => void
+        onDelete: (id: string) => void
     }> = ({ rowData, onEdit, onDelete }) => {
         const menu = useRef<Menu>(null);
 
@@ -169,7 +133,7 @@ export const UserAvailabilityTable: React.FC<UserAvailabilityTableProps> = ({
 
         const handleDelete = () => {
             console.log("Solicitando eliminar disponibilidad con ID:", rowData.id);
-            onDelete(rowData);
+            onDelete(rowData.id);
         };
 
         return (
@@ -215,7 +179,7 @@ export const UserAvailabilityTable: React.FC<UserAvailabilityTableProps> = ({
                 <TableMenu
                     rowData={rowData}
                     onEdit={onEditItem ? onEditItem : () => { }}
-                    onDelete={confirmDelete}
+                    onDelete={deleteAvailability}
                 />
             </div>
         );
@@ -273,36 +237,13 @@ export const UserAvailabilityTable: React.FC<UserAvailabilityTableProps> = ({
         {
             field: 'actions',
             header: 'Acciones',
-            body: (rowData: any) => actionBodyTemplate(rowData.actions),
-            exportable: false
+            body: (rowData: any) => actionBodyTemplate(rowData.actions)
         }
     ];
 
     return (
         <div className="w-100">
             <Toast ref={toast} />
-
-            {/* Diálogo de confirmación de eliminación */}
-            <Dialog
-                visible={deleteDialogVisible}
-                style={{ width: "450px" }}
-                header="Confirmar"
-                modal
-                footer={deleteDialogFooter}
-                onHide={() => setDeleteDialogVisible(false)}
-            >
-                <div className="flex align-items-center justify-content-center">
-                    <i
-                        className="fas fa-exclamation-triangle mr-3"
-                        style={{ fontSize: "2rem", color: "#F8BB86" }}
-                    />
-                    {availabilityToDelete && (
-                        <span>
-                            ¿Estás seguro que deseas eliminar la disponibilidad de <b>{availabilityToDelete.doctorName}</b>?
-                        </span>
-                    )}
-                </div>
-            </Dialog>
 
             <div className="card mb-3">
                 <div className="card-body">

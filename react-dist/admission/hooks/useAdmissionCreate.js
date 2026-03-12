@@ -1,11 +1,11 @@
 import { useState } from "react";
 import { getUserLogged } from "../../../services/utilidades.js";
-import { calculateTotal } from "../admission-billing/utils/helpers.js";
 import { admissionService, thirdPartyService } from "../../../services/api/index.js";
 export const useAdmissionCreate = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const createAdmission = async (formData, appointmentData) => {
+    console.log("Creating admission with formData:", formData);
     setLoading(true);
     setError(null);
     try {
@@ -27,18 +27,21 @@ export const useAdmissionCreate = () => {
           authorization_number: formData.billing.facturacionEntidad ? formData.billing.authorizationNumber : "",
           authorization_date: formData.billing.facturacionEntidad && formData.billing.authorizationDate ? formData.billing.authorizationDate.toISOString().split("T")[0] : "",
           appointment_id: appointmentData?.id,
+          admission_value: formData.copayment,
+          copayment: formData.isCopayment,
+          moderator_fee: !formData.isCopayment,
           koneksi_claim_id: null
         },
         invoice: {
           type: formData.billing.facturacionEntidad ? "entity" : "public",
           status: "Pagado",
-          subtotal: calculateTotal(formData.products, formData.billing.facturacionEntidad),
+          subtotal: formData.copayment,
           discount: 0,
           taxes: formData.products.reduce((sum, product) => sum + product.price * product.quantity * product.tax / 100, 0),
-          total_amount: calculateTotal(formData.products, formData.billing.facturacionEntidad),
+          total_amount: formData.copayment,
           observations: "",
           due_date: dueDateString,
-          paid_amount: calculateTotal(formData.products, formData.billing.facturacionEntidad),
+          paid_amount: formData.copayment,
           user_id: userLogged.id,
           third_party_id: thirdParty?.id,
           sub_type: formData.billing.facturacionEntidad ? "entity" : "public"
@@ -51,7 +54,7 @@ export const useAdmissionCreate = () => {
           unit_price: formData.billing.facturacionEntidad ? Number(product.copayment) : product.price,
           tax_rate: product.tax,
           discount: product.discount,
-          total: formData.billing.facturacionEntidad ? Number(product.copayment) : product.total
+          total: product.calculateCopaymentAdmission
         })),
         payments: formData.payments.map((payment, index) => {
           return {

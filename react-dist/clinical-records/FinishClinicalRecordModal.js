@@ -107,7 +107,9 @@ export const FinishClinicalRecordModal = /*#__PURE__*/forwardRef((props, ref) =>
       appointmentActive,
       appointmentId,
       patientId,
-      specialtyName
+      specialtyName,
+      data_rips,
+      is_rips_active
     } = finishClinicalRecordFormRef.current?.getFormState();
     setPatientId(patientId);
     setSpecialtyName(specialtyName);
@@ -159,6 +161,9 @@ export const FinishClinicalRecordModal = /*#__PURE__*/forwardRef((props, ref) =>
         appointmentId
       }
     };
+    if (is_rips_active) {
+      result.data_rips = data_rips;
+    }
     if (examsActive && exams.length > 0) {
       result.exam_order = exams.map(exam => ({
         patient_id: patientId,

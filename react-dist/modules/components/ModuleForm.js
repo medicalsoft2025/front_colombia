@@ -113,7 +113,7 @@ export const ModuleForm = ({
       filter: true,
       disabled: allowedReasonsOptions.length === 0,
       placeholder: allowedReasonsOptions.length === 0 ? "Cargando motivos..." : "Seleccione los motivos de visita a atender",
-      className: classNames("w-100", {
+      className: classNames("w-100 position-relative", {
         "p-invalid": errors.allowed_reasons
       }),
       appendTo: "self"

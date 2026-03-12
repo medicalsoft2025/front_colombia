@@ -18,6 +18,8 @@ export interface StoreClinicalRecordInputs {
     exam_order?: ExamOrderItem[];
     remission?: Remission;
     appointment?: any;
+    data_rips?: any;
+    is_rips_active?: boolean;
 }
 
 export interface ClinicalRecordData {

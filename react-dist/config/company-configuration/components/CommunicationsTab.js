@@ -2,6 +2,7 @@ import React, { useEffect } from 'react';
 import { Card } from 'primereact/card';
 import WhatsAppConnection from "./WhatsAppConnection.js";
 const CommunicationsTab = ({
+  companyId,
   whatsAppStatus,
   onStatusChange,
   onValidationChange
@@ -26,6 +27,7 @@ const CommunicationsTab = ({
   }, "Configuraci\xF3n de Comunicaciones"), /*#__PURE__*/React.createElement("p", {
     className: "text-muted mb-4"
   }, "Configura la conexi\xF3n de WhatsApp para enviar notificaciones a tus pacientes."), /*#__PURE__*/React.createElement(WhatsAppConnection, {
+    companyId: companyId,
     onStatusChange: handleStatusChange
   })))));
 };

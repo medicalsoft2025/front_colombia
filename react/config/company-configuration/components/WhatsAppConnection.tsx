@@ -8,10 +8,11 @@ import SmtpConfigForm from '../form/SmtpConfigForm';
 import { WhatsAppStatus } from '../types/consultorio';
 
 interface WhatsAppConnectionProps {
+    companyId?: string | number;
     onStatusChange?: (status: WhatsAppStatus) => void;
 }
 
-const WhatsAppConnection: React.FC<WhatsAppConnectionProps> = ({ onStatusChange }) => {
+const WhatsAppConnection: React.FC<WhatsAppConnectionProps> = ({ companyId, onStatusChange }) => {
     const [showQRModal, setShowQRModal] = useState(false);
     const [localLoading, setLocalLoading] = useState(false);
 
@@ -23,7 +24,7 @@ const WhatsAppConnection: React.FC<WhatsAppConnectionProps> = ({ onStatusChange 
         connectWhatsApp,
         disconnectWhatsApp,
         checkWhatsAppStatus
-    } = useWhatsApp();
+    } = useWhatsApp(companyId);
 
     // Notificar cambios de estado al componente padre
     useEffect(() => {
@@ -76,11 +77,11 @@ const WhatsAppConnection: React.FC<WhatsAppConnectionProps> = ({ onStatusChange 
         if (status === 'CONECTADA') {
             return (
                 <>
-                    <i className="fas fa-check-circle text-success" style={{ fontSize: '100px' }}></i>
+                    {/* <i className="fas fa-circle-check" style={{ fontSize: '100px' }}></i> */}
                     <p className="mt-3">WhatsApp conectado correctamente</p>
                     <Button
                         label="Quitar conexión"
-                        icon="pi pi-times-circle"
+                        icon={<i className="fas fa-times-circle"></i>}
                         severity="danger"
                         loading={localLoading}
                         onClick={handleDisconnect}
@@ -93,11 +94,11 @@ const WhatsAppConnection: React.FC<WhatsAppConnectionProps> = ({ onStatusChange 
         if (status === 'NO-CONECTADA') {
             return (
                 <>
-                    <i className="fas fa-circle-xmark text-danger" style={{ fontSize: '100px' }}></i>
+                    {/* <i className="fas fa-circle-xmark" style={{ fontSize: '100px' }}></i> */}
                     <p className="mt-3">WhatsApp no conectado</p>
                     <Button
                         label="Conectar WhatsApp"
-                        icon="pi pi-whatsapp"
+                        icon={<i className="fas fa-whatsapp"></i>}
                         severity="warning"
                         loading={localLoading}
                         onClick={handleConnect}
@@ -110,9 +111,12 @@ const WhatsAppConnection: React.FC<WhatsAppConnectionProps> = ({ onStatusChange 
         // Estado por defecto: NO-CREADA
         return (
             <>
-                <i className="fas fa-exclamation-triangle text-warning" style={{ fontSize: '100px' }}></i>
+                {/* <i className="fas fa-triangle-exclamation" style={{ fontSize: '100px' }}></i> */}
                 <p className="mt-3">Instancia de WhatsApp no creada</p>
-                <BtnCreateWhatsAppInstance onSave={() => handleCloseQRModal()} />
+                <BtnCreateWhatsAppInstance
+                    companyId={companyId}
+                    onSave={() => checkWhatsAppStatus(true)}
+                />
             </>
         );
     };
@@ -121,7 +125,7 @@ const WhatsAppConnection: React.FC<WhatsAppConnectionProps> = ({ onStatusChange 
         <div>
             <Button
                 label="Cerrar"
-                icon="pi pi-times"
+                icon={<i className="fas fa-times"></i>}
                 onClick={handleCloseQRModal}
                 className="p-button-secondary"
                 disabled={localLoading}
@@ -132,7 +136,7 @@ const WhatsAppConnection: React.FC<WhatsAppConnectionProps> = ({ onStatusChange 
     return (
         <div className="flex flex-column align-items-center text-center p-3">
             {renderContent()}
-            <SmtpConfigForm />
+            <SmtpConfigForm companyId={companyId} />
 
             <Dialog
                 header="Vincular WhatsApp"
@@ -159,7 +163,7 @@ const WhatsAppConnection: React.FC<WhatsAppConnectionProps> = ({ onStatusChange 
                         />
                     ) : (
                         <div className="p-4">
-                            <i className="pi pi-spin pi-spinner" style={{ fontSize: '2rem' }}></i>
+                            {/* <i className="fas fa-spinner fa-spin" style={{ fontSize: '2rem' }}></i> */}
                             <p className="mt-2">Generando código QR...</p>
                         </div>
                     )}

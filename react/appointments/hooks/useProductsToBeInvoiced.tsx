@@ -14,7 +14,7 @@ export const useProductsToBeInvoiced = (appointmentId) => {
         setLoading(true);
         const appointmentService = new AppointmentService();
         const response = await appointmentService.getProductsToBeInvoiced(appointmentId);
-        setProducts(response.data || []);
+        setProducts(response || []);
       } catch (error) {
         handleError(error);
         console.error('Error fetching products to be invoiced:', error);

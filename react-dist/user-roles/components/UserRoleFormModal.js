@@ -15,8 +15,7 @@ export const UserRoleFormModal = ({
     onHide: onHide,
     formId: formId,
     title: title,
-    scrollable: true,
-    width: "75vw"
+    scrollable: true
   }, /*#__PURE__*/React.createElement(UserRoleForm, {
     formId: formId,
     onHandleSubmit: handleSubmit,

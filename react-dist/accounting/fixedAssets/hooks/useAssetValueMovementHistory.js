@@ -20,7 +20,8 @@ export const useAssetValueMovementHistory = () => {
     currentPage,
     first,
     perPage,
-    search
+    search,
+    totalRecords
   } = useDataPagination({
     fetchFunction: filters => assetsService.getAssetsWithValueMovementHistory(filters),
     getCustomFilters: () => getFilters()
@@ -35,7 +36,6 @@ export const useAssetValueMovementHistory = () => {
     data,
     loading,
     refreshValueMovements,
-    refresh,
     dateRange,
     type,
     setDateRange,
@@ -45,6 +45,7 @@ export const useAssetValueMovementHistory = () => {
     currentPage,
     first,
     perPage,
-    search
+    search,
+    totalRecords
   };
 };

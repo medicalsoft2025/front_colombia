@@ -51,12 +51,11 @@ const ModalNuevaNota = ({
     }
     setSubmitting(true);
     try {
-      // Preparar los datos en el formato que espera el servidor
       const datosParaGuardar = {
         tituloNota: nuevaNota.tituloNota,
         user_id: nuevaNota.user_id,
         note: nuevaNota.note,
-        guardarNota: "" // Campo vacío como requiere el servidor
+        guardarNota: ""
       };
       await onGuardarNota(datosParaGuardar);
       setNuevaNota({

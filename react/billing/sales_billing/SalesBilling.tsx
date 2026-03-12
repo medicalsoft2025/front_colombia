@@ -39,6 +39,7 @@ import { useAdvancePayments } from "../hooks/useAdvancePayments";
 import { useBillingByType } from "../hooks/useBillingByType";
 import { useThirdPartyModal } from "../third-parties/hooks/useThirdPartyModal";
 import { CustomTaxes, TaxItem } from "../../components/billing/CustomTaxes";
+import { ThirdPartyModal } from "../third-parties/modals/ThridPartiesModal";
 
 export const SalesBilling: React.FC<any> = ({
   selectedInvoice,
@@ -89,9 +90,9 @@ export const SalesBilling: React.FC<any> = ({
       setFilteredPaymentMethods(
         paymentMethods.filter((paymentMethod) =>
           ["transactional", "customer_advance", "customer_expiration"].includes(
-            paymentMethod.category
-          )
-        )
+            paymentMethod.category,
+          ),
+        ),
       );
     }
   }, [paymentMethods]);
@@ -138,6 +139,10 @@ export const SalesBilling: React.FC<any> = ({
     fetchAdvancePayments(selectedInvoice.third_id || customerId, "client");
   }, [selectedInvoice, customerId]);
 
+  useEffect(() => {
+    fetchAdvancePayments(customerId, "client");
+  }, [customerId]);
+
   function generateId() {
     return Math.random().toString(36).substr(2, 9);
   }
@@ -159,7 +164,7 @@ export const SalesBilling: React.FC<any> = ({
       setValue("elaborationDate", new Date(selectedInvoice.created_at));
       setValue("expirationDate", new Date(selectedInvoice.due_date));
       const selectedCostCenter = centresCosts.find(
-        (cc) => cc.id == selectedInvoice.cost_center_id
+        (cc) => cc.id == selectedInvoice.cost_center_id,
       );
       setValue("costCenter", selectedCostCenter);
       setValue("seller_id", Number(selectedInvoice.buyer_id));
@@ -284,7 +289,7 @@ export const SalesBilling: React.FC<any> = ({
   const calculateTotalWithholdingTax = (): number => {
     return retentions.reduce(
       (total, retention) => total + (retention.value || 0),
-      0
+      0,
     );
   };
   const calculateTotal = (): number => {
@@ -335,8 +340,8 @@ export const SalesBilling: React.FC<any> = ({
               ...payment,
               value: selectedAdvances.amount,
             }
-          : payment
-      )
+          : payment,
+      ),
     );
 
     setShowAdvancesForm(false);
@@ -346,7 +351,7 @@ export const SalesBilling: React.FC<any> = ({
   const removeProduct = (id: string) => {
     if (productsArray.length > 1) {
       setProductsArray((prevProducts) =>
-        prevProducts.filter((product) => product.id !== id)
+        prevProducts.filter((product) => product.id !== id),
       );
     }
   };
@@ -354,12 +359,12 @@ export const SalesBilling: React.FC<any> = ({
   const handleProductChange = (
     id: string,
     field: keyof InvoiceProduct,
-    value: any
+    value: any,
   ) => {
     setProductsArray((prevProducts) =>
       prevProducts.map((product) =>
-        product.id === id ? { ...product, [field]: value } : product
-      )
+        product.id === id ? { ...product, [field]: value } : product,
+      ),
     );
   };
 
@@ -378,7 +383,7 @@ export const SalesBilling: React.FC<any> = ({
   const removePayment = (id: string) => {
     if (paymentMethodsArray.length > 1) {
       setPaymentMethodsArray((prevPayments) =>
-        prevPayments.filter((payment) => payment.id !== id)
+        prevPayments.filter((payment) => payment.id !== id),
       );
     }
   };
@@ -391,11 +396,11 @@ export const SalesBilling: React.FC<any> = ({
   const handlePaymentChange = (
     id: string,
     field: keyof PaymentMethod,
-    value: any
+    value: any,
   ) => {
     if (field === "method") {
       const selectedMethod = paymentMethods.find(
-        (method) => method.id === value
+        (method) => method.id === value,
       );
 
       if (selectedMethod?.category === "customer_advance") {
@@ -417,8 +422,8 @@ export const SalesBilling: React.FC<any> = ({
 
     setPaymentMethodsArray((prevPayments) =>
       prevPayments.map((payment) =>
-        payment.id === id ? { ...payment, [field]: value } : payment
-      )
+        payment.id === id ? { ...payment, [field]: value } : payment,
+      ),
     );
   };
 
@@ -428,7 +433,7 @@ export const SalesBilling: React.FC<any> = ({
     const remainingAmount = total - currentPaymentsTotal;
 
     const currentPaymentValue = Number(
-      paymentMethodsArray.find((p) => p.id === paymentId)?.value || 0
+      paymentMethodsArray.find((p) => p.id === paymentId)?.value || 0,
     );
     const amountToSet = remainingAmount + currentPaymentValue;
 
@@ -437,14 +442,14 @@ export const SalesBilling: React.FC<any> = ({
         prevPayments.map((payment) =>
           payment.id === paymentId
             ? { ...payment, value: parseFloat(amountToSet.toFixed(2)) }
-            : payment
-        )
+            : payment,
+        ),
       );
 
       window["toast"].show({
         severity: "success",
         summary: "Éxito",
-        detail: `Valor ${amountToSet.toFixed(2)} DOP copiado al método de pago`,
+        detail: `Valor ${amountToSet.toFixed(2)} COP copiado al método de pago`,
         life: 3000,
       });
     } else {
@@ -547,7 +552,7 @@ export const SalesBilling: React.FC<any> = ({
               handleProductChange(
                 rowData.id,
                 "taxAccountingAccountId",
-                value?.accounting_account_id || null
+                value?.accounting_account_id || null,
               );
               handleProductChange(rowData.id, "taxChargeId", value?.id || null);
             }}
@@ -578,8 +583,8 @@ export const SalesBilling: React.FC<any> = ({
           <InputNumber
             value={calculateLineTotal(rowData)}
             mode="currency"
-            currency="DOP"
-            locale="es-DO"
+            currency="COP"
+            locale="es-CO"
             readOnly
             inputClassName="form-control bg-light"
             style={{ minWidth: "200px" }}
@@ -631,10 +636,10 @@ export const SalesBilling: React.FC<any> = ({
         severity: "error",
         summary: "Error",
         detail: `Los métodos de pago (${calculateTotalPayments().toFixed(
-          2
-        )} DOP) no cubren el total de la factura (${calculateTotal().toFixed(
-          2
-        )} DOP)`,
+          2,
+        )} COP) no cubren el total de la factura (${calculateTotal().toFixed(
+          2,
+        )} COP)`,
         life: 5000,
       });
       return;
@@ -670,6 +675,7 @@ export const SalesBilling: React.FC<any> = ({
   };
 
   function formatInvoiceForBackend(frontendData: any) {
+    console.log("productsArray:", productsArray);
     const purchaseIdValue = purchaseOrderId
       ? {
           purchase_order_id: purchaseOrderId,
@@ -679,7 +685,7 @@ export const SalesBilling: React.FC<any> = ({
       retentions[0].value > 0
         ? {
             retentions: retentions.map(
-              (retention: any) => retention.percentage.id
+              (retention: any) => retention.percentage.id,
             ),
           }
         : {};
@@ -713,6 +719,7 @@ export const SalesBilling: React.FC<any> = ({
           tax_product: product.taxAmount || product.iva || 0,
           tax_accounting_account_id: product.taxAccountingAccountId || null,
           tax_charge_id: product.taxChargeId || null,
+          accounting_account_id: product?.accountingAccountId?.id || null,
         };
       }),
       payments: paymentMethodsArray.map((payment) => {
@@ -728,16 +735,23 @@ export const SalesBilling: React.FC<any> = ({
     };
   }
 
-  const { openModal: openThirdPartyModal, ThirdPartyModal } =
-    useThirdPartyModal({
-      onSuccess: (data) => {
-        fetchThirdParties();
-      },
-    });
+  const { openModal, modalProps } = useThirdPartyModal({
+    onSuccess: (data) => {
+      fetchThirdParties();
+    },
+  });
 
   return (
     <div className="container-fluid p-3 p-md-4">
-      <ThirdPartyModal />
+      {modalProps.visible && (
+        <ThirdPartyModal
+          visible={modalProps.visible}
+          onHide={modalProps.onHide}
+          onSubmit={modalProps.onSubmit}
+          loading={modalProps.loading}
+          error={modalProps.error}
+        />
+      )}
       {/* Encabezado */}
       <div className="row mb-4">
         <div className="col-12">
@@ -861,7 +875,7 @@ export const SalesBilling: React.FC<any> = ({
                                 optionValue="id"
                                 placeholder="Seleccione un proveedor"
                                 className={classNames(
-                                  "flex-grow-1 dropdown-billing"
+                                  "flex-grow-1 dropdown-billing",
                                 )}
                                 appendTo={"self"}
                                 disabled={disabledInpputs}
@@ -869,7 +883,7 @@ export const SalesBilling: React.FC<any> = ({
                               />
                               <Button
                                 type="button"
-                                onClick={openThirdPartyModal}
+                                onClick={() => openModal()}
                                 icon={<i className="fa-solid fa-plus"></i>}
                                 className="p-button-primary"
                               />
@@ -1012,7 +1026,7 @@ export const SalesBilling: React.FC<any> = ({
               <div className="card-header bg-light d-flex justify-content-between align-items-center p-3">
                 <h2 className="h5 mb-0">
                   <i className="pi pi-credit-card me-2 text-primary"></i>
-                  Métodos de Pago (DOP)
+                  Métodos de Pago (COP)
                 </h2>
                 <Button
                   label="Agregar Método"
@@ -1061,17 +1075,17 @@ export const SalesBilling: React.FC<any> = ({
                         <div className="d-flex gap-2 align-items-center flex-nowrap">
                           <InputNumber
                             value={payment.value === "" ? null : payment.value}
-                            placeholder="RD$ 0.00"
+                            placeholder="$ 0.00"
                             className="flex-grow-1"
                             mode="currency"
-                            currency="DOP"
-                            locale="es-DO"
+                            currency="COP"
+                            locale="es-CO"
                             min={0}
                             onValueChange={(e) =>
                               handlePaymentChange(
                                 payment.id,
                                 "value",
-                                e.value === null ? "" : e.value
+                                e.value === null ? "" : e.value,
                               )
                             }
                             inputClassName="form-control"
@@ -1118,8 +1132,8 @@ export const SalesBilling: React.FC<any> = ({
                             value={calculateTotal()}
                             className="me-3"
                             mode="currency"
-                            currency="DOP"
-                            locale="es-DO"
+                            currency="COP"
+                            locale="es-CO"
                             minFractionDigits={2}
                             maxFractionDigits={3}
                             readOnly
@@ -1133,8 +1147,8 @@ export const SalesBilling: React.FC<any> = ({
                             value={calculateTotalPayments()}
                             className="me-3"
                             mode="currency"
-                            currency="DOP"
-                            locale="es-DO"
+                            currency="COP"
+                            locale="es-CO"
                             minFractionDigits={2}
                             maxFractionDigits={3}
                             readOnly
@@ -1150,7 +1164,7 @@ export const SalesBilling: React.FC<any> = ({
                               {(
                                 calculateTotal() - calculateTotalPayments()
                               ).toFixed(2)}{" "}
-                              DOP
+                              COP
                             </span>
                           ) : (
                             <span className="text-success">
@@ -1187,7 +1201,7 @@ export const SalesBilling: React.FC<any> = ({
               <div className="card-header bg-light p-3">
                 <h2 className="h5 mb-0">
                   <i className="pi pi-calculator me-2 text-primary"></i>
-                  Totales (DOP)
+                  Totales (COP)
                 </h2>
               </div>
               <div className="card-body p-3">
@@ -1199,8 +1213,8 @@ export const SalesBilling: React.FC<any> = ({
                         value={calculateSubtotal()}
                         className="w-100"
                         mode="currency"
-                        currency="DOP"
-                        locale="es-DO"
+                        currency="COP"
+                        locale="es-CO"
                         readOnly
                         inputClassName="form-control bg-light"
                       />
@@ -1213,8 +1227,8 @@ export const SalesBilling: React.FC<any> = ({
                         value={calculateTotalDiscount()}
                         className="w-100"
                         mode="currency"
-                        currency="DOP"
-                        locale="es-DO"
+                        currency="COP"
+                        locale="es-CO"
                         readOnly
                         inputClassName="form-control bg-light"
                       />
@@ -1230,8 +1244,8 @@ export const SalesBilling: React.FC<any> = ({
                         value={calculateSubtotalAfterDiscount()}
                         className="w-100"
                         mode="currency"
-                        currency="DOP"
-                        locale="es-DO"
+                        currency="COP"
+                        locale="es-CO"
                         readOnly
                         inputClassName="form-control bg-light"
                       />
@@ -1245,8 +1259,8 @@ export const SalesBilling: React.FC<any> = ({
                         value={calculateTotalTax()}
                         className="w-100"
                         mode="currency"
-                        currency="DOP"
-                        locale="es-DO"
+                        currency="COP"
+                        locale="es-CO"
                         readOnly
                         inputClassName="form-control bg-light"
                       />
@@ -1260,8 +1274,8 @@ export const SalesBilling: React.FC<any> = ({
                         value={calculateTotalWithholdingTax()}
                         className="w-100"
                         mode="currency"
-                        currency="DOP"
-                        locale="es-DO"
+                        currency="COP"
+                        locale="es-CO"
                         readOnly
                         inputClassName="form-control bg-light"
                       />
@@ -1275,8 +1289,8 @@ export const SalesBilling: React.FC<any> = ({
                         value={calculateTotal()}
                         className="w-100 font-weight-bold"
                         mode="currency"
-                        currency="DOP"
-                        locale="es-DO"
+                        currency="COP"
+                        locale="es-CO"
                         readOnly
                         inputClassName="form-control bg-light fw-bold"
                       />
@@ -1449,8 +1463,8 @@ const TypeColumnBody = ({
     { id: "supplies", name: "Insumos" },
     { id: "medications", name: "Medicamentos" },
     { id: "vaccines", name: "Vacunas" },
-    { id: "services", name: "Servicios" },
-    { id: "assetsFixed", name: "Activos y fijos" },
+    { id: "spent", name: "Servicios" },
+    { id: "assets", name: "Activos fijos" },
   ];
 
   return (
@@ -1482,20 +1496,22 @@ const ProductColumnBody = ({
   disabled,
 }: {
   rowData: InvoiceProduct;
-  type: string | null;
+  type: string | null | any;
   onChange: (value: string) => void;
   handleProductChange: (
     id: string,
     field: keyof InvoiceProduct,
-    value: any
+    value: any,
   ) => void;
   disabled?: boolean;
 }) => {
   const { getByType, products } = useInventory();
   const { accounts: propertyAccounts } = useAccountingAccountsByCategory(
     "sub_account",
-    "15"
+    "15",
   );
+  const { accounts: accountingAccountByCategory } =
+    useAccountingAccountsByCategory("category", type);
   const [options, setOptions] = useState<
     { id: string; label: string; name: string }[]
   >([]);
@@ -1541,8 +1557,8 @@ const ProductColumnBody = ({
           onChange(e.value);
           handleProductChange(
             rowData.id,
-            "description",
-            selectedProduct?.label || ""
+            "accountingAccountId", // Necesitas añadir esta propiedad al tipo InvoiceProduct
+            accountingAccountByCategory?.[0] || "",
           );
         }}
         onClick={(e) => e.stopPropagation()}
@@ -1568,6 +1584,11 @@ const ProductColumnBody = ({
         const selectedProduct = options.find((p) => p.id === e.value);
         if (selectedProduct) {
           handleProductChange(rowData.id, "description", selectedProduct.label);
+          handleProductChange(
+            rowData.id,
+            "accountingAccountId",
+            accountingAccountByCategory?.[0] || "",
+          );
         }
       }}
       virtualScrollerOptions={{ itemSize: 38 }}
@@ -1624,8 +1645,8 @@ const PriceColumnBody = ({
         placeholder="RD$ 0.00"
         style={{ minWidth: "150px" }}
         mode="currency"
-        currency="DOP"
-        locale="es-DO"
+        currency="COP"
+        locale="es-CO"
         min={0}
         onValueChange={(e: any) => {
           onChange(e.value);
@@ -1696,8 +1717,8 @@ const DiscountColumnBody = ({
         suffix={discountType === "percentage" ? "%" : ""}
         prefix={discountType === "fixed" ? "$ " : ""}
         mode={localDiscountType === "fixed" ? "currency" : "decimal"}
-        currency={localDiscountType === "fixed" ? "DOP" : undefined}
-        locale="es-DO"
+        currency={localDiscountType === "fixed" ? "COP" : undefined}
+        locale="es-CO"
         min={0}
         max={discountType === "percentage" ? 100 : undefined}
         onValueChange={(e: any) => {
@@ -1740,7 +1761,7 @@ const IvaColumnBody = ({
           onChange(null);
         } else {
           const selectedTax = taxes.find(
-            (tax: any) => tax.percentage === e.value
+            (tax: any) => tax.percentage === e.value,
           );
           if (selectedTax) {
             onChange(selectedTax); // ← Pasar el objeto completo

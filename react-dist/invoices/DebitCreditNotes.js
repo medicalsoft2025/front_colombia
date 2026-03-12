@@ -148,9 +148,9 @@ export const DebitCreditNotes = () => {
     loadNotes(1, rows);
   };
   const formatCurrency = value => {
-    return value?.toLocaleString("es-DO", {
+    return value?.toLocaleString("es-CO", {
       style: "currency",
-      currency: "DOP",
+      currency: "COP",
       minimumFractionDigits: 2,
       maximumFractionDigits: 2
     }) || "$0.00";

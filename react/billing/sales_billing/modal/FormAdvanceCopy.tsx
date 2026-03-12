@@ -62,7 +62,7 @@ export const FormAdvanceCopy: React.FC<any> = ({
         <div className="d-flex justify-content-between">
           <div>Anticipo disponible:</div>
           <div>
-            {advances?.original?.advance_balance}
+            {new Intl.NumberFormat('es-DO', { style: 'currency', currency: 'DOP', minimumFractionDigits: 2 }).format(advances?.original?.advance_balance)}
           </div>
         </div>
       </div>

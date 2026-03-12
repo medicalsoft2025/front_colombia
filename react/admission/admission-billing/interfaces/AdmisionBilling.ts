@@ -95,6 +95,9 @@ export interface AdmissionBillingFormData {
   payments: PaymentMethod[];
   currentPayment: CurrentPayment;
   companion?: CompanionInfo;
+  copayment: any;
+  isCopayment: any;
+  copaymentRules: any;
 }
 
 export interface PatientStepProps {

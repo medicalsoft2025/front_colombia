@@ -10,7 +10,7 @@ interface BranchesTabProps {
 export const BranchesTab: React.FC<BranchesTabProps> = ({ companyId, onValidationChange }) => {
     return (
         <div className="container-fluid">
-            <BranchApp onValidationChange={onValidationChange} />
+            <BranchApp companyId={companyId} onValidationChange={onValidationChange} />
         </div>
     );
 };

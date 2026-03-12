@@ -18,7 +18,6 @@ import { useCentresCosts } from "../../centres-cost/hooks/useCentresCosts.js";
 import MedicationFormModal from "../../inventory/medications/MedicationFormModal.js";
 import SupplyFormModal from "../../inventory/supply/SupplyFormModal.js";
 import VaccineFormModal from "../../inventory/vaccine/VaccineFormModal.js";
-import { useInvoicePurchase } from "./hooks/usePurchaseBilling.js";
 import { useInventory } from "./hooks/useInventory.js";
 import { brandService, invoiceService, accountingAccountsService } from "../../../services/api/index.js";
 import { purchaseOrdersService } from "../../../services/api/index.js";
@@ -37,7 +36,10 @@ import { useAdvancePayments } from "../hooks/useAdvancePayments.js";
 import { useBillingByType } from "../hooks/useBillingByType.js";
 import { InventariableFormModal } from "../../inventory/inventariable/InventariableFormModal.js";
 import { SwalManager } from "../../../services/alertManagerImported.js";
-import { useThirdPartyModal } from "../third-parties/hooks/useThirdPartyModal.js"; // Componentes memoizados para las columnas (se mantienen igual)
+import { useThirdPartyModal } from "../third-parties/hooks/useThirdPartyModal.js";
+import { useDepositsComponent } from "../../inventory/deposits/hooks/useDepositsComponent.js";
+import DepositModal from "../../inventory/deposits/modal/DepositModal.js";
+import { ThirdPartyModal } from "../third-parties/modals/ThridPartiesModal.js"; // Componentes memoizados para las columnas (se mantienen igual)
 const TypeColumnBody = /*#__PURE__*/React.memo(({
   control,
   productIndex,
@@ -85,7 +87,8 @@ const ProductColumnBody = /*#__PURE__*/React.memo(({
   control,
   productIndex,
   disabled,
-  setValue
+  setValue,
+  refreshTrigger
 }) => {
   const typeProduct = useWatch({
     control,
@@ -95,7 +98,8 @@ const ProductColumnBody = /*#__PURE__*/React.memo(({
   const {
     getByType,
     products,
-    currentType
+    currentType,
+    refreshProducts
   } = useInventory();
   const {
     accounts: spentAccounts
@@ -108,6 +112,7 @@ const ProductColumnBody = /*#__PURE__*/React.memo(({
   } = useAccountingAccountsByCategory("category", typeProduct);
   const [options, setOptions] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [reloading, setReloading] = useState(false);
 
   // Cargar productos cuando cambia el tipo
   useEffect(() => {
@@ -115,7 +120,7 @@ const ProductColumnBody = /*#__PURE__*/React.memo(({
       setLoading(true);
       getByType(typeProduct).finally(() => setLoading(false));
     }
-  }, [typeProduct, getByType]);
+  }, [typeProduct, getByType, refreshTrigger]);
 
   // Formatear opciones basadas en el tipo
   useEffect(() => {
@@ -166,13 +171,15 @@ const ProductColumnBody = /*#__PURE__*/React.memo(({
     control: control,
     render: ({
       field
-    }) => /*#__PURE__*/React.createElement(Dropdown, {
+    }) => /*#__PURE__*/React.createElement("div", {
+      className: "d-flex gap-2 align-items-center"
+    }, /*#__PURE__*/React.createElement(Dropdown, {
       value: field.value,
       options: options,
       optionLabel: "label",
       optionValue: "id",
       placeholder: "Seleccione Producto",
-      className: "w-100 dropdown-billing-products",
+      className: "flex-grow-1 dropdown-billing-products",
       filter: true,
       onChange: e => {
         const selectedOption = options.find(opt => opt.id === e.value);
@@ -184,11 +191,23 @@ const ProductColumnBody = /*#__PURE__*/React.memo(({
           }
         }
       },
-      loading: loading,
+      loading: loading || reloading,
       emptyMessage: "No hay productos disponibles",
-      filter: true,
       disabled: disabled || !typeProduct
-    })
+    }), /*#__PURE__*/React.createElement(Button, {
+      type: "button",
+      className: "p-button-rounded p-button-text p-button-sm",
+      onClick: () => {
+        refreshProducts();
+      },
+      disabled: disabled || !typeProduct || reloading,
+      tooltip: "Recargar productos",
+      tooltipOptions: {
+        position: "top"
+      }
+    }, /*#__PURE__*/React.createElement("i", {
+      className: `fa-solid ${reloading ? "fa-spinner fa-spin" : "fa-rotate-right"}`
+    })))
   });
 });
 const QuantityColumnBody = /*#__PURE__*/React.memo(({
@@ -246,8 +265,8 @@ const PriceColumnBody = /*#__PURE__*/React.memo(({
       placeholder: "Precio",
       className: "w-100 price-input",
       mode: "currency",
-      currency: "DOP",
-      locale: "es-DO",
+      currency: "COP",
+      locale: "es-CO",
       min: 0,
       onValueChange: e => field.onChange(e.value),
       disabled: disabled,
@@ -396,7 +415,8 @@ const ProductAccordion = /*#__PURE__*/React.memo(({
   onSaveEditedLot,
   editingLot,
   setValue,
-  disabledInputs
+  disabledInputs,
+  refreshTrigger
 }) => {
   const containerRef = useRef(null);
   const product = useWatch({
@@ -490,7 +510,7 @@ const ProductAccordion = /*#__PURE__*/React.memo(({
     className: "badge bg-primary me-2"
   }, "Cantidad: ", product.quantity), /*#__PURE__*/React.createElement("span", {
     className: "badge bg-success"
-  }, "Total:", " ", (product.quantity * product.price).toFixed(2), " DOP"))), product.isExpanded && /*#__PURE__*/React.createElement("div", {
+  }, "Total: ", (product.quantity * product.price).toFixed(2), " DOP"))), product.isExpanded && /*#__PURE__*/React.createElement("div", {
     className: "card-body"
   }, /*#__PURE__*/React.createElement(DataTable, {
     value: [product],
@@ -516,7 +536,8 @@ const ProductAccordion = /*#__PURE__*/React.memo(({
       control: control,
       productIndex: productIndex,
       setValue: setValue,
-      disabled: disabledInputs
+      disabled: disabledInputs,
+      refreshTrigger: refreshTrigger
     }),
     style: {
       minWidth: "180px"
@@ -681,6 +702,7 @@ export const PurchaseBilling = ({
   purchaseOrder,
   onClose = () => {}
 }) => {
+  const [refreshProductsTrigger, setRefreshProductsTrigger] = useState(0);
   const [isModalVisible, setIsModalVisible] = React.useState(false);
   const [productForExpiration, setProductForExpiration] = useState(null);
   const {
@@ -753,8 +775,6 @@ export const PurchaseBilling = ({
     expirationDate: null,
     deposit: ""
   });
-  const [deposits, setDeposits] = useState([]);
-  const [formattedDeposits, setFormattedDeposits] = useState([]);
   const [options, setOptions] = useState([]);
   const [selectedFixedAssetProductId, setSelectedFixedAssetProductId] = useState(null);
   const [fixedAssetData, setFixedAssetData] = useState(null);
@@ -796,16 +816,23 @@ export const PurchaseBilling = ({
   const [showVaccineModal, setShowVaccineModal] = useState(false);
   const [showMedicamentoModal, setShowMedicamentoModal] = useState(false);
   const [showInventariableModal, setShowInventariableModal] = useState(false);
-  const {
-    storeInvoice,
-    loading,
-    getAllDeposits
-  } = useInvoicePurchase();
   const [showAdvancesForm, setShowAdvancesForm] = useState(false);
   const [selectedAdvanceMethodId, setSelectedAdvanceMethodId] = useState(null);
   const [supplierId, setSupplierId] = useState(null);
   const [disabledInputs, setDisabledInputs] = useState(false);
   const [showBrandFormModal, setShowBrandFormModal] = useState(false);
+  const [showDepositModal, setShowDepositModal] = useState(false);
+  const {
+    deposits,
+    saveDeposit,
+    saveLoading,
+    saveToast: saveDepositToast
+  } = useDepositsComponent();
+  const formattedDeposits = deposits.map(deposit => ({
+    id: deposit.id,
+    name: deposit.attributes.name,
+    originalData: deposit
+  }));
   const [editingLot, setEditingLot] = useState(null);
   const [paymentMethodsArray, setPaymentMethodsArray] = useState([{
     id: generateId(),
@@ -818,24 +845,40 @@ export const PurchaseBilling = ({
   // Menu items para el botón de agregar
   const menuItems = [{
     label: "Insumo",
-    icon: "pi pi-plus",
+    icon: /*#__PURE__*/React.createElement("i", {
+      className: "fa-solid fa-plus me-1"
+    }),
     command: () => setShowInsumoModal(true)
   }, {
     label: "Vacuna",
-    icon: "pi pi-plus",
+    icon: /*#__PURE__*/React.createElement("i", {
+      className: "fa-solid fa-plus me-1"
+    }),
     command: () => setShowVaccineModal(true)
   }, {
     label: "Medicamento",
-    icon: "pi pi-plus",
+    icon: /*#__PURE__*/React.createElement("i", {
+      className: "fa-solid fa-plus me-1"
+    }),
     command: () => setShowMedicamentoModal(true)
   }, {
     label: "Inventariable",
-    icon: "pi pi-plus",
+    icon: /*#__PURE__*/React.createElement("i", {
+      className: "fa-solid fa-plus me-1"
+    }),
     command: () => setShowInventariableModal(true)
   }, {
     label: "Marca",
-    icon: "pi pi-plus",
+    icon: /*#__PURE__*/React.createElement("i", {
+      className: "fa-solid fa-plus me-1"
+    }),
     command: () => setShowBrandFormModal(true)
+  }, {
+    label: "Deposito",
+    icon: /*#__PURE__*/React.createElement("i", {
+      className: "fa-solid fa-plus me-1"
+    }),
+    command: () => setShowDepositModal(true)
   }];
   useEffect(() => {
     if (purchaseOrder || supplierId) {
@@ -843,21 +886,8 @@ export const PurchaseBilling = ({
     }
   }, [purchaseOrder, supplierId]);
   useEffect(() => {
-    const loadDeposits = async () => {
-      try {
-        const depositsData = await getAllDeposits();
-        const formatted = depositsData.map(deposit => ({
-          id: deposit.id,
-          name: deposit.attributes.name,
-          originalData: deposit
-        }));
-        setFormattedDeposits(formatted);
-      } catch (error) {
-        console.error("Error loading deposits:", error);
-      }
-    };
-    loadDeposits();
-  }, []);
+    fetchAdvancePayments(supplierId, "provider");
+  }, [supplierId]);
   useEffect(() => {
     if (paymentMethods) {
       setFilteredPaymentMethods(paymentMethods.filter(paymentMethod => ["transactional", "supplier_expiration", "supplier_advance"].includes(paymentMethod.category)));
@@ -936,6 +966,7 @@ export const PurchaseBilling = ({
   }
   const handleProductCreated = productType => {
     refreshProducts(productType);
+    setRefreshProductsTrigger(prev => prev + 1);
     toast.current?.show({
       severity: "success",
       summary: "Éxito",
@@ -1395,8 +1426,8 @@ export const PurchaseBilling = ({
     });
   };
   const {
-    openModal: openThirdPartyModal,
-    ThirdPartyModal
+    openModal,
+    modalProps
   } = useThirdPartyModal({
     onSuccess: data => {
       fetchThirdParties();
@@ -1404,7 +1435,13 @@ export const PurchaseBilling = ({
   });
   return /*#__PURE__*/React.createElement("div", {
     className: "container-fluid p-3 p-md-4"
-  }, /*#__PURE__*/React.createElement(ThirdPartyModal, null), /*#__PURE__*/React.createElement("div", {
+  }, modalProps.visible && /*#__PURE__*/React.createElement(ThirdPartyModal, {
+    visible: modalProps.visible,
+    onHide: modalProps.onHide,
+    onSubmit: modalProps.onSubmit,
+    loading: modalProps.loading,
+    error: modalProps.error
+  }), /*#__PURE__*/React.createElement("div", {
     className: "row"
   }, /*#__PURE__*/React.createElement("div", {
     className: "col-12"
@@ -1542,7 +1579,7 @@ export const PurchaseBilling = ({
       showClear: true
     })), !disabledInputs && /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement(Button, {
       type: "button",
-      onClick: openThirdPartyModal,
+      onClick: () => openModal(),
       icon: /*#__PURE__*/React.createElement("i", {
         className: "fa-solid fa-plus"
       }),
@@ -1656,7 +1693,8 @@ export const PurchaseBilling = ({
     onSaveEditedLot: handleSaveEditedLot,
     editingLot: editingLot,
     setValue: setValue,
-    disabledInputs: disabledInputs
+    disabledInputs: disabledInputs,
+    refreshTrigger: refreshProductsTrigger
   })))))), /*#__PURE__*/React.createElement("div", {
     className: "card mb-4 shadow-sm"
   }, /*#__PURE__*/React.createElement(RetentionsSection, {
@@ -1919,7 +1957,18 @@ export const PurchaseBilling = ({
     onSubmit: data => {
       handleSelectAdvances(data);
     }
-  })))), /*#__PURE__*/React.createElement(Toast, {
+  })), /*#__PURE__*/React.createElement(DepositModal, {
+    isVisible: showDepositModal,
+    onSave: async data => {
+      await saveDeposit(data);
+      setShowDepositModal(false);
+    },
+    onClose: () => setShowDepositModal(false),
+    closable: true,
+    loading: saveLoading
+  }))), /*#__PURE__*/React.createElement(Toast, {
+    ref: saveDepositToast
+  }), /*#__PURE__*/React.createElement(Toast, {
     ref: toast
   }), /*#__PURE__*/React.createElement("style", null, `
    

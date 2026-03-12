@@ -6,10 +6,10 @@ export const useLocalItem = localStorageKey => {
   const getItem = useCallback(async id => {
     setLoading(true);
     const localStorageService = new LocalStorageService(localStorageKey);
-    const item = await localStorageService.getItem(id);
-    setItem(item);
+    const fetchedItem = await localStorageService.getItem(id);
+    if (fetchedItem) setItem(fetchedItem);
     setLoading(false);
-    return item;
+    return fetchedItem;
   }, [localStorageKey]);
   return {
     item,

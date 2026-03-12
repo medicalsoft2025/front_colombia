@@ -1,0 +1,38 @@
+# Instrucciones para el Agente Backend (Antigravity AI)
+
+Se ha completado el desarrollo del Front-end (React) para el módulo de Alergias. A continuación se detallan los requerimientos técnicos y el contrato de datos pactado, para que puedas implementar la API REST en Laravel.
+
+## Entorno Backend
+- **Framework**: Laravel
+- **Arquitectura**: Multi-tenant utilizando el paquete `stancl/tenancy`. Modelos Eloquent, Migraciones.
+- **Patrones de Diseño**: Todo el código debe estar agrupado dentro de un módulo, separando responsabilidades en capas de Controladores (Controllers), Servicios (Services) y Repositorios (Repositories). (Las migraciones sí van en database/migrations/tenant).
+
+## Modelos / Entidades Requeridas (En Base de Datos)
+1. **Allergy** (Alergias de pacientes)
+   - `id` (PK)
+   - `patient_id` (FK a pacientes, requerido)
+   - `description` (text, requerido)
+   - `type` (string, requerido, valores enviados desde el listado select del frontend: '01' Medicamento, '02' Alimento, '03' Sustancia del ambiente, '04' Sustancia que entran en contacto con la piel, '05' Picadura de insectos, '06' Otra)
+   - `status` (string, requerido: 'active', 'inactive', 'resolved')
+   - Timestamps básicos.
+   - SoftDeletes
+
+2. **AllergyHistory** (Historial de cambio de estados opcional)
+   - `id` (PK)
+   - `allergy_id` (FK a Allergy)
+   - `previous_status` (string)
+   - `new_status` (string)
+   - `changed_by` (FK a User, o manejado por tenancy)
+   - `changed_at` (datetime)
+
+## Endpoints Esperados
+
+Todos los endpoints deben estar protegidos por autenticación y el middleware de Tenancy aplicable. Pueden estar agrupados bajo `/medical/allergies` o `/medical/patients/{id}/allergies`. El Frontend está configurado para llamar a:
+
+- `GET /medical/patients/{patientId}/allergies`: Obtiene el listado de alergias de un paciente en específico.
+- `POST /medical/patients/{patientId}/allergies`: Crea una nueva alergia. Recibe: `description, type, status`.
+- `PUT /medical/allergies/{id}`: Actualiza todos los campos editables (`description, type, status`) de la alergia.
+- `PUT /medical/allergies/{id}/status`: Actualiza exclusivamente el estado y puede generar un registro en el historial. Recibe `{ status: 'resolved' }`.
+- `DELETE /medical/allergies/{id}`: Elimina la alergia.
+
+Por favor, revisa la validación de Requests en la capa de controladores utilizando FormRequests.

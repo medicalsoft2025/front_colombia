@@ -3,8 +3,7 @@ import { PatientInfo } from "./PatientInfo.js";
 import { usePatient } from "./hooks/usePatient.js";
 export const PatientInfoContainer = ({
   patientId,
-  hideEditButton = false,
-  onSuccess
+  hideEditButton = false
 }) => {
   const {
     patient,
@@ -13,9 +12,6 @@ export const PatientInfoContainer = ({
   return patient ? /*#__PURE__*/React.createElement(PatientInfo, {
     requestRefresh: () => {
       fetchPatient();
-      if (onSuccess) {
-        onSuccess();
-      }
     },
     patient: patient,
     hideEditButton: hideEditButton

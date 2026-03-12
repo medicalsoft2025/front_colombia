@@ -49,6 +49,10 @@ export const ClinicalRecordTypes = () => {
         remove(data);
     };
 
+    const onManageSections = (data: ClinicalRecordTypeDto) => {
+        window.location.href = `/clinicalRecordSections?clinicalRecordTypeId=${data.id}`;
+    };
+
     const onHide = () => {
         setShowFormDialog(false);
         setSelectedItem(null);
@@ -81,6 +85,7 @@ export const ClinicalRecordTypes = () => {
                 onDelete={onDelete}
                 loading={isLoadingClinicalRecordTypes}
                 onReload={fetchClinicalRecordTypes}
+                onManageSections={onManageSections}
             />
             <ClinicalRecordTypesFormDialog
                 visible={showFormDialog}

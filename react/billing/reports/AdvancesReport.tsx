@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import { Calendar } from "primereact/calendar";
 import { Card } from "primereact/card";
 import { CSSProperties } from "react";
@@ -8,29 +8,107 @@ import { ThirdPartyDropdown } from "../../fields/dropdowns/ThirdPartyDropdown";
 import { formatDateRange, formatPrice } from "../../../services/utilidades";
 import {
     ThirdPartyAdvance,
-    useAdvancesReport,
 } from "./hooks/useAdvancesReport";
 import { useAdvancesReportFormat } from "../../documents-generation/hooks/useAdvancesReportFormat";
 import { CustomPRTable } from "../../components/CustomPRTable";
+import { useDataPagination } from "../../hooks/useDataPagination";
+import { BillingReportService } from "../../../services/api/classes/billingReportService";
+import { Toast } from "primereact/toast";
 
 interface AdvancesReportProps {
     fetchData?: (startDate: string, endDate: string) => Promise<any[]>;
 }
 
 export const AdvancesReport: React.FC<AdvancesReportProps> = () => {
-    const [reportType, setReportType] = useState<"client" | "provider">(
-        "client"
-    );
-    const {
-        advancesReport,
-        dateRange,
-        setDateRange,
-        thirdPartyId,
-        setThirdPartyId,
-        loading,
-        fetchAdvancesReport,
-    } = useAdvancesReport(reportType);
+    const toast = useRef<Toast>(null);
+    const [reportType, setReportType] = useState<"client" | "provider">("client");
     const { generarFormatoAdvancesReport } = useAdvancesReportFormat();
+    
+    const [filtros, setFiltros] = useState({
+        dateRange: [new Date(), new Date()] as (Date | null)[],
+        thirdPartyId: null as string | null,
+    });
+
+    const {
+        data: advancesReport,
+        loading: loadingPaginator,
+        first,
+        perPage,
+        totalRecords,
+        handlePageChange,
+        handleSearchChange,
+        refresh,
+    } = useDataPagination({
+        fetchFunction: (params) => loadAdvancesReport(params),
+        defaultPerPage: 10,
+    });
+
+    async function loadAdvancesReport(params: any = { perPage: 10 }) {
+        const service = new BillingReportService();
+        
+        const backendFilters: any = {
+            ...params,
+            sort: "-id",
+        };
+
+        if (filtros.dateRange && Array.isArray(filtros.dateRange)) {
+            const fechaArray = filtros.dateRange as any[];
+            if (fechaArray.length >= 2) {
+                const startDate = fechaArray[0];
+                const endDate = fechaArray[1];
+
+                if (startDate && typeof startDate.toISOString === "function") {
+                    backendFilters.start_date = startDate.toISOString().split("T")[0];
+                }
+                if (endDate && typeof endDate.toISOString === "function") {
+                    backendFilters.end_date = endDate.toISOString().split("T")[0];
+                }
+            }
+        }
+
+        if (filtros.thirdPartyId) {
+            backendFilters.third_party_id = filtros.thirdPartyId;
+        }
+
+        if (params.search && params.search.trim() !== "") {
+            backendFilters.search = params.search.trim();
+        }
+
+        const response = await service.getAdvancesReportByType(backendFilters, {type: reportType});
+
+        return {
+            data: response.data.data || response.data || [],
+            total: response.data.total || (response.data.length || 0),
+        };
+    }
+
+    const handleFilterChange = (field: string, value: any) => {
+        setFiltros((prev) => ({
+            ...prev,
+            [field]: value,
+        }));
+    };
+
+    const limpiarFiltros = () => {
+        setFiltros({
+            dateRange: [new Date(), new Date()],
+            thirdPartyId: null,
+        });
+    };
+
+    useEffect(() => {
+        refresh();
+    }, [reportType]);
+
+    useEffect(() => {
+        if (
+            filtros.dateRange?.[0] === null &&
+            filtros.dateRange?.[1] === null &&
+            filtros.thirdPartyId === null
+        ) {
+            refresh();
+        }
+    }, [filtros]);
 
     const formatMovementType = (type: string) => {
         return type === "income" ? "Ingreso" : "Egreso";
@@ -125,22 +203,18 @@ export const AdvancesReport: React.FC<AdvancesReportProps> = () => {
     const exportToPdf = () => {
         generarFormatoAdvancesReport(
             advancesReport,
-            formatDateRange(dateRange),
+            formatDateRange(filtros.dateRange),
             "Impresion"
         );
     };
 
     const handleReload = () => {
-        fetchAdvancesReport();
+        refresh();
     };
 
     const handleTypeChange = (type: "client" | "provider") => {
         setReportType(type);
     };
-
-    useEffect(() => {
-        fetchAdvancesReport();
-    }, [reportType]);
 
     const renderTypeSelector = () => (
         <div className="row g-3 mb-3">
@@ -191,36 +265,34 @@ export const AdvancesReport: React.FC<AdvancesReportProps> = () => {
                         <Calendar
                             id="dateRange"
                             selectionMode="range"
-                            value={dateRange}
-                            onChange={(e) => setDateRange(e.value)}
+                            value={filtros.dateRange}
+                            onChange={(e) => handleFilterChange("dateRange", e.value)}
                             className="w-100"
                             showIcon
                             dateFormat="dd/mm/yy"
                             placeholder="Seleccione un rango"
                         />
                     </div>
-                    {/* <div className="col-md-6">
+                    <div className="col-md-6">
                         <ThirdPartyDropdown
-                            value={thirdPartyId}
-                            handleChange={(e: any) => setThirdPartyId(e.value)}
+                            value={filtros.thirdPartyId}
+                            handleChange={(e: any) => handleFilterChange("thirdPartyId", e.value)}
                         />
-                    </div> */}
+                    </div>
                 </div>
                 <div className="d-flex justify-content-end gap-2 mt-3">
                     <Button
                         label="Limpiar Filtros"
                         icon="pi pi-trash"
                         className="p-button-secondary"
-                        onClick={() => {
-                            setDateRange(null);
-                            setThirdPartyId(null);
-                        }}
+                        onClick={limpiarFiltros}
                     />
                     <Button
                         label="Aplicar Filtros"
                         icon="pi pi-filter"
                         className="p-button-primary"
                         onClick={handleReload}
+                        loading={loadingPaginator}
                     />
                 </div>
             </AccordionTab>
@@ -229,6 +301,7 @@ export const AdvancesReport: React.FC<AdvancesReportProps> = () => {
 
     return (
         <main className="main" id="top">
+            <Toast ref={toast} />
             <div className="row g-3 justify-content-between align-items-start mb-4">
                 <div className="col-12">
                     <div
@@ -272,10 +345,16 @@ export const AdvancesReport: React.FC<AdvancesReportProps> = () => {
                                             className="mb-3"
                                         >
                                             <CustomPRTable
-                                                data={advancesReport}
-                                                onReload={fetchAdvancesReport}
                                                 columns={mainColumns}
-                                                loading={loading}
+                                                data={advancesReport}
+                                                lazy
+                                                first={first}
+                                                rows={perPage}
+                                                totalRecords={totalRecords}
+                                                loading={loadingPaginator}
+                                                onPage={handlePageChange}
+                                                onSearch={handleSearchChange}
+                                                onReload={() => refresh()}
                                             />
                                         </Card>
                                     </div>

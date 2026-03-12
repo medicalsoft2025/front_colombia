@@ -21,10 +21,7 @@ export class AppointmentService extends OneToManyService {
         `${this.microservice}/change-status-appointment/${id}/${statusKey}`
       );
     } catch (error) {
-      console.error(
-        `Error getting ${this.childEndpoint} for parent ${parentId}:`,
-        error
-      );
+      console.error(error);
       throw error;
     }
   }

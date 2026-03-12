@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
-import { branchService } from '../../../services/api';
 import { BranchDto } from '../../models/models';
+import { branchService } from '../../../services/api';
 
 export const useBranchesForSelect = () => {
     const [branches, setBranches] = useState<{ value: string, label: string }[]>([]);

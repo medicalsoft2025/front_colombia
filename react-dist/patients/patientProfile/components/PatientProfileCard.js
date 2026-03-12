@@ -12,7 +12,6 @@ export const PatientProfileCard = () => {
   const {
     patientData,
     loading,
-    refresh,
     error
   } = usePatientInfo(patientId);
   const [showMedicalModal, setShowMedicalModal] = useState(false);
@@ -49,7 +48,6 @@ export const PatientProfileCard = () => {
   })), /*#__PURE__*/React.createElement("div", {
     className: "col-lg-6 col-md-6"
   }, /*#__PURE__*/React.createElement(ContactSection, {
-    refresh: refresh,
     patient: patientData
   })), /*#__PURE__*/React.createElement("div", {
     className: "col-lg-12 col-md-12"

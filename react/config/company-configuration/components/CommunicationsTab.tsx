@@ -4,12 +4,14 @@ import WhatsAppConnection from './WhatsAppConnection';
 import { WhatsAppStatus } from '../types/consultorio';
 
 interface CommunicationsTabProps {
+    companyId?: string | number;
     whatsAppStatus: WhatsAppStatus;
     onStatusChange: (status: WhatsAppStatus) => void;
     onValidationChange?: (isValid: boolean) => void;
 }
 
 const CommunicationsTab: React.FC<CommunicationsTabProps> = ({
+    companyId,
     whatsAppStatus,
     onStatusChange,
     onValidationChange
@@ -35,6 +37,7 @@ const CommunicationsTab: React.FC<CommunicationsTabProps> = ({
                         </p>
 
                         <WhatsAppConnection
+                            companyId={companyId}
                             onStatusChange={handleStatusChange}
                         />
                     </div>

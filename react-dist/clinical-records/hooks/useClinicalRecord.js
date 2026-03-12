@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { clinicalRecordService } from "../../../services/api/index.js";
 export const useClinicalRecord = () => {
-  const [clinicalRecord, setClinicalRecord] = useState();
+  const [clinicalRecord, setClinicalRecord] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const getClinicalRecord = async id => {

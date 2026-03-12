@@ -6,6 +6,7 @@ import { branchService } from "../../../../services/api/index.js";
 import { SwalManager } from "../../../../services/alertManagerImported.js";
 import { useBranch } from "./hooks/useBranch.js";
 export const BranchApp = ({
+  companyId,
   onValidationChange
 }) => {
   const {
@@ -18,7 +19,7 @@ export const BranchApp = ({
   const [initialData, setInitialData] = useState(null);
   useEffect(() => {
     fetchBranches();
-  }, []);
+  }, [companyId]);
   useEffect(() => {
     if (branch) {
       setInitialData({
@@ -46,13 +47,17 @@ export const BranchApp = ({
   };
   const handleSubmit = async data => {
     try {
+      const payload = {
+        ...data,
+        company_id: companyId
+      };
       if (branch) {
-        await branchService.update(branch?.id, data);
+        await branchService.update(branch?.id, payload);
         SwalManager.success({
           title: "Sede actualizada"
         });
       } else {
-        await branchService.create(data);
+        await branchService.create(payload);
         SwalManager.success({
           title: "Sede creada"
         });
@@ -85,7 +90,13 @@ export const BranchApp = ({
   };
   async function fetchBranches() {
     try {
-      const response = await branchService.getAll();
+      let response;
+      if (companyId) {
+        // @ts-ignore - branchService is typed as BaseApiService but we added getByCompany
+        response = await branchService.getByCompany(companyId);
+      } else {
+        response = await branchService.getAll();
+      }
       setBranches(response);
       console.log('📊 Sedes cargadas:', response.length);
     } catch (error) {

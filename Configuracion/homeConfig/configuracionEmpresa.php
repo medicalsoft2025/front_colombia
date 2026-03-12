@@ -14,14 +14,20 @@ include "../../header.php";
         </nav>
         <div class="main-content">
             <div class="component-container">
-                <div class="d-flex align-items-center justify-content-between mb-3">
-                    <h2>Configuración Empresa</h2>
-                </div>
-                <?php include "../tabs/tab_tenantConfiguration.php"; ?>
+                <div id="company-crud-react"></div>
             </div>
         </div>
     </div>
 </div>
+
+<script type="module">
+    import {
+        CompaniesCrud
+    } from './react-dist/config/companies-crud/CompaniesCrud.js';
+    import { renderApp } from "../services/react/app-renderer.js";
+
+    renderApp(CompaniesCrud, "company-crud-react");
+</script>
 
 <?php
 include "../../footer.php";

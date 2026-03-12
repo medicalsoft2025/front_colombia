@@ -63,7 +63,7 @@ export default function SpecialityTable({
     header: renderHeader(),
     responsiveLayout: "scroll"
   }, /*#__PURE__*/React.createElement(Column, {
-    field: "specialty",
+    field: "name",
     header: "Nombre",
     sortable: true,
     style: {

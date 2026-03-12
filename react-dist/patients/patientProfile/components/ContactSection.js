@@ -1,30 +1,10 @@
-import React, { useRef, useState } from 'react';
 import { Button } from 'primereact/button';
-import { PatientEditModal } from "./modal/PatientEditModal.js";
+import React from 'react';
 const ContactSection = ({
-  patient,
-  refresh
+  patient
 }) => {
-  const [showEditModal, setShowEditModal] = useState(false);
-  const toast = useRef(null);
   if (!patient) return null;
-  const handleEditSuccess = () => {
-    console.log('Paciente editado exitosamente');
-    if (toast.current) {
-      toast.current.show({
-        severity: 'success',
-        summary: 'Éxito',
-        detail: 'Paciente actualizado correctamente',
-        life: 3000
-      });
-    }
-
-    // Refrescar datos
-    if (refresh) {
-      refresh();
-    }
-  };
-  return /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("div", {
+  return /*#__PURE__*/React.createElement("div", {
     className: "contact-section"
   }, /*#__PURE__*/React.createElement("h3", {
     className: "section-title"
@@ -34,10 +14,11 @@ const ContactSection = ({
     className: "d-flex"
   }, /*#__PURE__*/React.createElement(Button, {
     className: "p-button-primary",
-    onClick: () => setShowEditModal(true),
-    tooltip: "Editar informaci\xF3n del paciente",
-    tooltipOptions: {
-      position: 'top'
+    style: {
+      width: "100%",
+      marginLeft: "10px",
+      fontSize: "10px",
+      marginTop: "10px"
     }
   }, /*#__PURE__*/React.createElement("i", {
     className: "fas fa-edit"
@@ -59,12 +40,7 @@ const ContactSection = ({
     icon: "fas fa-globe-americas",
     label: "Ciudad:",
     value: patient.city_id || "No especificada"
-  }))), patient.id && /*#__PURE__*/React.createElement(PatientEditModal, {
-    visible: showEditModal,
-    onHide: () => setShowEditModal(false),
-    patientId: patient.id.toString(),
-    onSuccess: handleEditSuccess
-  }));
+  })));
 };
 const ContactDetailItem = ({
   icon,
@@ -79,4 +55,13 @@ const ContactDetailItem = ({
 }), label), /*#__PURE__*/React.createElement("div", {
   className: "contact-detail-value"
 }, value));
+const InsuranceBadge = ({
+  entityName
+}) => /*#__PURE__*/React.createElement("div", {
+  className: "insurance-section"
+}, /*#__PURE__*/React.createElement("div", {
+  className: "insurance-badge"
+}, /*#__PURE__*/React.createElement("i", {
+  className: "pi pi-id-card me-2"
+}), entityName || "Particular"));
 export default ContactSection;

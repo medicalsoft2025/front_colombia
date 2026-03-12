@@ -18,7 +18,6 @@ export const EntitiesConfiTable: React.FC<EntitiesConfigTableProps> = ({
     onDeleteItem,
 }) => {
     const toast = useRef<Toast>(null);
-    const [deleteDialogVisible, setDeleteDialogVisible] = useState(false);
     const [entityToDelete, setEntityToDelete] = useState<EntitiesDTO | null>(null);
     const [filteredEntities, setFilteredEntities] = useState<EntitiesDTO[]>([]);
     const [filtros, setFiltros] = useState({
@@ -84,7 +83,7 @@ export const EntitiesConfiTable: React.FC<EntitiesConfigTableProps> = ({
                 <Button
                     icon={<i className="fa-solid fa-trash"></i>}
                     className="p-button-rounded p-button-text p-button-sm p-button-danger"
-                    onClick={() => confirmDelete(rowData)}
+                    onClick={() => deleteEntity(rowData.id.toString())}
                 />
             </div>
         );
@@ -95,39 +94,11 @@ export const EntitiesConfiTable: React.FC<EntitiesConfigTableProps> = ({
         return type ? type.label : rowData.document_type;
     };
 
-    const confirmDelete = (entity: EntitiesDTO) => {
-        setEntityToDelete(entity);
-        setDeleteDialogVisible(true);
-    };
-
-    const deleteEntity = () => {
-        if (entityToDelete && onDeleteItem) {
-            onDeleteItem(entityToDelete.id.toString());
-            showToast("success", "Éxito", `Entidad ${entityToDelete.name} eliminada`);
+    const deleteEntity = (id: string) => {
+        if (onDeleteItem) {
+            onDeleteItem(id);
         }
-        setDeleteDialogVisible(false);
     };
-
-    const showToast = (severity: 'success' | 'info' | 'warn' | 'error', summary: string, detail: string) => {
-        toast.current?.show({ severity, summary, detail, life: 3000 });
-    };
-
-    const deleteDialogFooter = (
-        <div className="flex justify-content-end gap-2">
-            <Button
-                label="Cancelar"
-                icon="pi pi-times"
-                className="p-button-text"
-                onClick={() => setDeleteDialogVisible(false)}
-            />
-            <Button
-                label="Eliminar"
-                icon="pi pi-check"
-                className="p-button-danger"
-                onClick={deleteEntity}
-            />
-        </div>
-    );
 
     const styles = {
         card: {
@@ -158,28 +129,6 @@ export const EntitiesConfiTable: React.FC<EntitiesConfigTableProps> = ({
     return (
         <div className="container-fluid mt-4" style={{ width: "100%", padding: "0 15px" }}>
             <Toast ref={toast} />
-
-            <Dialog
-                visible={deleteDialogVisible}
-                style={{ width: "450px" }}
-                header="Confirmar"
-                modal
-                footer={deleteDialogFooter}
-                onHide={() => setDeleteDialogVisible(false)}
-            >
-                <div className="flex align-items-center justify-content-center">
-                    <i
-                        className="pi pi-exclamation-triangle mr-3"
-                        style={{ fontSize: "2rem", color: "#f8bb86" }}
-                    />
-                    {entityToDelete && (
-                        <span>
-                            ¿Estás seguro que deseas eliminar la entidad <b>{entityToDelete.name}</b>?
-                            Esta acción no se puede deshacer.
-                        </span>
-                    )}
-                </div>
-            </Dialog>
 
             <Card title="Filtros de Búsqueda" style={styles.card}>
                 <div className="row g-3">

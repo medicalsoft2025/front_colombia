@@ -1,15 +1,14 @@
 // ValueMovementHistory.jsx
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect } from "react";
 import { Card } from "primereact/card";
 import { Tag } from "primereact/tag";
 import { DataTable } from "primereact/datatable";
 import { Column } from "primereact/column";
-import { Toast } from "primereact/toast";
 import { Button } from "primereact/button";
 import { Accordion, AccordionTab } from "primereact/accordion";
 import { Calendar } from "primereact/calendar";
 import { Dropdown } from "primereact/dropdown";
-import { useAssetValueMovementHistory } from "../hooks/useAssetValueMovementHistory.js"; // Interfaces corregidas
+import { useAssetValueMovementHistory } from "../hooks/useAssetValueMovementHistory.js";
 const ValueMovementHistory = () => {
   const {
     data: assets,
@@ -19,7 +18,6 @@ const ValueMovementHistory = () => {
     setDateRange,
     type,
     setType,
-    handleSearchChange,
     first,
     totalRecords,
     handlePageChange,
@@ -27,7 +25,6 @@ const ValueMovementHistory = () => {
   } = useAssetValueMovementHistory();
   const [mappedAssets, setMappedAssets] = useState([]);
   const [expandedRows, setExpandedRows] = useState(null);
-  const toast = useRef(null);
   useEffect(() => {
     if (assets) {
       const mappedData = assets.map(asset => ({
@@ -240,9 +237,7 @@ const ValueMovementHistory = () => {
   const valueBodyTemplate = asset => {
     return formatCurrency(asset.currentValue);
   };
-  return /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement(Toast, {
-    ref: toast
-  }), /*#__PURE__*/React.createElement(Accordion, {
+  return /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement(Accordion, {
     className: "mb-3"
   }, /*#__PURE__*/React.createElement(AccordionTab, {
     header: /*#__PURE__*/React.createElement("div", {

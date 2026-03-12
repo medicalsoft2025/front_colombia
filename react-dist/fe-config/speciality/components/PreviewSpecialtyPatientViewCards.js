@@ -82,11 +82,23 @@ export const PreviewSpecialtyPatientViewCards = props => {
     texto: "Consulta todas las incapacidades clínicas para este paciente",
     url: "verIncapacidades?patient_id=" + patientId
   }, {
+    id: "alergias",
+    icono: "person-dots-from-line",
+    titulo: "Alergias",
+    texto: "Revisa todas las alergias registradas para este paciente",
+    url: "verAlergias?patient_id=" + patientId
+  }, {
     id: "antecedentes",
     icono: "hospital",
     titulo: "Antecedentes personales",
     texto: "Revisa todos los antecedentes personales registrados para este paciente",
     url: "verAntecedentes?patient_id=" + patientId
+  }, {
+    id: "historial-familiar",
+    icono: "hospital",
+    titulo: "Antecedentes familiares",
+    texto: "Revisa todos los antecedentes familiares registrados para este paciente",
+    url: "verAntecedentesFamiliares?patient_id=" + patientId
   }, {
     id: "consentimientos",
     icono: "book-medical",
@@ -99,13 +111,15 @@ export const PreviewSpecialtyPatientViewCards = props => {
     titulo: "Presupuestos",
     texto: "Genera y revisa todos los presupuestos elaborados para este paciente",
     url: "registros-presupuestos?patient_id=" + patientId
-  }, {
-    id: "esquema-vacunacion",
-    icono: "syringe",
-    titulo: "Esquema de vacunación",
-    texto: "Revisa el esquema de vacunación o genera un nuevo esquema",
-    url: "esquemaVacunacion?patient_id=" + patientId
-  }, {
+  },
+  // {
+  //     id: "esquema-vacunacion",
+  //     icono: "syringe",
+  //     titulo: "Esquema de vacunación",
+  //     texto: "Revisa el esquema de vacunación o genera un nuevo esquema",
+  //     url: "esquemaVacunacion?patient_id=" + patientId,
+  // },
+  {
     id: "notas-enfermeria",
     icono: "fas fa-user-nurse",
     titulo: "Notas de Enfermeria",

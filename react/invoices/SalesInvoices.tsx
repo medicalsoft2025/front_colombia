@@ -47,6 +47,7 @@ interface FacturaVenta {
     discount?: number;
     tax?: number;
     withholding_tax?: number;
+    invoice_retentions?: any[];
 }
 
 export const SalesInvoices = () => {
@@ -188,17 +189,18 @@ export const SalesInvoices = () => {
             discount: parseFloat(response.discount),
             tax: parseFloat(response.iva),
             withholding_tax: parseFloat(response.withholdings),
+            invoice_retentions: response?.invoice_retentions || [],
             adjustedType:
                 response?.notes && response.notes.length
                     ? response.notes
-                          .map((note: any) => {
-                              note.name = "";
-                              note.type == "debit"
-                                  ? (note.name = "Débito")
-                                  : (note.name = "Crédito");
-                              return `${note.name}`;
-                          })
-                          .join(", ")
+                        .map((note: any) => {
+                            note.name = "";
+                            note.type == "debit"
+                                ? (note.name = "Débito")
+                                : (note.name = "Crédito");
+                            return `${note.name}`;
+                        })
+                        .join(", ")
                     : "Sin ajuste",
         };
     }
@@ -220,9 +222,9 @@ export const SalesInvoices = () => {
 
     // Formatear número para montos en pesos dominicanos (DOP)
     const formatCurrency = (value: number) => {
-        return value.toLocaleString("es-DO", {
+        return value.toLocaleString("es-CO", {
             style: "currency",
-            currency: "DOP",
+            currency: "COP",
             minimumFractionDigits: 2,
             maximumFractionDigits: 2,
         });
@@ -230,7 +232,7 @@ export const SalesInvoices = () => {
 
     // Formatear fecha
     const formatDate = (value: Date) => {
-        return value.toLocaleDateString("es-DO", {
+        return value.toLocaleDateString("es-CO", {
             day: "2-digit",
             month: "2-digit",
             year: "numeric",
@@ -572,8 +574,8 @@ export const SalesInvoices = () => {
                             <Button
                                 className="p-button-primary"
                                 onClick={() =>
-                                    (window.location.href =
-                                        "Facturacion_Ventas")
+                                (window.location.href =
+                                    "Facturacion_Ventas")
                                 }
                             >
                                 <i className="fas fa-file-edit me-2"></i>

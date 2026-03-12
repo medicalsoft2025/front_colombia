@@ -9,6 +9,7 @@ import { useUserAssistantBulkCreate } from "./hooks/useUserAssistantBulkCreate.j
 import { userAssistantService } from "../../services/api/index.js";
 import { CustomPRTable } from "../components/CustomPRTable.js";
 import { GoogleCalendarModal } from "./components/GoogleCalendarModal.js";
+import { VinculateEntitiesToUsers } from "./components/VinculateEntitiesToUsers.js";
 export const UserTable = ({
   users,
   onEditItem,
@@ -31,6 +32,7 @@ export const UserTable = ({
     email: ""
   });
   const [showAssistantsModal, setShowAssistantsModal] = useState(false);
+  const [showVinculateEntitiesModal, setShowVinculateEntitiesModal] = useState(false);
   const [assistantsFormInitialData, setAssistantsFormInitialData] = useState();
   const [selectedFile, setSelectedFile] = useState(null);
   const [previewUrl, setPreviewUrl] = useState(null);
@@ -168,6 +170,13 @@ export const UserTable = ({
       assistants: assistants.data.map(assistant => assistant.id)
     });
   };
+  const openVinculateEntitiesModal = async row => {
+    setCurrentUserId(row.id);
+    setShowVinculateEntitiesModal(true);
+  };
+  const handleVinculateEntitiesSubmit = async () => {
+    showToast("success", "Éxito", `Entidades vinculadas correctamente`);
+  };
   const handleAssistantsSubmit = async data => {
     await createUserAssistantBulk(currentUserId, data.assistants).then(() => {
       setShowAssistantsModal(false);
@@ -209,6 +218,9 @@ export const UserTable = ({
     const handleAssistants = () => {
       openAssistantsModal(rowData.id);
     };
+    const vinculateEntities = () => {
+      openVinculateEntitiesModal(rowData);
+    };
     const menuItems = [{
       label: "Editar",
       icon: /*#__PURE__*/React.createElement("i", {
@@ -221,7 +233,13 @@ export const UserTable = ({
         className: "fas fa-trash me-2"
       }),
       command: handleDelete
-    }];
+    }
+    // {
+    //     label: "Vincular entidades",
+    //     icon: <i className="fas fa-link me-2"></i>,
+    //     command: vinculateEntities,
+    // },
+    ];
 
     // Agregar items específicos para DOCTOR
     if (["DOCTOR", "DOCTOR_ASSISTANT"].includes(rowData.roleGroup)) {
@@ -451,6 +469,23 @@ export const UserTable = ({
       onReload && onReload();
     },
     toast: toast.current
-  })));
+  }), /*#__PURE__*/React.createElement(Dialog, {
+    visible: showVinculateEntitiesModal,
+    style: {
+      width: "70vw",
+      height: "70vh"
+    },
+    header: "Vincular entidades",
+    modal: true,
+    onHide: () => setShowVinculateEntitiesModal(false)
+  }, /*#__PURE__*/React.createElement(VinculateEntitiesToUsers, {
+    userId: currentUserId || "",
+    onSuccess: () => {
+      setShowVinculateEntitiesModal(false);
+      onReload && onReload();
+      handleVinculateEntitiesSubmit();
+    },
+    toast: toast.current
+  }))));
 };
 export default UserTable;

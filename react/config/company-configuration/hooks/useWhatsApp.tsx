@@ -2,28 +2,46 @@ import { useState, useEffect, useCallback } from 'react';
 import { WhatsAppStatus } from '../types/consultorio';
 import { SwalManager } from '../../../../services/alertManagerImported';
 import { whatsAppService } from '../../../../services/api/classes/whatsappService';
+import { companyService } from '../../../../services/api';
 
 export type WhatsAppConnectionStatus = 'CONECTADA' | 'NO-CONECTADA' | 'NO-CREADA';
 
-export const useWhatsApp = () => {
-    const [status, setStatus] = useState<WhatsAppStatus>({
-        connected: false,
-        qrCode: null
-    });
+export const useWhatsApp = (companyId?: string | number) => {
+    const [status, setStatus] = useState<WhatsAppConnectionStatus>('NO-CONECTADA');
+    const [qrCode, setQrCode] = useState<string | null>(null);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [communicationData, setCommunicationData] = useState<any>(null);
 
-    const loadCommunicationData = useCallback(async () => {
+    const loadCommunicationData = useCallback(async (forceRefresh = false) => {
         try {
-            const response = await whatsAppService.getCommunicationData();
-            if (response.status === 200 && response.data && response.data.length > 0) {
-                const companyData = response.data[0];
-                if (companyData.includes && companyData.includes.communication) {
-                    const commData = companyData.includes.communication;
-                    setCommunicationData(commData);
-                    return commData;
+            let commData = !forceRefresh ? communicationData : null;
+
+            if (!commData) {
+                if (companyId) {
+                    const response = await companyService.getCompany(companyId);
+                    if (response.status === 200 && response.data) {
+                        const companyData = Array.isArray(response.data) ? response.data[0] : response.data;
+                        const finalData = (companyData.data && !Array.isArray(companyData.data)) ? companyData.data : companyData;
+
+                        if (finalData) {
+                            commData = finalData.communication || (finalData.includes && finalData.includes.communication);
+                        }
+                    }
+                } else {
+                    const response = await whatsAppService.getCommunicationData();
+                    if (response.status === 200 && response.data && response.data.length > 0) {
+                        const companyData = response.data[0];
+                        if (companyData.includes && companyData.includes.communication) {
+                            commData = companyData.includes.communication;
+                        }
+                    }
                 }
+            }
+
+            if (commData) {
+                setCommunicationData(commData);
+                return commData;
             }
             return null;
         } catch (err) {
@@ -31,17 +49,22 @@ export const useWhatsApp = () => {
             setError('Error al cargar datos de comunicación');
             return null;
         }
-    }, []);
+    }, [companyId, communicationData]);
 
-    const checkWhatsAppStatus = useCallback(async (): Promise<WhatsAppConnectionStatus> => {
+    const checkWhatsAppStatus = useCallback(async (forceRefresh = false): Promise<WhatsAppConnectionStatus> => {
         try {
-            const commData = await loadCommunicationData();
+            let commData = communicationData;
+            if (!commData || forceRefresh) {
+                commData = await loadCommunicationData(forceRefresh);
+            }
 
             if (!commData?.api_key) {
+                setStatus('NO-CREADA');
                 return 'NO-CREADA';
             }
 
             if (!commData?.instance) {
+                setStatus('NO-CONECTADA'); // Or NO-CONFIGURADA?
                 return 'NO-CONECTADA';
             }
 
@@ -51,22 +74,28 @@ export const useWhatsApp = () => {
             );
 
             if (result.instance && result.instance.state === "open") {
-                setStatus({ connected: true, qrCode: null });
+                setStatus('CONECTADA');
+                setQrCode(null);
                 return 'CONECTADA';
             } else {
-                setStatus({ connected: false, qrCode: null });
+                setStatus('NO-CONECTADA');
+                // Don't clear QR code here! It might be visible for scanning.
+                // setQrCode(null); 
                 return 'NO-CONECTADA';
             }
         } catch (error) {
-            console.error('Error checking WhatsApp status:', error);
-            setStatus({ connected: false, qrCode: null });
+            // console.error('Error checking WhatsApp status:', error);
+            // It might fail if instance not found, etc.
+            setStatus('NO-CONECTADA');
             return 'NO-CONECTADA';
         }
-    }, [loadCommunicationData]);
+    }, [loadCommunicationData, communicationData]);
 
     const generateQRCode = useCallback(async (): Promise<string | null> => {
         try {
-            const commData = await loadCommunicationData();
+            let commData = communicationData;
+            if (!commData) commData = await loadCommunicationData();
+
             if (!commData?.api_key || !commData?.instance) {
                 throw new Error('No hay configuración de WhatsApp disponible');
             }
@@ -77,19 +106,22 @@ export const useWhatsApp = () => {
             );
             console.log("QR", qrCode);
 
-            setStatus(prev => ({ ...prev, qrCode }));
+            setQrCode(qrCode);
+            // Don't update status here, just show QR
             return qrCode;
         } catch (error) {
             console.error('Error generating QR code:', error);
             setError('Error al generar código QR');
             return null;
         }
-    }, [loadCommunicationData]);
+    }, [loadCommunicationData, communicationData]);
 
     const disconnectWhatsApp = useCallback(async (): Promise<void> => {
         try {
             setLoading(true);
-            const commData = await loadCommunicationData();
+            let commData = communicationData;
+            if (!commData) commData = await loadCommunicationData();
+
             if (!commData?.api_key || !commData?.instance) {
                 throw new Error('No hay configuración de WhatsApp disponible');
             }
@@ -99,7 +131,8 @@ export const useWhatsApp = () => {
                 commData.api_key
             );
 
-            setStatus({ connected: false, qrCode: null });
+            setStatus('NO-CONECTADA');
+            setQrCode(null);
             SwalManager.success('WhatsApp desconectado correctamente');
         } catch (error) {
             console.error('Error disconnecting WhatsApp:', error);
@@ -108,7 +141,7 @@ export const useWhatsApp = () => {
         } finally {
             setLoading(false);
         }
-    }, [loadCommunicationData]);
+    }, [loadCommunicationData, communicationData]);
 
     const connectWhatsApp = useCallback(async (): Promise<void> => {
         try {
@@ -146,6 +179,8 @@ export const useWhatsApp = () => {
         generateQRCode,
         disconnectWhatsApp,
         connectWhatsApp,
-        communicationData
+        communicationData,
+        qrCode,
+        loadCommunicationData
     };
 };

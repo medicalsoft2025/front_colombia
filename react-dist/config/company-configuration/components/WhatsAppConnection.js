@@ -6,6 +6,7 @@ import { SwalManager } from "../../../../services/alertManagerImported.js";
 import { BtnCreateWhatsAppInstance } from "../../../communications/BtnCreateWhatsAppInstance.js";
 import SmtpConfigForm from "../form/SmtpConfigForm.js";
 const WhatsAppConnection = ({
+  companyId,
   onStatusChange
 }) => {
   const [showQRModal, setShowQRModal] = useState(false);
@@ -18,7 +19,7 @@ const WhatsAppConnection = ({
     connectWhatsApp,
     disconnectWhatsApp,
     checkWhatsAppStatus
-  } = useWhatsApp();
+  } = useWhatsApp(companyId);
 
   // Notificar cambios de estado al componente padre
   useEffect(() => {
@@ -68,16 +69,13 @@ const WhatsAppConnection = ({
   // Renderizado condicional simplificado
   const renderContent = () => {
     if (status === 'CONECTADA') {
-      return /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("i", {
-        className: "fas fa-check-circle text-success",
-        style: {
-          fontSize: '100px'
-        }
-      }), /*#__PURE__*/React.createElement("p", {
+      return /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("p", {
         className: "mt-3"
       }, "WhatsApp conectado correctamente"), /*#__PURE__*/React.createElement(Button, {
         label: "Quitar conexi\xF3n",
-        icon: "pi pi-times-circle",
+        icon: /*#__PURE__*/React.createElement("i", {
+          className: "fas fa-times-circle"
+        }),
         severity: "danger",
         loading: localLoading,
         onClick: handleDisconnect,
@@ -85,16 +83,13 @@ const WhatsAppConnection = ({
       }));
     }
     if (status === 'NO-CONECTADA') {
-      return /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("i", {
-        className: "fas fa-circle-xmark text-danger",
-        style: {
-          fontSize: '100px'
-        }
-      }), /*#__PURE__*/React.createElement("p", {
+      return /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("p", {
         className: "mt-3"
       }, "WhatsApp no conectado"), /*#__PURE__*/React.createElement(Button, {
         label: "Conectar WhatsApp",
-        icon: "pi pi-whatsapp",
+        icon: /*#__PURE__*/React.createElement("i", {
+          className: "fas fa-whatsapp"
+        }),
         severity: "warning",
         loading: localLoading,
         onClick: handleConnect,
@@ -103,27 +98,27 @@ const WhatsAppConnection = ({
     }
 
     // Estado por defecto: NO-CREADA
-    return /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("i", {
-      className: "fas fa-exclamation-triangle text-warning",
-      style: {
-        fontSize: '100px'
-      }
-    }), /*#__PURE__*/React.createElement("p", {
+    return /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("p", {
       className: "mt-3"
     }, "Instancia de WhatsApp no creada"), /*#__PURE__*/React.createElement(BtnCreateWhatsAppInstance, {
-      onSave: () => handleCloseQRModal()
+      companyId: companyId,
+      onSave: () => checkWhatsAppStatus(true)
     }));
   };
   const qrModalFooter = /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement(Button, {
     label: "Cerrar",
-    icon: "pi pi-times",
+    icon: /*#__PURE__*/React.createElement("i", {
+      className: "fas fa-times"
+    }),
     onClick: handleCloseQRModal,
     className: "p-button-secondary",
     disabled: localLoading
   }));
   return /*#__PURE__*/React.createElement("div", {
     className: "flex flex-column align-items-center text-center p-3"
-  }, renderContent(), /*#__PURE__*/React.createElement(SmtpConfigForm, null), /*#__PURE__*/React.createElement(Dialog, {
+  }, renderContent(), /*#__PURE__*/React.createElement(SmtpConfigForm, {
+    companyId: companyId
+  }), /*#__PURE__*/React.createElement(Dialog, {
     header: "Vincular WhatsApp",
     visible: showQRModal,
     footer: qrModalFooter,
@@ -147,12 +142,7 @@ const WhatsAppConnection = ({
     }
   }) : /*#__PURE__*/React.createElement("div", {
     className: "p-4"
-  }, /*#__PURE__*/React.createElement("i", {
-    className: "pi pi-spin pi-spinner",
-    style: {
-      fontSize: '2rem'
-    }
-  }), /*#__PURE__*/React.createElement("p", {
+  }, /*#__PURE__*/React.createElement("p", {
     className: "mt-2"
   }, "Generando c\xF3digo QR...")))), error && /*#__PURE__*/React.createElement("div", {
     className: "alert alert-danger mt-3 w-100"

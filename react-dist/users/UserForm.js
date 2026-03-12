@@ -20,7 +20,7 @@ const UserForm = ({
   initialData,
   config
 }) => {
-  const [profileUrl, setProfileUrl] = useState("assets/img/profile/profile_default.jpg");
+  const [profileUrl, setProfileUrl] = useState("../assets/img/profile/profile_default.jpg");
   const videoRef = useRef(null);
   const canvasRef = useRef(null);
   const fileInputRef = useRef(null);
@@ -208,9 +208,7 @@ const UserForm = ({
   const handleProfileUrl = async minioUrl => {
     //@ts-ignore
     const url = getUrlImage(minioUrl);
-    if (url && minioUrl) {
-      setProfileUrl(url);
-    }
+    setProfileUrl(url);
   };
   const passwordHeader = /*#__PURE__*/React.createElement("div", {
     className: "font-bold mb-3"
@@ -237,7 +235,7 @@ const UserForm = ({
     className: "profile-img-container"
   }, /*#__PURE__*/React.createElement("img", {
     id: "profilePreview",
-    src: profileUrl || "assets/img/profile/profile_default.jpg",
+    src: profileUrl || "../assets/img/profile/profile_default.jpg",
     alt: "Previsualizaci\xF3n",
     style: {
       width: "150px",
@@ -255,8 +253,8 @@ const UserForm = ({
   }))), /*#__PURE__*/React.createElement("div", {
     className: "mt-3 d-flex flex-column justify-content-center gap-2"
   }, /*#__PURE__*/React.createElement(Button, {
-    className: "d-flex align-items-center align-self-center",
     type: "button",
+    className: "d-flex align-items-center",
     onClick: () => fileInputRef.current?.click()
   }, /*#__PURE__*/React.createElement("i", {
     className: "fa-solid fa-upload me-1"
@@ -515,7 +513,7 @@ const UserForm = ({
       })
     }, field)))
   }), getFormErrorMessage("email")), /*#__PURE__*/React.createElement("div", {
-    className: "col-md-12 mb-1 mt-2"
+    className: "col-md-12 mb-1"
   }, /*#__PURE__*/React.createElement(Controller, {
     name: "otp_enabled",
     control: control,
@@ -545,7 +543,7 @@ const UserForm = ({
   }, /*#__PURE__*/React.createElement("div", {
     className: "row"
   }, /*#__PURE__*/React.createElement("div", {
-    className: selectedRole && ["DOCTOR_ASSISTANT", "DOCTOR"].includes(selectedRole.group) ? "col-md-6 mb-1" : "col-md-12 mb-1"
+    className: "col-md-6 mb-1"
   }, /*#__PURE__*/React.createElement(Controller, {
     name: "user_role_id",
     control: control,

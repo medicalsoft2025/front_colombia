@@ -31,7 +31,7 @@ const PatientNotesImportant = ({
   return /*#__PURE__*/React.createElement("div", {
     className: "important-notes-section"
   }, /*#__PURE__*/React.createElement("h3", {
-    className: "section-title mb-3"
+    className: "section-title"
   }, /*#__PURE__*/React.createElement("i", {
     className: "fas fa-exclamation-circle me-2"
   }), "Notas Importantes", /*#__PURE__*/React.createElement("div", {

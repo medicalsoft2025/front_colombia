@@ -10,11 +10,14 @@ import { GenerateTicket } from "../tickets/GenerateTicket.js";
 import { AppointmentFormModal } from "./AppointmentFormModal.js";
 import { Menu } from "primereact/menu";
 import { getLocalTodayISODate } from "../../services/utilidades.js";
-import { appointmentService } from "../../services/api/index.js";
+import { appointmentService, copaymentRulesService } from "../../services/api/index.js";
 import { SwalManager } from "../../services/alertManagerImported.js";
 import { RescheduleAppointmentModalV2 } from "./RescheduleAppointmentModalV2.js";
 import { usePRToast } from "../hooks/usePRToast.js";
 import { Toast } from "primereact/toast";
+import { Accordion, AccordionTab } from "primereact/accordion";
+import { Dropdown } from "primereact/dropdown";
+import { useCompanies } from "../companies/hooks/useCompanies.js";
 export const TodayAppointmentsTable = () => {
   const [showBillingDialog, setShowBillingDialog] = useState(false);
   const [showTicketControl, setShowTicketControl] = useState(false);
@@ -27,6 +30,9 @@ export const TodayAppointmentsTable = () => {
     toast,
     showSuccessToast
   } = usePRToast();
+  const {
+    companies
+  } = useCompanies();
   const customFilters = () => {
     return {
       appointmentState: "pending",
@@ -42,17 +48,21 @@ export const TodayAppointmentsTable = () => {
     totalRecords,
     first,
     loading,
-    perPage
+    perPage,
+    companyId,
+    setCompanyId
   } = useFetchAppointments(customFilters);
 
   // useEffect(() => {
   //   console.log("appointments", appointments);
   // }, [appointments]);
 
-  const handleFacturarAdmision = appointment => {
+  const handleFacturarAdmision = async appointment => {
+    const copaymentRules = await copaymentRulesService.getRuleByAppointment(Number(appointment.id));
     setSelectedAppointment({
       ...appointment,
-      patient: appointment.patient
+      patient: appointment.patient,
+      copaymentRules: copaymentRules || null
     });
     setShowBillingDialog(true);
   };
@@ -112,6 +122,9 @@ export const TodayAppointmentsTable = () => {
     field: "patientDNI",
     header: "Número de documento"
   }, {
+    field: "companyName",
+    header: "Empresa"
+  }, {
     field: "date",
     header: "Fecha Consulta"
   }, {
@@ -143,13 +156,34 @@ export const TodayAppointmentsTable = () => {
       minHeight: "400px",
       marginTop: "-20px"
     }
+  }, /*#__PURE__*/React.createElement(Accordion, {
+    activeIndex: null
+  }, /*#__PURE__*/React.createElement(AccordionTab, {
+    header: "Filtros"
   }, /*#__PURE__*/React.createElement("div", {
+    className: "row"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "col-md-6 mb-2"
+  }, /*#__PURE__*/React.createElement("label", {
+    htmlFor: "company",
+    className: "form-label"
+  }, "Empresa"), /*#__PURE__*/React.createElement(Dropdown, {
+    id: "company",
+    value: companyId,
+    options: companies,
+    onChange: e => {
+      setCompanyId(e.value);
+    },
+    optionLabel: "attributes.legal_name",
+    optionValue: "id",
+    placeholder: "Seleccione una empresa",
+    filter: true,
+    showClear: true,
+    className: "w-100 md:w-14rem"
+  }))))), /*#__PURE__*/React.createElement("div", {
     className: "card-body h-100 w-100 d-flex flex-column"
   }, /*#__PURE__*/React.createElement("div", {
-    className: "d-flex justify-content-end gap-3 mb-2 botones-responsive",
-    style: {
-      marginTop: "-30px"
-    }
+    className: "d-flex justify-content-end gap-3 mb-2"
   }, /*#__PURE__*/React.createElement(Button, {
     label: "Control de turnos",
     icon: /*#__PURE__*/React.createElement("i", {

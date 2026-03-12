@@ -7,10 +7,11 @@ import { SwalManager } from "../../../../services/alertManagerImported";
 import { useBranch } from "./hooks/useBranch";
 
 interface BranchAppProps {
+  companyId?: string | number;
   onValidationChange?: (isValid: boolean) => void;
 }
 
-export const BranchApp: React.FC<BranchAppProps> = ({ onValidationChange }) => {
+export const BranchApp: React.FC<BranchAppProps> = ({ companyId, onValidationChange }) => {
   const { branch, setBranch, fetchBranchHook } = useBranch();
   const [branches, setBranches] = useState<any[]>([]);
   const [showBranchFormModal, setShowBranchFormModal] = useState(false);
@@ -18,7 +19,7 @@ export const BranchApp: React.FC<BranchAppProps> = ({ onValidationChange }) => {
 
   useEffect(() => {
     fetchBranches();
-  }, []);
+  }, [companyId]);
 
   useEffect(() => {
     if (branch) {
@@ -49,13 +50,15 @@ export const BranchApp: React.FC<BranchAppProps> = ({ onValidationChange }) => {
 
   const handleSubmit = async (data: any) => {
     try {
+      const payload = { ...data, company_id: companyId };
+
       if (branch) {
-        await branchService.update(branch?.id, data);
+        await branchService.update(branch?.id, payload);
         SwalManager.success({
           title: "Sede actualizada",
         });
       } else {
-        await branchService.create(data);
+        await branchService.create(payload);
         SwalManager.success({
           title: "Sede creada",
         });
@@ -92,7 +95,13 @@ export const BranchApp: React.FC<BranchAppProps> = ({ onValidationChange }) => {
 
   async function fetchBranches() {
     try {
-      const response = await branchService.getAll();
+      let response;
+      if (companyId) {
+        // @ts-ignore - branchService is typed as BaseApiService but we added getByCompany
+        response = await branchService.getByCompany(companyId);
+      } else {
+        response = await branchService.getAll();
+      }
       setBranches(response);
       console.log('📊 Sedes cargadas:', response.length);
     } catch (error) {

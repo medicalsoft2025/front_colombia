@@ -291,7 +291,7 @@ export const NewReceiptBoxModal = ({
   }), onSave && /*#__PURE__*/React.createElement(Button, {
     label: "Guardar",
     icon: "fa fa-plus",
-    className: "btn btn-primary",
+    className: "p-button-success",
     onClick: handleSave
   }))));
 };

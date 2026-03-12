@@ -65,14 +65,22 @@ export const AddVaccineForm = /*#__PURE__*/forwardRef((props, ref) => {
   const handleUpdateVaccine = (index, data) => {
     updateVaccine(index, data);
   };
+  const addVaccine = name => {
+    appendVaccine({
+      uuid: Math.random().toString(36).substring(7),
+      name,
+      dose: 1,
+      scheme: "",
+      booster: ""
+    });
+  };
   return /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
     className: "mb-3"
   }, /*#__PURE__*/React.createElement(Controller, {
     name: "fromInventory",
     control: control,
     render: ({
-      field,
-      fieldState
+      field
     }) => /*#__PURE__*/React.createElement("div", {
       className: "d-flex align-items-center gap-2"
     }, /*#__PURE__*/React.createElement(InputSwitch, {
@@ -137,22 +145,9 @@ export const AddVaccineForm = /*#__PURE__*/forwardRef((props, ref) => {
     disabled: fromInventory && !vaccineFromInventory || !fromInventory && !vaccineName,
     onClick: () => {
       if (fromInventory) {
-        console.log(vaccineFromInventory);
-        appendVaccine({
-          uuid: Math.random().toString(36).substring(7),
-          name: vaccineFromInventory.label,
-          dose: 1,
-          scheme: "",
-          booster: ""
-        });
+        addVaccine(vaccineFromInventory.label);
       } else if (vaccineName) {
-        appendVaccine({
-          uuid: Math.random().toString(36).substring(7),
-          name: vaccineName,
-          dose: 1,
-          scheme: "",
-          booster: ""
-        });
+        addVaccine(vaccineName);
       }
       resetField("vaccineFromInventory");
       resetField("vaccineName");

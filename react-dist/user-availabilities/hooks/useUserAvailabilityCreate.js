@@ -5,9 +5,9 @@ import { usePRToast } from "../../hooks/usePRToast.js";
 export const useUserAvailabilityCreate = () => {
   const [loading, setLoading] = useState(false);
   const {
+    toast,
     showSuccessToast,
-    showServerErrorsToast,
-    toast
+    showServerErrorsToast
   } = usePRToast();
   const createUserAvailability = async userAvailabilityData => {
     setLoading(true);
@@ -24,8 +24,7 @@ export const useUserAvailabilityCreate = () => {
       };
       await userAvailabilityService.createForParent(userAvailabilityData.user_id, data);
       showSuccessToast({
-        title: "Horario creado",
-        message: "El horario de atención se ha creado correctamente"
+        message: "Se creó la disponibilidad exitosamente"
       });
     } catch (error) {
       showServerErrorsToast(error);

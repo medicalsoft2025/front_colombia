@@ -9,6 +9,8 @@ import { useUserAvailabilityDelete } from "./hooks/useUserAvailabilityDelete.js"
 import { useUserAvailabilityCreate } from "./hooks/useUserAvailabilityCreate.js";
 import { convertHHMMToDate } from "../../services/utilidades.js";
 import { Button } from 'primereact/button';
+import { usePRToast } from "../hooks/usePRToast.js";
+import { Toast } from 'primereact/toast';
 export const UserAvailabilityApp = ({
   onConfigurationComplete,
   isConfigurationContext = false
@@ -20,10 +22,12 @@ export const UserAvailabilityApp = ({
     fetchData: fetchAvailabilities
   } = useUserAvailabilitiesTable();
   const {
-    createUserAvailability
+    createUserAvailability,
+    toast: toastCreate
   } = useUserAvailabilityCreate();
   const {
-    updateUserAvailability
+    updateUserAvailability,
+    toast: toastUpdate
   } = useUserAvailabilityUpdate();
   const {
     deleteUserAvailability
@@ -33,6 +37,10 @@ export const UserAvailabilityApp = ({
     setUserAvailability,
     fetchUserAvailability
   } = useUserAvailability();
+  const {
+    toast: toastDelete,
+    showSuccessToast
+  } = usePRToast();
   const onCreate = () => {
     setInitialData(undefined);
     setUserAvailability(null);
@@ -69,7 +77,12 @@ export const UserAvailabilityApp = ({
   };
   const handleTableDelete = async id => {
     const confirmed = await deleteUserAvailability(id);
-    if (confirmed) fetchAvailabilities();
+    if (confirmed) {
+      fetchAvailabilities();
+      showSuccessToast({
+        message: 'Disponibilidad eliminada correctamente'
+      });
+    }
   };
   useEffect(() => {
     if (userAvailability) {
@@ -102,7 +115,13 @@ export const UserAvailabilityApp = ({
         overlay: 100000
       }
     }
-  }, showValidations && /*#__PURE__*/React.createElement("div", {
+  }, /*#__PURE__*/React.createElement(Toast, {
+    ref: toastCreate
+  }), /*#__PURE__*/React.createElement(Toast, {
+    ref: toastUpdate
+  }), /*#__PURE__*/React.createElement(Toast, {
+    ref: toastDelete
+  }), showValidations && /*#__PURE__*/React.createElement("div", {
     className: "validation-section mb-3"
   }, /*#__PURE__*/React.createElement("div", {
     className: `alert ${isComplete ? 'alert-success' : 'alert-info'} p-3`

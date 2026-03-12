@@ -158,13 +158,13 @@ export const AddVaccineForm = /*#__PURE__*/forwardRef((props, ref) => {
       resetField("vaccineFromInventory");
       resetField("vaccineName");
     }
-  }))), /*#__PURE__*/React.createElement(VaccinesTable, {
+  }))), /*#__PURE__*/React.createElement(AddVaccineFormTable, {
     vaccinesFromInventory: vaccinesFromInventory,
     onRemove: handleRemoveVaccine,
     updateVaccine: handleUpdateVaccine
   }));
 });
-export const VaccinesTable = /*#__PURE__*/forwardRef((props, ref) => {
+export const AddVaccineFormTable = /*#__PURE__*/forwardRef((props, ref) => {
   const {
     vaccinesFromInventory,
     onRemove,

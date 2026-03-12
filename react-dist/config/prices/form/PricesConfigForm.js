@@ -6,7 +6,7 @@ import { InputNumber } from "primereact/inputnumber";
 import { Dropdown } from "primereact/dropdown";
 import { InputSwitch } from "primereact/inputswitch";
 import { Button } from "primereact/button";
-import { examTypeService, taxesService, retentionsService } from "../../../../services/api/index.js";
+import { examTypeService, taxesService, retentionsService, resourcesAdminService } from "../../../../services/api/index.js";
 import { Dialog } from "primereact/dialog";
 import { ExamConfigFormModal } from "../../../exams-config/components/ExamConfigFormModal.js";
 import { CustomPRTable } from "../../../components/CustomPRTable.js";
@@ -24,6 +24,8 @@ const PricesConfigForm = ({
   const [showEntities, setShowEntities] = useState(false);
   const [showTax, setShowTax] = useState(false);
   const [entityRows, setEntityRows] = useState([]);
+  const [showSelectCategory, setShowSelectCategory] = useState(false);
+  const [showSelectLevel, setShowSelectLevel] = useState(false);
   const [currentEntity, setCurrentEntity] = useState({
     entity_id: "",
     entity_name: "",
@@ -32,11 +34,14 @@ const PricesConfigForm = ({
     tax_name: "",
     withholding_tax_id: "",
     retention_name: "",
-    negotation_type: ""
+    negotation_type: "",
+    category: "",
+    level: ""
   });
   const [examTypesData, setExamTypesData] = useState([]);
   const [taxes, setTaxes] = useState([]);
   const [retentions, setRetentions] = useState([]);
+  const [userTypes, setUserTypes] = useState([]);
 
   // Estado para controlar la visibilidad del modal de exámenes
   const [showExamModal, setShowExamModal] = useState(false);
@@ -91,6 +96,10 @@ const PricesConfigForm = ({
     productsByType: supplies,
     fetchProductsByType
   } = useProductsByType();
+  async function loadResources() {
+    const userTypesData = await resourcesAdminService.getHealthUserTypes();
+    setUserTypes(userTypesData);
+  }
   useEffect(() => {
     if (attentionType === "PROCEDURE") {
       setShowExamType(true);
@@ -111,6 +120,7 @@ const PricesConfigForm = ({
     setShowTax(toggleImpuesto || false);
   }, [toggleImpuesto]);
   useEffect(() => {
+    loadResources();
     loadExamTypes();
     loadTaxes();
     loadRetentions();
@@ -180,18 +190,22 @@ const PricesConfigForm = ({
     }
     onHandleSubmit(submitData);
   };
-  const regimeOptions = [{
-    label: "Subsidiado",
-    value: "subsidiado"
+  const categoryOptions = [{
+    label: "Categoría A",
+    value: "A"
   }, {
-    label: "Contributivo",
-    value: "contributivo"
+    label: "Categoría B",
+    value: "B"
   }, {
-    label: "Pensionado",
-    value: "pensionado"
+    label: "Categoría C",
+    value: "C"
+  }];
+  const levelsOptions = [{
+    label: "Nivel 1",
+    value: "1"
   }, {
-    label: "Privado",
-    value: "privado"
+    label: "Nivel 2",
+    value: "2"
   }];
   const handleExamSubmit = data => {
     handleCloseExamModal();
@@ -242,9 +256,22 @@ const PricesConfigForm = ({
         [field]: value
       }));
     }
+    if (field === "negotation_type") {
+      if (value == 1 || value == 2 || value == 3) {
+        setShowSelectCategory(true);
+        setShowSelectLevel(false);
+      } else if (value == 4) {
+        setShowSelectLevel(true);
+        setShowSelectCategory(false);
+      } else {
+        setShowSelectCategory(false);
+        setShowSelectLevel(false);
+      }
+    }
   };
   const addEntityRow = () => {
     if (currentEntity.entity_id && currentEntity.price > 0) {
+      console.log("currentEntity", currentEntity);
       const newRow = {
         entity_id: currentEntity.entity_id,
         entity_name: currentEntity.entity_name,
@@ -253,8 +280,11 @@ const PricesConfigForm = ({
         tax_name: currentEntity.tax_name || "N/A",
         withholding_tax_id: currentEntity.withholding_tax_id || "",
         negotation_type: currentEntity.negotation_type || "",
-        retention_name: currentEntity.retention_name || "N/A"
+        retention_name: currentEntity.retention_name || "N/A",
+        category: currentEntity.category || "",
+        level: currentEntity.level || ""
       };
+      console.log("newRow", newRow);
       setEntityRows([...entityRows, newRow]);
 
       // Reset current entity
@@ -266,7 +296,9 @@ const PricesConfigForm = ({
         tax_name: "",
         withholding_tax_id: "",
         retention_name: "",
-        negotation_type: ""
+        negotation_type: "",
+        category: "",
+        level: ""
       });
     }
   };
@@ -798,8 +830,38 @@ const PricesConfigForm = ({
   }, "Tipo de negociaci\xF3n"), /*#__PURE__*/React.createElement(Dropdown, {
     className: "w-100",
     value: currentEntity.negotation_type,
+    optionLabel: "name",
+    optionValue: "id",
     onChange: e => handleEntityChange("negotation_type", e.value),
-    options: regimeOptions,
+    options: userTypes,
+    placeholder: "Seleccionar..."
+  }))), showSelectCategory && /*#__PURE__*/React.createElement("div", {
+    className: "col-md-6"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "mb-3"
+  }, /*#__PURE__*/React.createElement("label", {
+    className: "form-label"
+  }, "Categor\xEDa"), /*#__PURE__*/React.createElement(Dropdown, {
+    className: "w-100",
+    value: currentEntity.category,
+    optionLabel: "label",
+    optionValue: "value",
+    onChange: e => handleEntityChange("category", e.value),
+    options: categoryOptions,
+    placeholder: "Seleccionar..."
+  }))), showSelectLevel && /*#__PURE__*/React.createElement("div", {
+    className: "col-md-6"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "mb-3"
+  }, /*#__PURE__*/React.createElement("label", {
+    className: "form-label"
+  }, "Nivel"), /*#__PURE__*/React.createElement(Dropdown, {
+    className: "w-100",
+    value: currentEntity.level,
+    optionLabel: "label",
+    optionValue: "value",
+    onChange: e => handleEntityChange("level", e.value),
+    options: levelsOptions,
     placeholder: "Seleccionar..."
   }))), /*#__PURE__*/React.createElement("div", {
     className: "col-12 text-end"
@@ -811,9 +873,9 @@ const PricesConfigForm = ({
     className: "card p-3 mt-3"
   }, /*#__PURE__*/React.createElement("table", {
     className: "table table-striped"
-  }, /*#__PURE__*/React.createElement("thead", null, /*#__PURE__*/React.createElement("tr", null, /*#__PURE__*/React.createElement("th", null, "Entidad"), /*#__PURE__*/React.createElement("th", null, "Precio"), /*#__PURE__*/React.createElement("th", null, "Tipo Impuesto"), /*#__PURE__*/React.createElement("th", null, "Tipo Retenci\xF3n"), /*#__PURE__*/React.createElement("th", null, "Tipo negociaci\xF3n"), /*#__PURE__*/React.createElement("th", null))), /*#__PURE__*/React.createElement("tbody", null, entityRows.map((row, index) => /*#__PURE__*/React.createElement("tr", {
+  }, /*#__PURE__*/React.createElement("thead", null, /*#__PURE__*/React.createElement("tr", null, /*#__PURE__*/React.createElement("th", null, "Entidad"), /*#__PURE__*/React.createElement("th", null, "Precio"), /*#__PURE__*/React.createElement("th", null, "Tipo Impuesto"), /*#__PURE__*/React.createElement("th", null, "Tipo Retenci\xF3n"), /*#__PURE__*/React.createElement("th", null, "Tipo negociaci\xF3n"), /*#__PURE__*/React.createElement("th", null, "Categor\xEDa"), /*#__PURE__*/React.createElement("th", null, "Nivel"), /*#__PURE__*/React.createElement("th", null))), /*#__PURE__*/React.createElement("tbody", null, entityRows.map((row, index) => /*#__PURE__*/React.createElement("tr", {
     key: index
-  }, /*#__PURE__*/React.createElement("td", null, row.entity_name), /*#__PURE__*/React.createElement("td", null, row.price), /*#__PURE__*/React.createElement("td", null, row.tax_name || "N/A"), /*#__PURE__*/React.createElement("td", null, row.retention_name || "N/A"), /*#__PURE__*/React.createElement("td", null, row.negotation_type || "N/A"), /*#__PURE__*/React.createElement("td", null, /*#__PURE__*/React.createElement("button", {
+  }, /*#__PURE__*/React.createElement("td", null, row.entity_name), /*#__PURE__*/React.createElement("td", null, row.price), /*#__PURE__*/React.createElement("td", null, row.tax_name || "N/A"), /*#__PURE__*/React.createElement("td", null, row.retention_name || "N/A"), /*#__PURE__*/React.createElement("td", null, row.negotation_type || "N/A"), /*#__PURE__*/React.createElement("td", null, row.category || ""), /*#__PURE__*/React.createElement("td", null, row.level || ""), /*#__PURE__*/React.createElement("td", null, /*#__PURE__*/React.createElement("button", {
     type: "button",
     className: "btn btn-danger btn-sm",
     onClick: () => removeEntityRow(index)

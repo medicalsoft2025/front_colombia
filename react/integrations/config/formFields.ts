@@ -63,17 +63,23 @@ export const sisproConfigFields: ConfigFieldI[] = [
         placeholder: "Ingrese la identificación"
     },
     {
-        field: "SISPRO_USERNAME",
-        label: "Nombre de usuario",
+        field: "SISPRO_NIT",
+        label: "Nit",
         type: "text",
-        placeholder: "Ingrese el nombre de usuario"
+        placeholder: "Ingrese la NIT(Si aplica)"
     },
     {
         field: "SISPRO_PASSWORD",
         label: "Contraseña",
         type: "password",
         placeholder: "Ingrese la contraseña"
-    }
+    },
+    {
+        field: "SISPRO_PRESTADOR_CODE",
+        label: "Codigo de prestador",
+        type: "text",
+        placeholder: "Ingrese el codigo de prestador"
+    },
 ];
 
 export const carnetConfigFields: ConfigFieldI[] = [

@@ -5,8 +5,10 @@ import { classNames } from "primereact/utils";
 import { InputText } from "primereact/inputtext";
 import { Button } from "primereact/button";
 import { Dropdown } from "primereact/dropdown";
-import { documentTypes } from "../interfaces/constant.js";
+import { documentTypes as documentTypesConstant } from "../interfaces/constant.js";
 import useLocationDropdowns from "../../../cities/hooks/useLocationDropdowns.js";
+import { resourcesAdminService } from "../../../../services/api/index.js";
+import { InputNumber } from "primereact/inputnumber";
 const EntitiesConfigForm = ({
   formId,
   onSubmit,
@@ -37,9 +39,23 @@ const EntitiesConfigForm = ({
       city_id: "",
       tax_charge_id: null,
       withholding_tax_id: null,
-      koneksi_sponsor_slug: null
+      koneksi_sponsor_slug: null,
+      type_organization_id: "",
+      type_liability_id: "",
+      type_regime_id: "",
+      operation_type_id: "",
+      coverage_type_id: "",
+      payment_method_id: "",
+      document_type_id: "",
+      user_type_id: "",
+      contract_number: "",
+      poliza_number: "",
+      isEditing: false
     }
   });
+  const [operationTypes, setOperationTypes] = useState([]);
+  const [coverageTypes, setCoverageTypes] = useState([]);
+  const [paymentMethods, setPaymentMethods] = useState([]);
   const watchCountry = watch("country_id");
   const watchDepartment = watch("department_id");
   const {
@@ -55,6 +71,27 @@ const EntitiesConfigForm = ({
     loading: locationLoading
   } = useLocationDropdowns();
   const [isInitialized, setIsInitialized] = useState(false);
+  const [organizationTypes, setOrganizationTypes] = useState([]);
+  const [liabilityTypes, setLiabilityTypes] = useState([]);
+  const [regimeTypes, setRegimeTypes] = useState([]);
+  async function loadResources() {
+    const organizationTypes = await resourcesAdminService.getOrganizationTypes();
+    const liabilityTypes = await resourcesAdminService.getLiabilityTypes();
+    const regimeTypes = await resourcesAdminService.getRegimeTypes();
+    const operationTypesData = await resourcesAdminService.getHealthTypeOperations();
+    const coverageTypesData = await resourcesAdminService.getHealthCoverages();
+    const paymentTypesData = await resourcesAdminService.getHealthPaymentMethods();
+    const documentTypesData = await resourcesAdminService.getHealthDocumentTypes();
+    const userTypesData = await resourcesAdminService.getHealthUserTypes();
+    setOrganizationTypes(organizationTypes);
+    setLiabilityTypes(liabilityTypes);
+    setRegimeTypes(regimeTypes);
+    setOperationTypes(operationTypesData);
+    setCoverageTypes(coverageTypesData);
+    setPaymentMethods(paymentTypesData);
+    setDocumentTypes(documentTypesData);
+    setUserTypes(userTypesData);
+  }
   const onFormSubmit = data => {
     onSubmit({
       ...data,
@@ -69,6 +106,7 @@ const EntitiesConfigForm = ({
     }, errors[name]?.message);
   };
   useEffect(() => {
+    loadResources();
     if (initialData && !isInitialized) {
       reset(initialData);
       if (initialData.country_id) {
@@ -174,7 +212,7 @@ const EntitiesConfigForm = ({
       className: "form-label"
     }, "Tipo de Documento *"), /*#__PURE__*/React.createElement(Dropdown, _extends({
       id: field.name,
-      options: documentTypes,
+      options: documentTypesConstant,
       optionLabel: "label",
       optionValue: "value",
       className: classNames("w-100", {
@@ -182,7 +220,9 @@ const EntitiesConfigForm = ({
       })
     }, field)))
   }), getFormErrorMessage("document_type")), /*#__PURE__*/React.createElement("div", {
-    className: "mb-3"
+    className: watch("document_type") === 'NIT' && initialData === undefined && !initialData?.isEditing ? 'row col-md-12 align-items-center' : 'mb-3'
+  }, /*#__PURE__*/React.createElement("div", {
+    className: watch("document_type") === 'NIT' && initialData === undefined && !initialData?.isEditing ? 'col-8' : 'mb-3'
   }, /*#__PURE__*/React.createElement(Controller, {
     name: "document_number",
     control: control,
@@ -200,7 +240,26 @@ const EntitiesConfigForm = ({
         "p-invalid": errors.document_number
       })
     }, field)))
-  }), getFormErrorMessage("document_number")), /*#__PURE__*/React.createElement("div", {
+  }), getFormErrorMessage("document_number")), watch("document_type") === "NIT" && initialData === undefined && !initialData?.isEditing && /*#__PURE__*/React.createElement("div", {
+    className: watch("document_type") === 'NIT' && initialData === undefined && !initialData?.isEditing ? 'col-4' : 'd-none'
+  }, /*#__PURE__*/React.createElement(Controller, {
+    name: "dv",
+    control: control,
+    rules: {
+      required: watch("document_type") === "NIT"
+    },
+    render: ({
+      field
+    }) => /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("label", {
+      htmlFor: field.name,
+      className: "form-label"
+    }, "DV *"), /*#__PURE__*/React.createElement(InputText, _extends({
+      id: field.name,
+      className: classNames("w-100", {
+        "p-invalid": errors.dv
+      })
+    }, field)))
+  }), getFormErrorMessage("dv"))), /*#__PURE__*/React.createElement("div", {
     className: "mb-3"
   }, /*#__PURE__*/React.createElement(Controller, {
     name: "email",
@@ -361,7 +420,200 @@ const EntitiesConfigForm = ({
       filterBy: "label",
       showClear: true
     }))
-  }), getFormErrorMessage("city_id")))), /*#__PURE__*/React.createElement("div", {
+  }), getFormErrorMessage("city_id")))), /*#__PURE__*/React.createElement("hr", {
+    className: "my-4"
+  }), /*#__PURE__*/React.createElement("h5", {
+    className: "mb-3"
+  }, "Informaci\xF3n Facturaci\xF3n Electr\xF3nica"), /*#__PURE__*/React.createElement("div", {
+    className: "row pb-5"
+  }, initialData === undefined && !initialData?.isEditing && /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("div", {
+    className: "col-md-4"
+  }, /*#__PURE__*/React.createElement(Controller, {
+    name: "type_organization_id",
+    control: control,
+    rules: {
+      required: "La organización es requerida"
+    },
+    render: ({
+      field
+    }) => /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("label", {
+      htmlFor: "type_organization_id",
+      className: "form-label"
+    }, "Tipo de Organizaci\xF3n *"), /*#__PURE__*/React.createElement(Dropdown, _extends({
+      id: field.name,
+      options: organizationTypes,
+      optionLabel: "name",
+      optionValue: "id",
+      className: classNames("w-100", {
+        "p-invalid": errors.type_organization_id
+      })
+    }, field, {
+      placeholder: "Selecciona un tipo de organizaci\xF3n",
+      required: true,
+      filter: true
+    })))
+  }), getFormErrorMessage("type_organization_id")), /*#__PURE__*/React.createElement("div", {
+    className: "col-md-4"
+  }, /*#__PURE__*/React.createElement(Controller, {
+    name: "type_liability_id",
+    control: control,
+    rules: {
+      required: "El agente retenedor es requerido"
+    },
+    render: ({
+      field
+    }) => /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("label", {
+      htmlFor: "type_liability_id",
+      className: "form-label"
+    }, "Agente retenedor *"), /*#__PURE__*/React.createElement(Dropdown, _extends({
+      id: field.name,
+      options: liabilityTypes,
+      optionLabel: "name",
+      optionValue: "id",
+      className: classNames("w-100", {
+        "p-invalid": errors.type_liability_id
+      })
+    }, field, {
+      placeholder: "Selecciona un agente retenedor",
+      required: true,
+      filter: true
+    })))
+  }), getFormErrorMessage("type_liability_id")), /*#__PURE__*/React.createElement("div", {
+    className: "col-md-4"
+  }, /*#__PURE__*/React.createElement(Controller, {
+    name: "type_regime_id",
+    control: control,
+    rules: {
+      required: "El tipo de régimen es requerido"
+    },
+    render: ({
+      field
+    }) => /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("label", {
+      htmlFor: "regime_type",
+      className: "form-label"
+    }, "Tipo de r\xE9gimen *"), /*#__PURE__*/React.createElement(Dropdown, _extends({
+      id: field.name,
+      options: regimeTypes,
+      optionLabel: "name",
+      optionValue: "id",
+      className: classNames("w-100", {
+        "p-invalid": errors.type_regime_id
+      })
+    }, field, {
+      placeholder: "Selecciona un tipo de r\xE9gimen",
+      required: true,
+      filter: true
+    })))
+  }), getFormErrorMessage("type_regime_id"))), /*#__PURE__*/React.createElement("div", {
+    className: "col-md-6"
+  }, /*#__PURE__*/React.createElement("label", {
+    htmlFor: "operation_type_id",
+    className: "form-label fw-bold"
+  }, "Tipo de Operaci\xF3n"), /*#__PURE__*/React.createElement(Controller, {
+    name: "operation_type_id",
+    control: control,
+    render: ({
+      field,
+      fieldState
+    }) => /*#__PURE__*/React.createElement(Dropdown, _extends({
+      id: field.name
+    }, field, {
+      optionLabel: "name",
+      optionValue: "id",
+      options: operationTypes,
+      placeholder: "Seleccione el tipo de operaci\xF3n",
+      className: classNames("w-100", {
+        "p-invalid": errors.operation_type_id
+      })
+    }))
+  }), getFormErrorMessage('operation_type_id')), /*#__PURE__*/React.createElement("div", {
+    className: "col-md-6"
+  }, /*#__PURE__*/React.createElement("label", {
+    htmlFor: "coverage_type_id",
+    className: "form-label fw-bold"
+  }, "Tipo de Cobertura"), /*#__PURE__*/React.createElement(Controller, {
+    name: "coverage_type_id",
+    control: control,
+    render: ({
+      field,
+      fieldState
+    }) => /*#__PURE__*/React.createElement(Dropdown, _extends({
+      id: field.name
+    }, field, {
+      optionLabel: "name",
+      optionValue: "id",
+      options: coverageTypes,
+      placeholder: "Seleccione el tipo de cobertura",
+      className: classNames("w-100", {
+        "p-invalid": errors.coverage_type_id
+      })
+    }))
+  }), getFormErrorMessage('coverage_type_id')), /*#__PURE__*/React.createElement("div", {
+    className: "col-md-6"
+  }, /*#__PURE__*/React.createElement("label", {
+    htmlFor: "payment_method_id",
+    className: "form-label fw-bold"
+  }, "Metodo de pago"), /*#__PURE__*/React.createElement(Controller, {
+    name: "payment_method_id",
+    control: control,
+    render: ({
+      field,
+      fieldState
+    }) => /*#__PURE__*/React.createElement(Dropdown, _extends({
+      id: field.name
+    }, field, {
+      optionLabel: "name",
+      optionValue: "id",
+      options: paymentMethods,
+      placeholder: "Seleccione el metodo de pago",
+      className: classNames("w-100", {
+        "p-invalid": errors.payment_method_id
+      })
+    }))
+  }), getFormErrorMessage('payment_method_id')), /*#__PURE__*/React.createElement("div", {
+    className: "col-md-6"
+  }, /*#__PURE__*/React.createElement("label", {
+    htmlFor: "contract_number",
+    className: "form-label fw-bold"
+  }, "Numero de contrato"), /*#__PURE__*/React.createElement(Controller, {
+    name: "contract_number",
+    control: control,
+    render: ({
+      field,
+      fieldState
+    }) => /*#__PURE__*/React.createElement(InputNumber, {
+      id: field.name,
+      value: field.value,
+      onValueChange: e => field.onChange(e.value),
+      useGrouping: false,
+      min: 0,
+      placeholder: "Ingrese el numero de contrato",
+      className: classNames("w-100", {
+        "p-invalid": errors.contract_number
+      })
+    })
+  }), getFormErrorMessage('contract_number')), /*#__PURE__*/React.createElement("div", {
+    className: "col-md-6"
+  }, /*#__PURE__*/React.createElement("label", {
+    htmlFor: "poliza_number",
+    className: "form-label fw-bold"
+  }, "Numero de poliza"), /*#__PURE__*/React.createElement(Controller, {
+    name: "poliza_number",
+    control: control,
+    render: ({
+      field,
+      fieldState
+    }) => /*#__PURE__*/React.createElement(InputNumber, {
+      id: field.name,
+      value: field.value,
+      onValueChange: e => field.onChange(e.value),
+      useGrouping: false,
+      placeholder: "Ingrese el numero de poliza",
+      className: classNames("w-100", {
+        "p-invalid": errors.poliza_number
+      })
+    })
+  }), getFormErrorMessage('poliza_number'))), /*#__PURE__*/React.createElement("div", {
     className: "d-flex justify-content-center mt-4 gap-6"
   }, onCancel && /*#__PURE__*/React.createElement(Button, {
     label: "Cancelar",

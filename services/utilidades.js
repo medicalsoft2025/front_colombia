@@ -1,3 +1,5 @@
+import { countryUrlPrefix } from "./commons";
+
 function changeAjaxFast(
     table,
     columnChange,
@@ -1160,4 +1162,105 @@ export function addHexHash(color) {
     }
 
     return '#' + color;
+}
+
+export function normalizarTexto(texto, opciones = {}) {
+    if (!texto || typeof texto !== 'string') return '';
+
+    const config = {
+        quitarAcentos: true,
+        quitarDiacriticos: true,
+        minusculas: true,
+        quitarEspaciosExtra: true,
+        quitarCaracteresEspeciales: false,
+        reemplazarGuiones: true,
+        ...opciones
+    };
+
+    let textoNormalizado = texto;
+
+    // 1. Convertir a minúsculas
+    if (config.minusculas) {
+        textoNormalizado = textoNormalizado.toLowerCase();
+    }
+
+    // 2. Quitar acentos y diacríticos
+    if (config.quitarAcentos || config.quitarDiacriticos) {
+        const mapaAcentos = {
+            'á': 'a', 'é': 'e', 'í': 'i', 'ó': 'o', 'ú': 'u',
+            'à': 'a', 'è': 'e', 'ì': 'i', 'ò': 'o', 'ù': 'u',
+            'ä': 'a', 'ë': 'e', 'ï': 'i', 'ö': 'o', 'ü': 'u',
+            'â': 'a', 'ê': 'e', 'î': 'i', 'ô': 'o', 'û': 'u',
+            'ã': 'a', 'õ': 'o', 'ñ': 'n', 'ç': 'c',
+            // Versiones mayúsculas (aunque ya pasamos a minúsculas)
+            'Á': 'A', 'É': 'E', 'Í': 'I', 'Ó': 'O', 'Ú': 'U',
+            'À': 'A', 'È': 'E', 'Ì': 'I', 'Ò': 'O', 'Ù': 'U',
+            'Ä': 'A', 'Ë': 'E', 'Ï': 'I', 'Ö': 'O', 'Ü': 'U',
+            'Â': 'A', 'Ê': 'E', 'Î': 'I', 'Ô': 'O', 'Û': 'U',
+            'Ã': 'A', 'Õ': 'O', 'Ñ': 'N', 'Ç': 'C'
+        };
+
+        textoNormalizado = textoNormalizado.replace(/[áéíóúàèìòùäëïöüâêîôûãõñç]/gi, function (match) {
+            return mapaAcentos[match] || match;
+        });
+    }
+
+    // 3. Reemplazar guiones y separadores comunes por espacios
+    if (config.reemplazarGuiones) {
+        textoNormalizado = textoNormalizado.replace(/[-_]/g, ' ');
+    }
+
+    // 4. Quitar caracteres especiales (opcional)
+    if (config.quitarCaracteresEspeciales) {
+        textoNormalizado = textoNormalizado.replace(/[^\w\s]/g, ' ');
+    } else {
+        // Solo reemplazar caracteres que puedan causar problemas en búsquedas
+        textoNormalizado = textoNormalizado.replace(/[.,;:!?"'¡¿()\[\]{}<>]/g, ' ');
+    }
+
+    // 5. Normalizar espacios
+    if (config.quitarEspaciosExtra) {
+        textoNormalizado = textoNormalizado
+            .replace(/\s+/g, ' ')  // Múltiples espacios a uno
+            .trim();                // Quitar espacios al inicio y final
+    }
+
+    return textoNormalizado;
+}
+
+// Función para comparar strings normalizados
+export function compararStrings(str1, str2, umbral = 0.8) {
+    const normalizado1 = normalizarTexto(str1);
+    const normalizado2 = normalizarTexto(str2);
+
+    // Comparación exacta después de normalizar
+    if (normalizado1 === normalizado2) {
+        return { match: true, score: 1, type: 'exacto' };
+    }
+
+    // Verificar si uno contiene al otro
+    if (normalizado1.includes(normalizado2) || normalizado2.includes(normalizado1)) {
+        return { match: true, score: 0.9, type: 'contenido' };
+    }
+
+    // Calcular similitud de Levenshtein para casos más complejos
+    const distancia = levenshteinDistance(normalizado1, normalizado2);
+    const maxLength = Math.max(normalizado1.length, normalizado2.length);
+    const similitud = 1 - (distancia / maxLength);
+
+    return {
+        match: similitud >= umbral,
+        score: similitud,
+        type: 'levenshtein'
+    };
+}
+
+export function getUserCountryUrlPrefix() {
+    const normalizedCountry = normalizarTexto(getJWTPayloadByToken(sessionStorage.getItem("auth_token") || "").country);
+
+    console.log("Token Payload", getJWTPayloadByToken(sessionStorage.getItem("auth_token") || ""));
+    console.log("Normalized Country:", normalizedCountry);
+
+    const countryPrefix = countryUrlPrefix[normalizedCountry] || "";
+    return `${countryPrefix}`.replace("//", "/");
 }

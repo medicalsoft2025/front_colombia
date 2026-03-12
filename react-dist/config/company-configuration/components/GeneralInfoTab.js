@@ -213,15 +213,7 @@ const GeneralInfoTab = ({
     severity: "success",
     text: "Informaci\xF3n guardada correctamente",
     className: "mb-3"
-  }), /*#__PURE__*/React.createElement("div", {
-    className: "row mb-3"
-  }, /*#__PURE__*/React.createElement("div", {
-    className: "col-12"
-  }, /*#__PURE__*/React.createElement("div", {
-    className: "alert alert-info"
-  }, /*#__PURE__*/React.createElement("small", null, /*#__PURE__*/React.createElement("i", {
-    className: "pi pi-info-circle mr-2"
-  }), /*#__PURE__*/React.createElement("strong", null, "Nota:"), " Complete todos los campos obligatorios para habilitar el siguiente m\xF3dulo.")))), /*#__PURE__*/React.createElement("form", {
+  }), /*#__PURE__*/React.createElement("form", {
     onSubmit: handleSubmit(onSubmit)
   }, /*#__PURE__*/React.createElement("div", {
     className: "row mb-4"

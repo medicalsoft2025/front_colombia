@@ -8,7 +8,7 @@ interface SystemConfig {
     value: string;
 }
 
-export const useSystemConfigs = () => {
+export const useSystemConfigs = (companyId: number) => {
     const systemConfigService = useMemo(() => new SystemConfigService(), []);
 
     const {
@@ -18,8 +18,8 @@ export const useSystemConfigs = () => {
         refetch,
         error
     } = useQuery<SystemConfig[], Error>({
-        queryKey: ['system-configs'],
-        queryFn: () => systemConfigService.getAllSystemConfigs(),
+        queryKey: ['system-configs', companyId],
+        queryFn: () => systemConfigService.getSystemConfigByCompany(companyId),
         staleTime: 60 * 60 * 1000,
         gcTime: 60 * 60 * 1000,
         refetchOnWindowFocus: false,

@@ -1,12 +1,13 @@
 import React, { useState } from 'react';
 import { ErrorHandler } from "../../../services/errorHandler";
-import { SwalManager } from '../../../services/alertManagerImported';
 import { UserAvailabilityFormInputs } from '../components/UserAvailabilityForm';
 import { userAvailabilityService } from '../../../services/api';
 import { convertDateToHHMM } from '../../../services/utilidades';
+import { usePRToast } from '../../hooks/usePRToast';
 
 export const useUserAvailabilityUpdate = () => {
     const [loading, setLoading] = useState(true);
+    const { toast, showSuccessToast, showServerErrorsToast } = usePRToast();
 
     const updateUserAvailability = async (id: string, data: UserAvailabilityFormInputs) => {
         setLoading(true);
@@ -22,7 +23,7 @@ export const useUserAvailabilityUpdate = () => {
                 }))
             }
             await userAvailabilityService.update(id, newData);
-            SwalManager.success();
+            showSuccessToast({ message: "Se editó la disponibilidad exitosamente" })
         } catch (error) {
             ErrorHandler.generic(error);
             throw error
@@ -33,6 +34,7 @@ export const useUserAvailabilityUpdate = () => {
 
     return {
         updateUserAvailability,
-        loading
+        loading,
+        toast
     };
 };

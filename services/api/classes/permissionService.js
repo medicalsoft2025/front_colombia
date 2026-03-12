@@ -22,6 +22,7 @@ export class PermissionService extends BaseApiService {
                     { name: 'Crear citas', key_: 'appointment_create' },
                     { name: 'Editar citas', key_: 'appointment_update' },
                     { name: 'Eliminar citas', key_: 'appointment_delete' },
+                    { name: 'Cancelar citas', key_: 'appointment_cancel' },
                 ]
             },
             {

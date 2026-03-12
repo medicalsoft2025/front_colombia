@@ -31,6 +31,11 @@ export type Tercero = {
     last_name: string;
     second_last_name?: string;
     date_of_birth: string | null;
+    type_organization_id: string;
+    municipality_id: string;
+    type_liability_id: string;
+    type_regime_id: string;
+    dv: string;
 };
 
 type FiltrosBusqueda = {
@@ -82,6 +87,12 @@ export const ThridPartiesTable: React.FC = () => {
                     last_name: formData.contact.last_name,
                     second_last_name: formData.contact.second_last_name,
                     date_of_birth: formData.contact.date_of_birth,
+                    type_organization_id: formData.organization_type.toString(),
+                    municipality_id: formData.municipality_id.toString(),
+                    type_liability_id: formData.liability_type.toString(),
+                    type_regime_id: formData.regime_type.toString(),
+                    dv: formData.contact.dv.toString()
+
                 });
             } else {
                 await createThirdParty({
@@ -97,6 +108,11 @@ export const ThridPartiesTable: React.FC = () => {
                     last_name: formData.contact.last_name,
                     second_last_name: formData.contact.second_last_name,
                     date_of_birth: formData.contact.date_of_birth,
+                    type_organization_id: formData.organization_type.toString(),
+                    municipality_id: formData.municipality_id.toString(),
+                    type_liability_id: formData.liability_type.toString(),
+                    type_regime_id: formData.regime_type.toString(),
+                    dv: formData.contact.dv.toString()
                 });
             }
             fetchThirdParties();
@@ -112,6 +128,10 @@ export const ThridPartiesTable: React.FC = () => {
     const handleEditTercero = (tercero: Tercero) => {
         setInitialData({
             type: tercero?.type || '',
+            organization_type: tercero?.type_organization_id || '',
+            municipality_id: tercero?.municipality_id || '',
+            liability_type: tercero?.type_liability_id || '',
+            regime_type: tercero?.type_regime_id || '',
             contact: {
                 name: tercero?.name || '',
                 document_type: tercero?.document_type || '',
@@ -124,6 +144,7 @@ export const ThridPartiesTable: React.FC = () => {
                 last_name: tercero?.last_name || '',
                 second_last_name: tercero?.second_last_name || '',
                 date_of_birth: tercero?.date_of_birth || '',
+                dv: tercero?.dv || '',
             }
         });
         setSelectedTercero(tercero);
@@ -151,7 +172,6 @@ export const ThridPartiesTable: React.FC = () => {
         try {
             setError(null);
             // Aquí puedes implementar la lógica de filtrado si es necesario
-            console.log('Aplicando filtros:', filtros);
         } catch (err) {
             setError('Ocurrió un error al aplicar los filtros');
         }
@@ -216,7 +236,7 @@ export const ThridPartiesTable: React.FC = () => {
         return `${rowData.document_type || ''} ${rowData.document_number}`.trim();
     };
 
-    const tableItems = thirdParties?.map(tercero => ({
+    const tableItems = thirdParties?.map((tercero: any) => ({
         id: tercero.id,
         type: tercero.type,
         document_type: tercero.document_type,

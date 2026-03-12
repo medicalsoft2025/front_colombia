@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { companyService } from "../../../../services/api/index.js";
 import { SwalManager } from "../../../../services/alertManagerImported.js";
-export const useCompanyRepresentative = () => {
+export const useCompanyRepresentative = companyId => {
   const [representative, setRepresentative] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -11,11 +11,24 @@ export const useCompanyRepresentative = () => {
     try {
       setLoading(true);
       setError(null);
-      const response = await companyService.getAllCompanies();
-      if (response.status === 200 && response.data && response.data.length > 0) {
-        const companyData = response.data[0];
-        if (companyData.includes && companyData.includes.representative) {
-          const repData = companyData.includes.representative;
+      let companyData;
+      if (companyId) {
+        const response = await companyService.getCompany(companyId);
+        if (response.status === 200 && response.data) {
+          companyData = Array.isArray(response.data) ? response.data[0] : response.data;
+          // Handle nested data wrapper if present
+          if (companyData.data && !Array.isArray(companyData)) companyData = companyData.data;
+        }
+      } else {
+        const response = await companyService.getAllCompanies();
+        if (response.status === 200 && response.data && response.data.length > 0) {
+          companyData = response.data[0];
+        }
+      }
+      if (companyData) {
+        // Handle nested structure from getCompany vs getAllCompanies
+        const repData = companyData.representative || companyData.includes && companyData.includes.representative;
+        if (repData) {
           const mappedRepresentative = {
             id: repData.id,
             company_id: repData.company_id,
@@ -30,7 +43,7 @@ export const useCompanyRepresentative = () => {
           setRepresentative(null);
         }
       } else {
-        setError('No se encontraron datos de la compañía');
+        if (companyId) setError('No se encontraron datos de la compañía');
       }
     } catch (err) {
       console.error('Error fetching representative data:', err);
@@ -80,7 +93,7 @@ export const useCompanyRepresentative = () => {
   };
   useEffect(() => {
     fetchRepresentativeData();
-  }, []);
+  }, [companyId]);
   const refetch = () => {
     fetchRepresentativeData();
   };

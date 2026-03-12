@@ -17,7 +17,7 @@ export class PatientService extends BaseApiService {
                         appointments: patient.appointments.filter(
                             (appointment) =>
                                 appointment.user_availability.user_id ===
-                                    user.id &&
+                                user.id &&
                                 appointment.appointment_date === today
                         ),
                     };
@@ -58,13 +58,14 @@ export class PatientService extends BaseApiService {
         );
     }
 
-    async getByFilters({ search, per_page = 10, page = 1 }) {
+    async getByFilters({ search, per_page = 10, page = 1, company_id }) {
         return await this.httpClient.get(
             `medical/v2/patients-clinical-records`,
             {
                 per_page,
                 page,
                 search,
+                company_id,
             }
         );
     }
@@ -119,10 +120,10 @@ export class PatientService extends BaseApiService {
     async updatePatient(id, data) {
         return await this.httpClient.put(
             this.microservice +
-                "/" +
-                "patients-companion-social-security" +
-                "/" +
-                id,
+            "/" +
+            "patients-companion-social-security" +
+            "/" +
+            id,
             data,
             {
                 headers: {

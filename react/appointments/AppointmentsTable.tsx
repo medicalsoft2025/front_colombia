@@ -22,7 +22,7 @@ import {
 import { ExamResultsFileForm } from "../exams/components/ExamResultsFileForm";
 import { SwalManager } from "../../services/alertManagerImported";
 import { RescheduleAppointmentModalV2 } from "./RescheduleAppointmentModalV2";
-import { getUserLogged } from "../../services/utilidades";
+import { getIndicativeByCountry, getUserLogged } from "../../services/utilidades";
 import { useMassMessaging } from "../hooks/useMassMessaging";
 import {
     CustomPRTable,
@@ -35,6 +35,7 @@ import { Toast } from "primereact/toast";
 import { Menu } from "primereact/menu";
 import { Button } from "primereact/button";
 import { AppointmentCreateFormModalButton } from "./AppointmentCreateFormModalButton";
+import { useCompanies } from "../companies/hooks/useCompanies";
 
 export const AppointmentsTable: React.FC = () => {
     const patientId =
@@ -48,6 +49,7 @@ export const AppointmentsTable: React.FC = () => {
     const [selectedAppointmentType, setSelectedAppointmentType] =
         React.useState<string | null>(null);
     const userLogged = getUserLogged();
+    const { companies } = useCompanies();
 
     const appointmentTypes = [
         { value: null, label: "Todos los tipos", icon: "📋" },
@@ -99,6 +101,8 @@ export const AppointmentsTable: React.FC = () => {
         first,
         loading: loadingAppointments,
         perPage,
+        companyId,
+        setCompanyId
     } = useFetchAppointments(getCustomFilters);
     const [showRescheduleModal, setShowRescheduleModal] = useState(false);
     const [selectedAppointmentId, setSelectedAppointmentId] = useState<
@@ -379,6 +383,7 @@ export const AppointmentsTable: React.FC = () => {
             sortable: true,
         },
         { header: "Número de documento", field: "patientDNI", sortable: true },
+        { field: "companyName", header: "Empresa" },
         { header: "Fecha Consulta", field: "date", sortable: true },
         { header: "Hora Consulta", field: "time", sortable: true },
         { header: "Profesional asignado", field: "doctorName", sortable: true },
@@ -407,7 +412,7 @@ export const AppointmentsTable: React.FC = () => {
                     appointmentStatesColors[data.stateId];
                 const text =
                     appointmentStatesByKeyTwo[data.stateKey]?.[
-                        data.attentionType
+                    data.attentionType
                     ] ||
                     appointmentStatesByKeyTwo[data.stateKey] ||
                     "SIN ESTADO";
@@ -512,7 +517,7 @@ export const AppointmentsTable: React.FC = () => {
                     channel: "whatsapp",
                     recipients: [
                         getIndicativeByCountry(patient.country_id) +
-                            patient.whatsapp,
+                        patient.whatsapp,
                     ],
                     message_type: "media",
                     message: templateFormatted,
@@ -528,7 +533,7 @@ export const AppointmentsTable: React.FC = () => {
                     channel: "whatsapp",
                     recipients: [
                         getIndicativeByCountry(patient.country_id) +
-                            patient.whatsapp,
+                        patient.whatsapp,
                     ],
                     message_type: "text",
                     message: templateFormatted,
@@ -585,7 +590,7 @@ export const AppointmentsTable: React.FC = () => {
                         <Accordion className="mb-3">
                             <AccordionTab header="Filtros">
                                 <div className="row mb-3">
-                                    <div className="col-md-4">
+                                    <div className="col-md-3">
                                         <label
                                             htmlFor="branch_id"
                                             className="form-label"
@@ -607,7 +612,7 @@ export const AppointmentsTable: React.FC = () => {
                                             showClear
                                         />
                                     </div>
-                                    <div className="col-md-4">
+                                    <div className="col-md-3">
                                         <label
                                             htmlFor="appointment_type"
                                             className="form-label"
@@ -631,7 +636,7 @@ export const AppointmentsTable: React.FC = () => {
                                             showClear
                                         />
                                     </div>
-                                    <div className="col-md-4">
+                                    <div className="col-md-3">
                                         <label
                                             htmlFor="rangoFechasCitas"
                                             className="form-label"
@@ -649,6 +654,23 @@ export const AppointmentsTable: React.FC = () => {
                                             }
                                             className="w-100"
                                             placeholder="Seleccione un rango"
+                                        />
+                                    </div>
+                                    <div className="col-md-3">
+                                        <label htmlFor="company" className="form-label">Empresa</label>
+                                        <Dropdown
+                                            id="company"
+                                            value={companyId}
+                                            options={companies}
+                                            onChange={(e) => {
+                                                setCompanyId(e.value);
+                                            }}
+                                            optionLabel="attributes.legal_name"
+                                            optionValue="id"
+                                            placeholder="Seleccione una empresa"
+                                            filter
+                                            showClear
+                                            className="w-100 md:w-14rem"
                                         />
                                     </div>
                                 </div>

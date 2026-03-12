@@ -3,6 +3,7 @@ import { prescriptionService } from "../../../services/api/index.js";
 export const useLastPatientPrescription = () => {
   const [lastPatientPrescription, setLastPatientPrescription] = useState(null);
   const loadLastPatientPrescription = async patientId => {
+    setLastPatientPrescription(null);
     try {
       const lastRecipe = await prescriptionService.getLastByPatientId(patientId);
       setLastPatientPrescription(lastRecipe.data);

@@ -71,6 +71,8 @@ export const UserAssistantForm: React.FC<Props> = ({ formId, onHandleSubmit, ini
                                     maxSelectedLabels={2}
                                     className={classNames('w-100', { 'p-invalid': errors.assistants })}
                                     {...field}
+                                    virtualScrollerOptions={{ itemSize: 43 }}
+                                    appendTo={document.body}
                                 />
                             </>
                         )}

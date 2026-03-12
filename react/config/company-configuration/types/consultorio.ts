@@ -20,6 +20,7 @@ export interface Company {
 
 export interface Representative {
     id?: string;
+    company_id?: string | number;
     name: string;
     phone: string;
     email: string;
@@ -40,11 +41,16 @@ export interface InvoiceConfig {
 
 export interface SmtpConfig {
     id?: string;
+    company_id?: number | string;
     smtp_server: string;
     port: number;
     security: 'tls' | 'ssl' | 'none';
     email: string;
     password: string;
+    api_key?: string;
+    instance?: string;
+    created_at?: string;
+    updated_at?: string;
 }
 
 export interface WhatsAppStatus {

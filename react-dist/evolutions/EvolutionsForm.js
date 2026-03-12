@@ -2,8 +2,6 @@ import React, { useState, useEffect } from "react";
 import { Dropdown } from "primereact/dropdown";
 import { clinicalRecordService, evolutionNotesService } from "../../services/api/index.js";
 export const EvolutionsForm = () => {
-  const [evolutions, setEvolutions] = useState([]);
-  const [title, setTitle] = useState("");
   const [note, setNote] = useState("");
   const [mappedServiceClinicalRecord, setMappedServiceClinicalRecord] = useState([]);
   const [selectedService, setSelectedService] = useState([]);
@@ -39,7 +37,7 @@ export const EvolutionsForm = () => {
     setMappedServiceClinicalRecord(mappedData);
   };
   const formatDate = isoDate => {
-    if (!isoDate) return ""; // Manejo de valores nulos o indefinidos
+    if (!isoDate) return "";
     return new Date(isoDate).toISOString().split("T")[0];
   };
   return /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("form", {

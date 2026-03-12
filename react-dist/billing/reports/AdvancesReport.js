@@ -1,26 +1,93 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { Calendar } from "primereact/calendar";
 import { Card } from "primereact/card";
 import { Button } from "primereact/button";
 import { Accordion, AccordionTab } from "primereact/accordion";
+import { ThirdPartyDropdown } from "../../fields/dropdowns/ThirdPartyDropdown.js";
 import { formatDateRange, formatPrice } from "../../../services/utilidades.js";
-import { useAdvancesReport } from "./hooks/useAdvancesReport.js";
 import { useAdvancesReportFormat } from "../../documents-generation/hooks/useAdvancesReportFormat.js";
 import { CustomPRTable } from "../../components/CustomPRTable.js";
+import { useDataPagination } from "../../hooks/useDataPagination.js";
+import { BillingReportService } from "../../../services/api/classes/billingReportService.js";
+import { Toast } from "primereact/toast";
 export const AdvancesReport = () => {
+  const toast = useRef(null);
   const [reportType, setReportType] = useState("client");
-  const {
-    advancesReport,
-    dateRange,
-    setDateRange,
-    thirdPartyId,
-    setThirdPartyId,
-    loading,
-    fetchAdvancesReport
-  } = useAdvancesReport(reportType);
   const {
     generarFormatoAdvancesReport
   } = useAdvancesReportFormat();
+  const [filtros, setFiltros] = useState({
+    dateRange: [new Date(), new Date()],
+    thirdPartyId: null
+  });
+  const {
+    data: advancesReport,
+    loading: loadingPaginator,
+    first,
+    perPage,
+    totalRecords,
+    handlePageChange,
+    handleSearchChange,
+    refresh
+  } = useDataPagination({
+    fetchFunction: params => loadAdvancesReport(params),
+    defaultPerPage: 10
+  });
+  async function loadAdvancesReport(params = {
+    perPage: 10
+  }) {
+    const service = new BillingReportService();
+    const backendFilters = {
+      ...params,
+      sort: "-id"
+    };
+    if (filtros.dateRange && Array.isArray(filtros.dateRange)) {
+      const fechaArray = filtros.dateRange;
+      if (fechaArray.length >= 2) {
+        const startDate = fechaArray[0];
+        const endDate = fechaArray[1];
+        if (startDate && typeof startDate.toISOString === "function") {
+          backendFilters.start_date = startDate.toISOString().split("T")[0];
+        }
+        if (endDate && typeof endDate.toISOString === "function") {
+          backendFilters.end_date = endDate.toISOString().split("T")[0];
+        }
+      }
+    }
+    if (filtros.thirdPartyId) {
+      backendFilters.third_party_id = filtros.thirdPartyId;
+    }
+    if (params.search && params.search.trim() !== "") {
+      backendFilters.search = params.search.trim();
+    }
+    const response = await service.getAdvancesReportByType(backendFilters, {
+      type: reportType
+    });
+    return {
+      data: response.data.data || response.data || [],
+      total: response.data.total || response.data.length || 0
+    };
+  }
+  const handleFilterChange = (field, value) => {
+    setFiltros(prev => ({
+      ...prev,
+      [field]: value
+    }));
+  };
+  const limpiarFiltros = () => {
+    setFiltros({
+      dateRange: [new Date(), new Date()],
+      thirdPartyId: null
+    });
+  };
+  useEffect(() => {
+    refresh();
+  }, [reportType]);
+  useEffect(() => {
+    if (filtros.dateRange?.[0] === null && filtros.dateRange?.[1] === null && filtros.thirdPartyId === null) {
+      refresh();
+    }
+  }, [filtros]);
   const formatMovementType = type => {
     return type === "income" ? "Ingreso" : "Egreso";
   };
@@ -90,17 +157,14 @@ export const AdvancesReport = () => {
     body: rowData => new Date(rowData.created_at).toLocaleDateString()
   }];
   const exportToPdf = () => {
-    generarFormatoAdvancesReport(advancesReport, formatDateRange(dateRange), "Impresion");
+    generarFormatoAdvancesReport(advancesReport, formatDateRange(filtros.dateRange), "Impresion");
   };
   const handleReload = () => {
-    fetchAdvancesReport();
+    refresh();
   };
   const handleTypeChange = type => {
     setReportType(type);
   };
-  useEffect(() => {
-    fetchAdvancesReport();
-  }, [reportType]);
   const renderTypeSelector = () => /*#__PURE__*/React.createElement("div", {
     className: "row g-3 mb-3"
   }, /*#__PURE__*/React.createElement("div", {
@@ -138,32 +202,37 @@ export const AdvancesReport = () => {
   }, "Rango de fechas"), /*#__PURE__*/React.createElement(Calendar, {
     id: "dateRange",
     selectionMode: "range",
-    value: dateRange,
-    onChange: e => setDateRange(e.value),
+    value: filtros.dateRange,
+    onChange: e => handleFilterChange("dateRange", e.value),
     className: "w-100",
     showIcon: true,
     dateFormat: "dd/mm/yy",
     placeholder: "Seleccione un rango"
+  })), /*#__PURE__*/React.createElement("div", {
+    className: "col-md-6"
+  }, /*#__PURE__*/React.createElement(ThirdPartyDropdown, {
+    value: filtros.thirdPartyId,
+    handleChange: e => handleFilterChange("thirdPartyId", e.value)
   }))), /*#__PURE__*/React.createElement("div", {
     className: "d-flex justify-content-end gap-2 mt-3"
   }, /*#__PURE__*/React.createElement(Button, {
     label: "Limpiar Filtros",
     icon: "pi pi-trash",
     className: "p-button-secondary",
-    onClick: () => {
-      setDateRange(null);
-      setThirdPartyId(null);
-    }
+    onClick: limpiarFiltros
   }), /*#__PURE__*/React.createElement(Button, {
     label: "Aplicar Filtros",
     icon: "pi pi-filter",
     className: "p-button-primary",
-    onClick: handleReload
+    onClick: handleReload,
+    loading: loadingPaginator
   }))));
   return /*#__PURE__*/React.createElement("main", {
     className: "main",
     id: "top"
-  }, /*#__PURE__*/React.createElement("div", {
+  }, /*#__PURE__*/React.createElement(Toast, {
+    ref: toast
+  }), /*#__PURE__*/React.createElement("div", {
     className: "row g-3 justify-content-between align-items-start mb-4"
   }, /*#__PURE__*/React.createElement("div", {
     className: "col-12"
@@ -199,9 +268,15 @@ export const AdvancesReport = () => {
     title: `Reporte de Anticipos - ${reportType === "client" ? "Clientes" : "Proveedores"}`,
     className: "mb-3"
   }, /*#__PURE__*/React.createElement(CustomPRTable, {
-    data: advancesReport,
-    onReload: fetchAdvancesReport,
     columns: mainColumns,
-    loading: loading
+    data: advancesReport,
+    lazy: true,
+    first: first,
+    rows: perPage,
+    totalRecords: totalRecords,
+    loading: loadingPaginator,
+    onPage: handlePageChange,
+    onSearch: handleSearchChange,
+    onReload: () => refresh()
   }))))))))));
 };

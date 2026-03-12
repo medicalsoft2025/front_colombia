@@ -6,6 +6,9 @@ import { menuService, permissionService } from "../../../services/api";
 import { PrimeReactProvider } from "primereact/api";
 import { ButtonGroup } from "primereact/buttongroup";
 import { Button } from "primereact/button";
+import { useBranchesForSelect } from "../../branches/hooks/useBranchesForSelect";
+import { useCompanies } from "../../companies/hooks/useCompanies";
+import { MultiSelect } from "primereact/multiselect";
 
 interface Menu {
     id: number;
@@ -41,6 +44,8 @@ export interface UserRoleFormInputs {
     permissions: string[];
     menus: Menu[];
     menuIds: number[];
+    branches: string[];
+    companies: string[];
 }
 
 const roleGroupOptions = [
@@ -255,6 +260,9 @@ export const UserRoleForm: React.FC<UserRoleFormProps> = ({
         formState: { errors },
     } = useForm<UserRoleFormInputs>();
 
+    const { branches } = useBranchesForSelect()
+    const { companies } = useCompanies()
+
     const onSubmit: SubmitHandler<UserRoleFormInputs> = (data) => {
         const submissionData: UserRoleFormInputs = {
             ...data,
@@ -325,6 +333,8 @@ export const UserRoleForm: React.FC<UserRoleFormProps> = ({
                     reset({
                         name: initialData.name,
                         group: initialData.group,
+                        branches: initialData.branches,
+                        companies: initialData.companies,
                     });
                     setSelectedPermissions(initialData.permissions || []);
                 } else {
@@ -400,7 +410,6 @@ export const UserRoleForm: React.FC<UserRoleFormProps> = ({
     return (
         <PrimeReactProvider
             value={{
-                appendTo: "self",
                 zIndex: {
                     overlay: 100000,
                 },
@@ -420,9 +429,8 @@ export const UserRoleForm: React.FC<UserRoleFormProps> = ({
                         {...register("name", {
                             required: "Nombre es requerido",
                         })}
-                        className={`form-control ${
-                            errors.name ? "is-invalid" : ""
-                        }`}
+                        className={`form-control ${errors.name ? "is-invalid" : ""
+                            }`}
                     />
                     {errors.name && (
                         <div className="invalid-feedback">
@@ -443,9 +451,8 @@ export const UserRoleForm: React.FC<UserRoleFormProps> = ({
                                 {...field}
                                 options={roleGroupOptions}
                                 placeholder="Seleccione grupo"
-                                className={`w-100 ${
-                                    errors.group ? "is-invalid" : ""
-                                }`}
+                                className={`w-100 ${errors.group ? "is-invalid" : ""
+                                    }`}
                             />
                         )}
                     />
@@ -459,6 +466,56 @@ export const UserRoleForm: React.FC<UserRoleFormProps> = ({
                 {/* SOLO MOSTRAR MENÚS Y PERMISOS EN MODO EDICIÓN */}
                 {isEditMode ? (
                     <div className="row">
+                        <div className="form-group mb-3">
+                            <label className="form-label" htmlFor="company">
+                                Empresas
+                            </label>
+                            <Controller
+                                name="companies"
+                                control={control}
+                                render={({ field }) => (
+                                    <MultiSelect
+                                        {...field}
+                                        options={companies}
+                                        placeholder="Seleccione una o más empresas"
+                                        optionLabel="attributes.legal_name"
+                                        optionValue="id"
+                                        className={`w-100 ${errors.companies ? "is-invalid" : ""
+                                            }`}
+                                    />
+                                )}
+                            />
+                            {errors.companies && (
+                                <div className="invalid-feedback">
+                                    {errors.companies.message}
+                                </div>
+                            )}
+                        </div>
+                        <div className="form-group mb-3">
+                            <label className="form-label" htmlFor="branch">
+                                Sucursales
+                            </label>
+                            <Controller
+                                name="branches"
+                                control={control}
+                                render={({ field }) => (
+                                    <MultiSelect
+                                        {...field}
+                                        options={branches}
+                                        placeholder="Seleccione una o más sucursales"
+                                        optionLabel="label"
+                                        optionValue="value"
+                                        className={`w-100 ${errors.branches ? "is-invalid" : ""
+                                            }`}
+                                    />
+                                )}
+                            />
+                            {errors.branches && (
+                                <div className="invalid-feedback">
+                                    {errors.branches.message}
+                                </div>
+                            )}
+                        </div>
                         <div className="col-6">
                             <div className="card">
                                 <div className="card-header d-flex justify-content-between align-items-center">
@@ -651,7 +708,7 @@ export const UserRoleForm: React.FC<UserRoleFormProps> = ({
                                                     )}
                                                     {index <
                                                         permissionCategories.length -
-                                                            1 && <hr />}
+                                                        1 && <hr />}
                                                 </div>
                                             )
                                         )

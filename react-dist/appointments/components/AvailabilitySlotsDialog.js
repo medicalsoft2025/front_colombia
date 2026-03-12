@@ -17,7 +17,9 @@ export const AvailabilitySlotsDialog = ({
   consultationTypes = [],
   externalCauses = [],
   onFetchAvailability,
-  specialties = []
+  specialties = [],
+  existingAppointments = [],
+  editingId = null
 }) => {
   // Config State
   const [productId, setProductId] = useState(null);
@@ -178,17 +180,27 @@ export const AvailabilitySlotsDialog = ({
               const hours = String(current.getHours()).padStart(2, '0');
               const minutes = String(current.getMinutes()).padStart(2, '0');
               const payloadTime = `${hours}:${minutes}`;
-              slots.push({
-                date: day.date,
-                time: payloadTime,
-                // @ts-ignore
-                displayTime: displayTime,
-                user: av.user,
-                branch: av.user.branch,
-                appointmentType: av.appointment_type,
-                duration: duration,
-                availabilityId: av.availability_id
+
+              // Check if already selected in existingAppointments
+              const isAlreadySelected = existingAppointments.some(app => {
+                if (editingId && app.uuid === editingId) return false;
+                const appDate = app.appointment_date instanceof Date ? app.appointment_date.toLocaleDateString('en-CA') : app.appointment_date ? new Date(app.appointment_date).toLocaleDateString('en-CA') : null;
+                const appProfessionalId = app.assigned_user_assistant_availability_id || app.assigned_user_availability?.id;
+                return appDate === day.date && appProfessionalId === av.availability_id && app.appointment_time === payloadTime;
               });
+              if (!isAlreadySelected) {
+                slots.push({
+                  date: day.date,
+                  time: payloadTime,
+                  // @ts-ignore
+                  displayTime: displayTime,
+                  user: av.user,
+                  branch: av.user.branch,
+                  appointmentType: av.appointment_type,
+                  duration: duration,
+                  availabilityId: av.availability_id
+                });
+              }
             }
             current.setMinutes(current.getMinutes() + duration);
           }
@@ -196,7 +208,7 @@ export const AvailabilitySlotsDialog = ({
       });
     });
     return slots;
-  }, [availabilities]);
+  }, [availabilities, existingAppointments, editingId]);
   const visibleSlots = useMemo(() => {
     return allSlots.slice(first, first + rows);
   }, [allSlots, first, rows]);

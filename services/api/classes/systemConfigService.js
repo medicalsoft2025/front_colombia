@@ -6,6 +6,10 @@ export class SystemConfigService extends BaseApiService {
         return await this.httpClient.get(`medical/system-configs/`);
     }
 
+    async getSystemConfigByCompany(companyId) {
+        return await this.httpClient.get(`medical/system-configs/by-company/${companyId}`);
+    }
+
     async storeSystemConfig(systemConfig) {
         return await this.httpClient.post(`medical/system-configs/`, systemConfig)
     }

@@ -344,6 +344,8 @@ $_SESSION["ID"] = 1;
       "primereact/rating": "https://esm.sh/primereact/rating?dev",
       "primereact/slider": "https://esm.sh/primereact/slider?dev",
       "primereact/contextmenu": "https://esm.sh/primereact/contextmenu?dev",
+      "primereact/inputmask":"https://esm.sh/primereact/inputmask?dev",
+      "primereact/floatlabel":"https://esm.sh/primereact/floatlabel?dev",
       "@tanstack/react-query": "https://esm.sh/@tanstack/react-query?dev",
       "@tanstack/query-sync-storage-persister": "https://esm.sh/@tanstack/query-sync-storage-persister?dev",
       "@tanstack/react-query-persist-client": "https://esm.sh/@tanstack/react-query-persist-client?dev",
@@ -355,7 +357,14 @@ $_SESSION["ID"] = 1;
       "@codemirror/state": "https://esm.sh/@codemirror/state?dev",
       "@codemirror/view": "https://esm.sh/@codemirror/view?dev",
       "marked": "https://esm.sh/marked?dev",
-      "primereact/timeline": "https://esm.sh/primereact/timeline?dev"
+      "primereact/timeline": "https://esm.sh/primereact/timeline?dev",
+      "@fullcalendar/core": "https://esm.sh/@fullcalendar/core@6.1.15?dev",
+      "@fullcalendar/core/locales/es": "https://esm.sh/@fullcalendar/core@6.1.15/locales/es?dev",
+      "@fullcalendar/react": "https://esm.sh/@fullcalendar/react@6.1.15?dev",
+      "@fullcalendar/daygrid": "https://esm.sh/@fullcalendar/daygrid@6.1.15?dev",
+      "@fullcalendar/timegrid": "https://esm.sh/@fullcalendar/timegrid@6.1.15?dev",
+      "@fullcalendar/interaction": "https://esm.sh/@fullcalendar/interaction@6.1.15?dev",
+      "moment": "https://esm.sh/moment?dev"
     }
   }
 </script>

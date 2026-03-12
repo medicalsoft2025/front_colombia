@@ -10,8 +10,11 @@ import { Calendar } from "primereact/calendar";
 import { userAvailabilityService, userService } from "../../../services/api/index.js";
 import { RadioButton } from "primereact/radiobutton";
 import { stringToDate } from "../../../services/utilidades.js";
+import { externalCauses as commonExternalCauses, purposeConsultations, typeConsults } from "../../../services/commons.js";
 import { InputText } from "primereact/inputtext";
+import { Checkbox } from "primereact/checkbox";
 import { useAppointmentBulkCreate } from "../../appointments/hooks/useAppointmentBulkCreate.js";
+import { usePatientExamRecipes } from "../../exam-recipes/hooks/usePatientExamRecipes.js";
 import { useProductsByType } from "../../products/hooks/useProductsByType.js";
 import { useMassMessaging } from "../../hooks/useMassMessaging.js";
 import { useTemplate } from "../../hooks/useTemplate.js";
@@ -45,6 +48,11 @@ export const AppointmentForm = ({
     createAppointmentBulk
   } = useAppointmentBulkCreate();
   const {
+    patientExamRecipes,
+    setPatientExamRecipes,
+    fetchPatientExamRecipes
+  } = usePatientExamRecipes();
+  const {
     sendMessage
   } = useMassMessaging();
   const {
@@ -61,10 +69,15 @@ export const AppointmentForm = ({
   const {
     template
   } = useTemplate(data);
-  const consultationTypes = Object.entries({
-    CONTROL: 'Control',
-    FIRST_TIME: 'Primera vez'
-  }).map(([key, value]) => ({
+  const consultationPurposes = Object.entries(purposeConsultations).map(([key, value]) => ({
+    value: key,
+    label: value
+  }));
+  const consultationTypes = Object.entries(typeConsults).map(([key, value]) => ({
+    value: key,
+    label: value
+  }));
+  const externalCauses = Object.entries(commonExternalCauses).map(([key, value]) => ({
     value: key,
     label: value
   }));
@@ -83,7 +96,9 @@ export const AppointmentForm = ({
       appointment_time: "",
       assigned_user_availability: null,
       appointment_type: "1",
-      consultation_type: "FIRST_TIME"
+      consultation_type: "FOLLOW_UP",
+      external_cause: "NOT_APPLICABLE",
+      consultation_purpose: "TREATMENT"
     }
   });
   const mapAppointmentToServer = async () => {
@@ -99,10 +114,11 @@ export const AppointmentForm = ({
       created_by_user_id: currentUser?.id,
       appointment_state_id: 1,
       attention_type: "CONSULTATION",
-      consultation_purpose: "CONTROL",
+      consultation_purpose: app.consultation_purpose,
       consultation_type: app.consultation_type,
-      external_cause: "NOT_APPLICABLE",
-      assigned_supervisor_user_availability_id: supervisorUserId
+      external_cause: app.external_cause,
+      assigned_supervisor_user_availability_id: supervisorUserId,
+      exam_recipe_id: app.exam_recipe_id
     };
   };
   const onSubmit = async e => {
@@ -143,6 +159,10 @@ export const AppointmentForm = ({
     control,
     name: "user_specialty"
   });
+  const showExamRecipeField = useWatch({
+    control,
+    name: "show_exam_recipe_field"
+  });
   const appointmentDate = useWatch({
     control,
     name: "appointment_date"
@@ -159,6 +179,32 @@ export const AppointmentForm = ({
     control,
     name: "assigned_user_assistant_availability_id"
   });
+  const examRecipeId = useWatch({
+    control,
+    name: "exam_recipe_id"
+  });
+  useEffect(() => {
+    if (!showExamRecipeField) {
+      setValue("exam_recipe_id", null);
+    }
+  }, [showExamRecipeField]);
+  useEffect(() => {
+    if (examRecipeId) {
+      const laboratory = products.find(product => product.attention_type === "LABORATORY");
+      setValue("product_id", laboratory?.id);
+      setDisabledProductIdField(true);
+    } else {
+      setValue("product_id", null);
+      setDisabledProductIdField(false);
+    }
+  }, [examRecipeId]);
+  useEffect(() => {
+    if (patient) {
+      fetchPatientExamRecipes(patient.id?.toString());
+    } else {
+      setPatientExamRecipes([]);
+    }
+  }, [patient?.id]);
   useEffect(() => {
     if (userSpecialty) {
       setShowUserSpecialtyError(false);
@@ -385,6 +431,8 @@ export const AppointmentForm = ({
   };
   const clearAppointmentForm = () => {
     setValue("user_specialty", null);
+    setValue("show_exam_recipe_field", false);
+    setValue("exam_recipe_id", null);
     setValue("appointment_type", "1");
     setValue("appointment_date", null);
     setValue("appointment_time", null);
@@ -476,7 +524,43 @@ export const AppointmentForm = ({
       }),
       appendTo: "self"
     }, field)))
-  }), getFormErrorMessage("user_specialty")), showUserSpecialtyError && /*#__PURE__*/React.createElement("div", {
+  }), getFormErrorMessage("user_specialty")), /*#__PURE__*/React.createElement("div", {
+    className: "d-flex align-items-center gap-2 mb-3"
+  }, /*#__PURE__*/React.createElement(Checkbox, {
+    inputId: "showExamRecipeField",
+    name: "showExamRecipeField",
+    checked: showExamRecipeField,
+    onChange: e => setValue("show_exam_recipe_field", e.target.checked || false)
+  }), /*#__PURE__*/React.createElement("label", {
+    htmlFor: "showExamRecipeField",
+    className: "ml-2 form-check-label"
+  }, "Relacionar receta de examen")), showExamRecipeField && /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("div", {
+    className: "mb-3"
+  }, /*#__PURE__*/React.createElement(Controller, {
+    name: "exam_recipe_id",
+    control: control,
+    render: ({
+      field
+    }) => /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("label", {
+      htmlFor: field.name,
+      className: "form-label"
+    }, "Receta de examen"), /*#__PURE__*/React.createElement(Dropdown, _extends({
+      inputId: field.name,
+      options: patientExamRecipes,
+      virtualScrollerOptions: {
+        itemSize: 38
+      },
+      optionLabel: "label",
+      optionValue: "id",
+      filter: true,
+      showClear: true,
+      placeholder: "Seleccione una receta de examen",
+      className: classNames("w-100", {
+        "p-invalid": errors.exam_recipe_id
+      }),
+      appendTo: "self"
+    }, field)))
+  }), getFormErrorMessage("exam_recipe_id"))), showUserSpecialtyError && /*#__PURE__*/React.createElement("div", {
     className: "alert alert-danger",
     role: "alert"
   }, "No hay especialistas de: ", /*#__PURE__*/React.createElement("span", null, userSpecialtyError), " ", "disponibles en este momento"), /*#__PURE__*/React.createElement("div", {
@@ -507,6 +591,50 @@ export const AppointmentForm = ({
       htmlFor: field.name + "1",
       className: "ml-2 form-check-label"
     }, "Presencial"))
+  })), /*#__PURE__*/React.createElement("div", {
+    className: "d-flex align-items-center gap-2"
+  }, /*#__PURE__*/React.createElement(Controller, {
+    name: "appointment_type",
+    control: control,
+    rules: {
+      required: "Este campo es requerido"
+    },
+    render: ({
+      field
+    }) => /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement(RadioButton, {
+      inputId: field.name + "3",
+      checked: appointmentType === "3",
+      className: classNames("", {
+        "p-invalid": errors.appointment_type
+      }),
+      onChange: e => field.onChange(e.value),
+      value: "3"
+    }), /*#__PURE__*/React.createElement("label", {
+      htmlFor: field.name + "3",
+      className: "ml-2 form-check-label"
+    }, "Domiciliaria"))
+  })), /*#__PURE__*/React.createElement("div", {
+    className: "d-flex align-items-center gap-2"
+  }, /*#__PURE__*/React.createElement(Controller, {
+    name: "appointment_type",
+    control: control,
+    rules: {
+      required: "Este campo es requerido"
+    },
+    render: ({
+      field
+    }) => /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement(RadioButton, {
+      inputId: field.name + "2",
+      checked: appointmentType === "2",
+      className: classNames("", {
+        "p-invalid": errors.appointment_type
+      }),
+      onChange: e => field.onChange(e.value),
+      value: "2"
+    }), /*#__PURE__*/React.createElement("label", {
+      htmlFor: field.name + "2",
+      className: "ml-2 form-check-label"
+    }, "Virtual"))
   }))), getFormErrorMessage("appointment_type")), /*#__PURE__*/React.createElement("div", {
     className: "mb-3"
   }, /*#__PURE__*/React.createElement(Controller, {
@@ -655,7 +783,36 @@ export const AppointmentForm = ({
   }, /*#__PURE__*/React.createElement("div", {
     className: "row"
   }, /*#__PURE__*/React.createElement("div", {
-    className: "col-md-12"
+    className: "col-md-6"
+  }, /*#__PURE__*/React.createElement(Controller, {
+    name: "consultation_purpose",
+    control: control,
+    rules: {
+      required: "Este campo es requerido"
+    },
+    render: ({
+      field
+    }) => /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("label", {
+      htmlFor: field.name,
+      className: "form-label"
+    }, "Finalidad de la consulta *"), /*#__PURE__*/React.createElement(Dropdown, _extends({
+      inputId: field.name,
+      options: consultationPurposes,
+      optionValue: "value",
+      optionLabel: "label",
+      virtualScrollerOptions: {
+        itemSize: 38
+      },
+      filter: true,
+      showClear: true,
+      placeholder: "Seleccione una finalidad",
+      className: classNames("w-100", {
+        "p-invalid": errors.consultation_purpose
+      }),
+      appendTo: "self"
+    }, field)))
+  }), getFormErrorMessage("consultation_purpose")), /*#__PURE__*/React.createElement("div", {
+    className: "col-md-6"
   }, /*#__PURE__*/React.createElement(Controller, {
     name: "consultation_type",
     control: control,
@@ -684,6 +841,34 @@ export const AppointmentForm = ({
       appendTo: "self"
     }, field)))
   }), getFormErrorMessage("consultation_type")))), /*#__PURE__*/React.createElement("div", {
+    className: "mb-3"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "row"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "col-md-6"
+  }, /*#__PURE__*/React.createElement(Controller, {
+    name: "external_cause",
+    control: control,
+    render: ({
+      field
+    }) => /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("label", {
+      htmlFor: field.name,
+      className: "form-label"
+    }, "Causa externa"), /*#__PURE__*/React.createElement(Dropdown, _extends({
+      inputId: field.name,
+      options: externalCauses,
+      virtualScrollerOptions: {
+        itemSize: 38
+      },
+      optionLabel: "label",
+      optionValue: "value",
+      filter: true,
+      showClear: true,
+      placeholder: "Seleccione una causa externa",
+      className: classNames("w-100"),
+      appendTo: "self"
+    }, field)))
+  })))), /*#__PURE__*/React.createElement("div", {
     className: "d-flex justify-content-between"
   }, /*#__PURE__*/React.createElement("button", {
     type: "button",

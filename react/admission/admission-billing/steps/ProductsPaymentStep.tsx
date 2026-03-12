@@ -15,6 +15,7 @@ import {
   calculateChange,
   validateProductsStep,
   validatePaymentStep,
+  calculateCopayment,
 } from "../utils/helpers";
 import { useAppointmentProceduresV2 } from "../../../appointments/hooks/useAppointmentsProcedureV2";
 import { AdmissionBillingFormData } from "../interfaces/AdmisionBilling";
@@ -59,9 +60,14 @@ const ProductsPaymentStep: React.FC<ProductsPaymentStep> = ({
     formData.products,
     formData.billing.facturacionEntidad,
   );
+  const { copayment, isCopayment } = calculateCopayment(
+    formData.products,
+    formData.copaymentRules,
+    formData.billing.facturacionEntidad,
+  );
   const paid = calculatePaid(formData.payments);
-  const change = calculateChange(total, paid);
-  const remaining = Math.max(0, total - paid);
+  const change = calculateChange(copayment, paid);
+  const remaining = Math.max(0, copayment - paid);
 
   const { procedureOptions, loadProcedures } = useAppointmentProceduresV2();
   const { paymentMethods, fetchPaymentMethods } = usePaymentMethods();
@@ -109,6 +115,13 @@ const ProductsPaymentStep: React.FC<ProductsPaymentStep> = ({
       ? procedure.copayment
       : procedure.sale_price;
 
+    const { copayment, isCopayment } = calculateCopaymentLocal(
+      procedure.sale_price,
+      procedure.entities,
+      formData.copaymentRules,
+      formData.billing.facturacionEntidad,
+    );
+
     const newProduct = {
       uuid: `${Math.random().toString(36).slice(2, 8)}${Math.random()
         .toString(36)
@@ -120,11 +133,13 @@ const ProductsPaymentStep: React.FC<ProductsPaymentStep> = ({
         procedure.description || procedure.name || "Procedimiento médico",
       price: procedure.sale_price,
       copayment: procedure.copayment,
+      calculateCopaymentAdmission: copayment,
       currentPrice: price,
       quantity: 1,
       tax: procedure.tax_charge?.percentage || 0,
       discount: 0,
       total: (price || 0) * (1 + (procedure.tax_charge?.percentage || 0) / 100),
+      entities: procedure.entities || [],
     };
 
     formData.products = [...formData.products, newProduct];
@@ -137,12 +152,111 @@ const ProductsPaymentStep: React.FC<ProductsPaymentStep> = ({
     setModalChange(0);
   }, [formData.products, formData.billing.facturacionEntidad]);
 
+  const calculateCopaymentLocal = (
+    price: any = 0,
+    entities: any = [],
+    copaymentRules: any,
+    facturacionEntidad: boolean,
+  ) => {
+    let copayment: any = 0;
+    let isCopaymentVar: any = false;
+
+    if (!facturacionEntidad) {
+      if (
+        !copaymentRules.level &&
+        copaymentRules.value_type === "percentage" &&
+        copaymentRules.affiliate_type === "2"
+      ) {
+        const percentage: any = Number(copaymentRules.value).toFixed(2) || 0;
+        copayment = price * (percentage / 100);
+        return {
+          copayment: copayment,
+          isCopayment: !isCopaymentVar,
+        };
+      } else if (
+        !copaymentRules.level &&
+        copaymentRules.value_type === "fixed"
+      ) {
+        copayment = Number(copaymentRules.value) || 0;
+        return {
+          copayment: copayment,
+          isCopayment: isCopaymentVar,
+        };
+      } else if (
+        copaymentRules.level == "2" &&
+        copaymentRules.attention_type === "procedure"
+      ) {
+        copayment = price * (10 / 100);
+        return {
+          copayment: copayment,
+          isCopayment: !isCopaymentVar,
+        };
+      }
+      return {
+        copayment: 0,
+        isCopayment: isCopaymentVar,
+      };
+    } else {
+      if (
+        !copaymentRules.level &&
+        copaymentRules.value_type === "percentage" &&
+        copaymentRules.affiliate_type === "2"
+      ) {
+        const percentage: any = Number(copaymentRules.value).toFixed(2) || 0;
+        const valueByEntity = entities?.filter(
+          (entity: any) => entity?.category === copaymentRules.category,
+        );
+        copayment = valueByEntity.reduce((sum: any, product: any) => {
+          return Number(sum) + Number(price) * (percentage / 100);
+        }, 0);
+        return {
+          copayment: copayment,
+          isCopayment: !isCopaymentVar,
+        };
+      } else if (
+        !copaymentRules.level &&
+        copaymentRules.value_type === "fixed"
+      ) {
+        const valueByEntity = entities?.filter(
+          (entity: any) => entity?.category === copaymentRules.category,
+        );
+        copayment = valueByEntity.reduce((sum: any, product: any) => {
+          return Number(sum) + Number(price);
+        }, 0);
+        return {
+          copayment: copayment,
+          isCopayment: isCopaymentVar,
+        };
+      } else if (
+        copaymentRules.level == "2" &&
+        copaymentRules.attention_type === "procedure"
+      ) {
+        const valueByEntity = entities?.filter(
+          (entity: any) => entity?.category === copaymentRules.category,
+        );
+        copayment = valueByEntity.reduce((sum: any, product: any) => {
+          return Number(sum) + Number(price) * (10 / 100);
+        }, 0);
+        return {
+          copayment: copayment,
+          isCopayment: !isCopaymentVar,
+        };
+      }
+      return {
+        copayment: 0,
+        isCopayment: isCopaymentVar,
+      };
+    }
+  };
+
   const handleRemoveProduct = (uuid: string) => {
     const updatedProducts = formData.products.filter(
       (product) => product.uuid !== uuid,
     );
 
     updateFormData("products", updatedProducts);
+    updateFormData("copayment", copayment);
+    updateFormData("isCopayment", isCopayment);
 
     toast.current?.show({
       severity: "success",
@@ -259,15 +373,17 @@ const ProductsPaymentStep: React.FC<ProductsPaymentStep> = ({
       return;
     }
 
-    const total = calculateTotal(
-      validProducts,
-      formData.billing.facturacionEntidad,
-    );
+    // const total = calculateTotal(
+    //   validProducts,
+    //   formData.billing.facturacionEntidad,
+    // );
 
     if (
       validateProductsStep(validProducts, toast) &&
-      validatePaymentStep(formData.payments, total, toast)
+      validatePaymentStep(formData.payments, copayment, toast)
     ) {
+      formData.copayment = copayment;
+      formData.isCopayment = isCopayment;
       nextStep();
     }
   };
@@ -340,27 +456,36 @@ const ProductsPaymentStep: React.FC<ProductsPaymentStep> = ({
 
   useEffect(() => {
     if (productsToInvoice.length > 0 && formData.products.length === 0) {
-      const initialProducts = productsToInvoice.map((product) => ({
-        uuid: product.uuid,
-        id: product.id,
-        productId: product.id,
-        code: product.barcode || `PROD-${product.id}`,
-        name: product.name || product.description || `Producto ${product.id}`,
-        description:
-          product.description || product.name || `Producto ${product.id}`,
-        price: product.sale_price || 0,
-        copayment: product.copayment || 0,
-        currentPrice:
-          (formData.billing.facturacionEntidad
-            ? product.copayment
-            : product.sale_price) || 0,
-        quantity: 1,
-        tax: product.tax_charge?.percentage || 0,
-        discount: 0,
-        total:
-          (product.sale_price || 0) *
-          (1 + (product.tax_charge?.percentage || 0) / 100),
-      }));
+      const initialProducts = productsToInvoice.map((product) => {
+        const { copayment, isCopayment } = calculateCopaymentLocal(
+          product.sale_price,
+          product.entities,
+          formData.copaymentRules,
+          formData.billing.facturacionEntidad,
+        );
+        return {
+          uuid: product.uuid,
+          id: product.id,
+          productId: product.id,
+          code: product.barcode || `PROD-${product.id}`,
+          name: product.name || product.description || `Producto ${product.id}`,
+          description:
+            product.description || product.name || `Producto ${product.id}`,
+          price: product.sale_price || 0,
+          copayment: product.copayment || 0,
+          calculateCopaymentAdmission: copayment,
+          currentPrice:
+            (formData.billing.facturacionEntidad
+              ? product.copayment
+              : product.sale_price) || 0,
+          quantity: 1,
+          tax: product.tax_charge?.percentage || 0,
+          discount: 0,
+          total:
+            (product.sale_price || 0) *
+            (1 + (product.tax_charge?.percentage || 0) / 100),
+        };
+      });
 
       updateFormData("products", initialProducts);
       setModalAmount(remaining);
@@ -456,10 +581,18 @@ const ProductsPaymentStep: React.FC<ProductsPaymentStep> = ({
           <Divider />
 
           <div className="flex justify-content-end align-items-center gap-3 mt-3">
-            <span className="text-lg">Total General:</span>
-            <span className="text-xl font-bold text-primary">
-              {formatCurrency(total)}
-            </span>
+            {/* <div>
+              <span className="text-lg">Total General: </span>
+              <span className="text-xl font-bold text-primary">
+                {formatCurrency(total)}
+              </span>
+            </div> */}
+            <div>
+              <span className="text-lg">Total Copago: </span>
+              <span className="text-xl font-bold text-primary">
+                {formatCurrency(copayment)}
+              </span>
+            </div>
           </div>
         </Card>
       </div>
@@ -714,7 +847,7 @@ const ProductsPaymentStep: React.FC<ProductsPaymentStep> = ({
             className="p-button-primary"
             onClick={handleNext}
             disabled={
-              (formData.payments.length === 0 && total > 0) ||
+              (formData.payments.length === 0 && copayment > 0) ||
               formData.products.length === 0
             }
           />

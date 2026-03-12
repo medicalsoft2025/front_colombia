@@ -10,6 +10,8 @@ import { useUserAvailabilityDelete } from './hooks/useUserAvailabilityDelete';
 import { useUserAvailabilityCreate } from './hooks/useUserAvailabilityCreate';
 import { convertHHMMSSToDate, convertHHMMToDate } from '../../services/utilidades';
 import { Button } from 'primereact/button';
+import { usePRToast } from '../hooks/usePRToast';
+import { Toast } from 'primereact/toast';
 
 interface UserAvailabilityAppProps {
     onConfigurationComplete?: (isComplete: boolean) => void;
@@ -25,10 +27,11 @@ export const UserAvailabilityApp = ({
     const [initialData, setInitialData] = useState<UserAvailabilityFormInputs | undefined>(undefined)
 
     const { availabilities, fetchData: fetchAvailabilities } = useUserAvailabilitiesTable();
-    const { createUserAvailability } = useUserAvailabilityCreate();
-    const { updateUserAvailability } = useUserAvailabilityUpdate();
+    const { createUserAvailability, toast: toastCreate } = useUserAvailabilityCreate();
+    const { updateUserAvailability, toast: toastUpdate } = useUserAvailabilityUpdate();
     const { deleteUserAvailability } = useUserAvailabilityDelete();
     const { userAvailability, setUserAvailability, fetchUserAvailability } = useUserAvailability();
+    const { toast: toastDelete, showSuccessToast } = usePRToast();
 
     const onCreate = () => {
         setInitialData(undefined)
@@ -70,7 +73,10 @@ export const UserAvailabilityApp = ({
 
     const handleTableDelete = async (id: string) => {
         const confirmed = await deleteUserAvailability(id)
-        if (confirmed) fetchAvailabilities()
+        if (confirmed) {
+            fetchAvailabilities()
+            showSuccessToast({ message: 'Disponibilidad eliminada correctamente' })
+        }
     };
 
 
@@ -111,7 +117,9 @@ export const UserAvailabilityApp = ({
                     overlay: 100000
                 }
             }}>
-
+                <Toast ref={toastCreate} />
+                <Toast ref={toastUpdate} />
+                <Toast ref={toastDelete} />
                 {/* Mostrar validaciones solo en contexto de configuración */}
                 {showValidations && (
                     <div className="validation-section mb-3">

@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { ErrorHandler } from "../../../services/errorHandler.js";
 import { prescriptionService } from "../../../services/api/index.js";
 export const useConvenioRecipe = () => {
   const [recipe, setRecipe] = useState(null);
@@ -16,8 +17,7 @@ export const useConvenioRecipe = () => {
       setRecipe(response.data);
     } catch (err) {
       console.log(err);
-
-      //ErrorHandler.generic(err);
+      ErrorHandler.generic(err);
     } finally {
       setLoading(false);
     }
