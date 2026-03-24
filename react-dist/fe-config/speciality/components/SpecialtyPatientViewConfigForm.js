@@ -1,12 +1,12 @@
 function _extends() { return _extends = Object.assign ? Object.assign.bind() : function (n) { for (var e = 1; e < arguments.length; e++) { var t = arguments[e]; for (var r in t) ({}).hasOwnProperty.call(t, r) && (n[r] = t[r]); } return n; }, _extends.apply(null, arguments); }
 import React, { useEffect, useState } from "react";
-import { Controller, useForm, useWatch } from 'react-hook-form';
+import { Controller, useForm, useWatch } from "react-hook-form";
 import { classNames } from "primereact/utils";
 import { MultiSelect } from "primereact/multiselect";
 import { Dialog } from "primereact/dialog";
 import { PreviewSpecialtyPatientViewCards } from "./PreviewSpecialtyPatientViewCards.js";
 import { useUpdateSpecialtyPatientViewConfig } from "../hooks/useUpdateSpecialtyPatientViewConfig.js";
-import { userSpecialtyService } from "../../../../services/api/index.js";
+import { userSpecialtyService, tenantConfigService } from "../../../../services/api/index.js";
 import { Toast } from "primereact/toast";
 export const SpecialtyPatientViewConfigForm = props => {
   const {
@@ -31,6 +31,7 @@ export const SpecialtyPatientViewConfigForm = props => {
     }
   });
   const [showPreview, setShowPreview] = useState(false);
+  const [cards, setCards] = useState([]);
   const onSubmit = async data => {
     try {
       const formData = {
@@ -53,61 +54,77 @@ export const SpecialtyPatientViewConfigForm = props => {
       className: "p-error"
     }, errors[name].message);
   };
-  const cards = [{
-    value: 'consulta',
-    label: "Consultas medicas"
-  }, {
-    value: 'citas',
-    label: "Citas"
-  }, {
-    value: 'llamar-paciente',
-    label: "Llamar al paciente"
-  }, {
-    value: 'ordenes-medicas',
-    label: "Ordenes médicas"
-  }, {
-    value: 'ordenes-laboratorio',
-    label: "Laboratorio"
-  }, {
-    value: 'recetas',
-    label: "Recetas médicas"
-  }, {
-    value: 'recetas-optometria',
-    label: "Recetas Optometría"
-  }, {
-    value: 'incapacidades',
-    label: "Incapacidades clínicas"
-  }, {
-    value: 'alergias',
-    label: "Alergias"
-  }, {
-    value: 'antecedentes',
-    label: "Antecedentes personales"
-  }, {
-    value: 'historial-familiar',
-    label: "Antecedentes familiares"
-  }, {
-    value: 'consentimientos',
-    label: "Consentimientos"
-  }, {
-    value: 'presupuestos',
-    label: "Presupuestos"
-  }, {
-    value: 'esquema-vacunacion',
-    label: "Esquema de vacunación"
-  }, {
-    value: 'notas-enfermeria',
-    label: "Notas de Enfermeria"
-  }, {
-    value: 'evoluciones',
-    label: "Evoluciones"
-  }, {
-    value: 'remisiones',
-    label: "Remisiones"
-  }, {
-    value: 'preadmisiones',
-    label: "Preadmisiones"
-  }];
+  async function loadCards() {
+    const tenantConfig = await tenantConfigService.getConfig();
+    const cards = [{
+      value: "consulta",
+      label: "Consultas medicas"
+    }, {
+      value: "citas",
+      label: "Citas"
+    }, {
+      value: "llamar-paciente",
+      label: "Llamar al paciente"
+    }, {
+      value: "ordenes-medicas",
+      label: "Ordenes médicas"
+    }, {
+      value: "ordenes-laboratorio",
+      label: "Laboratorio"
+    }, {
+      value: "recetas",
+      label: "Recetas médicas"
+    }, {
+      value: "recetas-optometria",
+      label: "Recetas Optometría"
+    }, {
+      value: "incapacidades",
+      label: "Incapacidades clínicas"
+    }, {
+      value: "alergias",
+      label: "Alergias"
+    }, {
+      value: "antecedentes",
+      label: "Antecedentes personales"
+    }, {
+      value: "historial-familiar",
+      label: "Antecedentes familiares"
+    }, {
+      value: "consentimientos",
+      label: "Consentimientos"
+    }, {
+      value: "presupuestos",
+      label: "Presupuestos"
+    }, {
+      value: "esquema-vacunacion",
+      label: "Esquema de vacunación"
+    }, {
+      value: "notas-enfermeria",
+      label: "Notas de Enfermeria"
+    }, {
+      value: "evoluciones",
+      label: "Evoluciones"
+    }, {
+      value: "remisiones",
+      label: "Remisiones"
+    }, {
+      value: "preadmisiones",
+      label: "Preadmisiones"
+    }, {
+      value: 'documentos',
+      label: "Documentos"
+    }];
+    if (tenantConfig?.is_migration) {
+      cards.push({
+        value: "consulta-antigua",
+        label: "Consultas medicas 1.0"
+      });
+    }
+    setCards(cards);
+  }
+  useEffect(() => {
+    loadCards();
+  }, []);
   useEffect(() => {
     if (specialtyId) {
       const asyncScope = async () => {

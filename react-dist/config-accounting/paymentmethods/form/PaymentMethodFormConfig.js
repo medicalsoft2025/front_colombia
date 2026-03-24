@@ -1,5 +1,5 @@
 function _extends() { return _extends = Object.assign ? Object.assign.bind() : function (n) { for (var e = 1; e < arguments.length; e++) { var t = arguments[e]; for (var r in t) ({}).hasOwnProperty.call(t, r) && (n[r] = t[r]); } return n; }, _extends.apply(null, arguments); }
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { classNames } from "primereact/utils";
 import { InputText } from "primereact/inputtext";
@@ -8,6 +8,7 @@ import { InputTextarea } from "primereact/inputtextarea";
 import { Dropdown } from "primereact/dropdown";
 import { useAccountingAccounts } from "../../../accounting/hooks/useAccountingAccounts.js";
 import { Checkbox } from "primereact/checkbox";
+import { resourcesAdminService } from "../../../../services/api/index.js";
 const categories = [{
   label: "Transaccional",
   value: "transactional"
@@ -26,22 +27,6 @@ const categories = [{
   label: "Anticipo Proveedores",
   value: "supplier_advance"
 }];
-const sub_categories = [{
-  label: "Cheque/Transferencia/Depósito",
-  value: "transfer"
-}, {
-  label: "Tarjeta Débito/Crédito",
-  value: "card"
-}, {
-  label: "Venta a Crédito",
-  value: "credit"
-}, {
-  label: "Bonos o Certificados de Regalo",
-  value: "gift_certificate"
-}, {
-  label: "Permuta",
-  value: "swap"
-}];
 const TypeMethod = [{
   label: "Compras",
   value: "purchase"
@@ -59,6 +44,7 @@ const PaymentMethodFormConfig = ({
   onCancel,
   loading = false
 }) => {
+  const [subCategories, setSubCategories] = useState([]);
   const {
     accounts,
     isLoading: isLoadingAccounts
@@ -87,6 +73,13 @@ const PaymentMethodFormConfig = ({
       className: "p-error"
     }, errors[name]?.message);
   };
+  async function loadSubcategories() {
+    const subcategories = await resourcesAdminService.getPaymentMethods();
+    setSubCategories(subcategories);
+  }
+  useEffect(() => {
+    loadSubcategories();
+  }, []);
   useEffect(() => {
     reset(initialData || {
       name: "",
@@ -249,13 +242,17 @@ const PaymentMethodFormConfig = ({
       id: field.name,
       value: field.value,
       onChange: e => field.onChange(e.value),
-      options: sub_categories,
-      optionLabel: "label",
-      optionValue: "value",
+      options: subCategories,
+      optionLabel: "name",
+      optionValue: "id",
       placeholder: "Seleccione una sub categor\xEDa",
       className: classNames("w-full", {
         "p-invalid": fieldState.error
       }),
+      appendTo: "self",
+      virtualScrollerOptions: {
+        itemSize: 38
+      },
       showClear: true,
       filter: true
     }), getFormErrorMessage("sub_category"))

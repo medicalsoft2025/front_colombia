@@ -2,13 +2,13 @@ import React from "react";
 import { Toast } from "primereact/toast";
 import { Card } from "primereact/card";
 import { Button } from "primereact/button";
-import { CopaymentRulesForm } from "../../copayment-rules/CopaymentRulesForm.js";
-import { CopaymentRulesTable } from "../../copayment-rules/CopaymentRulesTable.js";
+import { PatientDocumentsForm } from "./PatientDocumentsForm.js";
+import { PatientDocumentsTable } from "./PatientDocumentsTable.js";
+import { PatientDocumentsTableOld } from "./PatientDocumentsTableOld.js";
 import { Dialog } from "primereact/dialog";
-import { copaymentRulesService } from "../../../../services/api/index.js";
-export const CopaymentRules = ({
-  companyId = null
-}) => {
+import { patientDocumentsService } from "../../../services/api/index.js";
+import { TabView, TabPanel } from "primereact/tabview";
+export const PatientDocumentsApp = () => {
   const toast = React.useRef(null);
   const [showForm, setShowForm] = React.useState(false);
   const [refreshTable, setRefreshTable] = React.useState(false);
@@ -23,20 +23,20 @@ export const CopaymentRules = ({
   };
   const handleOnSave = async data => {
     try {
-      if (data?.id) {
-        const response = await copaymentRulesService.update(data.id, data);
-        toast.current?.show({
-          severity: "info",
-          summary: "Éxito",
-          detail: "Regla de copago actualizada correctamente",
-          life: 3000
-        });
-      } else {
-        const response = await copaymentRulesService.create(data);
+      if (data.id) {
+        const response = await patientDocumentsService.update(data.id, data);
         toast.current?.show({
           severity: "success",
           summary: "Éxito",
-          detail: "Regla de copago creada correctamente",
+          detail: "Documento del paciente actualizado correctamente",
+          life: 3000
+        });
+      } else {
+        const response = await patientDocumentsService.create(data);
+        toast.current?.show({
+          severity: "success",
+          summary: "Éxito",
+          detail: "Documento del paciente creado correctamente",
           life: 3000
         });
       }
@@ -51,9 +51,11 @@ export const CopaymentRules = ({
       });
     }
   };
-  return /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement(Card, null, /*#__PURE__*/React.createElement("div", {
+  return /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement(Card, null, /*#__PURE__*/React.createElement(TabView, null, /*#__PURE__*/React.createElement(TabPanel, {
+    header: "Medical actual"
+  }, /*#__PURE__*/React.createElement("div", {
     className: "d-flex justify-content-between"
-  }, /*#__PURE__*/React.createElement("h4", null, "Copagos"), /*#__PURE__*/React.createElement("div", {
+  }, /*#__PURE__*/React.createElement("h4", null, "Documentos"), /*#__PURE__*/React.createElement("div", {
     className: "d-flex gap-2"
   }, /*#__PURE__*/React.createElement(Button, {
     label: "Nuevo",
@@ -64,18 +66,22 @@ export const CopaymentRules = ({
     className: "p-button-info "
   }, /*#__PURE__*/React.createElement("i", {
     className: "fa-solid fa-plus ms-2"
-  }, " ")))), /*#__PURE__*/React.createElement(CopaymentRulesTable, {
+  }, " ")))), /*#__PURE__*/React.createElement(PatientDocumentsTable, {
     refreshData: refreshTable,
     onHandleEdit: handleOnEdit
-  })), /*#__PURE__*/React.createElement(Dialog, {
+  })), /*#__PURE__*/React.createElement(TabPanel, {
+    header: "Medical anterior"
+  }, /*#__PURE__*/React.createElement(PatientDocumentsTableOld, {
+    refreshData: refreshTable,
+    onHandleEdit: handleOnEdit
+  })))), /*#__PURE__*/React.createElement(Dialog, {
     visible: showForm,
     onHide: handleFormToggle,
-    header: "Nueva regla de copago",
+    header: "Nuevo Documento",
     style: {
       width: "70vw"
     }
-  }, /*#__PURE__*/React.createElement(CopaymentRulesForm, {
-    companyId: companyId,
+  }, /*#__PURE__*/React.createElement(PatientDocumentsForm, {
     onSave: handleOnSave,
     dataToEdit: dataToEdit
   })), /*#__PURE__*/React.createElement(Toast, {

@@ -62,6 +62,11 @@ export const sisproConfigFields = [{
   label: "Codigo de prestador",
   type: "text",
   placeholder: "Ingrese el codigo de prestador"
+}, {
+  field: "TOKEN_ELECTRONIC_BILLING",
+  label: "Token para facturación electrónica",
+  type: "text",
+  placeholder: "Ingrese el token de facturación electrónica"
 }];
 export const carnetConfigFields = [{
   field: "CARNET_USERNAME",

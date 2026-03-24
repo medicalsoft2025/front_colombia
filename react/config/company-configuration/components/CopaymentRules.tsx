@@ -11,22 +11,37 @@ export const CopaymentRules: React.FC<any> = ({ companyId = null }) => {
   const toast = React.useRef<Toast>(null);
   const [showForm, setShowForm] = React.useState(false);
   const [refreshTable, setRefreshTable] = React.useState(false);
+  const [dataToEdit, setDataToEdit] = React.useState<any>(null);
 
   const handleFormToggle = () => {
     setShowForm((prev) => !prev);
     setRefreshTable(false);
   };
 
-  const handleOnSave = async (data: any) => {
+  const handleOnEdit = (data: any) => {
+    setDataToEdit(data);
+    setShowForm((prev) => !prev);
+  };
 
+  const handleOnSave = async (data: any) => {
     try {
-      const response = await copaymentRulesService.create(data);
-      toast.current?.show({
-        severity: "success",
-        summary: "Éxito",
-        detail: "Regla de copago creada correctamente",
-        life: 3000,
-      });
+      if (data?.id) {
+        const response = await copaymentRulesService.update(data.id, data);
+        toast.current?.show({
+          severity: "info",
+          summary: "Éxito",
+          detail: "Regla de copago actualizada correctamente",
+          life: 3000,
+        });
+      } else {
+        const response = await copaymentRulesService.create(data);
+        toast.current?.show({
+          severity: "success",
+          summary: "Éxito",
+          detail: "Regla de copago creada correctamente",
+          life: 3000,
+        });
+      }
       setShowForm((prev) => !prev);
       setRefreshTable(true);
     } catch (error: any) {
@@ -55,7 +70,10 @@ export const CopaymentRules: React.FC<any> = ({ companyId = null }) => {
             </Button>
           </div>
         </div>
-        <CopaymentRulesTable refreshData={refreshTable} />
+        <CopaymentRulesTable
+          refreshData={refreshTable}
+          onHandleEdit={handleOnEdit}
+        />
       </Card>
       <Dialog
         visible={showForm}
@@ -66,6 +84,7 @@ export const CopaymentRules: React.FC<any> = ({ companyId = null }) => {
         <CopaymentRulesForm
           companyId={companyId}
           onSave={handleOnSave}
+          dataToEdit={dataToEdit}
         ></CopaymentRulesForm>
       </Dialog>
       <Toast ref={toast} />

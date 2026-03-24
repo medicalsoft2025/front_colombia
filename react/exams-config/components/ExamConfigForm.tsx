@@ -82,7 +82,6 @@ export const ExamConfigForm: React.FC<ExamTypeFormProps> = ({ formId, onHandleSu
             type: '',
             form_config: {}
         });
-        console.log(initialData);
 
         setFormConfig(initialData?.form_config || null);
     }, [initialData, reset]);

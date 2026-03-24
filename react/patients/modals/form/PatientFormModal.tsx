@@ -37,6 +37,7 @@ import {
 } from "../interfaces/PatientFormType";
 import { Toast } from "primereact/toast";
 import { disabilityClassificationOptions, ethnicityOptions } from "../../consts";
+import { usePatient } from "../../hooks/usePatient";
 
 const PatientFormModal: React.FC<PatientFormModalProps> = ({
   visible,
@@ -69,6 +70,7 @@ const PatientFormModal: React.FC<PatientFormModalProps> = ({
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [documentTypes, setDocumentTypes] = useState<any[]>([]);
   const [userTypes, setUserTypes] = useState<any[]>([]);
+  const { refetchPatientById } = usePatient()
 
   const {
     control,
@@ -203,6 +205,8 @@ const PatientFormModal: React.FC<PatientFormModalProps> = ({
       setValue("patient.city_id", patientData.city_id);
       setValue("patient.address", patientData.address);
       setValue("patient.nationality", patientData.nationality);
+      setValue("patient.residence_zone", patientData.residence_zone);
+      setValue("patient.disability_classification", patientData.disability_classification);
 
       if (patientData.social_security) {
         setValue(
@@ -695,6 +699,7 @@ const PatientFormModal: React.FC<PatientFormModalProps> = ({
           });
         }
       }
+      await refetchPatientById(patientId);
       toast.current?.show({
         severity: "success",
         summary: "Éxito",
@@ -710,6 +715,7 @@ const PatientFormModal: React.FC<PatientFormModalProps> = ({
         }, 2000);
       }
       queryClient.invalidateQueries({ queryKey: ["patients"] });
+      queryClient.invalidateQueries({ queryKey: ["patients-active"] });
       onHide();
       if (onSuccess) onSuccess();
     } catch (error: any) {

@@ -8,6 +8,10 @@ export class AuthService extends BaseApiService {
         });
     }
 
+    async loginBridge(credentials) {
+        return await this.httpClient.post(`${this.microservice}/login-bridge`, credentials);
+    }
+
     async register(data) {
         return await this.httpClient.post(`${this.microservice}/register`, data, {
             "X-DOMAIN": url.split('/')[0]

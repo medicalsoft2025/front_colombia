@@ -63,6 +63,10 @@ export class ResourcesAdminService extends BaseApiService {
   async getHealthUserTypes() {
     return await this.httpClient.get(`api/v1/admin/resources-co/health-user-types`);
   }
+
+  async getPaymentMethods() {
+    return await this.httpClient.get(`api/v1/admin/resources-co/payment-methods`);
+  }
 }
 
 export default ResourcesAdminService;

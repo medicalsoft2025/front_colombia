@@ -38,13 +38,11 @@ export const PreviewSpecialtyPatientViewCards = (
 
     useEffect(() => {
         if (userId) {
-            console.log("patientViewCards", patientViewCards);
             setFinalAvailableCardsIds(patientViewCards);
         }
     }, [patientViewCards]);
 
     useEffect(() => {
-        console.log("userId", userId);
         fetchUserPatientViewCards();
     }, [userId]);
 
@@ -55,6 +53,13 @@ export const PreviewSpecialtyPatientViewCards = (
             titulo: "Consultas medicas",
             texto: "Revisa o crea historias médicas",
             url: "consulta?patient_id=" + patientId,
+        },
+        {
+            id: "consulta-antigua",
+            icono: "fas fa-address-book",
+            titulo: "Consultas medicas 1.0",
+            texto: "Revisa o crea historias médicas",
+            url: "consultaAntigua?patient_id=" + patientId,
         },
         {
             id: "citas",
@@ -177,6 +182,13 @@ export const PreviewSpecialtyPatientViewCards = (
             titulo: "Preadmisiones",
             texto: "Revisa las preadmisiones del paciente",
             url: "preadmisiones?patient_id=" + patientId,
+        },
+        {
+            id: "documentos",
+            icono: "far fa-file-alt",
+            titulo: "Documentos",
+            texto: "Revisa los documentos del paciente",
+            url: "documents?patient_id=" + patientId,
         },
     ];
 

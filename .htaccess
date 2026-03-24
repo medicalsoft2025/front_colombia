@@ -260,6 +260,7 @@ RewriteRule ^registros-presupuestos$ Presupuestos/registros_presupuestos.php
 RewriteRule ^preliminar-presupuesto$ Presupuestos/preliminar-presupuesto.php
 RewriteRule ^generar-presupuesto$ Presupuestos/generar_presupuesto.php
 RewriteRule ^consultas-especialidad$  Consultas/consultasEspecialidad.php
+RewriteRule ^consultaAntigua$  Pacientes/clinicalRecordsOld.php
 RewriteRule ^generar_admision$  Citas/includes/modals/AdmissionModalCopyTwo.php
 RewriteRule ^generar_admision_rd$  Citas/includes/modals/AdmissionFormRD.php
 RewriteRule ^Factura_entidad$  Citas/EntidadView.php
@@ -439,3 +440,4 @@ RewriteRule ^clinicalRecordSections$ ClinicalRecordSections/clinicalRecordSectio
 RewriteRule ^esterilizacion$ Esterilizacion/esterilizacionReact.php
 RewriteRule ^verAlergias$ Alergias/verAlergias.php
 RewriteRule ^verAntecedentesFamiliares$ FamilyMemberHistory/verAntecedentesFamiliares.php
+RewriteRule ^documents$ Documentos/patientDocuments.php

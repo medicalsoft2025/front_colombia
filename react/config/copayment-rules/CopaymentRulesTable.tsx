@@ -6,8 +6,14 @@ import { Toast } from "primereact/toast";
 import { PrimeReactProvider } from "primereact/api";
 import { CustomPRTable } from "../../components/CustomPRTable";
 import { useDataPagination } from "../../hooks/useDataPagination";
+import { CustomPRTableMenu } from "../../components/CustomPRTableMenu";
+import { MenuItem } from "primereact/menuitem";
+import { Button } from "primereact/button";
 
-export const CopaymentRulesTable: React.FC<any> = ({ refreshData = false }) => {
+export const CopaymentRulesTable: React.FC<any> = ({
+  refreshData = false,
+  onHandleEdit = () => {},
+}) => {
   const toast = useRef<Toast>(null);
 
   const {
@@ -25,7 +31,6 @@ export const CopaymentRulesTable: React.FC<any> = ({ refreshData = false }) => {
   });
 
   useEffect(() => {
-    console.log("refreshData", refreshData);
     if (refreshData) {
       refresh();
     }
@@ -43,6 +48,41 @@ export const CopaymentRulesTable: React.FC<any> = ({ refreshData = false }) => {
       total: data.total || 0,
     };
   }
+
+  async function handleEdit(id: any) {
+    const data = await copaymentRulesService.get(id);
+    onHandleEdit(data);
+  }
+
+  const onDelete = async (rowData: any) => {
+    await copaymentRulesService.delete(rowData.id);
+    refresh();
+    toast.current?.show({
+      severity: "warn",
+      summary: "Éxito",
+      detail: "Regla de copago eliminada correctamente",
+      life: 3000,
+    })
+  };
+
+  const accionesBodyTemplate = (rowData: any) => {
+    return (
+      <div className="d-flex gap-2">
+        <Button
+          icon={<i className="fa-solid fa-pen-to-square"></i>}
+          className="p-button-text p-button-info"
+          onClick={() => handleEdit(rowData.id)}
+          tooltip="Editar"
+        />
+        <Button
+          icon={<i className="fa-solid fa-trash"></i>}
+          className="p-button-text p-button-danger"
+          onClick={() => onDelete(rowData)}
+          tooltip="Eliminar"
+        />
+      </div>
+    );
+  };
 
   const columns = [
     {
@@ -102,14 +142,14 @@ export const CopaymentRulesTable: React.FC<any> = ({ refreshData = false }) => {
         return rowData.level;
       },
     },
-    // {
-    //   field: "actions",
-    //   header: "Acciones",
-    //   body: accionesBodyTemplate,
-    //   exportable: false,
-    //   style: { minWidth: "80px", textAlign: "center" },
-    //   width: "80px",
-    // },
+    {
+      field: "actions",
+      header: "Acciones",
+      body: accionesBodyTemplate,
+      exportable: false,
+      style: { minWidth: "80px", textAlign: "center" },
+      width: "80px",
+    },
   ];
 
   return (

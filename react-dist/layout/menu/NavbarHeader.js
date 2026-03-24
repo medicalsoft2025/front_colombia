@@ -3,11 +3,16 @@ import React from "react";
 import { navbarMenuStyle } from "./styles/navBarMegaMenu.js";
 import { useMenuItems } from "./hooks/useMenuItems.js";
 import NavbarSkeleton from "../skeleton/NavbarSkeleton.js";
+import { Button } from "primereact/button";
+import { authService } from "../../../services/api/index.js";
+import { getUserLogged } from "../../../services/utilidades.js";
 const NavbarHeader = () => {
   const {
     menuItems: menuItemsFromHook,
-    loading
+    loading,
+    tenantConfig
   } = useMenuItems();
+  const userLogged = getUserLogged();
   const iconTemplate = iconClass => {
     return iconClass ? /*#__PURE__*/React.createElement("i", {
       className: iconClass
@@ -33,13 +38,33 @@ const NavbarHeader = () => {
     });
   };
   const processedItems = processItems(menuItemsFromHook);
-  console.log("Processed Menus", processedItems);
   if (loading) {
     return /*#__PURE__*/React.createElement(NavbarSkeleton, null);
   }
-  return /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement(Menubar, {
+  async function loginBridgeOn() {
+    const loginUserData = localStorage.getItem("loginUserData");
+    const loginUserDataJson = JSON.parse(loginUserData);
+    const payload = {
+      email: loginUserDataJson.email,
+      username: loginUserDataJson.username
+    };
+    const response = await authService.loginBridge(payload);
+    console.log("response", response);
+  }
+  return /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("div", {
+    className: "d-flex align-items-center justify-content-center"
+  }, tenantConfig?.is_migration === true && /*#__PURE__*/React.createElement(Button, {
+    label: "Medical anterior",
+    className: "custom-menu-button",
+    style: {
+      height: "fit-content"
+    },
+    onClick: loginBridgeOn
+  }, /*#__PURE__*/React.createElement("i", {
+    className: "fas fa-arrow-right-to-bracket"
+  })), /*#__PURE__*/React.createElement(Menubar, {
     model: processedItems,
     className: "custom-responsive-megamenu"
-  }), /*#__PURE__*/React.createElement("style", null, navbarMenuStyle));
+  })), /*#__PURE__*/React.createElement("style", null, navbarMenuStyle));
 };
 export default NavbarHeader;

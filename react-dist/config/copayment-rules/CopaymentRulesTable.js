@@ -5,8 +5,10 @@ import { Toast } from "primereact/toast";
 import { PrimeReactProvider } from "primereact/api";
 import { CustomPRTable } from "../../components/CustomPRTable.js";
 import { useDataPagination } from "../../hooks/useDataPagination.js";
+import { Button } from "primereact/button";
 export const CopaymentRulesTable = ({
-  refreshData = false
+  refreshData = false,
+  onHandleEdit = () => {}
 }) => {
   const toast = useRef(null);
   const {
@@ -23,7 +25,6 @@ export const CopaymentRulesTable = ({
     defaultPerPage: 10
   });
   useEffect(() => {
-    console.log("refreshData", refreshData);
     if (refreshData) {
       refresh();
     }
@@ -40,6 +41,39 @@ export const CopaymentRulesTable = ({
       total: data.total || 0
     };
   }
+  async function handleEdit(id) {
+    const data = await copaymentRulesService.get(id);
+    onHandleEdit(data);
+  }
+  const onDelete = async rowData => {
+    await copaymentRulesService.delete(rowData.id);
+    refresh();
+    toast.current?.show({
+      severity: "warn",
+      summary: "Éxito",
+      detail: "Regla de copago eliminada correctamente",
+      life: 3000
+    });
+  };
+  const accionesBodyTemplate = rowData => {
+    return /*#__PURE__*/React.createElement("div", {
+      className: "d-flex gap-2"
+    }, /*#__PURE__*/React.createElement(Button, {
+      icon: /*#__PURE__*/React.createElement("i", {
+        className: "fa-solid fa-pen-to-square"
+      }),
+      className: "p-button-text p-button-info",
+      onClick: () => handleEdit(rowData.id),
+      tooltip: "Editar"
+    }), /*#__PURE__*/React.createElement(Button, {
+      icon: /*#__PURE__*/React.createElement("i", {
+        className: "fa-solid fa-trash"
+      }),
+      className: "p-button-text p-button-danger",
+      onClick: () => onDelete(rowData),
+      tooltip: "Eliminar"
+    }));
+  };
   const columns = [{
     field: "id",
     header: "Id",
@@ -84,16 +118,17 @@ export const CopaymentRulesTable = ({
     body: rowData => {
       return rowData.level;
     }
-  }
-  // {
-  //   field: "actions",
-  //   header: "Acciones",
-  //   body: accionesBodyTemplate,
-  //   exportable: false,
-  //   style: { minWidth: "80px", textAlign: "center" },
-  //   width: "80px",
-  // },
-  ];
+  }, {
+    field: "actions",
+    header: "Acciones",
+    body: accionesBodyTemplate,
+    exportable: false,
+    style: {
+      minWidth: "80px",
+      textAlign: "center"
+    },
+    width: "80px"
+  }];
   return /*#__PURE__*/React.createElement(PrimeReactProvider, null, /*#__PURE__*/React.createElement(Card, null, /*#__PURE__*/React.createElement(CustomPRTable, {
     columns: columns,
     data: copaymentsRules,

@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { Controller, SubmitHandler, useForm } from "react-hook-form";
 import { classNames } from "primereact/utils";
 import { InputText } from "primereact/inputtext";
@@ -11,6 +11,7 @@ import {
   PaymentMethodFormProps,
 } from "../interfaces/PaymentMethodFormConfigTypes";
 import { Checkbox } from "primereact/checkbox";
+import { resourcesAdminService } from "../../../../services/api";
 
 const categories = [
   { label: "Transaccional", value: "transactional" },
@@ -19,14 +20,6 @@ const categories = [
   { label: "Vencimiento Clientes", value: "customer_expiration" },
   { label: "Anticipo Clientes", value: "customer_advance" },
   { label: "Anticipo Proveedores", value: "supplier_advance" },
-];
-
-const sub_categories = [
-  { label: "Cheque/Transferencia/Depósito", value: "transfer" },
-  { label: "Tarjeta Débito/Crédito", value: "card" },
-  { label: "Venta a Crédito", value: "credit" },
-  { label: "Bonos o Certificados de Regalo", value: "gift_certificate" },
-  { label: "Permuta", value: "swap" },
 ];
 
 const TypeMethod = [
@@ -42,6 +35,7 @@ const PaymentMethodFormConfig: React.FC<PaymentMethodFormProps> = ({
   onCancel,
   loading = false,
 }) => {
+  const [subCategories, setSubCategories] = useState<any[]>([]);
   const { accounts, isLoading: isLoadingAccounts } = useAccountingAccounts();
 
   const {
@@ -69,6 +63,15 @@ const PaymentMethodFormConfig: React.FC<PaymentMethodFormProps> = ({
       errors[name] && <small className="p-error">{errors[name]?.message}</small>
     );
   };
+
+  async function loadSubcategories() {
+    const subcategories = await resourcesAdminService.getPaymentMethods();
+    setSubCategories(subcategories);
+  }
+
+  useEffect(() => {
+    loadSubcategories();
+  }, []);
 
   useEffect(() => {
     reset(
@@ -247,13 +250,15 @@ const PaymentMethodFormConfig: React.FC<PaymentMethodFormProps> = ({
                     id={field.name}
                     value={field.value}
                     onChange={(e) => field.onChange(e.value)}
-                    options={sub_categories}
-                    optionLabel="label"
-                    optionValue="value"
+                    options={subCategories}
+                    optionLabel="name"
+                    optionValue="id"
                     placeholder="Seleccione una sub categoría"
                     className={classNames("w-full", {
                       "p-invalid": fieldState.error,
                     })}
+                    appendTo="self"
+                    virtualScrollerOptions={{ itemSize: 38 }}
                     showClear
                     filter
                   />

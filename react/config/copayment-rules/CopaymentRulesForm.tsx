@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { useForm, Controller } from "react-hook-form";
 import { Toast } from "primereact/toast";
 import { Card } from "primereact/card";
@@ -22,6 +22,7 @@ interface FormData {
 export const CopaymentRulesForm: React.FC<any> = ({
   companyId = null,
   onSave = () => {},
+  dataToEdit = null,
 }) => {
   const toast = React.useRef<Toast>(null);
 
@@ -56,6 +57,7 @@ export const CopaymentRulesForm: React.FC<any> = ({
     handleSubmit,
     formState: { errors },
     watch,
+    setValue
   } = useForm<FormData>({
     defaultValues: {
       regimeType: "",
@@ -68,8 +70,21 @@ export const CopaymentRulesForm: React.FC<any> = ({
     },
   });
 
+  useEffect(() => {
+      if (dataToEdit) {
+        setValue("regimeType", dataToEdit.regime_type);
+        setValue("attentionType", dataToEdit.attention_type);
+        setValue("affiliateType", dataToEdit.affiliate_type);
+        setValue("level", dataToEdit.level);
+        setValue("category", dataToEdit.category);
+        setValue("valueType", dataToEdit.value_type);
+        setValue("value", Number(dataToEdit.value));
+      }
+    }, [dataToEdit]);
+
   const onSubmit = async (data: FormData) => {
     const payload = {
+      id: dataToEdit?.id || null,
       regime_type: data.regimeType,
       attention_type: data.attentionType,
       affiliate_type:

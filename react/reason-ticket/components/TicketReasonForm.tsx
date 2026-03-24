@@ -4,6 +4,8 @@ import { InputText } from 'primereact/inputtext';
 import { Checkbox } from 'primereact/checkbox';
 import { Toast } from 'primereact/toast';
 import { useRef } from 'react';
+import { Dropdown } from 'primereact/dropdown';
+import { ticketReasonTypeOptions } from '../consts';
 
 export interface TicketReasonFormInputs {
   id?: number;
@@ -67,54 +69,53 @@ export const TicketReasonForm: React.FC<TicketReasonFormProps> = ({ formId, onHa
       <Toast ref={toast} />
       <form id={formId} onSubmit={handleSubmit(onSubmit)} className="container-fluid p-3">
         <div className="form-group mb-3">
-          <label htmlFor="key">Key</label>
-          <InputText 
-            id="key" 
-            {...register('key', { 
-              required: 'Key es requerido',
-              pattern: {
-                value: /^[a-zA-Z0-9_]+$/,
-                message: 'Key solo puede contener letras, números y guiones bajos'
-              }
-            })} 
-            placeholder="Reason_Consulta"
-            className={`form-control ${errors.key ? 'is-invalid' : ''}`} 
+          <label htmlFor="key">Tipo</label>
+          <Dropdown
+            id="key"
+            {...register('key', {
+              required: 'Tipo es requerido',
+            })}
+            options={ticketReasonTypeOptions}
+            optionLabel="label"
+            optionValue="value"
+            placeholder="Seleccione un tipo"
+            className={`w-100 ${errors.key ? 'is-invalid' : ''}`}
           />
           {errors.key && <div className="invalid-feedback">{errors.key.message}</div>}
         </div>
 
         <div className="form-group mb-3">
-          <label htmlFor="label">Label</label>
-          <InputText 
-            id="label" 
-            {...register('label', { required: 'Label es requerido' })} 
+          <label htmlFor="label">Titulo</label>
+          <InputText
+            id="label"
+            {...register('label', { required: 'Titulo es requerido' })}
             placeholder="Razon Consulta"
-            className={`form-control ${errors.label ? 'is-invalid' : ''}`} 
+            className={`form-control ${errors.label ? 'is-invalid' : ''}`}
           />
           {errors.label && <div className="invalid-feedback">{errors.label.message}</div>}
         </div>
 
         <div className="form-group mb-3">
-          <label htmlFor="tag">Tag</label>
-          <InputText 
-            id="tag" 
-            {...register('tag', { 
-              required: 'Tag es requerido',
+          <label htmlFor="tag">Etiqueta</label>
+          <InputText
+            id="tag"
+            {...register('tag', {
+              required: 'Etiqueta es requerido',
               minLength: {
                 value: 1,
-                message: 'El tag no puede estar vacío'
+                message: 'El etiqueta no puede estar vacío'
               },
               maxLength: {
                 value: 5,
-                message: 'El tag no puede tener más de 5 caracteres'
+                message: 'El etiqueta no puede tener más de 5 caracteres'
               },
               pattern: {
                 value: /^[a-zA-Z0-9]+$/,
-                message: 'El tag solo puede contener letras y números'
+                message: 'El etiqueta solo puede contener letras y números'
               }
-            })} 
+            })}
             placeholder="RC"
-            className={`form-control ${errors.tag ? 'is-invalid' : ''}`} 
+            className={`form-control ${errors.tag ? 'is-invalid' : ''}`}
           />
           {errors.tag && <div className="invalid-feedback">{errors.tag.message}</div>}
           <small className="form-text text-muted">

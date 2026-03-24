@@ -21,6 +21,7 @@ import { StepperPanel } from "primereact/stepperpanel";
 import CompanionModal from "./CompanionFormModal.js";
 import { Toast } from "primereact/toast";
 import { disabilityClassificationOptions, ethnicityOptions } from "../../consts/index.js";
+import { usePatient } from "../../hooks/usePatient.js";
 const PatientFormModal = ({
   visible,
   onHide,
@@ -49,6 +50,9 @@ const PatientFormModal = ({
   const fileInputRef = useRef(null);
   const [documentTypes, setDocumentTypes] = useState([]);
   const [userTypes, setUserTypes] = useState([]);
+  const {
+    refetchPatientById
+  } = usePatient();
   const {
     control,
     handleSubmit,
@@ -195,6 +199,8 @@ const PatientFormModal = ({
       setValue("patient.city_id", patientData.city_id);
       setValue("patient.address", patientData.address);
       setValue("patient.nationality", patientData.nationality);
+      setValue("patient.residence_zone", patientData.residence_zone);
+      setValue("patient.disability_classification", patientData.disability_classification);
       if (patientData.social_security) {
         setValue("social_security.entity_id", patientData.social_security.entity_id || "");
         setValue("social_security.affiliate_type", patientData.social_security.affiliate_type || "");
@@ -605,6 +611,7 @@ const PatientFormModal = ({
           });
         }
       }
+      await refetchPatientById(patientId);
       toast.current?.show({
         severity: "success",
         summary: "Éxito",
@@ -619,6 +626,9 @@ const PatientFormModal = ({
       }
       queryClient.invalidateQueries({
         queryKey: ["patients"]
+      });
+      queryClient.invalidateQueries({
+        queryKey: ["patients-active"]
       });
       onHide();
       if (onSuccess) onSuccess();

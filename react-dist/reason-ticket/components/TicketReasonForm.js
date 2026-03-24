@@ -5,6 +5,8 @@ import { InputText } from 'primereact/inputtext';
 import { Checkbox } from 'primereact/checkbox';
 import { Toast } from 'primereact/toast';
 import { useRef } from 'react';
+import { Dropdown } from 'primereact/dropdown';
+import { ticketReasonTypeOptions } from "../consts.js";
 export const TicketReasonForm = ({
   formId,
   onHandleSubmit,
@@ -69,27 +71,26 @@ export const TicketReasonForm = ({
     className: "form-group mb-3"
   }, /*#__PURE__*/React.createElement("label", {
     htmlFor: "key"
-  }, "Key"), /*#__PURE__*/React.createElement(InputText, _extends({
+  }, "Tipo"), /*#__PURE__*/React.createElement(Dropdown, _extends({
     id: "key"
   }, register('key', {
-    required: 'Key es requerido',
-    pattern: {
-      value: /^[a-zA-Z0-9_]+$/,
-      message: 'Key solo puede contener letras, números y guiones bajos'
-    }
+    required: 'Tipo es requerido'
   }), {
-    placeholder: "Reason_Consulta",
-    className: `form-control ${errors.key ? 'is-invalid' : ''}`
+    options: ticketReasonTypeOptions,
+    optionLabel: "label",
+    optionValue: "value",
+    placeholder: "Seleccione un tipo",
+    className: `w-100 ${errors.key ? 'is-invalid' : ''}`
   })), errors.key && /*#__PURE__*/React.createElement("div", {
     className: "invalid-feedback"
   }, errors.key.message)), /*#__PURE__*/React.createElement("div", {
     className: "form-group mb-3"
   }, /*#__PURE__*/React.createElement("label", {
     htmlFor: "label"
-  }, "Label"), /*#__PURE__*/React.createElement(InputText, _extends({
+  }, "Titulo"), /*#__PURE__*/React.createElement(InputText, _extends({
     id: "label"
   }, register('label', {
-    required: 'Label es requerido'
+    required: 'Titulo es requerido'
   }), {
     placeholder: "Razon Consulta",
     className: `form-control ${errors.label ? 'is-invalid' : ''}`
@@ -99,21 +100,21 @@ export const TicketReasonForm = ({
     className: "form-group mb-3"
   }, /*#__PURE__*/React.createElement("label", {
     htmlFor: "tag"
-  }, "Tag"), /*#__PURE__*/React.createElement(InputText, _extends({
+  }, "Etiqueta"), /*#__PURE__*/React.createElement(InputText, _extends({
     id: "tag"
   }, register('tag', {
-    required: 'Tag es requerido',
+    required: 'Etiqueta es requerido',
     minLength: {
       value: 1,
-      message: 'El tag no puede estar vacío'
+      message: 'El etiqueta no puede estar vacío'
     },
     maxLength: {
       value: 5,
-      message: 'El tag no puede tener más de 5 caracteres'
+      message: 'El etiqueta no puede tener más de 5 caracteres'
     },
     pattern: {
       value: /^[a-zA-Z0-9]+$/,
-      message: 'El tag solo puede contener letras y números'
+      message: 'El etiqueta solo puede contener letras y números'
     }
   }), {
     placeholder: "RC",

@@ -71,7 +71,6 @@ export const ExamConfigForm = ({
       type: '',
       form_config: {}
     });
-    console.log(initialData);
     setFormConfig(initialData?.form_config || null);
   }, [initialData, reset]);
   return /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("form", {

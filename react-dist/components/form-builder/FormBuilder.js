@@ -20,24 +20,21 @@ export const FormBuilder = /*#__PURE__*/forwardRef(({
     getFormConfiguration
   }));
   useEffect(() => {
-    if (form) {
+    if (form && form?.tabs) {
       initializeForm(form);
     }
   }, [form]);
   const initializeForm = formData => {
-    console.log(formData);
     const initialFormValues = {};
-    const initializedTabs = formData.tabs.map(tab => ({
+    const initializedTabs = formData?.tabs?.map(tab => ({
       ...tab,
       cards: Object.keys(tab).filter(key => key.startsWith('card')).flatMap(key => tab[key]).map((card, index) => ({
         ...Object.assign(card, {
           id: `card-${index}`
         }),
         fields: card.fields.map(field => {
-          console.log(field);
           if (formData.values?.[field.id]) {
             initialFormValues[field.id] = formData.values[field.id];
-            console.log(initialFormValues[field.id]);
           } else {
             initialFormValues[field.id] = field.type === 'checkbox' ? false : '';
           }
@@ -52,7 +49,6 @@ export const FormBuilder = /*#__PURE__*/forwardRef(({
         })
       }))
     }));
-    console.log('Initial form values:', initialFormValues);
     setFormValues(initialFormValues);
     setTabs(initializedTabs);
   };
@@ -145,7 +141,7 @@ export const FormBuilder = /*#__PURE__*/forwardRef(({
     })));
   };
   const getFormConfiguration = () => ({
-    tabs: tabs.map(tab => ({
+    tabs: tabs?.map(tab => ({
       tab: tab.tab,
       cards: tab.cards.map(card => ({
         title: card.title,
@@ -166,7 +162,7 @@ export const FormBuilder = /*#__PURE__*/forwardRef(({
     addNewTab: addNewTab
   }), /*#__PURE__*/React.createElement("div", {
     className: "tab-content mt-4"
-  }, tabs.map((tab, tabIndex) => /*#__PURE__*/React.createElement("div", {
+  }, tabs?.map((tab, tabIndex) => /*#__PURE__*/React.createElement("div", {
     key: tabIndex,
     className: `tab-pane fade ${activeTab === tabIndex ? 'show active' : ''}`
   }, /*#__PURE__*/React.createElement("div", {

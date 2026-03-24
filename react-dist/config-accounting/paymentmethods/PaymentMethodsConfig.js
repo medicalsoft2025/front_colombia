@@ -66,7 +66,7 @@ export const PaymentMethodsConfig = ({
         description: data.additionalDetails || '',
         accounting_account_id: data.accounting_account_id || null,
         category: data.category,
-        sub_category: data.sub_category,
+        sub_category: data.sub_category.toString() || "",
         is_cash: data.is_cash
       };
       if (paymentMethod) {
@@ -117,7 +117,7 @@ export const PaymentMethodsConfig = ({
         name: paymentMethod.method,
         payment_type: paymentMethod.payment_type,
         category: paymentMethod.category || 'other',
-        sub_category: paymentMethod.sub_category,
+        sub_category: Number(paymentMethod.sub_category),
         is_cash: paymentMethod.is_cash,
         accounting_account_id: paymentMethod.accounting_account_id || null,
         additionalDetails: paymentMethod.description

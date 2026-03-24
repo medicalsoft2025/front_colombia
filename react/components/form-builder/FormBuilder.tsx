@@ -22,16 +22,15 @@ export const FormBuilder: React.FC<FormBuilderProps> = forwardRef(({ form }, ref
     }));
 
     useEffect(() => {
-        if (form) {
+        if (form && form?.tabs) {
             initializeForm(form);
         }
     }, [form]);
 
     const initializeForm = (formData: any) => {
-        console.log(formData);
 
         const initialFormValues: any = {};
-        const initializedTabs = formData.tabs.map((tab: any) => ({
+        const initializedTabs = formData?.tabs?.map((tab: any) => ({
             ...tab,
             cards: Object.keys(tab)
                 .filter(key => key.startsWith('card'))
@@ -39,10 +38,8 @@ export const FormBuilder: React.FC<FormBuilderProps> = forwardRef(({ form }, ref
                 .map((card: any, index) => ({
                     ...Object.assign(card, { id: `card-${index}` }),
                     fields: card.fields.map((field: any) => {
-                        console.log(field);
                         if (formData.values?.[field.id]) {
                             initialFormValues[field.id] = formData.values[field.id];
-                            console.log(initialFormValues[field.id]);
                         } else {
                             initialFormValues[field.id] = field.type === 'checkbox' ? false : '';
                         }
@@ -58,7 +55,6 @@ export const FormBuilder: React.FC<FormBuilderProps> = forwardRef(({ form }, ref
                     })
                 }))
         }));
-        console.log('Initial form values:', initialFormValues);
         setFormValues(initialFormValues);
         setTabs(initializedTabs);
     };
@@ -152,7 +148,7 @@ export const FormBuilder: React.FC<FormBuilderProps> = forwardRef(({ form }, ref
     };
 
     const getFormConfiguration = () => ({
-        tabs: tabs.map(tab => ({
+        tabs: tabs?.map(tab => ({
             tab: tab.tab,
             cards: tab.cards.map(card => ({
                 title: card.title,
@@ -175,7 +171,7 @@ export const FormBuilder: React.FC<FormBuilderProps> = forwardRef(({ form }, ref
             />
 
             <div className="tab-content mt-4">
-                {tabs.map((tab, tabIndex) => (
+                {tabs?.map((tab, tabIndex) => (
                     <div
                         key={tabIndex}
                         className={`tab-pane fade ${activeTab === tabIndex ? 'show active' : ''}`}

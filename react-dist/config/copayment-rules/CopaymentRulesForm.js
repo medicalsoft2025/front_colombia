@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { useForm, Controller } from "react-hook-form";
 import { Toast } from "primereact/toast";
 import { Card } from "primereact/card";
@@ -8,7 +8,8 @@ import { classNames } from "primereact/utils";
 import { InputNumber } from "primereact/inputnumber";
 export const CopaymentRulesForm = ({
   companyId = null,
-  onSave = () => {}
+  onSave = () => {},
+  dataToEdit = null
 }) => {
   const toast = React.useRef(null);
   const regimeTypes = [{
@@ -55,7 +56,8 @@ export const CopaymentRulesForm = ({
     formState: {
       errors
     },
-    watch
+    watch,
+    setValue
   } = useForm({
     defaultValues: {
       regimeType: "",
@@ -67,8 +69,20 @@ export const CopaymentRulesForm = ({
       value: 0
     }
   });
+  useEffect(() => {
+    if (dataToEdit) {
+      setValue("regimeType", dataToEdit.regime_type);
+      setValue("attentionType", dataToEdit.attention_type);
+      setValue("affiliateType", dataToEdit.affiliate_type);
+      setValue("level", dataToEdit.level);
+      setValue("category", dataToEdit.category);
+      setValue("valueType", dataToEdit.value_type);
+      setValue("value", Number(dataToEdit.value));
+    }
+  }, [dataToEdit]);
   const onSubmit = async data => {
     const payload = {
+      id: dataToEdit?.id || null,
       regime_type: data.regimeType,
       attention_type: data.attentionType,
       affiliate_type: data.regimeType === "contributory" ? data.affiliateType : "",

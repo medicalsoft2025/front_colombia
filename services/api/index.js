@@ -81,6 +81,8 @@ import { EntitiesUserService } from "./classes/entitiesUserService.js";
 import { CopaymentRulesService } from "./classes/copaymentRulesService.js";
 import BranchService from "./classes/branchService.js";
 import { ResourcesMedicalService } from "./classes/resourcesMedicalService.js";
+import { TenantConfigService } from "./classes/tenantConfigService.js";
+import { PatientDocumentsService } from "./classes/patientDocumentsService.js";
 
 
 export const authService = new AuthService("api/auth");
@@ -380,3 +382,5 @@ export const surveyService = new SurveyService("medical", "surveys");
 export const entitiesUserService = new EntitiesUserService("medical", "entities-user");
 export const copaymentRulesService = new CopaymentRulesService("medical", "copayment-rules");
 export const resourcesMedicalService = new ResourcesMedicalService("medical");
+export const tenantConfigService = new TenantConfigService();
+export const patientDocumentsService = new PatientDocumentsService("medical", "patient-documents");

@@ -1,5 +1,7 @@
 import { menuService } from "../../../../services/api";
 import { useQuery } from "@tanstack/react-query";
+import { tenantConfigService } from "../../../../services/api";
+import React, { useEffect } from "react";
 
 const sortMenus = (menus: any[]): any[] => {
   return menus
@@ -13,6 +15,7 @@ const sortMenus = (menus: any[]): any[] => {
 };
 
 export const useMenuItems = () => {
+  const [tenantConfig, setTenantConfig] = React.useState<any>(null);
   const { data, isLoading, isFetching, refetch } = useQuery({
     queryKey: ["logged-user-menus"],
     queryFn: () => menuService.getAllMenuForRQ(),
@@ -20,8 +23,17 @@ export const useMenuItems = () => {
     select: (data) => {
       const menus = data?.menus?.menus || [];
       return sortMenus(menus);
-    }
-  })
+    },
+  });
 
-  return { menuItems: data || [], loading: isLoading || isFetching, refetch };
+  async function loadTenantConfig() {
+    const tenantConfig = await tenantConfigService.getConfig();
+    setTenantConfig(tenantConfig);
+  }
+
+  useEffect(() => {
+    loadTenantConfig();
+  }, []);
+
+  return { menuItems: data || [], loading: isLoading || isFetching, refetch, tenantConfig };
 };
