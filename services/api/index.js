@@ -83,6 +83,7 @@ import BranchService from "./classes/branchService.js";
 import { ResourcesMedicalService } from "./classes/resourcesMedicalService.js";
 import { TenantConfigService } from "./classes/tenantConfigService.js";
 import { PatientDocumentsService } from "./classes/patientDocumentsService.js";
+import { MedicalPayService } from "./classes/medicalPayService.js";
 
 
 export const authService = new AuthService("api/auth");
@@ -384,3 +385,4 @@ export const copaymentRulesService = new CopaymentRulesService("medical", "copay
 export const resourcesMedicalService = new ResourcesMedicalService("medical");
 export const tenantConfigService = new TenantConfigService();
 export const patientDocumentsService = new PatientDocumentsService("medical", "patient-documents");
+export const medicalPayService = new MedicalPayService("api/v1/one-pay", "tenants");

@@ -256,6 +256,6 @@ export const statusInvoices = {
 }
 
 export const countryUrlPrefix = {
-    'colombia': 'front_colombia',
+    'colombia': 'co',
     'peru': 'front_peru',
 }

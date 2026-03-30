@@ -1,11 +1,16 @@
 function _extends() { return _extends = Object.assign ? Object.assign.bind() : function (n) { for (var e = 1; e < arguments.length; e++) { var t = arguments[e]; for (var r in t) ({}).hasOwnProperty.call(t, r) && (n[r] = t[r]); } return n; }, _extends.apply(null, arguments); }
 import React, { useState, useEffect, useImperativeHandle, forwardRef } from "react";
 import { useForm, Controller } from "react-hook-form";
-import { inventoryService } from "../../../services/api/index.js";
 import { InputText } from "primereact/inputtext";
 import { InputNumber } from "primereact/inputnumber";
 import { Dropdown } from "primereact/dropdown";
+import { medicationService } from "../services/MedicationService.js";
+import { ActiveMedicationsTable } from "../../medication-statements/components/ActiveMedicationsTable.js";
+import { DuplicateMedicationModal } from "../../medication-statements/components/DuplicateMedicationModal.js";
+import { useMedicationStatements } from "../../medication-statements/hooks/useMedicationStatements.js";
+import { MEDICATION_STATEMENT_STATUS } from "../../medication-statements/consts/status.js";
 const initialMedicine = {
+  id: "",
   name: "",
   medication: "",
   concentration: "",
@@ -16,7 +21,10 @@ const initialMedicine = {
   quantity: 0,
   take_every_hours: 0,
   showQuantity: false,
-  showTimeField: false
+  showTimeField: false,
+  medication_id: null,
+  medication_statement_id: null,
+  medication_statement_status: null
 };
 const medicationTypeOptions = [{
   label: "Seleccione",
@@ -50,8 +58,13 @@ const frequencyOptions = [{
 }];
 const PrescriptionForm = /*#__PURE__*/forwardRef(({
   formId,
-  initialData
+  initialData,
+  patientId: propsPatientId
 }, ref) => {
+  const patientId = propsPatientId || initialData?.patient_id || 0;
+  const {
+    medications
+  } = useMedicationStatements(patientId);
   const {
     control,
     handleSubmit,
@@ -59,7 +72,7 @@ const PrescriptionForm = /*#__PURE__*/forwardRef(({
     setValue,
     watch
   } = useForm();
-  const [useGroup, setUseGroup] = useState(false);
+  const [useGroup, setUseGroup] = useState(true);
   const [selectedGroupId, setSelectedGroupId] = useState("");
   const [formData, setFormData] = useState([{
     ...initialMedicine
@@ -69,6 +82,9 @@ const PrescriptionForm = /*#__PURE__*/forwardRef(({
   const [medicines, setMedicines] = useState([]);
   const [selectedMedicine, setSelectedMedicine] = useState(null);
   const [manualEntry, setManualEntry] = useState(false);
+  const [duplicateModalVisible, setDuplicateModalVisible] = useState(false);
+  const [matchingActiveMedications, setMatchingActiveMedications] = useState([]);
+  const [pendingMedication, setPendingMedication] = useState(null);
   useImperativeHandle(ref, () => ({
     getFormData: () => {
       return addedMedications;
@@ -123,26 +139,42 @@ const PrescriptionForm = /*#__PURE__*/forwardRef(({
   const handleMedicineSelection = e => {
     setSelectedMedicine(e.value);
     if (e.value) {
-      setValue("medication", e.value.name);
-      setValue("name", e.value.name); // Añadimos esta línea
-      setValue("concentration", e.value.concentration);
-      handleMedicationChange(0, "medication", e.value.name);
-      handleMedicationChange(0, "name", e.value.name); // Añadimos esta línea
-      handleMedicationChange(0, "concentration", e.value.concentration);
+      setValue("medication", e.value.descripcion);
+      setValue("name", e.value.descripcion);
+      setValue("concentration", e.value.concentration || "");
+      handleMedicationChange(0, "medication", e.value.descripcion);
+      handleMedicationChange(0, "name", e.value.descripcion);
+      handleMedicationChange(0, "concentration", e.value.concentration || "");
+      handleMedicationChange(0, "medication_id", Number(e.value.id || e.value.Codigo));
     }
   };
   const handleAddMedication = () => {
     const currentMedication = {
       ...formData[0],
-      name: selectedMedicine?.name || formData[0].medication || formData[0].name,
-      medication: selectedMedicine?.name || formData[0].medication || formData[0].name
+      name: selectedMedicine?.descripcion || formData[0].medication || formData[0].name,
+      medication: selectedMedicine?.descripcion || formData[0].medication || formData[0].name,
+      medication_id: selectedMedicine ? Number(selectedMedicine.id || selectedMedicine.Codigo) : Number(formData[0].medication_id)
     };
+
+    // Check for duplicates in active medications
+    if (editIndex === null && currentMedication.medication_id) {
+      const duplicates = medications.filter(m => Number(m.medicationId) === Number(currentMedication.medication_id) && [MEDICATION_STATEMENT_STATUS.ACTIVE, MEDICATION_STATEMENT_STATUS.INTENDED, MEDICATION_STATEMENT_STATUS.ON_HOLD, MEDICATION_STATEMENT_STATUS.UNKNOWN].includes(m.status));
+      if (duplicates.length > 0) {
+        setMatchingActiveMedications(duplicates);
+        setPendingMedication(currentMedication);
+        setDuplicateModalVisible(true);
+        return;
+      }
+    }
+    finalizeAddMedication(currentMedication);
+  };
+  const finalizeAddMedication = med => {
     if (editIndex !== null) {
-      const updatedMedications = addedMedications.map((med, index) => index === editIndex ? currentMedication : med);
+      const updatedMedications = addedMedications.map((m, index) => index === editIndex ? med : m);
       setAddedMedications(updatedMedications);
       setEditIndex(null);
     } else {
-      setAddedMedications(prev => [...prev, currentMedication]);
+      setAddedMedications(prev => [...prev, med]);
     }
     setFormData([{
       ...initialMedicine
@@ -150,6 +182,23 @@ const PrescriptionForm = /*#__PURE__*/forwardRef(({
     setSelectedMedicine(null);
     setManualEntry(false);
     reset();
+    setDuplicateModalVisible(false);
+    setPendingMedication(null);
+  };
+  const handleUpdateStatusAndContinue = (statementId, newStatus) => {
+    if (pendingMedication) {
+      const medWithStatement = {
+        ...pendingMedication,
+        medication_statement_id: statementId,
+        medication_statement_status: newStatus
+      };
+      finalizeAddMedication(medWithStatement);
+    }
+  };
+  const handleContinueAsNew = () => {
+    if (pendingMedication) {
+      finalizeAddMedication(pendingMedication);
+    }
   };
   const handleEditMedication = index => {
     const medicationToEdit = addedMedications[index];
@@ -172,8 +221,8 @@ const PrescriptionForm = /*#__PURE__*/forwardRef(({
     setAddedMedications(prev => prev.filter((_, i) => i !== index));
   };
   async function loadProducts() {
-    const medications = await inventoryService.getMedications();
-    setMedicines(medications);
+    const medications = await medicationService.getAll();
+    setMedicines(medications.data);
   }
   useEffect(() => {
     if (initialData?.medicines) {
@@ -199,12 +248,16 @@ const PrescriptionForm = /*#__PURE__*/forwardRef(({
           inputId: "medicines",
           filter: true,
           options: medicines,
-          optionLabel: "name",
+          optionLabel: "descripcion",
+          dataKey: "Codigo",
           placeholder: "Seleccione",
           className: "w-100",
           appendTo: "self",
           value: selectedMedicine,
-          onChange: handleMedicineSelection
+          onChange: handleMedicineSelection,
+          virtualScrollerOptions: {
+            itemSize: 38
+          }
         })) : /*#__PURE__*/React.createElement("div", {
           className: "col-md-12"
         }, /*#__PURE__*/React.createElement("label", {
@@ -365,7 +418,15 @@ const PrescriptionForm = /*#__PURE__*/forwardRef(({
         return null;
     }
   };
-  return /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("form", {
+  return /*#__PURE__*/React.createElement(React.Fragment, null, patientId > 0 && /*#__PURE__*/React.createElement(ActiveMedicationsTable, {
+    patientId: patientId
+  }), /*#__PURE__*/React.createElement(DuplicateMedicationModal, {
+    visible: duplicateModalVisible,
+    onHide: () => setDuplicateModalVisible(false),
+    activeMedications: matchingActiveMedications,
+    onUpdateStatusAndContinue: handleUpdateStatusAndContinue,
+    onContinueAsNew: handleContinueAsNew
+  }), /*#__PURE__*/React.createElement("form", {
     id: formId,
     className: "row g-3"
   }, /*#__PURE__*/React.createElement("div", {
@@ -376,18 +437,7 @@ const PrescriptionForm = /*#__PURE__*/forwardRef(({
     className: "d-flex justify-content-between align-items-center mb-3"
   }, /*#__PURE__*/React.createElement("h5", {
     className: "card-title"
-  }, "Medicamentos"), /*#__PURE__*/React.createElement("div", {
-    className: "form-check form-switch"
-  }, /*#__PURE__*/React.createElement("input", {
-    className: "form-check-input",
-    type: "checkbox",
-    id: "useGroup",
-    checked: useGroup,
-    onChange: handleGroupToggle
-  }), /*#__PURE__*/React.createElement("label", {
-    className: "form-check-label",
-    htmlFor: "useGroup"
-  }, "Agregar medicamentos desde inventario"))), /*#__PURE__*/React.createElement("div", {
+  }, "Medicamentos")), /*#__PURE__*/React.createElement("div", {
     className: "row"
   }, renderField("medication", "Medicamento"), renderField("concentration", "Concentración"), renderField("frequency", "Frecuencia"), renderField("duration", "Duración (días)"), renderField("medication_type", "Tipo Medicamento"), showTimeField && renderField("take_every_hours", "Tomar cada"), renderField("quantity", "Cantidad"), /*#__PURE__*/React.createElement("div", {
     className: "col-12"

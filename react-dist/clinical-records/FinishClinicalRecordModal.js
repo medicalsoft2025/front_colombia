@@ -7,6 +7,7 @@ import { formatTimeByMilliseconds, generateURLStorageKey, getDateTimeByMilliseco
 import { FinishClinicalRecordForm } from "./FinishClinicalRecordForm.js";
 import { usePRToast } from "../hooks/usePRToast.js";
 import { PostConsultationGestion } from "../appointments/PostConsultationGestion.js";
+import { useQueryClient } from "@tanstack/react-query";
 function getPurpuse(purpuse) {
   switch (purpuse) {
     case "Tratamiento":
@@ -24,6 +25,7 @@ export const FinishClinicalRecordModal = /*#__PURE__*/forwardRef((props, ref) =>
     showErrorToast,
     showFormErrorsToast
   } = usePRToast();
+  const queryClient = useQueryClient();
   const toast = useRef(null);
   const finishClinicalRecordFormRef = useRef(null);
   const {
@@ -61,6 +63,13 @@ export const FinishClinicalRecordModal = /*#__PURE__*/forwardRef((props, ref) =>
         detail: "Se ha creado el registro exitosamente y se han enviado todos los mensajes correctamente",
         life: 3000
       });
+
+      // Invalidate medication-statements cache
+      if (mappedData.extra_data?.patientId) {
+        queryClient.invalidateQueries({
+          queryKey: ["medication-statements", +mappedData.extra_data.patientId]
+        });
+      }
       localStorage.removeItem(generateURLStorageKey("elapsedTime"));
       localStorage.removeItem(generateURLStorageKey("startTime"));
       localStorage.removeItem(generateURLStorageKey("isRunning"));
@@ -107,9 +116,7 @@ export const FinishClinicalRecordModal = /*#__PURE__*/forwardRef((props, ref) =>
       appointmentActive,
       appointmentId,
       patientId,
-      specialtyName,
-      data_rips,
-      is_rips_active
+      specialtyName
     } = finishClinicalRecordFormRef.current?.getFormState();
     setPatientId(patientId);
     setSpecialtyName(specialtyName);
@@ -161,9 +168,6 @@ export const FinishClinicalRecordModal = /*#__PURE__*/forwardRef((props, ref) =>
         appointmentId
       }
     };
-    if (is_rips_active) {
-      result.data_rips = data_rips;
-    }
     if (examsActive && exams.length > 0) {
       result.exam_order = exams.map(exam => ({
         patient_id: patientId,
@@ -186,7 +190,10 @@ export const FinishClinicalRecordModal = /*#__PURE__*/forwardRef((props, ref) =>
           medication_type: medicine.medication_type,
           observations: medicine.observations,
           quantity: medicine.quantity,
-          take_every_hours: medicine.take_every_hours
+          take_every_hours: medicine.take_every_hours,
+          medication_id: medicine.medication_id,
+          medication_statement_id: medicine.medication_statement_id,
+          medication_statement_status: medicine.medication_statement_status
         })),
         type: "general"
       };

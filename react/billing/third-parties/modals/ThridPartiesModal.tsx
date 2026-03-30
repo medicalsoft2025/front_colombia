@@ -36,6 +36,13 @@ export type TerceroFormData = {
     second_last_name: string;
     date_of_birth: string | null; // Cambiado a string para coincidir con Contact
   };
+  medicalPay?: {
+    account_number: string;
+    subtype: string;
+    bank: any;
+    bank_id: string;
+    bank_name: string;
+  };
 };
 
 interface ThirdPartyModalProps {
@@ -77,6 +84,13 @@ export const ThirdPartyModal: React.FC<ThirdPartyModalProps> = ({
       second_last_name: "",
       date_of_birth: null,
     },
+    medicalPay: {
+      account_number: "",
+      subtype: "",
+      bank: "",
+      bank_id: "",
+      bank_name: "",
+    },
   });
 
   const [dateOfBirth, setDateOfBirth] = useState<Date | null>(null);
@@ -84,6 +98,7 @@ export const ThirdPartyModal: React.FC<ThirdPartyModalProps> = ({
   const [municipalities, setMunicipalities] = useState<any[]>([]);
   const [liabilityTypes, setLiabilityTypes] = useState<any[]>([]);
   const [regimeTypes, setRegimeTypes] = useState<any[]>([]);
+  const [banks, setBanks] = useState<any[]>([]);
 
   // Cargar datos iniciales si estamos editando
   useEffect(() => {
@@ -107,6 +122,13 @@ export const ThirdPartyModal: React.FC<ThirdPartyModalProps> = ({
           last_name: initialData.contact.last_name,
           second_last_name: initialData.contact.second_last_name || "",
           date_of_birth: initialData.contact.date_of_birth,
+        },
+        medicalPay: {
+          account_number: initialData.medicalPay?.account_number || "",
+          subtype: initialData.medicalPay?.subtype || "",
+          bank: initialData.medicalPay?.bank || "",
+          bank_id: initialData.medicalPay?.bank_id || "",
+          bank_name: initialData.medicalPay?.bank_name || "",
         },
       });
 
@@ -145,6 +167,7 @@ export const ThirdPartyModal: React.FC<ThirdPartyModalProps> = ({
 
   useEffect(() => {
     loadResources();
+    loadBanks();
   }, []);
 
   async function loadResources() {
@@ -158,6 +181,21 @@ export const ThirdPartyModal: React.FC<ThirdPartyModalProps> = ({
     setMunicipalities(municipalities);
     setLiabilityTypes(liabilityTypes);
     setRegimeTypes(regimeTypes);
+  }
+
+  async function loadBanks() {
+    const headers = {
+      "Content-Type": "application/json",
+      Accept: "application/json",
+      Authorization: `Bearer sk_test_mPfpVxOu0CbL4nc6FTOMrBv62fUle4Ve`,
+    };
+    const url = new URL(`https://api.onepay.la/v1/banks`);
+    const onepayBanks = await fetch(url.toString(), {
+      method: "GET",
+      headers,
+    });
+    const response = await onepayBanks.json();
+    setBanks(response);
   }
 
   const tipoTerceroOptions = [
@@ -186,6 +224,15 @@ export const ThirdPartyModal: React.FC<ThirdPartyModalProps> = ({
           [contactField]: value,
         },
       }));
+    } else if (name.startsWith("medicalPay.")) {
+      const medicalPayField = name.split(".")[1];
+      setFormData((prev: any) => ({
+        ...prev,
+        medicalPay: {
+          ...prev.medicalPay,
+          [medicalPayField]: value,
+        },
+      }));
     } else {
       setFormData((prev) => ({
         ...prev,
@@ -202,6 +249,15 @@ export const ThirdPartyModal: React.FC<ThirdPartyModalProps> = ({
         contact: {
           ...prev.contact,
           [contactField]: e.value,
+        },
+      }));
+    } else if (field.startsWith("medicalPay.")) {
+      const medicalPayField = field.split(".")[1];
+      setFormData((prev: any) => ({
+        ...prev,
+        medicalPay: {
+          ...prev.medicalPay,
+          [medicalPayField]: e.value,
         },
       }));
     } else {
@@ -244,6 +300,11 @@ export const ThirdPartyModal: React.FC<ThirdPartyModalProps> = ({
     // Validación básica
     if (!formData.contact.document_number) {
       return;
+    }
+
+    if (formData.medicalPay) {
+      formData.medicalPay.bank_id = formData.medicalPay.bank.id;
+      formData.medicalPay.bank_name = formData.medicalPay.bank.name;
     }
 
     if (initialData && onEdit) {
@@ -564,6 +625,68 @@ export const ThirdPartyModal: React.FC<ThirdPartyModalProps> = ({
                 filter
                 optionLabel="name"
                 optionValue="id"
+                required
+              />
+            </div>
+          </div>
+        </div>
+
+        <hr className="my-4" />
+        <h5 className="mb-3">Información Medicalpay</h5>
+        <div className="row mb-4">
+          <div className="col-md-4">
+            <div className="mb-3">
+              <label htmlFor="account_number" className="form-label">
+                Número de Cuenta
+              </label>
+              <InputText
+                id="medicalPay.account_number"
+                name="medicalPay.account_number"
+                value={formData?.medicalPay?.account_number}
+                onChange={handleInputChange}
+                className="w-100"
+                placeholder="Ingrese el número de cuenta"
+                disabled={!!initialData}
+                required
+              />
+            </div>
+          </div>
+          <div className="col-md-4">
+            <div className="mb-3">
+              <label htmlFor="subtype" className="form-label">
+                Tipo
+              </label>
+              <Dropdown
+                id="subtype"
+                value={formData.medicalPay?.subtype}
+                options={[
+                  { id: "SAVINGS", name: "Ahorros" },
+                  { id: "CHECKING", name: "Cuenta Corriente" },
+                  { id: "ELECTRONIC_DEPOSIT", name: "Deposito Electronico" },
+                  { id: "KEY(Bre-B)", name: "Llave Bre-B" },
+                ]}
+                onChange={(e) => handleDropdownChange(e, "medicalPay.subtype")}
+                placeholder="Seleccione tipo"
+                className="w-100"
+                optionLabel="name"
+                optionValue="id"
+                required
+              />
+            </div>
+          </div>
+          <div className="col-md-4">
+            <div className="mb-3">
+              <label htmlFor="bank" className="form-label">
+                Banco
+              </label>
+              <Dropdown
+                id="regime_type"
+                value={formData.medicalPay?.bank}
+                options={banks}
+                onChange={(e) => handleDropdownChange(e, "medicalPay.bank")}
+                placeholder="Seleccione tipo"
+                className="w-100"
+                optionLabel="name"
                 required
               />
             </div>

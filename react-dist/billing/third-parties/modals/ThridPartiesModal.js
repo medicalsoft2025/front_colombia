@@ -35,6 +35,13 @@ export const ThirdPartyModal = ({
       last_name: "",
       second_last_name: "",
       date_of_birth: null
+    },
+    medicalPay: {
+      account_number: "",
+      subtype: "",
+      bank: "",
+      bank_id: "",
+      bank_name: ""
     }
   });
   const [dateOfBirth, setDateOfBirth] = useState(null);
@@ -42,6 +49,7 @@ export const ThirdPartyModal = ({
   const [municipalities, setMunicipalities] = useState([]);
   const [liabilityTypes, setLiabilityTypes] = useState([]);
   const [regimeTypes, setRegimeTypes] = useState([]);
+  const [banks, setBanks] = useState([]);
 
   // Cargar datos iniciales si estamos editando
   useEffect(() => {
@@ -66,6 +74,13 @@ export const ThirdPartyModal = ({
           last_name: initialData.contact.last_name,
           second_last_name: initialData.contact.second_last_name || "",
           date_of_birth: initialData.contact.date_of_birth
+        },
+        medicalPay: {
+          account_number: initialData.medicalPay?.account_number || "",
+          subtype: initialData.medicalPay?.subtype || "",
+          bank: initialData.medicalPay?.bank || "",
+          bank_id: initialData.medicalPay?.bank_id || "",
+          bank_name: initialData.medicalPay?.bank_name || ""
         }
       });
 
@@ -103,6 +118,7 @@ export const ThirdPartyModal = ({
   }, [visible, initialData]);
   useEffect(() => {
     loadResources();
+    loadBanks();
   }, []);
   async function loadResources() {
     const organizationTypes = await resourcesAdminService.getOrganizationTypes();
@@ -113,6 +129,20 @@ export const ThirdPartyModal = ({
     setMunicipalities(municipalities);
     setLiabilityTypes(liabilityTypes);
     setRegimeTypes(regimeTypes);
+  }
+  async function loadBanks() {
+    const headers = {
+      "Content-Type": "application/json",
+      Accept: "application/json",
+      Authorization: `Bearer sk_test_mPfpVxOu0CbL4nc6FTOMrBv62fUle4Ve`
+    };
+    const url = new URL(`https://api.onepay.la/v1/banks`);
+    const onepayBanks = await fetch(url.toString(), {
+      method: "GET",
+      headers
+    });
+    const response = await onepayBanks.json();
+    setBanks(response);
   }
   const tipoTerceroOptions = [{
     label: "Cliente",
@@ -154,6 +184,15 @@ export const ThirdPartyModal = ({
           [contactField]: value
         }
       }));
+    } else if (name.startsWith("medicalPay.")) {
+      const medicalPayField = name.split(".")[1];
+      setFormData(prev => ({
+        ...prev,
+        medicalPay: {
+          ...prev.medicalPay,
+          [medicalPayField]: value
+        }
+      }));
     } else {
       setFormData(prev => ({
         ...prev,
@@ -169,6 +208,15 @@ export const ThirdPartyModal = ({
         contact: {
           ...prev.contact,
           [contactField]: e.value
+        }
+      }));
+    } else if (field.startsWith("medicalPay.")) {
+      const medicalPayField = field.split(".")[1];
+      setFormData(prev => ({
+        ...prev,
+        medicalPay: {
+          ...prev.medicalPay,
+          [medicalPayField]: e.value
         }
       }));
     } else {
@@ -209,6 +257,10 @@ export const ThirdPartyModal = ({
     // Validación básica
     if (!formData.contact.document_number) {
       return;
+    }
+    if (formData.medicalPay) {
+      formData.medicalPay.bank_id = formData.medicalPay.bank.id;
+      formData.medicalPay.bank_name = formData.medicalPay.bank.name;
     }
     if (initialData && onEdit) {
       onEdit(formData);
@@ -488,6 +540,73 @@ export const ThirdPartyModal = ({
     filter: true,
     optionLabel: "name",
     optionValue: "id",
+    required: true
+  })))), /*#__PURE__*/React.createElement("hr", {
+    className: "my-4"
+  }), /*#__PURE__*/React.createElement("h5", {
+    className: "mb-3"
+  }, "Informaci\xF3n Medicalpay"), /*#__PURE__*/React.createElement("div", {
+    className: "row mb-4"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "col-md-4"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "mb-3"
+  }, /*#__PURE__*/React.createElement("label", {
+    htmlFor: "account_number",
+    className: "form-label"
+  }, "N\xFAmero de Cuenta"), /*#__PURE__*/React.createElement(InputText, {
+    id: "medicalPay.account_number",
+    name: "medicalPay.account_number",
+    value: formData?.medicalPay?.account_number,
+    onChange: handleInputChange,
+    className: "w-100",
+    placeholder: "Ingrese el n\xFAmero de cuenta",
+    disabled: !!initialData,
+    required: true
+  }))), /*#__PURE__*/React.createElement("div", {
+    className: "col-md-4"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "mb-3"
+  }, /*#__PURE__*/React.createElement("label", {
+    htmlFor: "subtype",
+    className: "form-label"
+  }, "Tipo"), /*#__PURE__*/React.createElement(Dropdown, {
+    id: "subtype",
+    value: formData.medicalPay?.subtype,
+    options: [{
+      id: "SAVINGS",
+      name: "Ahorros"
+    }, {
+      id: "CHECKING",
+      name: "Cuenta Corriente"
+    }, {
+      id: "ELECTRONIC_DEPOSIT",
+      name: "Deposito Electronico"
+    }, {
+      id: "KEY(Bre-B)",
+      name: "Llave Bre-B"
+    }],
+    onChange: e => handleDropdownChange(e, "medicalPay.subtype"),
+    placeholder: "Seleccione tipo",
+    className: "w-100",
+    optionLabel: "name",
+    optionValue: "id",
+    required: true
+  }))), /*#__PURE__*/React.createElement("div", {
+    className: "col-md-4"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "mb-3"
+  }, /*#__PURE__*/React.createElement("label", {
+    htmlFor: "bank",
+    className: "form-label"
+  }, "Banco"), /*#__PURE__*/React.createElement(Dropdown, {
+    id: "regime_type",
+    value: formData.medicalPay?.bank,
+    options: banks,
+    onChange: e => handleDropdownChange(e, "medicalPay.bank"),
+    placeholder: "Seleccione tipo",
+    className: "w-100",
+    optionLabel: "name",
     required: true
   })))), /*#__PURE__*/React.createElement("div", {
     className: "d-flex justify-content-center mt-4"

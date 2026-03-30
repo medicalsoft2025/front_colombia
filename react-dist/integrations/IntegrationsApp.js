@@ -7,6 +7,8 @@ import { useSystemConfigs } from "../system-configs/hooks/useSystemConfigs.js";
 import { useSystemConfigCreate } from "../system-configs/hooks/useSystemConfigCreate.js";
 import { Toast } from "primereact/toast";
 import { IframeIntegration } from "./forms/IframeIntegration.js";
+import { PatientDocumentsForm } from "./components/medical-pay/MedicalPayForm.js";
+import { medicalPayService } from "../../services/api/index.js";
 export const IntegrationsApp = ({
   companyId = null
 }) => {
@@ -22,6 +24,17 @@ export const IntegrationsApp = ({
     const systemConfigs = SystemConfigHelper.formatDataToSystemConfigArray(data);
     await createSystemConfig(systemConfigs, Number(companyId));
     refetch();
+  };
+  const handleSubmiMedicalPay = async data => {
+    try {
+      if (data.id) {
+        const response = await medicalPayService.update(data.id, data);
+      } else {
+        const response = await medicalPayService.create(data);
+      }
+    } catch (error) {
+      console.log(error);
+    }
   };
   const tabs = [{
     id: "labplus-tab",
@@ -58,6 +71,13 @@ export const IntegrationsApp = ({
       configs: configs,
       configFields: carnetConfigFields,
       onSubmit: handleSubmit
+    })
+  }, {
+    id: "medialPay-tab",
+    label: "Medical Pay",
+    icon: "fa-solid fa-credit-card",
+    content: /*#__PURE__*/React.createElement(PatientDocumentsForm, {
+      onSave: handleSubmiMedicalPay
     })
   }, {
     id: "ai-tab",

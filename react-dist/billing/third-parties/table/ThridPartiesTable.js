@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
-import { Button } from 'primereact/button';
-import { Tag } from 'primereact/tag';
+import React, { useState } from "react";
+import { Button } from "primereact/button";
+import { Tag } from "primereact/tag";
 import { useThirdParties } from "../hooks/useThirdParties.js";
 import { ThirdPartyModal } from "../modals/ThridPartiesModal.js";
 import { useThirdPartyCreate } from "../hooks/useThirdPartyCreate.js";
@@ -36,14 +36,14 @@ export const ThridPartiesTable = () => {
     fechaHasta: null
   });
   const tiposTercero = [{
-    label: 'Cliente',
-    value: 'client'
+    label: "Cliente",
+    value: "client"
   }, {
-    label: 'Proveedor',
-    value: 'provider'
+    label: "Proveedor",
+    value: "provider"
   }, {
-    label: 'Entidad',
-    value: 'entity'
+    label: "Entidad",
+    value: "entity"
   }];
   const handleSaveTercero = async formData => {
     try {
@@ -65,7 +65,11 @@ export const ThridPartiesTable = () => {
           municipality_id: formData.municipality_id.toString(),
           type_liability_id: formData.liability_type.toString(),
           type_regime_id: formData.regime_type.toString(),
-          dv: formData.contact.dv.toString()
+          dv: formData.contact.dv.toString(),
+          account_number: formData.medicalPay?.account_number,
+          subtype: formData.medicalPay?.subtype,
+          bank_id: formData.medicalPay?.bank_id,
+          bank_name: formData.medicalPay?.bank_name
         });
       } else {
         await createThirdParty({
@@ -85,7 +89,11 @@ export const ThridPartiesTable = () => {
           municipality_id: formData.municipality_id.toString(),
           type_liability_id: formData.liability_type.toString(),
           type_regime_id: formData.regime_type.toString(),
-          dv: formData.contact.dv.toString()
+          dv: formData.contact.dv.toString(),
+          account_number: formData.medicalPay?.account_number,
+          subtype: formData.medicalPay?.subtype,
+          bank_id: formData.medicalPay?.bank_id,
+          bank_name: formData.medicalPay?.bank_name
         });
       }
       fetchThirdParties();
@@ -102,24 +110,31 @@ export const ThridPartiesTable = () => {
   };
   const handleEditTercero = tercero => {
     setInitialData({
-      type: tercero?.type || '',
-      organization_type: tercero?.type_organization_id || '',
-      municipality_id: tercero?.municipality_id || '',
-      liability_type: tercero?.type_liability_id || '',
-      regime_type: tercero?.type_regime_id || '',
+      type: tercero?.type || "",
+      organization_type: tercero?.type_organization_id || "",
+      municipality_id: tercero?.municipality_id || "",
+      liability_type: tercero?.type_liability_id || "",
+      regime_type: tercero?.type_regime_id || "",
       contact: {
-        name: tercero?.name || '',
-        document_type: tercero?.document_type || '',
-        document_number: tercero?.document_number || '',
-        email: tercero?.email || '',
-        phone: tercero?.phone || '',
-        address: tercero?.address || '',
-        first_name: tercero?.first_name || '',
-        middle_name: tercero?.middle_name || '',
-        last_name: tercero?.last_name || '',
-        second_last_name: tercero?.second_last_name || '',
-        date_of_birth: tercero?.date_of_birth || '',
-        dv: tercero?.dv || ''
+        name: tercero?.name || "",
+        document_type: tercero?.document_type || "",
+        document_number: tercero?.document_number || "",
+        email: tercero?.email || "",
+        phone: tercero?.phone || "",
+        address: tercero?.address || "",
+        first_name: tercero?.first_name || "",
+        middle_name: tercero?.middle_name || "",
+        last_name: tercero?.last_name || "",
+        second_last_name: tercero?.second_last_name || "",
+        date_of_birth: tercero?.date_of_birth || "",
+        dv: tercero?.dv || ""
+      },
+      medicalPay: {
+        account_number: tercero?.account_number || "",
+        subtype: tercero?.subtype || "",
+        bank_id: tercero?.bank_id || "",
+        bank_name: tercero?.bank_name || "",
+        bank: tercero?.bank_id || null
       }
     });
     setSelectedTercero(tercero);
@@ -147,7 +162,7 @@ export const ThridPartiesTable = () => {
       setError(null);
       // Aquí puedes implementar la lógica de filtrado si es necesario
     } catch (err) {
-      setError('Ocurrió un error al aplicar los filtros');
+      setError("Ocurrió un error al aplicar los filtros");
     }
   };
   const limpiarFiltros = () => {
@@ -161,7 +176,7 @@ export const ThridPartiesTable = () => {
     setError(null);
   };
   const handleSearchChange = searchValue => {
-    handleFilterChange('nombre', searchValue);
+    handleFilterChange("nombre", searchValue);
   };
   const handleRefresh = () => {
     limpiarFiltros();
@@ -194,20 +209,20 @@ export const ThridPartiesTable = () => {
   const tipoTerceroTemplate = rowData => {
     const tipoMap = {
       client: {
-        severity: 'success',
-        label: 'Cliente'
+        severity: "success",
+        label: "Cliente"
       },
       provider: {
-        severity: 'info',
-        label: 'Proveedor'
+        severity: "info",
+        label: "Proveedor"
       },
       entity: {
-        severity: 'primary',
-        label: 'Entidad'
+        severity: "primary",
+        label: "Entidad"
       }
     };
     const {
-      severity = 'secondary',
+      severity = "secondary",
       label = rowData.type
     } = tipoMap[rowData.type] || {};
     return /*#__PURE__*/React.createElement(Tag, {
@@ -216,7 +231,7 @@ export const ThridPartiesTable = () => {
     });
   };
   const documentoTemplate = rowData => {
-    return `${rowData.document_type || ''} ${rowData.document_number}`.trim();
+    return `${rowData.document_type || ""} ${rowData.document_number}`.trim();
   };
   const tableItems = thirdParties?.map(tercero => ({
     id: tercero.id,
@@ -230,51 +245,51 @@ export const ThridPartiesTable = () => {
     actions: tercero
   })) || [];
   const columns = [{
-    field: 'id',
-    header: 'ID',
+    field: "id",
+    header: "ID",
     sortable: true
   }, {
-    field: 'type',
-    header: 'Tipo',
+    field: "type",
+    header: "Tipo",
     sortable: true,
     body: rowData => tipoTerceroTemplate(rowData.actions)
   }, {
-    field: 'document_number',
-    header: 'Documento',
+    field: "document_number",
+    header: "Documento",
     sortable: true,
     body: rowData => documentoTemplate(rowData.actions)
   }, {
-    field: 'name',
-    header: 'Nombre Completo',
+    field: "name",
+    header: "Nombre Completo",
     sortable: true
   }, {
-    field: 'email',
-    header: 'Email',
+    field: "email",
+    header: "Email",
     sortable: true
   }, {
-    field: 'phone',
-    header: 'Teléfono',
+    field: "phone",
+    header: "Teléfono",
     sortable: true
   }, {
-    field: 'address',
-    header: 'Dirección',
+    field: "address",
+    header: "Dirección",
     sortable: true
   }, {
-    field: 'actions',
-    header: 'Acciones',
+    field: "actions",
+    header: "Acciones",
     body: rowData => actionBodyTemplate(rowData.actions),
     exportable: false
   }];
   const styles = {
     card: {
-      marginBottom: '20px',
-      boxShadow: '0 2px 10px rgba(0, 0, 0, 0.1)',
-      borderRadius: '8px'
+      marginBottom: "20px",
+      boxShadow: "0 2px 10px rgba(0, 0, 0, 0.1)",
+      borderRadius: "8px"
     },
     formLabel: {
       fontWeight: 500,
-      marginBottom: '0.5rem',
-      display: 'block'
+      marginBottom: "0.5rem",
+      display: "block"
     }
   };
   return /*#__PURE__*/React.createElement("div", {
@@ -298,9 +313,9 @@ export const ThridPartiesTable = () => {
     error: null
   }), /*#__PURE__*/React.createElement("div", {
     style: {
-      display: 'flex',
-      justifyContent: 'flex-end',
-      margin: '10px'
+      display: "flex",
+      justifyContent: "flex-end",
+      margin: "10px"
     }
   }, /*#__PURE__*/React.createElement(Button, {
     label: "Crear Nuevo Tercero",

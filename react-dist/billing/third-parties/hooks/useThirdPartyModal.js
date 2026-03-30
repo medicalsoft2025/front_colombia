@@ -1,6 +1,6 @@
-import { useState } from "react";
+import React, { useState } from "react";
 import { useThirdPartyCreate } from "./useThirdPartyCreate.js";
-// useThirdPartyModal.ts
+import { ThirdPartyModal } from "../modals/ThridPartiesModal.js";
 export const useThirdPartyModal = options => {
   const [open, setOpen] = useState(false);
   const {
@@ -24,6 +24,7 @@ export const useThirdPartyModal = options => {
         second_last_name: formData.contact.second_last_name,
         date_of_birth: formData.contact.date_of_birth
       });
+      // Ejecutar callback de éxito si existe
       if (options?.onSuccess) {
         options.onSuccess(res);
       }
@@ -32,15 +33,18 @@ export const useThirdPartyModal = options => {
       console.error(error);
     }
   };
-  const modalProps = {
+  const ModalComponent = /*#__PURE__*/React.memo(() => /*#__PURE__*/React.createElement(ThirdPartyModal, {
     visible: open,
-    onHide: closeModal,
+    onHide: () => {
+      closeModal();
+    },
     onSubmit: handleSaveTercero,
     loading: false,
     error: null
-  };
+  }));
   return {
-    modalProps,
+    ThirdPartyModal: ModalComponent,
+    open,
     openModal,
     closeModal
   };

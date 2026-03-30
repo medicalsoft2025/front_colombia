@@ -78,6 +78,9 @@ export const SpecialtyPatientViewConfigForm = props => {
       value: "recetas-optometria",
       label: "Recetas Optometría"
     }, {
+      value: "medicamentos-actuales",
+      label: "Medicamentos actuales"
+    }, {
       value: "incapacidades",
       label: "Incapacidades clínicas"
     }, {

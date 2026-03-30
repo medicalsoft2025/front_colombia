@@ -107,6 +107,15 @@ export const PreviewSpecialtyPatientViewCards = (
                 "&especialidad=Optometria",
         },
         {
+            id: "medicamentos-actuales",
+            icono: "fas fa-pills",
+            titulo: "Medicamentos actuales",
+            texto: "Revisa los medicamentos actuales del paciente",
+            url:
+                "verMedicamentosActuales?patient_id=" +
+                patientId,
+        },
+        {
             id: "incapacidades",
             icono: "wheelchair",
             titulo: "Incapacidades clínicas",

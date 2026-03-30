@@ -21,6 +21,7 @@ import { FinishClinicalRecordForm } from "./FinishClinicalRecordForm.js";
 import { usePRToast } from "../hooks/usePRToast.js";
 import { FinishClinicalRecordFormRef } from "./FinishClinicalRecordForm";
 import { PostConsultationGestion } from "../appointments/PostConsultationGestion.js";
+import { useQueryClient } from "@tanstack/react-query";
 
 interface FinishClinicalRecordModalProps {
   initialExternalDynamicData: ClinicalRecordData;
@@ -49,6 +50,7 @@ function getPurpuse(purpuse: string): string | undefined {
 export const FinishClinicalRecordModal: React.FC<FinishClinicalRecordModalProps> =
   forwardRef((props, ref) => {
     const { showErrorToast, showFormErrorsToast } = usePRToast();
+    const queryClient = useQueryClient();
     const toast = useRef<Toast>(null);
     const finishClinicalRecordFormRef =
       useRef<FinishClinicalRecordFormRef>(null);
@@ -97,40 +99,45 @@ export const FinishClinicalRecordModal: React.FC<FinishClinicalRecordModalProps>
       const mappedData = await mapToServer();
 
       try {
-          await clinicalRecordService.clinicalRecordsParamsStore(
-              mappedData.extra_data?.patientId,
-              mappedData
-          );
+        await clinicalRecordService.clinicalRecordsParamsStore(
+          mappedData.extra_data?.patientId,
+          mappedData
+        );
 
-          toast.current?.show({
-              severity: "success",
-              summary: "Completado",
-              detail: "Se ha creado el registro exitosamente y se han enviado todos los mensajes correctamente",
-              life: 3000,
-          });
+        toast.current?.show({
+          severity: "success",
+          summary: "Completado",
+          detail: "Se ha creado el registro exitosamente y se han enviado todos los mensajes correctamente",
+          life: 3000,
+        });
 
-          localStorage.removeItem(generateURLStorageKey("elapsedTime"));
-          localStorage.removeItem(generateURLStorageKey("startTime"));
-          localStorage.removeItem(generateURLStorageKey("isRunning"));
+        // Invalidate medication-statements cache
+        if (mappedData.extra_data?.patientId) {
+          queryClient.invalidateQueries({ queryKey: ["medication-statements", +mappedData.extra_data.patientId] });
+        }
 
-          hideModal();
+        localStorage.removeItem(generateURLStorageKey("elapsedTime"));
+        localStorage.removeItem(generateURLStorageKey("startTime"));
+        localStorage.removeItem(generateURLStorageKey("isRunning"));
 
-          setShowSuccessfulSaveDialog(true);
+        hideModal();
+
+        setShowSuccessfulSaveDialog(true);
       } catch (error: any) {
-          console.error(error);
-          if (error.data?.errors) {
-              showFormErrorsToast({
-                  title: "Errores de validación",
-                  errors: error.data.errors,
-              });
-          } else {
-              showErrorToast({
-                  title: "Error",
-                  message: error.message || "Ocurrió un error inesperado",
-              });
-          }
+        console.error(error);
+        if (error.data?.errors) {
+          showFormErrorsToast({
+            title: "Errores de validación",
+            errors: error.data.errors,
+          });
+        } else {
+          showErrorToast({
+            title: "Error",
+            message: error.message || "Ocurrió un error inesperado",
+          });
+        }
       } finally {
-          setIsProcessing(false);
+        setIsProcessing(false);
       }
     };
 
@@ -257,6 +264,9 @@ export const FinishClinicalRecordModal: React.FC<FinishClinicalRecordModalProps>
             observations: medicine.observations,
             quantity: medicine.quantity,
             take_every_hours: medicine.take_every_hours,
+            medication_id: medicine.medication_id,
+            medication_statement_id: medicine.medication_statement_id,
+            medication_statement_status: medicine.medication_statement_status,
           })),
           type: "general",
         };

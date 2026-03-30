@@ -334,7 +334,7 @@ const BillingConfigTab = ({
     }, /*#__PURE__*/React.createElement("label", {
       htmlFor: `dian_prefix_${tipo}`,
       className: "font-medium block mb-2"
-    }, "Prefijo DGII ", /*#__PURE__*/React.createElement("span", {
+    }, "Prefijo DIAN ", /*#__PURE__*/React.createElement("span", {
       className: "text-danger"
     }, "*")), /*#__PURE__*/React.createElement(InputText, _extends({
       id: `dian_prefix_${tipo}`
@@ -345,7 +345,7 @@ const BillingConfigTab = ({
       placeholder: "Ej: ABC"
     })), errors?.dian_prefix && /*#__PURE__*/React.createElement("small", {
       className: "p-error"
-    }, "Favor ingrese el prefijo DGII.")), showAccountingAccount && /*#__PURE__*/React.createElement("div", {
+    }, "Favor ingrese el prefijo DIAN.")), showAccountingAccount && /*#__PURE__*/React.createElement("div", {
       className: "field mb-4"
     }, /*#__PURE__*/React.createElement("label", {
       htmlFor: `accounting_account_${tipo}`,

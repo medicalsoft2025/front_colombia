@@ -77,7 +77,6 @@ const WhatsAppConnection = ({
           className: "fas fa-times-circle"
         }),
         severity: "danger",
-        loading: localLoading,
         onClick: handleDisconnect,
         disabled: localLoading
       }));
@@ -91,7 +90,6 @@ const WhatsAppConnection = ({
           className: "fas fa-whatsapp"
         }),
         severity: "warning",
-        loading: localLoading,
         onClick: handleConnect,
         disabled: localLoading
       }));
@@ -127,8 +125,7 @@ const WhatsAppConnection = ({
       width: '400px'
     },
     modal: true,
-    className: "p-fluid",
-    closable: !localLoading
+    className: "p-fluid"
   }, /*#__PURE__*/React.createElement("div", {
     className: "text-center"
   }, /*#__PURE__*/React.createElement("p", null, "Escanea este c\xF3digo QR para vincular tu cuenta de WhatsApp."), qrCode ? /*#__PURE__*/React.createElement("img", {

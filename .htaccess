@@ -441,3 +441,4 @@ RewriteRule ^esterilizacion$ Esterilizacion/esterilizacionReact.php
 RewriteRule ^verAlergias$ Alergias/verAlergias.php
 RewriteRule ^verAntecedentesFamiliares$ FamilyMemberHistory/verAntecedentesFamiliares.php
 RewriteRule ^documents$ Documentos/patientDocuments.php
+RewriteRule ^verMedicamentosActuales$ MedicamentosActuales/verMedicamentosActuales.php

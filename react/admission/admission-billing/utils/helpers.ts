@@ -25,6 +25,13 @@ export const calculateCopayment = (
     ? products
     : Object.values(products || {});
 
+  if (copaymentRules?.message) {
+    return {
+      copayment: 0,
+      isCopayment: isCopaymentVar,
+    };
+  }
+
   if (!facturacionEntidad) {
     if (
       !copaymentRules.level &&

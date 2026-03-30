@@ -12,6 +12,12 @@ export const calculateCopayment = (products = [], copaymentRules, facturacionEnt
   let copayment = 0;
   let isCopaymentVar = false;
   const productsArray = Array.isArray(products) ? products : Object.values(products || {});
+  if (copaymentRules?.message) {
+    return {
+      copayment: 0,
+      isCopayment: isCopaymentVar
+    };
+  }
   if (!facturacionEntidad) {
     if (!copaymentRules.level && copaymentRules.value_type === "percentage" && copaymentRules.affiliate_type === "2") {
       const percentage = Number(copaymentRules.value).toFixed(2) || 0;

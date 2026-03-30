@@ -2,52 +2,84 @@ import { getJWTPayload } from "../../utilidades";
 import BaseApiService from "./baseApiService";
 
 export class UserService extends BaseApiService {
-    async getAllUsers() {
-        return await this.httpClient.get(`${this.microservice}/users`);
-    }
-    async getExternalId(id) {
-        return await this.httpClient.get(`${this.microservice}/users/external-id/${id}`);
-    }
+  async getAllUsers() {
+    return await this.httpClient.get(`${this.microservice}/users`);
+  }
+  async getExternalId(id) {
+    return await this.httpClient.get(
+      `${this.microservice}/users/external-id/${id}`,
+    );
+  }
 
-    async getByExternalId(id) {
-        const user = await this.httpClient.get(`${this.microservice}/users/search/${id}`);
+  async getByExternalId(id) {
+    const user = await this.httpClient.get(
+      `${this.microservice}/users/search/${id}`,
+    );
 
-        const todayAvailability = user.availabilities.find(availability => {
-            return availability.days_of_week.includes(new Date().getDay()) && availability.is_active && availability.module_id
-        })
+    const todayAvailability = user.availabilities.find((availability) => {
+      return (
+        availability.days_of_week.includes(new Date().getDay()) &&
+        availability.is_active &&
+        availability.module_id
+      );
+    });
 
-        return {
-            ...user,
-            today_module_name: todayAvailability?.module?.name,
-            today_module_id: todayAvailability?.module_id,
-        };
-    }
+    return {
+      ...user,
+      today_module_name: todayAvailability?.module?.name,
+      today_module_id: todayAvailability?.module_id,
+    };
+  }
 
-    async getLoggedUser() {
-        return await this.getByExternalId(getJWTPayload().sub);
-    }
+  async getLoggedUser() {
+    return await this.getByExternalId(getJWTPayload().sub);
+  }
 
-    async getCachedLoggedUser() {
-        const cachedUser = localStorage.getItem("userData")
-        let user = JSON.parse(cachedUser)
+  async getCachedLoggedUser() {
+    const cachedUser = localStorage.getItem("userData");
+    let user = JSON.parse(cachedUser);
 
-        if (!cachedUser) {
-            user = await this.getLoggedUser();
-            localStorage.setItem("userData", JSON.stringify(user))
-        }
-
-        return user;
-    }
-
-    async getMenuByRole(userId) {
-        return await this.httpClient.get(`${this.microservice}/menu-by-roles/${userId}`);
-    }
-
-    async getMenuByRolePermission(roleId) {
-        return await this.httpClient.get(`${this.microservice}/menus/permissions/${roleId}`);
+    if (!cachedUser) {
+      user = await this.getLoggedUser();
+      localStorage.setItem("userData", JSON.stringify(user));
     }
 
-    async getPatientViewConfig() {
-        return await this.httpClient.get(`${this.microservice}/users/config/patient-view`);
-    }
+    return user;
+  }
+
+  async getMenuByRole(userId) {
+    return await this.httpClient.get(
+      `${this.microservice}/menu-by-roles/${userId}`,
+    );
+  }
+
+  async getMenuByRolePermission(roleId) {
+    return await this.httpClient.get(
+      `${this.microservice}/menus/permissions/${roleId}`,
+    );
+  }
+
+  async getPatientViewConfig() {
+    return await this.httpClient.get(
+      `${this.microservice}/users/config/patient-view`,
+    );
+  }
+  async logout() {
+    const token = sessionStorage.getItem("auth_token");
+    const headers = {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+      "X-DOMAIN": window.location.hostname.split(".")[0],
+    };
+
+    if (!token) return;
+    return await this.httpClient.post(`api/auth/logout`, null, headers);
+  }
+
+  async updateStatus(data) {
+    const headers = {
+      "X-DOMAIN": window.location.hostname,
+    };
+    return await this.httpClient.post(`api/auth/user/update-status`, data, headers);
+  }
 }

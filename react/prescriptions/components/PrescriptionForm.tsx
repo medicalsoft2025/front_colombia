@@ -11,6 +11,7 @@ import { inventoryService } from "../../../services/api/index";
 import { InputText } from "primereact/inputtext";
 import { InputNumber } from "primereact/inputnumber";
 import { Dropdown } from "primereact/dropdown";
+import { medicationService } from "../services/MedicationService";
 
 export interface PrescriptionFormInputs {
     patient_id: number;
@@ -57,7 +58,7 @@ const frequencyOptions = [
 const PrescriptionForm: React.FC<PrescriptionFormProps> = forwardRef(
     ({ formId, initialData }, ref) => {
         const { control, handleSubmit, reset, setValue, watch } = useForm();
-        const [useGroup, setUseGroup] = useState(false);
+        const [useGroup, setUseGroup] = useState(true);
         const [selectedGroupId, setSelectedGroupId] = useState("");
         const [formData, setFormData] = useState<Medicine[]>([
             { ...initialMedicine },
@@ -197,8 +198,8 @@ const PrescriptionForm: React.FC<PrescriptionFormProps> = forwardRef(
         };
 
         async function loadProducts() {
-            const medications = await inventoryService.getMedications();
-            setMedicines(medications);
+            const medications = await medicationService.getAll();
+            setMedicines(medications.data);
         }
 
         useEffect(() => {
@@ -227,12 +228,16 @@ const PrescriptionForm: React.FC<PrescriptionFormProps> = forwardRef(
                                 inputId="medicines"
                                 filter
                                 options={medicines}
-                                optionLabel="name"
+                                optionLabel="descripcion"
+                                optionValue="Codigo"
                                 placeholder="Seleccione"
                                 className="w-100"
                                 appendTo="self"
                                 value={selectedMedicine}
                                 onChange={handleMedicineSelection}
+                                virtualScrollerOptions={{
+                                    itemSize: 38,
+                                }}
                             />
                         </div>
                     ) : (
@@ -445,7 +450,7 @@ const PrescriptionForm: React.FC<PrescriptionFormProps> = forwardRef(
                         <div className="card-body">
                             <div className="d-flex justify-content-between align-items-center mb-3">
                                 <h5 className="card-title">Medicamentos</h5>
-                                <div className="form-check form-switch">
+                                {/* <div className="form-check form-switch">
                                     <input
                                         className="form-check-input"
                                         type="checkbox"
@@ -456,7 +461,7 @@ const PrescriptionForm: React.FC<PrescriptionFormProps> = forwardRef(
                                     <label className="form-check-label" htmlFor="useGroup">
                                         Agregar medicamentos desde inventario
                                     </label>
-                                </div>
+                                </div> */}
                             </div>
 
                             <div className="row">

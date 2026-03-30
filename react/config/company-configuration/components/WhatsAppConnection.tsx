@@ -83,7 +83,6 @@ const WhatsAppConnection: React.FC<WhatsAppConnectionProps> = ({ companyId, onSt
                         label="Quitar conexión"
                         icon={<i className="fas fa-times-circle"></i>}
                         severity="danger"
-                        loading={localLoading}
                         onClick={handleDisconnect}
                         disabled={localLoading}
                     />
@@ -100,7 +99,6 @@ const WhatsAppConnection: React.FC<WhatsAppConnectionProps> = ({ companyId, onSt
                         label="Conectar WhatsApp"
                         icon={<i className="fas fa-whatsapp"></i>}
                         severity="warning"
-                        loading={localLoading}
                         onClick={handleConnect}
                         disabled={localLoading}
                     />
@@ -146,7 +144,6 @@ const WhatsAppConnection: React.FC<WhatsAppConnectionProps> = ({ companyId, onSt
                 style={{ width: '400px' }}
                 modal
                 className="p-fluid"
-                closable={!localLoading}
             >
                 <div className="text-center">
                     <p>Escanea este código QR para vincular tu cuenta de WhatsApp.</p>

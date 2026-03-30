@@ -80,6 +80,12 @@ export const PreviewSpecialtyPatientViewCards = props => {
     texto: "Genera y revisa todas las recetas médicas de optometría para este paciente",
     url: "verRecetasOptometria?patient_id=" + patientId + "&especialidad=Optometria"
   }, {
+    id: "medicamentos-actuales",
+    icono: "fas fa-pills",
+    titulo: "Medicamentos actuales",
+    texto: "Revisa los medicamentos actuales del paciente",
+    url: "verMedicamentosActuales?patient_id=" + patientId
+  }, {
     id: "incapacidades",
     icono: "wheelchair",
     titulo: "Incapacidades clínicas",
