@@ -238,7 +238,8 @@ export const AppointmentFormModal = ({
       external_cause: "NOT_APPLICABLE",
       consultation_purpose: "TREATMENT",
       is_group: false,
-      patients: []
+      patients: [],
+      billing_type: "INDIVIDUAL"
     }
   });
   const mapAppointmentsToServer = async appointments => {
@@ -346,6 +347,7 @@ export const AppointmentFormModal = ({
     try {
       if (!isGroup) {
         await createAppointmentBulk({
+          billing_type: getValues("billing_type"),
           appointments: data
         }, patient.id?.toString());
       } else {
@@ -411,6 +413,10 @@ export const AppointmentFormModal = ({
   const examRecipeId = useWatch({
     control,
     name: "exam_recipe_id"
+  });
+  const billingType = useWatch({
+    control,
+    name: "billing_type"
   });
   useEffect(() => {
     if (!showExamRecipeField) {
@@ -1458,7 +1464,45 @@ export const AppointmentFormModal = ({
     onLoading: () => {}
   }))))), /*#__PURE__*/React.createElement("div", {
     className: "col-md-5"
-  }, /*#__PURE__*/React.createElement("h5", null, "Citas programadas"), /*#__PURE__*/React.createElement("hr", null), appointments.length === 0 ? /*#__PURE__*/React.createElement("p", {
+  }, /*#__PURE__*/React.createElement("h5", null, "Citas programadas"), /*#__PURE__*/React.createElement("hr", null), appointments.length > 1 && /*#__PURE__*/React.createElement("div", {
+    className: "mb-4 p-3 border rounded bg-light"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "mb-3"
+  }, /*#__PURE__*/React.createElement(Controller, {
+    name: "billing_type",
+    control: control,
+    render: ({
+      field
+    }) => /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("label", {
+      htmlFor: field.name,
+      className: "form-label fw-bold"
+    }, "Forma de facturaci\xF3n del tratamiento"), /*#__PURE__*/React.createElement(Dropdown, {
+      id: field.name,
+      value: field.value,
+      options: [{
+        label: "Facturar cada cita por separado",
+        value: "INDIVIDUAL"
+      }, {
+        label: "Facturar todo el tratamiento al comenzar",
+        value: "FIRST_APPOINTMENT"
+      }, {
+        label: "Facturar todo el tratamiento al terminar",
+        value: "LAST_APPOINTMENT"
+      }],
+      onChange: e => field.onChange(e.value),
+      placeholder: "Seleccione forma de facturaci\xF3n",
+      className: "w-100",
+      appendTo: "self"
+    }))
+  })), /*#__PURE__*/React.createElement("div", {
+    className: "explanation-text small text-muted"
+  }, billingType === "INDIVIDUAL" && /*#__PURE__*/React.createElement("span", null, /*#__PURE__*/React.createElement("i", {
+    className: "fas fa-info-circle me-1"
+  }), "Cada cita se cobra individualmente en el momento de la admisi\xF3n."), billingType === "FIRST_APPOINTMENT" && /*#__PURE__*/React.createElement("span", null, /*#__PURE__*/React.createElement("i", {
+    className: "fas fa-info-circle me-1"
+  }), "Se cobra el costo total del tratamiento en la primera cita. Las citas restantes pasan directamente a \"en espera\"."), billingType === "LAST_APPOINTMENT" && /*#__PURE__*/React.createElement("span", null, /*#__PURE__*/React.createElement("i", {
+    className: "fas fa-info-circle me-1"
+  }), "Se cobra el costo total del tratamiento en la \xFAltima cita. Todas las citas (excepto la \xFAltima) pasan directamente a \"en espera\"."))), appointments.length === 0 ? /*#__PURE__*/React.createElement("p", {
     className: "text-muted"
   }, "No hay citas programadas") : /*#__PURE__*/React.createElement("div", {
     className: "d-flex flex-column align-items-center"

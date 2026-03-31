@@ -10,7 +10,8 @@ import { useForm, Controller } from "react-hook-form";
 export const TicketForm = ({
   visible,
   onHide,
-  onSave
+  onSave,
+  isSaving = false
 }) => {
   const defaultValues = {
     subject: "",
@@ -72,13 +73,15 @@ export const TicketForm = ({
     label: "Guardar",
     icon: "pi pi-check",
     onClick: handleSubmit(onSubmit),
-    autoFocus: true
+    autoFocus: true,
+    loading: isSaving,
+    disabled: isSaving
   }));
   return /*#__PURE__*/React.createElement(Dialog, {
     header: "Crear Ticket",
     visible: visible,
     style: {
-      width: '50vw'
+      width: "50vw"
     },
     onHide: handleHide,
     footer: footer
@@ -96,7 +99,7 @@ export const TicketForm = ({
     name: "subject",
     control: control,
     rules: {
-      required: 'El asunto es obligatorio'
+      required: "El asunto es obligatorio"
     },
     render: ({
       field,
@@ -104,7 +107,7 @@ export const TicketForm = ({
     }) => /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement(InputText, _extends({
       id: "subject"
     }, field, {
-      className: `w-100 ${fieldState.invalid ? 'p-invalid' : ''}`
+      className: `w-100 ${fieldState.invalid ? "p-invalid" : ""}`
     })), fieldState.error && /*#__PURE__*/React.createElement("small", {
       className: "p-error"
     }, fieldState.error.message))

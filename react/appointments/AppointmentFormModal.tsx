@@ -69,6 +69,7 @@ export interface AppointmentFormInputs {
     patient_whatsapp: string;
     patient_email: string;
     is_group: boolean;
+    billing_type?: "INDIVIDUAL" | "FIRST_APPOINTMENT" | "LAST_APPOINTMENT" | null;
 }
 
 export interface FormAppointment extends AppointmentFormInputs {
@@ -274,6 +275,7 @@ export const AppointmentFormModal = ({
             consultation_purpose: "TREATMENT",
             is_group: false,
             patients: [],
+            billing_type: "INDIVIDUAL",
         },
     });
 
@@ -417,6 +419,7 @@ export const AppointmentFormModal = ({
             if (!isGroup) {
                 await createAppointmentBulk(
                     {
+                        billing_type: getValues("billing_type"),
                         appointments: data,
                     },
                     patient!.id?.toString()
@@ -497,6 +500,11 @@ export const AppointmentFormModal = ({
     const examRecipeId = useWatch({
         control,
         name: "exam_recipe_id",
+    });
+
+    const billingType = useWatch({
+        control,
+        name: "billing_type",
     });
 
     useEffect(() => {
@@ -2188,6 +2196,57 @@ export const AppointmentFormModal = ({
                                     <h5>Citas programadas</h5>
 
                                     <hr />
+
+                                    {appointments.length > 1 && (
+                                        <div className="mb-4 p-3 border rounded bg-light">
+                                            <div className="mb-3">
+                                                <Controller
+                                                    name="billing_type"
+                                                    control={control}
+                                                    render={({ field }) => (
+                                                        <>
+                                                            <label htmlFor={field.name} className="form-label fw-bold">
+                                                                Forma de facturación del tratamiento
+                                                            </label>
+                                                            <Dropdown
+                                                                id={field.name}
+                                                                value={field.value}
+                                                                options={[
+                                                                    { label: "Facturar cada cita por separado", value: "INDIVIDUAL" },
+                                                                    { label: "Facturar todo el tratamiento al comenzar", value: "FIRST_APPOINTMENT" },
+                                                                    { label: "Facturar todo el tratamiento al terminar", value: "LAST_APPOINTMENT" },
+                                                                ]}
+                                                                onChange={(e) => field.onChange(e.value)}
+                                                                placeholder="Seleccione forma de facturación"
+                                                                className="w-100"
+                                                                appendTo="self"
+                                                            />
+                                                        </>
+                                                    )}
+                                                />
+                                            </div>
+                                            <div className="explanation-text small text-muted">
+                                                {billingType === "INDIVIDUAL" && (
+                                                    <span>
+                                                        <i className="fas fa-info-circle me-1"></i>
+                                                        Cada cita se cobra individualmente en el momento de la admisión.
+                                                    </span>
+                                                )}
+                                                {billingType === "FIRST_APPOINTMENT" && (
+                                                    <span>
+                                                        <i className="fas fa-info-circle me-1"></i>
+                                                        Se cobra el costo total del tratamiento en la primera cita. Las citas restantes pasan directamente a "en espera".
+                                                    </span>
+                                                )}
+                                                {billingType === "LAST_APPOINTMENT" && (
+                                                    <span>
+                                                        <i className="fas fa-info-circle me-1"></i>
+                                                        Se cobra el costo total del tratamiento en la última cita. Todas las citas (excepto la última) pasan directamente a "en espera".
+                                                    </span>
+                                                )}
+                                            </div>
+                                        </div>
+                                    )}
 
                                     {appointments.length === 0 ? (
                                         <p className="text-muted">

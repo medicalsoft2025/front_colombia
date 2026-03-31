@@ -1,53 +1,138 @@
-
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { DataTable } from "primereact/datatable";
 import { Column } from "primereact/column";
 import { Button } from "primereact/button";
-
-interface Ticket {
-    id: number;
-    subject: string;
-    frequency: string;
-    status: string;
-    created_at: string;
-}
+import { ticketStatusMap, ticketColorMap } from "./utils/ticketUtils";
+import { Ticket } from "./utils/interfaces";
 
 interface TicketsListProps {
-    onNewTicket: () => void;
+  tickets: Ticket[];
+  loading: boolean;
+  error: string | null;
+  onNewTicket: () => void;
+  onViewTicket: (ticket: Ticket) => void;
 }
 
-export const TicketsList: React.FC<TicketsListProps> = ({ onNewTicket }) => {
-    // Mock data
-    const [tickets, setTickets] = useState<Ticket[]>([
-        { id: 1, subject: "Error en login", frequency: "Siempre", status: "Abierto", created_at: "2023-10-27" },
-        { id: 2, subject: "Pantalla blanca en reportes", frequency: "A veces", status: "En Proceso", created_at: "2023-10-26" },
-    ]);
+export const TicketsList: React.FC<TicketsListProps> = ({
+  tickets,
+  loading,
+  error,
+  onNewTicket,
+  onViewTicket,
+}) => {
+  const statusBodyTemplate = (rowData: Ticket) => {
+    const statusText = ticketStatusMap[rowData.status] || rowData.status;
+    const colorClass = ticketColorMap[rowData.status] || "bg-light text-dark";
+    return <span className={`badge ${colorClass}`}>{statusText}</span>;
+  };
 
-    const statusBodyTemplate = (rowData: Ticket) => {
-        return <span className={`badge ${rowData.status === 'Abierto' ? 'bg-danger' : 'bg-success'}`}>{rowData.status}</span>;
-    };
-
-    const actionBodyTemplate = (rowData: Ticket) => {
-        return (
-            <Button icon="pi pi-search" className="p-button-rounded p-button-text" aria-label="Ver" />
-        );
-    }
-
+  const actionBodyTemplate = (rowData: Ticket) => {
     return (
-        <div className="card">
-            <div className="flex justify-content-between mb-3">
-                <h3>Listado de Tickets</h3>
-                <Button label="Crear Ticket" icon="pi pi-plus" className="p-button-success" onClick={onNewTicket} />
-            </div>
-            
-            <DataTable value={tickets} paginator rows={10} emptyMessage="No hay tickets encontrados.">
-                <Column field="id" header="ID" sortable></Column>
-                <Column field="subject" header="Asunto" sortable></Column>
-                <Column field="frequency" header="Frecuencia" sortable></Column>
-                <Column field="created_at" header="Fecha Creación" sortable></Column>
-                <Column field="status" header="Estado" body={statusBodyTemplate} sortable></Column>
-                <Column body={actionBodyTemplate} exportable={false} style={{ minWidth: '8rem' }}></Column>
-            </DataTable>
-        </div>
+      <Button
+        className="p-button-primary p-button-rounded flex align-items-center justify-content-center"
+        aria-label="Ver"
+        onClick={() => onViewTicket(rowData)}
+        tooltip="Ver detalles del ticket"
+        tooltipOptions={{ position: "top" }}
+      >
+        <i className="fas fa-search"></i>
+      </Button>
     );
+  };
+
+  if (error) {
+    return (
+      <div className="card p-3 text-center">
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+            marginBottom: "1rem",
+          }}
+        >
+          <h3>Listado de Tickets</h3>
+          <Button
+            className="p-button-info d-flex gap-2 "
+            aria-label="Crear Ticket"
+            onClick={onNewTicket}
+          >
+            <i className="fas fa-plus"></i> Crear Ticket
+          </Button>
+        </div>
+        <div className="text-info mb-3">
+          <i className="fas fa-exclamation-circle fa-2x"></i>
+          <p className="mt-2">No hay tickets para mostrar</p>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="card p-3">
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+          marginBottom: "1rem",
+        }}
+      >
+        <h3>Listado de Tickets</h3>
+        <Button
+          className="p-button-info d-flex gap-2 "
+          aria-label="Crear Ticket"
+          onClick={onNewTicket}
+        >
+          <i className="fas fa-plus"></i> Crear Ticket
+        </Button>
+      </div>
+
+      <DataTable
+        value={tickets}
+        paginator
+        rows={10}
+        emptyMessage="No hay tickets encontrados."
+        loading={loading}
+      >
+        <Column
+          field="id"
+          header="ID"
+          sortable
+          style={{ width: "10%" }}
+        ></Column>
+        <Column
+          field="title"
+          header="Asunto"
+          sortable
+          style={{ width: "30%", textTransform: "uppercase" }}
+        ></Column>
+        <Column
+          field="assigned_to_user"
+          header="Asignado a"
+          sortable
+          style={{ width: "20%" }}
+        ></Column>
+        <Column
+          field="created_at"
+          header="Fecha Creación"
+          sortable
+          style={{ width: "20%" }}
+        ></Column>
+        <Column
+          field="status"
+          header="Estado"
+          body={statusBodyTemplate}
+          sortable
+          style={{ width: "10%" }}
+        ></Column>
+        <Column
+          body={actionBodyTemplate}
+          exportable={false}
+          style={{ width: "10%", textAlign: "center" }}
+          header="Acciones"
+        ></Column>
+      </DataTable>
+    </div>
+  );
 };
